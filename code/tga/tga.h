@@ -31,4 +31,13 @@ void loadTGA(char * file);
 
 /* strip the file extension of a filename. */
 void strip_extension(char * fileName);
+
+/* getbits:  get n bits from position p */
+unsigned getbits(unsigned x, int p, int n);
+
+SHORT readShort(FILE * fp);
+BYTE readByte(FILE * fp);
+
+
 #endif /* _TGA_H_ */
+
