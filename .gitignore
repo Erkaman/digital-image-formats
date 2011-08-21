@@ -1,2 +1,4 @@
 *.exe
 *.o
+# outputted from tga.exe.
+*.dmp
