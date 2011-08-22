@@ -1,17 +1,31 @@
 \documentclass[a4paper]{report}
+
 \usepackage[T1]{fontenc}
+
 \usepackage{Inconsolata}
+
 \usepackage[kerning,spacing]{microtype}
 \usepackage[charter]{mathdesign}
+
 \usepackage{hyperref}
+
+\usepackage{verbatim}
+
+\usepackage{makeidx}
+
+\makeindex
+\usepackage[rgb]{xcolor}
 \usepackage[sorting=none,refsegment=chapter]{biblatex}
 \bibliography{preliminaries.bib}
-\usepackage{verbatim}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,backgrounds}
+
 \hyphenpenalty=100000
 
 \pagestyle{headings}
-%\includeonly{title.tex,preliminaries.tex}
 
+%http://www.library.cornell.edu/preservation/tutorial/intro/intro-08.html
 \begin{document}
 
 \input{title.tex}
@@ -20,5 +34,6 @@
 
 \input{preliminaries.tex}
 
-\end{document}
+\printindex
 
+\end{document}

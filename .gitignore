@@ -5,6 +5,7 @@
 *.dmp
 
 auto/
+
 *.aux
 *.idx
 *.log
@@ -15,3 +16,5 @@ auto/
 *.blg
 *.bbl
 *-blx.bib
+*.ilg
+*.ind
