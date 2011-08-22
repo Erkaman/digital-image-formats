@@ -36,6 +36,8 @@ void loadTGA(char * file)
     FILE * in;
     FILE * out;
     char imageID[255];
+    SHORT * colorMap;
+    int i ;
 
     in = fopen(file,"rb");
 
@@ -61,7 +63,7 @@ void loadTGA(char * file)
     tgah.imageDescriptor = readByte(in);
 
     if(tgah.IDLength > 0)
-	readStr(in,tgah.IDLength * sizeof(BYTE),imageID);
+        readStr(in,tgah.IDLength * sizeof(BYTE),imageID);
 
 
     /* Works because all tga files has a tga extension,
@@ -75,12 +77,19 @@ void loadTGA(char * file)
     imageDest = getbits(tgah.imageDescriptor,5,2);
     getImageDestStr(imageDestStr,imageDest);
 
+    if(tgah.colorMapType != 0){
+        if(tgah.colorMapDepth == 16){
+            colorMap = malloc(sizeof(SHORT) * tgah.colorMapLength);
+            fread(colorMap,sizeof(SHORT),tgah.colorMapLength,in);
+        }
+    }
+
     fprintf(out,"Id Length:%d\n",tgah.IDLength);
     fprintf(out,"Color map type:%d\n",tgah.colorMapType);
     fprintf(out,"Image type:%d\n",tgah.imageType);
     fprintf(out,"Color map start:%d\n",tgah.colorMapStart);
     fprintf(out,"Color map length:%d\n",tgah.colorMapLength);
-    fprintf(out,"Color map depth:%d\n",tgah.colorMapDepth);
+    fprintf(out,"4.3: Color map depth:%d\n",tgah.colorMapDepth);
     fprintf(out,"X origin:%d\n",tgah.xOrigin);
     fprintf(out,"Y origin:%d\n",tgah.yOrigin);
     fprintf(out,"Width:%d\n",tgah.width);
@@ -90,6 +99,13 @@ void loadTGA(char * file)
     fprintf(out,"Alpha Channel Bits:%d\n",alphaChannelBits);
     fprintf(out,"Screen destination of first pixel:%s\n",imageDestStr);
     fprintf(out,"Image ID:%s\n",imageID);
+
+    fprintf(out,"Color map:\n");
+    for(i = 0; i < tgah.colorMapLength; ++i)
+	fprintf(out,"%d\n",colorMap[i]);
+
+
+    free(colorMap);
 }
 
 static void strip_extension(char * fileName)

@@ -1,4 +1,13 @@
 *.exe
 *.o
+
 # outputted from tga.exe.
 *.dmp
+
+auto/
+*.aux
+*.idx
+*.log
+*.out
+*.toc
+*.pdf
