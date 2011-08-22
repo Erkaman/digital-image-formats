@@ -59,6 +59,14 @@ typedef struct
     BYTE attributesType;
 } TGAExtensionArea;
 
+/*typedef struct
+{
+    TGAHeader header;
+    char * imageID;
+    
+    TGAExtensionArea extensionArea;
+} TGAFile;*/
+
 void loadTGA(char * file);
 
 #endif /* _TGA_H_ */

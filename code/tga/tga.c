@@ -9,23 +9,16 @@ static void strip_extension(char * fileName);
 /* getbits:  get n bits from position p */
 static unsigned getbits(unsigned x, int p, int n);
 
-/* Read a short from a file. */
 static SHORT readShort(FILE * fp);
 
-/* Read a byte from a file. */
+static void readStr(FILE * fp,size_t length,char * str);
+
 static BYTE readByte(FILE * fp);
 
 static void getImageDestStr(char * str,int imageOrigin);
 
-int main(int argc, char *argv[])
+int main(int argc, char * argv[])
 {
-    char s[2];
-    CHAR b1 = 61;
-    CHAR b2 = 54;
-    s[0] = b1;
-    s[1] = b2;
-    s[2] = '\0';
-    puts(s);
     if(argc == 1){
         printf("No file was specified for loading");
         return 1;
@@ -42,6 +35,7 @@ void loadTGA(char * file)
     char imageDestStr[11];
     FILE * in;
     FILE * out;
+    char imageID[255];
 
     in = fopen(file,"rb");
 
@@ -65,6 +59,9 @@ void loadTGA(char * file)
     tgah.height = readShort(in);
     tgah.pixelDepth = readByte(in);
     tgah.imageDescriptor = readByte(in);
+
+    if(tgah.IDLength > 0)
+	readStr(in,tgah.IDLength * sizeof(BYTE),imageID);
 
 
     /* Works because all tga files has a tga extension,
@@ -92,6 +89,7 @@ void loadTGA(char * file)
     fprintf(out,"Image Descriptor:%d\n",tgah.imageDescriptor);
     fprintf(out,"Alpha Channel Bits:%d\n",alphaChannelBits);
     fprintf(out,"Screen destination of first pixel:%s\n",imageDestStr);
+    fprintf(out,"Image ID:%s\n",imageID);
 }
 
 static void strip_extension(char * fileName)
@@ -126,6 +124,11 @@ static BYTE readByte(FILE * fp)
     return s;
 }
 
+static void readStr(FILE * fp,size_t length,char * str)
+{
+    fread(str,sizeof(CHAR),length,fp);
+}
+
 static void getImageDestStr(char * str,int imageOrigin)
 {
     switch(imageOrigin){
@@ -142,5 +145,4 @@ static void getImageDestStr(char * str,int imageOrigin)
         strcpy(str,"Top Right");
         break;
     }
-
 }
