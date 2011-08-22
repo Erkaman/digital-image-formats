@@ -1,8 +1,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "tga.h"
+
+/* strip the file extension of a filename. */
+static void strip_extension(char * fileName);
+
+/* getbits:  get n bits from position p */
+static unsigned getbits(unsigned x, int p, int n);
+
+/* Read a short from a file. */
+static SHORT readShort(FILE * fp);
+
+/* Read a byte from a file. */
+static BYTE readByte(FILE * fp);
+
+static void getImageDestStr(char * str,int imageOrigin);
 
 int main(int argc, char *argv[])
 {
@@ -47,7 +60,8 @@ void loadTGA(char * file)
     tgah.imageDescriptor = readByte(in);
 
 
-    /* Works because all tga files has a tga extension(I hope).*/
+    /* Works because all tga files has a tga extension,
+       meaning that ".dmp" will fit in the rest of the file.*/
     strip_extension(file);
     strcat(file,".dmp");
 
@@ -55,6 +69,7 @@ void loadTGA(char * file)
 
     alphaChannelBits = getbits(tgah.imageDescriptor,3,4);
     imageDest = getbits(tgah.imageDescriptor,5,2);
+    getImageDestStr(imageDestStr,imageDest);
 
     fprintf(out,"Id Length:%d\n",tgah.IDLength);
     fprintf(out,"Color map type:%d\n",tgah.colorMapType);
@@ -69,27 +84,11 @@ void loadTGA(char * file)
     fprintf(out,"pixelDepth:%d\n",tgah.pixelDepth);
     fprintf(out,"Image Descriptor:%d\n",tgah.imageDescriptor);
     fprintf(out,"Alpha Channel Bits:%d\n",alphaChannelBits);
-
-    switch(imageDest){
-    case 0:
-        strcpy(imageDestStr,"Bottom Left");
-        break;
-    case 1:
-        strcpy(imageDestStr,"Bottom Rigth");
-        break;
-    case 2:
-        strcpy(imageDestStr,"Top Left");
-        break;
-    case 3:
-        strcpy(imageDestStr,"Top Right");
-        break;
-    }
-
     fprintf(out,"Screen destination of first pixel:%s\n",imageDestStr);
 
 }
 
-void strip_extension(char * fileName)
+static void strip_extension(char * fileName)
 {
     char * extBeg;
     int n;
@@ -102,21 +101,40 @@ void strip_extension(char * fileName)
     }
 }
 
-unsigned getbits(unsigned x, int p, int n)
+static unsigned getbits(unsigned x, int p, int n)
 {
     return (x >> (p+1-n)) & ~(~0 << n);
 }
 
-SHORT readShort(FILE * fp)
+static SHORT readShort(FILE * fp)
 {
     SHORT s;
     fread(&s,sizeof(SHORT),1,fp);
     return s;
 }
 
-BYTE readByte(FILE * fp)
+static BYTE readByte(FILE * fp)
 {
     BYTE s;
     fread(&s,sizeof(BYTE),1,fp);
     return s;
+}
+
+static void getImageDestStr(char * str,int imageOrigin)
+{
+    switch(imageOrigin){
+    case 0:
+        strcpy(str,"Bottom Left");
+        break;
+    case 1:
+        strcpy(str,"Bottom Rigth");
+        break;
+    case 2:
+        strcpy(str,"Top Left");
+        break;
+    case 3:
+        strcpy(str,"Top Right");
+        break;
+    }
+
 }
