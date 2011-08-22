@@ -11,3 +11,7 @@ auto/
 *.out
 *.toc
 *.pdf
+*.run.xml
+*.blg
+*.bbl
+*-blx.bib
