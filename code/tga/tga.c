@@ -19,6 +19,13 @@ static void getImageDestStr(char * str,int imageOrigin);
 
 int main(int argc, char *argv[])
 {
+    char s[2];
+    CHAR b1 = 61;
+    CHAR b2 = 54;
+    s[0] = b1;
+    s[1] = b2;
+    s[2] = '\0';
+    puts(s);
     if(argc == 1){
         printf("No file was specified for loading");
         return 1;
@@ -85,7 +92,6 @@ void loadTGA(char * file)
     fprintf(out,"Image Descriptor:%d\n",tgah.imageDescriptor);
     fprintf(out,"Alpha Channel Bits:%d\n",alphaChannelBits);
     fprintf(out,"Screen destination of first pixel:%s\n",imageDestStr);
-
 }
 
 static void strip_extension(char * fileName)
