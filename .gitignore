@@ -6,6 +6,7 @@
 
 auto/
 
+# outputted by latex and its various helper programs.
 *.aux
 *.idx
 *.log
@@ -18,3 +19,4 @@ auto/
 *-blx.bib
 *.ilg
 *.ind
+*.dvi
