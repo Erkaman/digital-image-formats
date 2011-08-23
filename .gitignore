@@ -20,3 +20,5 @@ auto/
 *.ilg
 *.ind
 *.dvi
+
+*.stackdump

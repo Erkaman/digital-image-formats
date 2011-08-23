@@ -8,7 +8,10 @@
 Before we are ready to talk about loading image files, we first need
 know how images are represented in a computer.
 
-\section{RGB}
+\section{Color models}
+\label{sec:color-models}
+
+\subsection{RGB}
 \label{sec:rgb}
 
 There several models for representing color in a computer, but the
@@ -18,7 +21,8 @@ But to understand the RGB color model, we first need to understand
 color to begin with. Color is light moving at different
 wavelengths. Different colors have different wavelengths. In our eyes
 there are cells for perceiving three different wavelengths of light:
-red, blue and green. There can also be different amounts of red, blue
+Red, Blue and Green(which is what RGB stands for, if you hadn't guessed
+it already). There can also be different amounts of red, blue
 and green light absorbed by the cells and the colors and also be
 mixed, creating new kinds of colors. \cite{neider93:_openg_progr_guide}
 
@@ -34,10 +38,24 @@ mixture of red,blue and green, as it is demonstrated in figure
 \ref{fig:rgb}. White is a mixture of red, blue and green, yellow is
 mixture of red and green, and so on. The mixing of different amounts
 of colors can conveniently enough be specified in numbers very
-easily. Which brings us to:
+easily.
+
+\subsection{Alpha channel}
+\label{sec:alpha_chan}
+
+But there is actually even more to RGB. There is an extended color
+model of RGB that's called RGBA \index{RGBA}(it is sometimes also
+called ARGB \index{ARGB}). In this model a new channel is added: the
+alpha channel \index{alpha channel}. This new channel represents the
+opacity of a color. Opacity is simply the opposite of transparency.  A
+low opacity means that the color in question is transparent,
+\todo{clarify this part} and that an other color be can be seen
+through it.  \cite{porter84_compos_dig_img}.
 
 \section{Color depth}
 \label{sec:bit-depth}
+
+But how are RGB and RGBA represented by a computer?
 
 \section{Digtal image}
 \label{sec:digtal-image}
