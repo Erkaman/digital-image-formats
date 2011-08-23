@@ -1,4 +1,5 @@
 TARGET=project
+TARGETFILES = $(wildcard *.tex) $(wildcard tikz_img/*.tex)
 
 all: ${TARGET}.pdf
 
@@ -10,7 +11,7 @@ ${TARGET}.bbl: ${TARGET}.bib
 	bibtex ${TARGET}
 	@latex ${TARGET}.tex
 
-${TARGET}.dvi: ${TARGET}.bbl ${TARGET}.tex
+${TARGET}.dvi: ${TARGET}.bbl  ${TARGETFILES}
 	@latex ${TARGET}.tex
 	makeindex ${TARGET}.idx
 	@latex ${TARGET}.tex
