@@ -8,12 +8,14 @@ all: ${TARGET}.pdf
 
 ${TARGET}.bbl: ${TARGET}.bib
 	latex ${TARGET}.tex
-	makeindex ${TARGET}.idx
 	bibtex ${TARGET}
 	@latex ${TARGET}.tex
 
 ${TARGET}.dvi: ${TARGET}.bbl  ${TARGETFILES}
 	@latex ${TARGET}.tex
+	makeindex ${TARGET}.idx
+	@latex ${TARGET}.tex
+
 
 ps: ${TARGET}.ps
 
