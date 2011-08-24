@@ -1,2 +1,11 @@
 http://www.library.cornell.edu/preservation/tutorial/contents.html
+
+
+* File Formats and Compression
 http://www.jiscdigitalmedia.ac.uk/crossmedia/advice/file-formats-and-compression/
+
+* How does JPEG actually work?
+http://blogs.msdn.com/b/devdev/archive/2006/04/12/575384.aspx
+
+* PNG - The definite guide.
+http://www.vias.org/pngguide/
