@@ -8,8 +8,29 @@
 Before we are ready to talk about loading image files, we first need
 know how images are represented in a computer.
 
-\section{Color models}
-\label{sec:color-models}
+\section{Color}
+\label{sec:color}
+
+\subsection{What is color?}
+\label{sec:what-color}
+
+Color is light moving at different wavelengths. See figure x for an
+example of how a wave looks like. Light is a wave. Different colors have
+different wavelengths. For example:  In our eyes there are cells for perceiving
+three different wavelengths of light: Red, Blue and Green(which is
+what RGB stands for, if you hadn't guessed it already). There can also
+be different amounts of red, blue and green light absorbed by the
+cells and the colors and also be mixed, creating new kinds of
+colorss. \cite{neider93:_openg_progr_guide}
+
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \draw (0,0) sin (1,1) cos (2,0) sin (3,-1) cos (4,0) sin (5,1);
+  \end{tikzpicture}
+  \caption{Wave}
+  \label{fig:wave}
+\end{figure}
 
 \subsection{RGB}
 \label{sec:rgb}
@@ -17,14 +38,6 @@ know how images are represented in a computer.
 There several models for representing color in a computer, but the
 most prominent and popular one is by no doubt \textbf{RGB} \index{RGB}
 
-But to understand the RGB color model, we first need to understand
-color to begin with. Color is light moving at different
-wavelengths. Different colors have different wavelengths. In our eyes
-there are cells for perceiving three different wavelengths of light:
-Red, Blue and Green(which is what RGB stands for, if you hadn't guessed
-it already). There can also be different amounts of red, blue
-and green light absorbed by the cells and the colors and also be
-mixed, creating new kinds of colors. \cite{neider93:_openg_progr_guide}
 
 \begin{figure}[h]
   \centering
@@ -39,6 +52,9 @@ mixture of red,blue and green, as it is demonstrated in figure
 mixture of red and green, and so on. The mixing of different amounts
 of colors can conveniently enough be specified in numbers very
 easily.
+
+\subsection{CMYK}
+\label{sec:cmyk}
 
 \subsection{Alpha channel}
 \label{sec:alpha_chan}
