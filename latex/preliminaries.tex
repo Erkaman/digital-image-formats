@@ -14,21 +14,33 @@ know how images are represented in a computer.
 \subsection{What is color?}
 \label{sec:what-color}
 
-Color is light moving at different wavelengths. See figure x for an
-example of how a wave looks like. Light is a wave. Different colors have
-different wavelengths. For example:  In our eyes there are cells for perceiving
-three different wavelengths of light: Red, Blue and Green(which is
-what RGB stands for, if you hadn't guessed it already). There can also
-be different amounts of red, blue and green light absorbed by the
-cells and the colors and also be mixed, creating new kinds of
-colorss. \cite{neider93:_openg_progr_guide}
+\newcommand{\bluewave}{\SI{400}{\nano\meter}}
+
+Color is light moving at different wavelengths. See figure
+\ref{fig:wave} for an example of how a light wave looks like. Light is
+a wave. Different colors have different wavelengths. For example:
+Blue, as shown in figure \ref{fig:wave} has a wavelength of
+\bluewave. That's $0.00000004$ meters!  In our eyes there are cells
+for perceiving three different wavelengths of light: Red, Blue and
+Green(which is what RGB stands for, if you hadn't guessed it
+already). There can also be different amounts of red, blue and green
+light absorbed by the cells and the colors and also be mixed, creating
+new kinds of colors. \cite{neider93:_openg_progr_guide}
 
 \begin{figure}[h!]
   \centering
   \begin{tikzpicture}
-    \draw (0,0) sin (1,1) cos (2,0) sin (3,-1) cos (4,0) sin (5,1);
+    \draw[line width=1mm,draw=blue]
+    (-2,0) sin (-1,-1) cos
+    (0,0) sin (1,1) cos (2,0) sin
+    (3,-1) cos (4,0) sin (5,1)
+    cos (6,0) sin(7,-1) cos(8,0);
+
+    \draw[|-|,thick] (1,1.2) -- (5,1.2) node[above left=0.5mm and 0.9]
+    {$\lambda = \bluewave$};
   \end{tikzpicture}
-  \caption{Wave}
+  \caption{A blue lightwave. $\lambda$ is the letter commonly used to
+    represent  wavelength.}
   \label{fig:wave}
 \end{figure}
 
