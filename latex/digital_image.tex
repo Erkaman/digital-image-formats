@@ -5,9 +5,6 @@
 \chapter{Digital Image}
 \label{cha:digital-image}
 
-Before we are ready to talk about loading image files, we first need
-know how images are represented in a computer.
-
 \section{Color}
 \label{sec:color}
 
@@ -27,16 +24,7 @@ meters!
 
 \begin{figure}[h!]
   \centering
-  \begin{tikzpicture}
-    \draw[line width=1mm,draw=blue]
-    (-2,0) sin (-1,-1) cos
-    (0,0) sin (1,1) cos (2,0) sin
-    (3,-1) cos (4,0) sin (5,1)
-    cos (6,0) sin(7,-1) cos(8,0);
-
-    \draw[|-|,thick] (1,1.2) -- (5,1.2) node[above left=0.5mm and 0.9]
-    {$\lambda = \bluewave$};
-  \end{tikzpicture}
+  \input{tikz_img/wave.tex}
   \caption{A blue lightwave. $\lambda$ is the letter commonly used to
     represent  wavelength.}
   \label{fig:wave}
@@ -52,8 +40,12 @@ possible colors.
 \subsection{RGB}
 \label{sec:rgb}
 
-There several models for representing color in a computer, but the
-most prominent and popular one is by no doubt \textbf{RGB} \index{RGB}
+Color models are ways specifying color numerically \todo{mention
+  additive and subtractive color models here}
+\cite{fadgi11:color_model}. They are of course very convenient for
+computer since they are very good at dealing with numbers. A very
+widely used color model for representing color in computer is
+\textbf{RGB} \index{RGB}.
 
 \begin{figure}[h]
   \centering
@@ -62,12 +54,13 @@ most prominent and popular one is by no doubt \textbf{RGB} \index{RGB}
   \label{fig:rgb}
 \end{figure}
 
-So the RGB color model relies on the fact that all colors are a
-mixture of red,blue and green, as it is demonstrated in figure
-\ref{fig:rgb}. White is a mixture of red, blue and green, yellow is
-mixture of red and green, and so on. The mixing of different amounts
-of colors can conveniently enough be specified in numbers very
-easily. \cite{porter84_compos_dig_img}.
+The color model is of course based on how our eyes perceive color, as
+mentioned in section \ref{set:what-color}. Do, however, observe figure
+\ref{fig:rgb}. As it can be seen, all the other colors can be achieved
+by mixing red, blue and green. Also note that white is achieved by
+mixing all of three colors. And black is represented by no light at
+all. One last thing: The different values for red, blue and green are
+their channels.
 
 \subsection{CMYK}
 \label{sec:cmyk}
@@ -75,14 +68,14 @@ easily. \cite{porter84_compos_dig_img}.
 \subsection{Alpha channel}
 \label{sec:alpha_chan}
 
-
 But there is actually even more to RGB. There is an extended color
 model of RGB that's called RGBA \index{RGBA}(it is sometimes also
 called ARGB \index{ARGB}). In this model a new channel is added: the
 alpha channel \index{alpha channel}. This new channel represents the
 opacity of a color. Opacity is simply the opposite of transparency.  A
 low opacity means that the color in question is transparent,
-\todo{clarify this part} and that an other color be can be seen
+\todo{clarify this part} and that an other color be can be seen.
+\cite{porter84_compos_dig_img}.
 
 \section{Color depth}
 \label{sec:bit-depth}
@@ -108,6 +101,7 @@ many, many other possible colors are available. This is just like when
 mixed colors in art classes to get different nuances of colors. Only
 this time, you can specify the colors mixing \emph{exactly} with
 numbers, which is a huge advantage.
+\cite{puglia00:_handbook_dig_proj}
 
 
 \begin{figure}[h]
@@ -117,19 +111,19 @@ numbers, which is a huge advantage.
     \draw (#1,0) node{#3};
   }
   \begin{tikzpicture}
-   \foreach \x in {-16.0,-15.6,...,-12.8}
-   {
+    \foreach \x in {-16.0,-15.6,...,-12.8}
+    {
       \bitbox{\x}{red}{1}
-   }
-   \foreach \x in {-12.8,-12.4,...,-9.6}
-   {
+    }
+    \foreach \x in {-12.8,-12.4,...,-9.6}
+    {
       \bitbox{\x}{green}{0}
-   }
-   \foreach \x in {-9.6,-9.2,...,-6.4}
-   {
+    }
+    \foreach \x in {-9.6,-9.2,...,-6.4}
+    {
       \bitbox{\x}{blue}{1}
-   }
- \end{tikzpicture}
+    }
+  \end{tikzpicture}
   \caption{The binary representation of a color}
   \label{fig:rgb-bits}
 \end{figure}
@@ -146,10 +140,11 @@ further cover this subject.
 \subsection{How many possible colors?}
 \label{sec:how-many-possible-colors}
 
-\cite{puglia00:_handbook_dig_proj}
 
 For a color depth of 24-bits there are 256 different combinations for
 each color channel, hence there are $256^3 = 16777216$ different
 colors for 24-bit color delpth! % combinatorics mention?
 
 % 8-bit color 1-bit color, palettes need to be covered.
+
+\printbibliography
