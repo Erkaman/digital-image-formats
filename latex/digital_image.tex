@@ -24,7 +24,7 @@ meters!
 
 \begin{figure}[h!]
   \centering
-  \input{tikz_img/wave.tex}
+  \inputtikz{wave.tex}
   \caption{A blue lightwave. $\lambda$ is the letter commonly used to
     represent  wavelength.}
   \label{fig:wave}
@@ -49,12 +49,12 @@ widely used color model for representing color in computer is
 
 \begin{figure}[h]
   \centering
-  \input{tikz_img/rgb.tex}
+  \inputtikz{rgb.tex}
   \caption{RGB color model}
   \label{fig:rgb}
 \end{figure}
 
-The color model is of course based on how our eyes perceive color, as
+The color model is, of course, based on how our eyes perceive color, as
 mentioned in section \ref{set:what-color}. Do, however, observe figure
 \ref{fig:rgb}. As it can be seen, all the other colors can be achieved
 by mixing red, blue and green. Also note that white is achieved by
@@ -70,12 +70,11 @@ their channels.
 
 But there is actually even more to RGB. There is an extended color
 model of RGB that's called RGBA \index{RGBA}(it is sometimes also
-called ARGB \index{ARGB}). In this model a new channel is added: the
-alpha channel \index{alpha channel}. This new channel represents the
-opacity of a color. Opacity is simply the opposite of transparency.  A
-low opacity means that the color in question is transparent,
-\todo{clarify this part} and that an other color be can be seen.
-\cite{porter84_compos_dig_img}.
+referred to as ARGB \index{ARGB}). In this model a new channel is
+added: the alpha channel \index{alpha channel}. This new channel
+represents the opacity of a color. Opacity is simply the opposite of
+transparency. Thus, a low transparency means that the color in
+question is close to invisible  \cite{porter84_compos_dig_img}.
 
 \section{Color depth}
 \label{sec:bit-depth}
@@ -101,29 +100,12 @@ many, many other possible colors are available. This is just like when
 mixed colors in art classes to get different nuances of colors. Only
 this time, you can specify the colors mixing \emph{exactly} with
 numbers, which is a huge advantage.
-\cite{puglia00:_handbook_dig_proj}
+\cite{puglia00:_handbook_dig_proj}.
 
 
 \begin{figure}[h]
   \centering
-  \newcommand{\bitbox}[3]{
-    \filldraw[fill=#2!80!white,draw=black] (#1,0) +(-.2,-.2) rectangle ++(.2,.2);
-    \draw (#1,0) node{#3};
-  }
-  \begin{tikzpicture}
-    \foreach \x in {-16.0,-15.6,...,-12.8}
-    {
-      \bitbox{\x}{red}{1}
-    }
-    \foreach \x in {-12.8,-12.4,...,-9.6}
-    {
-      \bitbox{\x}{green}{0}
-    }
-    \foreach \x in {-9.6,-9.2,...,-6.4}
-    {
-      \bitbox{\x}{blue}{1}
-    }
-  \end{tikzpicture}
+  \inputtikz{rgb_bits.tex}
   \caption{The binary representation of a color}
   \label{fig:rgb-bits}
 \end{figure}
