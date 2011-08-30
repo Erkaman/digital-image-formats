@@ -87,7 +87,6 @@ represents these color model. Let us start with:
 \subsection{24-bit color}
 \label{sec:24-bit-color}
 
-
 So each color is just a combination red,blue and green lights. In the
 RGB color model these channels are given values. Let us represent
 these values as a triple of three numbers, like this:
@@ -103,9 +102,9 @@ A full red color is represented by the triple \rgbtrip{255}{0}{0}. In
 that case, have a guess at what color is represented by
 \rgbtrip{255}{0}{255}. If haven't guessed it already, please study
 figure \ref{fig:rgb}. As you probably already have guessed, this color
-is yellow. And in the same number mixing and matching way, all the
-other color can be represented(?) \todo{no they cannot, there are
-  limitations}. Like it is represented in color table \ref{tab:color-examples}
+is yellow. And in the same number mixing and matching way, many other
+colors can be represented. Like it is represented in color table
+\ref{tab:color-examples}
 
 \newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
   \textcolor[RGB]{#1,#2,#3}{#4} \\ \hline}
@@ -125,20 +124,41 @@ other color can be represented(?) \todo{no they cannot, there are
   \label{tab:color-examples}
 \end{table}
 
-% how many different colors?
+But of course, not all colors can be represented using just
+24-bit. The number of All possible colors is infinite. But you can
+represent an awful not colors with only 24-bits. How many? Well, every
+color channel can have $256$ different values. There are $3$
+channels. Hence, there are $256^3 = 16777216$ different colors.
 
-% When we start talking about alpha ch
+\begin{figure}[h!]
+  \centering
+  \begin{tikzpicture}
+    \shade[yslant=-0.5,bottom color=red]
+    (0,0) rectangle +(3,3);
+
+    \shade[yslant=0.5,right color=blue]
+    (3,-3) rectangle +(3,3);
+
+    \shade[yslant=0.5,xslant=-1,bottom color=green] (6,3) rectangle +(-3,-3);
+
+  \end{tikzpicture}
+  \caption{RGB color cube TODO: Make.}
+  \label{fig:color-cube}
+\end{figure}
+
+\newcommand{\rgbaquad}[4]{(
+  \textcolor{red}{#1},\textcolor{green}{#2},\textcolor{blue}{#3},\textcolor{grey}{#4} )}
+
+Adding alpha channels to this color representation is trivial, just
+add a fourth channel. Here is for example the color green halfly
+transparent: \rgbaquad{0}{0}{255}{125}. The only real difference is
+that a color will require 32-bits of storage if an alpha channel is needed.
 
 \subsection{Other colors depths}
 \label{sec:other-colors-depths}
 
-\subsection{How many possible colors?}
-\label{sec:how-many-possible-colors}
-
-
-For a color depth of 24-bits there are 256 different combinations for
-each color channel, hence there are $256^3 = 16777216$ different
-colors for 24-bit color delpth! % combinatorics mention?
+\subsection{Indexed Color}
+\label{sec:indexed-color}
 
 % 8-bit color 1-bit color, palettes need to be covered.-
 
