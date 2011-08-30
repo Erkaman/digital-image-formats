@@ -9,3 +9,6 @@ http://blogs.msdn.com/b/devdev/archive/2006/04/12/575384.aspx
 
 * PNG - The definite guide.
 http://www.vias.org/pngguide/
+
+* Understand Compositing and Color extensions in SVG 1.2 in 30 minutes!
+http://www.svgopen.org/2005/papers/abstractsvgopen/
