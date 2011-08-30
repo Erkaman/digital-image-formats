@@ -79,42 +79,55 @@ question is close to invisible  \cite{porter84_compos_dig_img}.
 \section{Color depth}
 \label{sec:color-depth}
 
+\newcommand{\rgbtrip}[3]{( \textcolor{red}{#1},\textcolor{green}{#2},\textcolor{blue}{#3})}
+
+But up until now, we have said nothing about how the computer
+represents these color model. Let us start with:
+
 \subsection{24-bit color}
 \label{sec:24-bit-color}
 
-But how are RGB and RGBA colors represented by a computer? The binary
-numeral system is used by computers to store their data. So we can
-therefore give every RGB color a value to represent the intensity or
-lighttness of a part color. In one popular system every part color of
-RGB is given 8-bit of storage. So a full color takes 24-bit is
-storage. You can also say that its \textbf{color depth}
-\index{color depth} is 24-bits.Observe figure \ref{fig:rgb-bits}. Every color is
-here given a 8-bit value. Both the red and the blue channels are given
-their highest possible values, 11111111, or in decimal, 255. This
-means the channels are given their fullest possible intensities. On
-other hand, the green channel has value of 00000000, or simply put,
-zero. This means there are no green parts of the colors. The channel
-is just dead in this case. If learned anything in color theory, you
-should know mixing red and blue gives you yellow. And in the same way,
-many, many other possible colors are available. This is just like when
-mixed colors in art classes to get different nuances of colors. Only
-this time, you can specify the colors mixing \emph{exactly} with
-numbers, which is a huge advantage.
-\cite{puglia00:_handbook_dig_proj}.
 
+So each color is just a combination red,blue and green lights. In the
+RGB color model these channels are given values. Let us represent
+these values as a triple of three numbers, like this:
+\rgbtrip{123}{21}{91}.
 
-\begin{figure}[h]
+An 8-bit number has ,as familiar, only $255$ possible values. If we
+assign an  8-bit number to each color channel, the color's total size
+will be 24-bits. This way of representing color is called 24-bit color
+\index{24-bit color}. You can also say that its color depth \index{color
+  depth} is 24 bits.
+
+A full red color is represented by the triple \rgbtrip{255}{0}{0}. In
+that case, have a guess at what color is represented by
+\rgbtrip{255}{0}{255}. If haven't guessed it already, please study
+figure \ref{fig:rgb}. As you probably already have guessed, this color
+is yellow. And in the same number mixing and matching way, all the
+other color can be represented(?) \todo{no they cannot, there are
+  limitations}. Like it is represented in color table \ref{tab:color-examples}
+
+\newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
+  \textcolor[RGB]{#1,#2,#3}{#4} \\ \hline}
+
+\begin{table}[h!]
   \centering
-  \inputtikz{rgb_bits.tex}
-  \caption{The binary representation of a color}
-  \label{fig:rgb-bits}
-\end{figure}
+  \begin{tabular}[h!]{|l|l|}
+    \hline
+    RGB triple & Resulting color \\ \hline
+    \colorrow{255}{215}{0}{Gold}
+    \colorrow{165}{42}{42}{Brown}
+    \colorrow{255}{0}{255}{Purple}
+    \colorrow{255}{192}{203}{Pink}
+    \colorrow{255}{165}{0}{Orange}
+  \end{tabular}
+  \caption{Colors}
+  \label{tab:color-examples}
+\end{table}
 
 % how many different colors?
 
-In RGBA, the alpha channel is stored in the exactly way as the other
-three color channel, using a 8-bit number, so there's no need to
-further cover this subject.
+% When we start talking about alpha ch
 
 \subsection{Other colors depths}
 \label{sec:other-colors-depths}
