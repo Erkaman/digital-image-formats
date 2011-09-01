@@ -106,6 +106,7 @@ void loadTGA(char * file)
 
 
     free(colorMap);
+    fclose(in);
 }
 
 static void strip_extension(char * fileName)
