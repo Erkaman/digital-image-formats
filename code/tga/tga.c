@@ -38,6 +38,7 @@ void loadTGA(char * file)
     char imageID[255];
     SHORT * colorMap;
     int i ;
+    TGAHeader tgah;
 
     in = fopen(file,"rb");
 
@@ -46,9 +47,8 @@ void loadTGA(char * file)
         exit(1);
     }
 
-    TGAHeader tgah;
 
-//    fread(&tgah,sizeof(TGAHeader),1,in);
+/*    fread(&tgah,sizeof(TGAHeader),1,in); */
     tgah.IDLength = readByte(in);
     tgah.colorMapType = readByte(in);
     tgah.imageType = readByte(in);
@@ -115,7 +115,7 @@ static void strip_extension(char * fileName)
     int n;
     extBeg = strrchr(fileName,'.');
     if(extBeg == NULL);
-    //return extBeg;
+    /* return extBeg; */
     else{
         n = extBeg - fileName;
         fileName[n] = '\0';

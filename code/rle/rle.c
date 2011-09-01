@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-// TODO: organize common functions and utilities into headers and files.
+/* TODO: organize common functions and utilities into headers and files. */
 void assertFileP(FILE * fp)
 {
     if(fp == NULL){
@@ -26,7 +26,7 @@ void encode(char * inputfile,char * outputfile)
     counter = 0;
     formerC = -1;
     while ((c = getc(in)) != EOF){
-        // if it's not the first character.
+        /* if it's not the first character. */
         if(formerC != -1){
             if(c == formerC){
                 ++formerC;

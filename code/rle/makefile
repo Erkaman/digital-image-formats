@@ -1,5 +1,5 @@
 PROG = rle.exe
-CFLAGS = -Wall -c
+CFLAGS = -Wall -c -pedantic -ansi
 objects = rle.o
 
 $(PROG) : $(objects)

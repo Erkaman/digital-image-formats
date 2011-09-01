@@ -1,5 +1,6 @@
 PROG = tga.exe
-CFLAGS = -Wall -c
+CC = gcc
+CFLAGS = -Wall -c -pedantic -ansi
 objects = tga.o
 
 $(PROG) : $(objects)
