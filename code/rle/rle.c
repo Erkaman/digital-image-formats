@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
 {
     char * result;
     int decompress = 0;
+    int n;
 
     if(argc == 1){
         printf("No arguments specified\n");
@@ -86,22 +87,27 @@ int main(int argc, char *argv[])
     /* parse command line arguments */
 
     ++argv;
+    n = 1;
 
-    while((*argv)[0] == '-'){
+    while(n < argc && (*argv)[0] == '-'){
         switch((*argv)[1]){
         case 'd':
             decompress = 1;
             break;
         }
         ++argv;
+        ++n;
+    }
+
+    if((argc - n) < 2){
+        printf("An input AND an output file must be specified");
+	return 1;
     }
 
     if(decompress){
-        result = changeExtension(*argv,"dec");
-        decode(*argv,result);
+        decode(argv[0],argv[1]);
     }else{
-        result = changeExtension(*argv,"rle");
-        encode(*argv,result);
+        encode(argv[0],argv[1]);
     }
 
     free(result);
