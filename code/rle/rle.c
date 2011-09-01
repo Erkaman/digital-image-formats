@@ -1,8 +1,8 @@
 #include "../common.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-/*int findExtensionBeg(char * )*/
 
 void encode(char * inputfile,char * outputfile)
 {
@@ -46,9 +46,11 @@ void encode(char * inputfile,char * outputfile)
 
 int main(int argc, char *argv[])
 {
+    char * encodedFile;
     if(argc != 1){
-
-        encode(argv[1],"enc");
+	encodedFile = changeExtension(argv[1],"rle");
+        encode(argv[1],encodedFile);
+	free(encodedFile);
     }
 
     return 0;
