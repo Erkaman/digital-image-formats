@@ -1,14 +1,8 @@
+#include "../common.h"
 #include <stdio.h>
 #include <stdlib.h>
-/* TODO: organize common functions and utilities into headers and files. */
-void assertFileP(FILE * fp)
-{
-    if(fp == NULL){
-        perror("An error occurred opening the file");
-        exit(1);
-    }
-}
 
+/*int findExtensionBeg(char * )*/
 
 void encode(char * inputfile,char * outputfile)
 {
@@ -20,27 +14,30 @@ void encode(char * inputfile,char * outputfile)
     in = fopen(inputfile,"rb");
     out = fopen(outputfile,"wb");
 
-    assertFileP(in);
-    assertFileP(out);
+    assertFileOpened(in);
+    assertFileOpened(out);
 
-    counter = 0;
+    counter = 1;
     formerC = -1;
+
     while ((c = getc(in)) != EOF){
         /* if it's not the first character. */
         if(formerC != -1){
-            if(c == formerC){
-                ++formerC;
-            }else{
+            if(c == formerC)
+                ++counter;
+            else{
                 putc(counter,out);
                 putc(formerC,out);
-                counter = 0;
+                counter = 1;
             }
-
-            formerC = c;
-        }else{
-            formerC = c;
-            ++formerC;
         }
+        formerC = c;
+    }
+
+    /* write the last bytes. */
+    if(formerC != -1){
+        putc(counter,out);
+        putc(formerC,out);
     }
 
     fclose(in);
@@ -49,8 +46,10 @@ void encode(char * inputfile,char * outputfile)
 
 int main(int argc, char *argv[])
 {
-    if(argc != 1)
+    if(argc != 1){
+
         encode(argv[1],"enc");
+    }
 
     return 0;
 }

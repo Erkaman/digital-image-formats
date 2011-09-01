@@ -2,8 +2,8 @@
 #define _TGA_H_
 #include <stdint.h>
 
-/* A byte is an unsigned 8-bit integer in the TGA specification. */
 #define BYTE uint8_t
+
 
 /* A short is an unsigned 16-bit integer in the TGA specification. */
 #define SHORT uint16_t
@@ -63,10 +63,11 @@ typedef struct
 {
     TGAHeader header;
     char * imageID;
-    
+
     TGAExtensionArea extensionArea;
 } TGAFile;*/
 
 void loadTGA(char * file);
 
 #endif /* _TGA_H_ */
+

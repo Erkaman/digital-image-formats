@@ -11,9 +11,9 @@ static unsigned getbits(unsigned x, int p, int n);
 
 static SHORT readShort(FILE * fp);
 
-static void readStr(FILE * fp,size_t length,char * str);
-
 static BYTE readByte(FILE * fp);
+
+static void readStr(FILE * fp,size_t length,char * str);
 
 static void getImageDestStr(char * str,int imageOrigin);
 
@@ -141,6 +141,7 @@ static BYTE readByte(FILE * fp)
     return s;
 }
 
+
 static void readStr(FILE * fp,size_t length,char * str)
 {
     fread(str,sizeof(CHAR),length,fp);
@@ -163,3 +164,4 @@ static void getImageDestStr(char * str,int imageOrigin)
         break;
     }
 }
+
