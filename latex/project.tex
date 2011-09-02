@@ -1,37 +1,58 @@
 \documentclass[a4paper]{report}
 
+% fonts
 \usepackage[T1]{fontenc}
-
 \usepackage{inconsolata}
-
 \usepackage[kerning,spacing]{microtype}
 \usepackage[charter]{mathdesign}
 
-\usepackage{hyperref}
-
-\usepackage{verbatim}
-
+% index creation
 \usepackage{makeidx}
-
 \makeindex
+
+% miscellaneous packages
 \usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{verbatim}
+\usepackage{siunitx}
+\usepackage{todonotes}
+
+% references
 \usepackage[sorting=none,refsegment=chapter]{biblatex}
 \bibliography{project.bib}
 
+% tikz
 \usepackage{tikz}
 \usetikzlibrary{shapes,backgrounds,decorations.pathreplacing,positioning,fit,shadings}
 
-\usepackage{siunitx}
+% algorithms typesetting.
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+
+\algblockdefx[REPEAT]
+{Repeat}
+{EndRepeat}
+[1]{\algorithmicrepeat\ #1 \ \algorithmicdo}
+{\algorithmicend \ \algorithmicrepeat}
+
+
+% miscellaneous configurations
+\pagestyle{headings}
 
 \hyphenpenalty=100000
 
-%\usepackage{xcolor}
-
-\usepackage{todonotes}
+% macros
 
 \newcommand{\inputtikz}[1]{\input{tikz_img/#1}}
 
-\pagestyle{headings}
+\newcommand*\BitAnd{\mathrel{\&}}
+\newcommand*\BitOr{\mathrel{|}}
+\newcommand*\ShiftLeft{\ll}
+\newcommand*\ShiftRight{\gg}
+\newcommand*\BitNeg{\ensuremath{\mathord{\sim}}}
+
 \begin{document}
 
 \input{title.tex}
@@ -60,4 +81,3 @@
 \printindex
 
 \end{document}
-

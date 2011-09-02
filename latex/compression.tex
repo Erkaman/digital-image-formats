@@ -5,4 +5,26 @@
 \chapter{Compression techniques}
 \label{cha:digital-image}
 
+\subsection{RLE}
+\label{sec:rle}
+
+\begin{algorithm}
+  \caption{Decoding a RLE encoded file.}
+  \begin{algorithmic}[1]
+    \Let{$count$}{$-1$}
+    \Let{$c$}{ \Call{Read}{}} \Comment{Reads the next character.}
+    \While{$c\not=EOF$}\Comment{While not eof}
+      \If{$count = -1$}
+        \Let{$count$}{$c$}
+      \Else
+        \Repeat{$count$}
+          \State \Call{Write}{c}
+          \Let{$count$}{$-1$}
+        \EndRepeat
+      \EndIf
+      \Let{$c$}{ \Call{Read}{}}
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
 \printbibliography[heading=subbibliography]

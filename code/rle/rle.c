@@ -19,12 +19,12 @@ void decode(char * inputfile,char * outputfile)
     count = -1;
     while ((c = getc(in)) != EOF){
         /* if the counter hasn't been assigned to yet. */
-        if(count == -1){
+        if(count == -1)
             count = c;
-        }else{
-            for(; count > 0; --count){
+        else{
+            for(; count > 0; --count)
                 putc(c,out);
-            }
+
             count = -1;
         }
     }
@@ -32,6 +32,10 @@ void decode(char * inputfile,char * outputfile)
     fclose(in);
     fclose(out);
 }
+
+/* FIXME: if a number is repeated more than the max value of char this
+ * algorithm will break.   */
+
 
 void encode(char * inputfile,char * outputfile)
 {
