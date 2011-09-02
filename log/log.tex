@@ -3,6 +3,7 @@
 \usepackage[kerning,spacing]{microtype}
 \usepackage[charter]{mathdesign}
 \usepackage{datetime}
+\usepackage{hyperref}
 \hyphenpenalty=100000
 \title{Log book}
 \author{Eric Arnebäck}
@@ -46,7 +47,15 @@ extremely simple compression algorithm Run Length Encoding.
 
 And today, I finished the program demonstrating the most simple
 version of the RLE algorithm. More information on the algorithm can be read here:
-http://www.fileformat.info/mirror/egff/ch09_03.htm
+\url{http://www.fileformat.info/mirror/egff/ch09_03.htm}
 
+\dayheading{2}{9}{2011}
+
+Figured out how to use the algorithmx package in \LaTeX. This
+basically allows me to very easily write algorithms in documents and
+have them beautifully formatted.
+
+Wrote the very simple algorithm for decoding an Run Length encoded
+file to get a feel for using the package.
 
 \end{document}

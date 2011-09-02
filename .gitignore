@@ -19,5 +19,6 @@ auto/
 *-blx.bib
 *.ilg
 *.ind
+*.loa
 
 *.stackdump

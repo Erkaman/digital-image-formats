@@ -8,7 +8,7 @@ void decode(char * inputfile,char * outputfile)
 {
     FILE * in;
     FILE * out;
-    char c,count;
+    char c,length;
 
     in = fopen(inputfile,"rb");
     out = fopen(outputfile,"wb");
@@ -16,17 +16,18 @@ void decode(char * inputfile,char * outputfile)
     assertFileOpened(in);
     assertFileOpened(out);
 
-    count = -1;
-    while ((c = getc(in)) != EOF){
-        /* if the counter hasn't been assigned to yet. */
-        if(count == -1)
-            count = c;
+    length = -1;
+    c = getc(in);
+    while (c != EOF){
+        if(length == -1)
+            length = c;
         else{
-            for(; count > 0; --count)
+            for(; length > 0; --length)
                 putc(c,out);
 
-            count = -1;
+            length = -1;
         }
+	c = getc(in);
     }
 
     fclose(in);

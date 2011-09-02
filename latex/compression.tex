@@ -5,24 +5,26 @@
 \chapter{Compression techniques}
 \label{cha:digital-image}
 
-\subsection{RLE}
+\section{RLE}
 \label{sec:rle}
 
 \begin{algorithm}
   \caption{Decoding a RLE encoded file.}
   \begin{algorithmic}[1]
-    \Let{$count$}{$-1$}
-    \Let{$c$}{ \Call{Read}{}} \Comment{Reads the next character.}
-    \While{$c\not=EOF$}\Comment{While not eof}
-      \If{$count = -1$}
-        \Let{$count$}{$c$}
+    \Let{$length$}{$-1$} \Comment{The number of bytes to uncomppress.}
+
+    \Let{$b$}{ \Call{Read}{}} \Comment{Reads the next byte.}
+    \While{$b\not=EOF$} \Comment{While the end the file hasn't yet
+      been reached.}
+      \If{$length = -1$}
+        \Let{$length$}{$b$}
       \Else
-        \Repeat{$count$}
-          \State \Call{Write}{c}
-          \Let{$count$}{$-1$}
+        \Repeat{$length$}
+          \State \Call{Write}{$b$}
         \EndRepeat
+        \Let{$length$}{$-1$}
       \EndIf
-      \Let{$c$}{ \Call{Read}{}}
+      \Let{$b$}{\Call{Read}{}}
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
