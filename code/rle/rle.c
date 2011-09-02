@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include <limits.h>
 
 void decode(char * inputfile,char * outputfile)
 {
@@ -34,10 +34,6 @@ void decode(char * inputfile,char * outputfile)
     fclose(out);
 }
 
-/* FIXME: if a number is repeated more than the max value of char this
- * algorithm will break.   */
-
-
 void encode(char * inputfile,char * outputfile)
 {
     FILE * in;
@@ -57,7 +53,7 @@ void encode(char * inputfile,char * outputfile)
     while ((c = getc(in)) != EOF){
         /* if it's not the first character. */
         if(formerC != -1){
-            if(c == formerC)
+            if(c == formerC && counter < CHAR_MAX)
                 ++counter;
             else{
                 putc(counter,out);
