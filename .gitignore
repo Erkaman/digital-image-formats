@@ -16,9 +16,9 @@ auto/
 *.run.xml
 *.blg
 *.bbl
-*-blx.bib
 *.ilg
 *.ind
 *.loa
+*.bcf
 
 *.stackdump
