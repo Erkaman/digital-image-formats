@@ -93,20 +93,20 @@ do just horrible. But in data in which the values are not varied much
 at all, like line art and simple vector graphics, even for such a
 naive algorithm it will do quite good.
 
-So how could it be implemented? Let's first consider the compression algorithm:
+It's very easy to see that this is trivial to implement in code Let us
+first consider the compression algorithm:
 
-%\newcommand{\readb}{\Let{$b$}{ \Call{Read}{}}}
+\newcommand{\eof}{\ensuremath{\VoidCall{EndOfFileReached}}}
+\newcommand{\neof}{\ensuremath{\NOT \VoidCall{EndOfFileReached}}}
 
 \begin{algorithm}[h]
   \caption{Encoding a file using RLE.}
   \label{alg:rle-enc}
   \begin{algorithmic}[1]
-    \Let{$length$}{$1$} \Comment{The number of bytes to write to the
-      file compressed.}
+    \Let{$length$}{$1$}
     \Let{$passedFirstCharacter$}{\False}
     \Let{$c_2$}{ \Call{Read}{}}
-    \While{$c_2\not=EOF$} \Comment{While the end the file hasn't yet
-      been reached.}
+    \While{\neof}
       \If{$passedFirstCharacter$}
         \If{$c_2 = c_1 \AND length < \Call{MaxValue}{length}$}
           \Let{$length$}{$1 + length$}
@@ -120,26 +120,25 @@ So how could it be implemented? Let's first consider the compression algorithm:
       \Let{$c_1$}{$c_2$}
       \Let{$c_2$}{ \Call{Read}{}}
     \EndWhile
-    \Comment{Write the last bytes.}
-    \If{$passedFirstCharacter$}
+    \If{$passedFirstCharacter$} \Comment{Write the last bytes.}
       \State \Call{Write}{$length$}
       \State \Call{Write}{$c_1$}
     \EndIf
   \end{algorithmic}
 \end{algorithm}
 
-And here's the decoding algorithm:
+The RLE decoding is very simple:
 
 \begin{algorithm}[h]
   \caption{Decoding a RLE encoded file.}
   \label{alg:rle-dec}
   \begin{algorithmic}[1]
 
-    \While{$\NOT \VoidCall{EndOfFileReached}$}
+    \While{\neof}
       \Let{$length$}{\Call{Read}{}}
       \Let{$c$}{\Call{Read}{}}
 
-      \If{$\VoidCall{EndOfFileReached}$}
+      \If{\eof}
         \Break
       \EndIf
 
@@ -149,6 +148,9 @@ And here's the decoding algorithm:
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
+
+All we're really doing here is reading packet length and the packet
+data and then outputting that data length times to a file.
 
 \subsection{Packets version}
 \label{sec:packets-version}
