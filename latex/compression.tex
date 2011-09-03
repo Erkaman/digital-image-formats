@@ -134,20 +134,18 @@ And here's the decoding algorithm:
   \caption{Decoding a RLE encoded file.}
   \label{alg:rle-dec}
   \begin{algorithmic}[1]
-    \Let{$length$}{$-1$} \Comment{The number of bytes to uncomppress.}
 
-    \Let{$b$}{ \Call{Read}{}} \Comment{Reads the next byte.}
-    \While{$b\not=EOF$} \Comment{While the end the file hasn't yet
-      been reached.}
-      \If{$length = -1$}
-        \Let{$length$}{$b$}
-      \Else
-        \Repeat{$length$}
-          \State \Call{Write}{$b$}
-        \EndRepeat
-        \Let{$length$}{$-1$}
+    \While{$\NOT \VoidCall{EndOfFileReached}$}
+      \Let{$length$}{\Call{Read}{}}
+      \Let{$c$}{\Call{Read}{}}
+
+      \If{$\VoidCall{EndOfFileReached}$}
+        \Break
       \EndIf
-      \Let{$b$}{\Call{Read}{}}
+
+      \Repeat{$length$}
+        \State \Call{Write}{$b$}
+      \EndRepeat
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
