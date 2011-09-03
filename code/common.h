@@ -2,6 +2,13 @@
 #define _COMMON_H_
 
 #include <stdio.h>
+#include <stdint.h>
+
+#define BYTE uint8_t
+#define BYTE_MAX UINT8_MAX
+
+BYTE readByte(FILE * fp);
+void writeByte(BYTE b,FILE * fp);
 
 void assertFile(FILE * fp,char * errorStr);
 void assertFileOpened(FILE * fp);

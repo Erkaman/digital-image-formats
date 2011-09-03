@@ -1,8 +1,7 @@
 #ifndef _TGA_H_
 #define _TGA_H_
+#include "../common.h"
 #include <stdint.h>
-
-#define BYTE uint8_t
 
 
 /* A short is an unsigned 16-bit integer in the TGA specification. */

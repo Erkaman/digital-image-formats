@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "tga.h"
+#include "../common.h"
 
 /* strip the file extension of a filename. */
 static void strip_extension(char * fileName);
@@ -10,8 +11,6 @@ static void strip_extension(char * fileName);
 static unsigned getbits(unsigned x, int p, int n);
 
 static SHORT readShort(FILE * fp);
-
-static BYTE readByte(FILE * fp);
 
 static void readStr(FILE * fp,size_t length,char * str);
 
@@ -133,14 +132,6 @@ static SHORT readShort(FILE * fp)
     fread(&s,sizeof(SHORT),1,fp);
     return s;
 }
-
-static BYTE readByte(FILE * fp)
-{
-    BYTE s;
-    fread(&s,sizeof(BYTE),1,fp);
-    return s;
-}
-
 
 static void readStr(FILE * fp,size_t length,char * str)
 {

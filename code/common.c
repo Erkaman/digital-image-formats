@@ -39,3 +39,15 @@ char * changeExtension(char * fileName,char * newExtension)
 
     return changedFileName;
 }
+
+BYTE readByte(FILE * fp)
+{
+    BYTE s;
+    fread(&s,sizeof(BYTE),1,fp);
+    return s;
+}
+
+void writeByte(BYTE b,FILE * fp)
+{
+    fwrite(&b,sizeof(unsigned char),1,fp);
+}
