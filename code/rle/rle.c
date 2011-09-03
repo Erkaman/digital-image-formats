@@ -4,6 +4,10 @@
 #include <string.h>
 #include <limits.h>
 
+#define RUN_LENGTH_PACKET 1
+#define RAW_PACKET 0
+
+
 void decode(char * inputfile,char * outputfile)
 {
     FILE * in;
@@ -20,10 +24,10 @@ void decode(char * inputfile,char * outputfile)
         length = readByte(in);
         c = readByte(in);
 
-	/* if the end of the file was reached. */
-	if(feof(in)){
-	    break;
-	}
+        /* if the end of the file was reached. */
+        if(feof(in)){
+            break;
+        }
 
         for(; length > 0; --length)
             writeByte(c,out);
@@ -79,17 +83,40 @@ void encode(char * inputfile,char * outputfile)
     fclose(out);
 }
 
+void writeRawPacket(BYTE length,BYTE * data,FILE * fp)
+{
+    BYTE packetHead;
+    int i;
+
+    packetHead = 0;
+    packetHead |= length ;
+    writeByte(packetHead,fp);
+    for(i = 0 ; i < (length + 1) ; ++i)
+        writeByte(data[i],fp);
+}
+
+void writeRunLengthPacket(BYTE length,BYTE data,FILE * fp)
+{
+    BYTE packetHead;
+
+    packetHead = 0;
+    packetHead |= 0x80;
+    packetHead |= length;
+    writeByte(packetHead,fp);
+    writeByte(data,fp);
+}
+
 
 void encode_opt(char * inputfile,char * outputfile)
 {
     FILE * in;
     FILE * out;
 
-    char c2,c1;
-    char length;
+    BYTE c2,c1;
+    BYTE length;
     int passedFirstCharacter;
-    char data[127];
     int packetType;
+    BYTE data[128];
 
     in = fopen(inputfile,"rb");
     out = fopen(outputfile,"wb");
@@ -97,51 +124,101 @@ void encode_opt(char * inputfile,char * outputfile)
     assertFileOpened(in);
     assertFileOpened(out);
 
-    length = 1;
+    length = 0;
     passedFirstCharacter = 0;
 
-    packetType = 0;
+    packetType = RAW_PACKET;
 
-    c2 = getc(in);
-    while (c2 != EOF){
+    c2 = readByte(in);
+    while (!feof(in)){
         /* if it's not the first character. */
         if(passedFirstCharacter){
-            if(c2 == c1 && length < CHAR_MAX){
-                packetType = 1;
+            if(c2 == c1 && length < 127){
+
+                if(packetType == RAW_PACKET && length > 0){
+		    writeRawPacket(length-1,data,out);
+		    length = 0;
+                }
                 ++length;
+                packetType = RUN_LENGTH_PACKET;
             }
             else{
-                if(packetType == 1){
-                    /* write the packet of type 1 */
-
-                }
-                else{
-
-                }
-                putc(length,out);
-                putc(c1,out);
-                length = 1;
+                if(packetType == RUN_LENGTH_PACKET){
+                    writeRunLengthPacket(length,c1,out);
+		    packetType = RAW_PACKET;
+		    /* reset the length. */
+		    length = 0;
+                } else{
+		    data[length++] = c1;
+		    packetType = RAW_PACKET;
+		}
             }
         }
         passedFirstCharacter = 1;
         c1 = c2;
-        c2 = getc(in);
+        c2 = readByte(in);
     }
 
-    /* write the last bytes.
-       if(passedFirstCharacter){
-       putc(length,out);
-       putc(c1,out);
-       }*/
+    /* write the last bytes. */
+    if(passedFirstCharacter){
+        if(packetType == RUN_LENGTH_PACKET){
+            writeRunLengthPacket(length,c1,out);
+        } else{
+            data[length] = c1;
+            writeRawPacket(length,data,out);
+        }
+    }
 
     fclose(in);
     fclose(out);
 }
 
+void decode_opt(char * inputfile,char * outputfile)
+{
+    FILE * in;
+    FILE * out;
+    BYTE b,length,head;
+
+    in = fopen(inputfile,"rb");
+    out = fopen(outputfile,"wb");
+
+    assertFileOpened(in);
+    assertFileOpened(out);
+
+    while (!feof(in)){
+        head = readByte(in);
+
+        if(feof(in)){
+            break;
+        }
+
+        /* run length packet */
+        if(head & 0x80){
+            length = head & 0x7f;
+            b = readByte(in);
+
+            for(length = length + 1; length > 0; --length)
+                writeByte(b,out);
+        } else {
+            /* raw packet */
+            length = head & 0x7f;
+            for(length = length + 1; length > 0; --length){
+                b = readByte(in);
+                writeByte(b,out);
+            }
+        }
+    }
+
+    fclose(in);
+    fclose(out);
+}
+
+
 int main(int argc, char *argv[])
 {
     char * result;
     int decompress = 0;
+    int optimize = 0;
     int n;
 
     if(argc == 1){
@@ -159,6 +236,9 @@ int main(int argc, char *argv[])
         case 'd':
             decompress = 1;
             break;
+        case 'o':
+            optimize = 1;
+            break;
         }
         ++argv;
         ++n;
@@ -169,10 +249,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if(decompress){
-        decode(argv[0],argv[1]);
-    }else{
-        encode(argv[0],argv[1]);
+    if(optimize){ /* */
+        if(decompress){
+            decode_opt(argv[0],argv[1]);
+        } else{
+            encode_opt(argv[0],argv[1]);
+        }
+    } else{
+        if(decompress){
+            decode(argv[0],argv[1]);
+        }else{
+            encode(argv[0],argv[1]);
+        }
     }
 
     free(result);
