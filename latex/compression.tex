@@ -7,72 +7,67 @@
 
 \begin{refsection}
 
+\section{Some terminology}
+\label{sec:some-terminology}
+
+Coding a data into another form is often referred to as
+\textbf{encoding} \index{encoding}. Converting that encoded data back
+into its orginal form is called \textbf{decoding}
+\index{decoding}. \todo{Need sources on these two terms.}. In the
+circumstanes of compression techniques, encoding is also often
+referred to as \textbf{compression} \index{compression}, and decoding as
+\textbf{decompression} \index{decompression} or \textbf{uncompression} \index{uncompression}
+
+% http://www.digitizationguidelines.gov/term.php?term=encoder
+
 \section{RLE}
 \label{sec:rle}
 
 One the most simple compression algorithms is known as Run Length
 Encoding \index{Run Length Encoding}(RLE
 \index{RLE}). \cite{nagarajan11:_enhan_approac_run_lengt_encod_schem}
-It is most easily explained by example.
+The basic working of the algorithm, is that sequences of consecutive
+data is stored count and a single value rather than the entire
+run.
 
-Let us consider the string
+But what does that mean? Let us consider the string
 
 \begin{indentpar}
   WWWWAAAACCCCCCQ
 \end{indentpar}
 
-When running the RLE encoding on this string, we get this as a result:
+When running the RLE encoding algorithm on this string, it is
+compressed like this:
 
 \begin{indentpar}
   4W4A6C1Q
 \end{indentpar}
 
-You saw what just happened? Every letter was given a number indicating
-the number is was repeated. Even if the letter was only repeated it
-would still be prefixed by a $1$. And this is problematic indeed. For
-example consider
+So all the RLE encoding algorithm does is encode long consequtive runs
+of the same value as a count and a single data value. But however, the
+same thing is also done for single runs, meaning that the algorithm
+can potentially explode the size of the original data, rather than
+compress it. Consider, for example, the string:
 
 \begin{indentpar}
   eric
 \end{indentpar}
 
-this will actually ``compress'' to
+this will actually get ``compressed'' down to
 
 \begin{indentpar}
   1e1r1i1c
 \end{indentpar}
 
-which is just horrible, the size actually doubled this time! So for
-very data with very varying values this algorithm will do just
-horrible. But in data in which the values are not varied much at all,
-like lineart and simple vector graphics, even such a naive algorithm
-will do quite good.
+So the size actually doubled for this kind of data! So for very data
+with very varying values, like photos and books, this algorithm will
+do just horrible. But in data in which the values are not varied much
+at all, like line art and simple vector graphics, even for such a
+naive algorithm it will do quite good.
 
 So how could it be implemented? Let's first consider the compression algorithm:
 
 %\newcommand{\readb}{\Let{$b$}{ \Call{Read}{}}}
-
-\begin{algorithm}
-  \caption{Decoding a RLE encoded file.}
-  \label{alg:rle-dec}
-  \begin{algorithmic}[1]
-    \Let{$length$}{$-1$} \Comment{The number of bytes to uncomppress.}
-
-    \Let{$b$}{ \Call{Read}{}} \Comment{Reads the next byte.}
-    \While{$b\not=EOF$} \Comment{While the end the file hasn't yet
-      been reached.}
-      \If{$length = -1$}
-        \Let{$length$}{$b$}
-      \Else
-        \Repeat{$length$}
-          \State \Call{Write}{$b$}
-        \EndRepeat
-        \Let{$length$}{$-1$}
-      \EndIf
-      \Let{$b$}{\Call{Read}{}}
-    \EndWhile
-  \end{algorithmic}
-\end{algorithm}
 
 \begin{algorithm}
   \caption{Encoding a file using RLE.}
@@ -105,7 +100,31 @@ So how could it be implemented? Let's first consider the compression algorithm:
   \end{algorithmic}
 \end{algorithm}
 
+And here's the decoding algorithm:
+
+\begin{algorithm}
+  \caption{Decoding a RLE encoded file.}
+  \label{alg:rle-dec}
+  \begin{algorithmic}[1]
+    \Let{$length$}{$-1$} \Comment{The number of bytes to uncomppress.}
+
+    \Let{$b$}{ \Call{Read}{}} \Comment{Reads the next byte.}
+    \While{$b\not=EOF$} \Comment{While the end the file hasn't yet
+      been reached.}
+      \If{$length = -1$}
+        \Let{$length$}{$b$}
+      \Else
+        \Repeat{$length$}
+          \State \Call{Write}{$b$}
+        \EndRepeat
+        \Let{$length$}{$-1$}
+      \EndIf
+      \Let{$b$}{\Call{Read}{}}
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
+
 \printbibliography[heading=subbibliography]
 
 \end{refsection}
-
