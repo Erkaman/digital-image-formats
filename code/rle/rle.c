@@ -8,7 +8,7 @@ void decode(char * inputfile,char * outputfile)
 {
     FILE * in;
     FILE * out;
-    char c,length;
+    BYTE c,length;
 
     in = fopen(inputfile,"rb");
     out = fopen(outputfile,"wb");
@@ -16,18 +16,17 @@ void decode(char * inputfile,char * outputfile)
     assertFileOpened(in);
     assertFileOpened(out);
 
-    length = -1;
-    c = getc(in);
-    while (c != EOF){
-        if(length == -1)
-            length = c;
-        else{
-            for(; length > 0; --length)
-                putc(c,out);
+    while (!feof(in)){
+        length = readByte(in);
+        c = readByte(in);
 
-            length = -1;
-        }
-        c = getc(in);
+	/* if the end of the file was reached. */
+	if(feof(in)){
+	    break;
+	}
+
+        for(; length > 0; --length)
+            writeByte(c,out);
     }
 
     fclose(in);
@@ -39,8 +38,8 @@ void encode(char * inputfile,char * outputfile)
     FILE * in;
     FILE * out;
 
-    char c2,c1;
-    char length;
+    BYTE c2,c1;
+    BYTE length;
     int passedFirstCharacter;
 
     in = fopen(inputfile,"rb");
@@ -52,28 +51,88 @@ void encode(char * inputfile,char * outputfile)
     length = 1;
     passedFirstCharacter = 0;
 
+    c2 = readByte(in);
+    while (!feof(in)){
+        /* if it's not the first character. */
+        if(passedFirstCharacter){
+            if(c2 == c1 && length < BYTE_MAX)
+                ++length;
+            else{
+                writeByte(length,out);
+                writeByte(c1,out);
+
+                length = 1;
+            }
+        }
+        passedFirstCharacter = 1;
+        c1 = c2;
+        c2 = readByte(in);
+    }
+
+    /* write the last bytes. */
+    if(passedFirstCharacter){
+        writeByte(length,out);
+        writeByte(c1,out);
+    }
+
+    fclose(in);
+    fclose(out);
+}
+
+
+void encode_opt(char * inputfile,char * outputfile)
+{
+    FILE * in;
+    FILE * out;
+
+    char c2,c1;
+    char length;
+    int passedFirstCharacter;
+    char data[127];
+    int packetType;
+
+    in = fopen(inputfile,"rb");
+    out = fopen(outputfile,"wb");
+
+    assertFileOpened(in);
+    assertFileOpened(out);
+
+    length = 1;
+    passedFirstCharacter = 0;
+
+    packetType = 0;
+
     c2 = getc(in);
     while (c2 != EOF){
         /* if it's not the first character. */
         if(passedFirstCharacter){
-            if(c2 == c1 && length < CHAR_MAX)
+            if(c2 == c1 && length < CHAR_MAX){
+                packetType = 1;
                 ++length;
+            }
             else{
+                if(packetType == 1){
+                    /* write the packet of type 1 */
+
+                }
+                else{
+
+                }
                 putc(length,out);
                 putc(c1,out);
                 length = 1;
             }
         }
-	passedFirstCharacter = 1;
+        passedFirstCharacter = 1;
         c1 = c2;
         c2 = getc(in);
     }
 
-    /* write the last bytes. */
-    if(passedFirstCharacter){
-        putc(length,out);
-        putc(c1,out);
-    }
+    /* write the last bytes.
+       if(passedFirstCharacter){
+       putc(length,out);
+       putc(c1,out);
+       }*/
 
     fclose(in);
     fclose(out);
