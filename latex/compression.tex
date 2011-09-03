@@ -20,8 +20,36 @@ referred to as \textbf{compression} \index{compression}, and decoding as
 
 % http://www.digitizationguidelines.gov/term.php?term=encoder
 
+\section{Pseudocode}
+\label{sec:pseudocode}
+
+We will be using several functions in the pseudocode.
+
+\textproc{Read} reads a byte from a opened file. If the end of the
+file has been reached, the constant $EOF$ is returned.
+
+\textproc{Write} Writes a byte to a opened file.
+
+\textproc{MaxValue(v)} returns the max value of the type of
+\textproc{v}.
+
+We will also a custom control structure, repeat:
+
+\begin{algorithm}[h]
+  \caption{The repeat control structure.}
+  \label{alg:repeat}
+  \begin{algorithmic}[1]
+    \Repeat{$n$}
+      \State $actions...$ \Comment{Repeats $actions...$ $n$ times} %
+    \EndRepeat
+  \end{algorithmic}
+\end{algorithm}
+
 \section{RLE}
 \label{sec:rle}
+
+\subsection{Most simple version}
+\label{sec:most-simple-version}
 
 One the most simple compression algorithms is known as Run Length
 Encoding \index{Run Length Encoding}(RLE
@@ -69,7 +97,7 @@ So how could it be implemented? Let's first consider the compression algorithm:
 
 %\newcommand{\readb}{\Let{$b$}{ \Call{Read}{}}}
 
-\begin{algorithm}
+\begin{algorithm}[h]
   \caption{Encoding a file using RLE.}
   \label{alg:rle-enc}
   \begin{algorithmic}[1]
@@ -102,7 +130,7 @@ So how could it be implemented? Let's first consider the compression algorithm:
 
 And here's the decoding algorithm:
 
-\begin{algorithm}
+\begin{algorithm}[h]
   \caption{Decoding a RLE encoded file.}
   \label{alg:rle-dec}
   \begin{algorithmic}[1]
@@ -124,6 +152,10 @@ And here's the decoding algorithm:
   \end{algorithmic}
 \end{algorithm}
 
+\subsection{Packets version}
+\label{sec:packets-version}
+
+\FloatBarrier
 
 \printbibliography[heading=subbibliography]
 
