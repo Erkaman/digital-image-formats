@@ -4,9 +4,6 @@
 #include "tga.h"
 #include "../common.h"
 
-/* strip the file extension of a filename. */
-static void strip_extension(char * fileName);
-
 /* getbits:  get n bits from position p */
 static unsigned getbits(unsigned x, int p, int n);
 
@@ -15,6 +12,8 @@ static SHORT readShort(FILE * fp);
 static void readStr(FILE * fp,size_t length,char * str);
 
 static void getImageDestStr(char * str,int imageOrigin);
+
+extern void loadTGAHeader(TGAHeader * tgah,FILE * fp);
 
 int main(int argc, char * argv[])
 {
@@ -27,6 +26,17 @@ int main(int argc, char * argv[])
     return 0;
 }
 
+
+void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)
+{
+    fprintf(fp,"(%lu , %lu , %lu)",r,g,b);
+}
+
+void printGrayScaleRGB(unsigned long d,FILE * fp)
+{
+    printRGB(d,d,d,fp);
+}
+
 void loadTGA(char * file)
 {
     BYTE alphaChannelBits;
@@ -35,8 +45,10 @@ void loadTGA(char * file)
     FILE * in;
     FILE * out;
     char imageID[255];
-    SHORT * colorMap;
-    int i ;
+    int col,row;
+    unsigned long data;
+/*    SHORT * colorMap; */
+/*    int i ; */
     TGAHeader tgah;
 
     in = fopen(file,"rb");
@@ -46,49 +58,33 @@ void loadTGA(char * file)
         exit(1);
     }
 
-
-/*    fread(&tgah,sizeof(TGAHeader),1,in); */
-    tgah.IDLength = readByte(in);
-    tgah.colorMapType = readByte(in);
-    tgah.imageType = readByte(in);
-    tgah.colorMapStart = readShort(in);
-    tgah.colorMapLength = readShort(in);
-    tgah.colorMapDepth = readByte(in);
-    tgah.xOrigin = readShort(in);
-    tgah.yOrigin = readShort(in);
-    tgah.width = readShort(in);
-    tgah.height = readShort(in);
-    tgah.pixelDepth = readByte(in);
-    tgah.imageDescriptor = readByte(in);
+    loadTGAHeader(&tgah,in);
 
     if(tgah.IDLength > 0)
-        readStr(in,tgah.IDLength * sizeof(BYTE),imageID);
+        readStr(in,tgah.IDLength * sizeof(char),imageID);
 
-
-    /* Works because all tga files has a tga extension,
-       meaning that ".dmp" will fit in the rest of the file.*/
-    strip_extension(file);
-    strcat(file,".dmp");
+    file = changeExtension(file,"dmp");
 
     out = fopen(file,"wb");
+    free(file);
 
     alphaChannelBits = getbits(tgah.imageDescriptor,3,4);
     imageDest = getbits(tgah.imageDescriptor,5,2);
     getImageDestStr(imageDestStr,imageDest);
 
-    if(tgah.colorMapType != 0){
+/*    if(tgah.colorMapType != 0){
         if(tgah.colorMapDepth == 16){
             colorMap = malloc(sizeof(SHORT) * tgah.colorMapLength);
             fread(colorMap,sizeof(SHORT),tgah.colorMapLength,in);
         }
-    }
+    }*/
 
     fprintf(out,"Id Length:%d\n",tgah.IDLength);
     fprintf(out,"Color map type:%d\n",tgah.colorMapType);
     fprintf(out,"Image type:%d\n",tgah.imageType);
     fprintf(out,"Color map start:%d\n",tgah.colorMapStart);
     fprintf(out,"Color map length:%d\n",tgah.colorMapLength);
-    fprintf(out,"4.3: Color map depth:%d\n",tgah.colorMapDepth);
+    fprintf(out,"Color map depth:%d\n",tgah.colorMapDepth);
     fprintf(out,"X origin:%d\n",tgah.xOrigin);
     fprintf(out,"Y origin:%d\n",tgah.yOrigin);
     fprintf(out,"Width:%d\n",tgah.width);
@@ -99,26 +95,31 @@ void loadTGA(char * file)
     fprintf(out,"Screen destination of first pixel:%s\n",imageDestStr);
     fprintf(out,"Image ID:%s\n",imageID);
 
-    fprintf(out,"Color map:\n");
-    for(i = 0; i < tgah.colorMapLength; ++i)
-	fprintf(out,"%d\n",colorMap[i]);
-
-
-    free(colorMap);
-    fclose(in);
-}
-
-static void strip_extension(char * fileName)
-{
-    char * extBeg;
-    int n;
-    extBeg = strrchr(fileName,'.');
-    if(extBeg == NULL);
-    /* return extBeg; */
+    /* read color map */
+/*    fprintf(out,"Color map:");
+    if(tgah.colorMapDepth == 0)
+        fprintf(out,"None\n");
     else{
-        n = extBeg - fileName;
-        fileName[n] = '\0';
+        fprintf(out,"\n");
+        for(i = 0; i < tgah.colorMapLength; ++i)
+            fprintf(out,"%d\n",colorMap[i]);
+    }*/
+
+    /* read color data */
+    if(tgah.imageType == 3 && tgah.colorMapType == 0){
+	for(row = 0; row < tgah.height; ++row){
+	    for(col = 0; col < tgah.width; ++col){
+		fread(&data, tgah.pixelDepth / 8, 1, in);
+		printGrayScaleRGB(data,out);
+	    }
+
+	}
+	fprintf(out,"\n");
     }
+
+    /*    free(colorMap);*/
+
+    fclose(in);
 }
 
 static unsigned getbits(unsigned x, int p, int n)
@@ -156,3 +157,18 @@ static void getImageDestStr(char * str,int imageOrigin)
     }
 }
 
+extern void loadTGAHeader(TGAHeader * tgah,FILE * fp)
+{
+    tgah->IDLength = readByte(fp);
+    tgah->colorMapType = readByte(fp);
+    tgah->imageType = readByte(fp);
+    tgah->colorMapStart = readShort(fp);
+    tgah->colorMapLength = readShort(fp);
+    tgah->colorMapDepth = readByte(fp);
+    tgah->xOrigin = readShort(fp);
+    tgah->yOrigin = readShort(fp);
+    tgah->width = readShort(fp);
+    tgah->height = readShort(fp);
+    tgah->pixelDepth = readByte(fp);
+    tgah->imageDescriptor = readByte(fp);
+}
