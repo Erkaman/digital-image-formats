@@ -41,7 +41,7 @@
   \subsection{RGB}
   \label{sec:rgb}
 
-  Color models are ways specifying color numerically \todo{mention
+  Color models \index{color model} are ways specifying color numerically \todo{mention
     additive and subtractive color models here}
   \cite{fadgi11:color_model}. They are of course very convenient for
   computers who are very good at dealing with numbers. A very widely
@@ -63,7 +63,7 @@
   represented by no light at all.
 
   The different amounts of red ,blue and green in a color, are called
-  their respective color channels.
+  their respective color channels \index{color channel}.
 
   \subsection{Alpha channel}
   \label{sec:alpha_chan}
@@ -83,7 +83,7 @@
 
   \begin{figure}[h!]
     \centering
-    inputtikz{alpha.tex}
+    \inputtikz{alpha.tex}
     \caption{A rectangle with a lower and lower alpha channel.}
     \label{fig:alpha}
   \end{figure}
@@ -97,30 +97,32 @@
 
   \newcommand{\rgbtrip}[3]{( \textcolor{red}{#1},\textcolor{green}{#2},\textcolor{blue}{#3})}
 
-  But up until now, we have said nothing about how the computer
-  represents these color model. Let us start with:
+  But up until now, I have said nothing about how the computer
+  represents these color models. Let us start with:
 
   \subsection{24-bit color}
   \label{sec:24-bit-color}
 
-  So each color is just a combination red,blue and green lights. In the
-  RGB color model these channels are given values. Let us represent
-  these values as a triple of three numbers, like this:
-  \rgbtrip{123}{21}{91}.
+  RGB color model each color is just a combination red,blue and
+  green. In the RGB color model these channels are given values. So let
+  us represent colors as a triple of three numbers, like this:
+  \rgbtrip{123}{21}{91}, which is \textcolor[RGB]{123,21,91}{this color}.
 
-  An 8-bit number has ,as familiar, only $255$ possible values. If we
+  An 8-bit number has, as you should be familiar with, only $256$ possible values. If we
   assign an  8-bit number to each color channel, the color's total size
   will be 24-bits. This way of representing color is called 24-bit color
   \index{24-bit color}. You can also say that its color depth \index{color
     depth} is 24 bits.
 
-  A full red color is represented by the triple \rgbtrip{255}{0}{0}. In
+  \newcommand{\selfcolor}[1]{\textcolor{#1}{#1}}
+
+  A full \selfcolor{red} color is represented by the triple \rgbtrip{255}{0}{0}. In
   that case, have a guess at what color is represented by
   \rgbtrip{255}{0}{255}. If haven't guessed it already, please study
   figure \ref{fig:rgb}. As you probably already have guessed, this color
-  is yellow. And in the same number mixing and matching way, many other
-  colors can be represented. Like it is represented in color table
-  \ref{tab:color-examples}
+  is \selfcolor{yellow}. And in the same number mixing and matching way, many other
+  colors can be represented. Study table \ref{tab:color-examples} for
+  examples of other color mixes.
 
   \newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
     \textcolor[RGB]{#1,#2,#3}{#4} \\ \hline}
@@ -135,6 +137,10 @@
       \colorrow{255}{0}{255}{Purple}
       \colorrow{255}{192}{203}{Pink}
       \colorrow{255}{165}{0}{Orange}
+      \colorrow{0}{0}{139}{Dark Blue}
+      \colorrow{105}{105}{105}{Dim Grey}
+      \colorrow{0}{100}{0}{Dark Green}
+      \colorrow{205}{92}{92}{Indian Red}
     \end{tabular}
     \caption{Colors}
     \label{tab:color-examples}
