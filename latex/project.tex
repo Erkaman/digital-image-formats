@@ -27,6 +27,13 @@
 \usepackage{tikz}
 \usetikzlibrary{shapes,backgrounds,decorations.pathreplacing,positioning,fit,shadings}
 
+\newenvironment{indentpar}[1][1cm]%
+{\begin{list}{}%
+         {\setlength{\leftmargin}{#1}}%
+         \item[]%
+}
+{\end{list}}
+
 % algorithms typesetting.
 \usepackage{algorithm}
 \usepackage{algpseudocode}
@@ -48,6 +55,14 @@
 % macros
 
 \newcommand{\inputtikz}[1]{\input{tikz_img/#1}}
+
+\newcommand{\True}{\textbf{true}}
+\newcommand{\False}{\texttt{false}}
+\newcommand{\NOT}{\neg}
+\newcommand{\AND}{\wedge}
+\newcommand{\OR}{\vee}
+\newcommand{\XOR}{\otimes}
+\newcommand{\x}{\ensuremath{\times}}
 
 \newcommand*\BitAnd{\mathrel{\&}}
 \newcommand*\BitOr{\mathrel{|}}

@@ -27,7 +27,7 @@ void decode(char * inputfile,char * outputfile)
 
             length = -1;
         }
-	c = getc(in);
+        c = getc(in);
     }
 
     fclose(in);
@@ -38,8 +38,10 @@ void encode(char * inputfile,char * outputfile)
 {
     FILE * in;
     FILE * out;
-    char c,formerC;
-    char counter;
+
+    char c2,c1;
+    char length;
+    int passedFirstCharacter;
 
     in = fopen(inputfile,"rb");
     out = fopen(outputfile,"wb");
@@ -47,27 +49,30 @@ void encode(char * inputfile,char * outputfile)
     assertFileOpened(in);
     assertFileOpened(out);
 
-    counter = 1;
-    formerC = -1;
+    length = 1;
+    passedFirstCharacter = 0;
 
-    while ((c = getc(in)) != EOF){
+    c2 = getc(in);
+    while (c2 != EOF){
         /* if it's not the first character. */
-        if(formerC != -1){
-            if(c == formerC && counter < CHAR_MAX)
-                ++counter;
+        if(passedFirstCharacter){
+            if(c2 == c1 && length < CHAR_MAX)
+                ++length;
             else{
-                putc(counter,out);
-                putc(formerC,out);
-                counter = 1;
+                putc(length,out);
+                putc(c1,out);
+                length = 1;
             }
         }
-        formerC = c;
+	passedFirstCharacter = 1;
+        c1 = c2;
+        c2 = getc(in);
     }
 
     /* write the last bytes. */
-    if(formerC != -1){
-        putc(counter,out);
-        putc(formerC,out);
+    if(passedFirstCharacter){
+        putc(length,out);
+        putc(c1,out);
     }
 
     fclose(in);
@@ -102,7 +107,7 @@ int main(int argc, char *argv[])
 
     if((argc - n) < 2){
         printf("An input AND an output file must be specified");
-	return 1;
+        return 1;
     }
 
     if(decompress){
