@@ -147,33 +147,11 @@
   \end{table}
 
   But of course, not all colors can be represented using just
-  24-bit. The number of All possible colors is infinite. But you can
+  24 bits. The number of \textit{all} possible colors is infinite. But you can still
   represent an awful not colors with only 24-bits. How many? Well, every
   color channel can have $256$ different values. There are $3$
-  channels. Hence, there are $256^3 = 16777216$ different colors.
-
-  \begin{figure}[h!]
-    \centering
-    \begin{tikzpicture}
-      % left
-      \shade[yslant=-0.5,upper left=yellow,upper right=white,
-      lower left=red,lower right=pink] %c
-      (0,0) rectangle +(3,3);
-
-
-      % right
-      \shade[yslant=0.5,upper left=yellow,upper right=white,
-      lower left=red,lower right=green]
-      (3,-3) rectangle +(3,3);
-
-      % top
-      \shade[yslant=0.5,xslant=-1,upper left=green,upper right=white,
-      lower left=yellow,lower right=white] (6,3) rectangle +(-3,-3);
-
-    \end{tikzpicture}
-    \caption{RGB color cube TODO: Make.}
-    \label{fig:color-cube}
-  \end{figure}
+  channels. Hence, there are $256^3 = 16777216$ different colors that
+  can represented using only 24-bits!
 
   \newcommand{\rgbaquad}[4]{(
     \textcolor{red}{#1},\textcolor{green}{#2},\textcolor{blue}{#3},\textcolor{gray}{#4} )}
