@@ -15,6 +15,10 @@ static void getImageDestStr(char * str,int imageOrigin);
 
 extern void loadTGAHeader(TGAHeader * tgah,FILE * fp);
 
+void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
+
+void printGrayScaleRGB(unsigned long d,FILE * fp);
+
 int main(int argc, char * argv[])
 {
     if(argc == 1){
@@ -27,15 +31,6 @@ int main(int argc, char * argv[])
 }
 
 
-void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)
-{
-    fprintf(fp,"(%lu , %lu , %lu)",r,g,b);
-}
-
-void printGrayScaleRGB(unsigned long d,FILE * fp)
-{
-    printRGB(d,d,d,fp);
-}
 
 void loadTGA(char * file)
 {
@@ -171,4 +166,14 @@ extern void loadTGAHeader(TGAHeader * tgah,FILE * fp)
     tgah->height = readShort(fp);
     tgah->pixelDepth = readByte(fp);
     tgah->imageDescriptor = readByte(fp);
+}
+
+void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)
+{
+    fprintf(fp,"(%lu , %lu , %lu)",r,g,b);
+}
+
+void printGrayScaleRGB(unsigned long d,FILE * fp)
+{
+    printRGB(d,d,d,fp);
 }

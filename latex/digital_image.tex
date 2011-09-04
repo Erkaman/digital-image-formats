@@ -124,14 +124,16 @@
   colors can be represented. Study table \ref{tab:color-examples} for
   examples of other color mixes.
 
-  \newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
-    \textcolor[RGB]{#1,#2,#3}{#4} \\ \hline}
+
 
   \begin{table}[h!]
+    \newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
+      \textcolor[RGB]{#1,#2,#3}{#4} \\}
     \centering
-    \begin{tabular}[h!]{|l|l|}
-      \hline
-      RGB triple & Resulting color \\ \hline
+    \begin{tabular}[h!]{lr}
+      \toprule
+      RGB triple & Resulting color \\
+      \midrule
       \colorrow{255}{215}{0}{Gold}
       \colorrow{165}{42}{42}{Brown}
       \colorrow{255}{0}{255}{Purple}
@@ -141,6 +143,7 @@
       \colorrow{105}{105}{105}{Dim Grey}
       \colorrow{0}{100}{0}{Dark Green}
       \colorrow{205}{92}{92}{Indian Red}
+      \bottomrule
     \end{tabular}
     \caption{Colors}
     \label{tab:color-examples}
@@ -188,13 +191,15 @@
 
   \begin{table}[h!]
     \centering
-    \begin{tabular}{|l|l|}
-      \hline
-      Bit count & Number of possible shades of gray \\ \hline
-      $2$ & $4$ \\ \hline
-      $4$ & $16$ \\ \hline
-      $8$ & $256$ \\ \hline
-      $16$ & $65536$ \\ \hline
+    \begin{tabular}{ll}
+      \toprule
+      Bit count & Possible shades of gray \\
+      \midrule
+      $2$ & $2^2 = 4$ \\
+      $4$ & $2^4 = 16$ \\
+      $8$ & $2^8 = 256$ \\
+      $16$ & $2^{16} = 65536$ \\
+      \bottomrule
     \end{tabular}
     \caption{Different bit counts of grayscale}
     \label{tab:grayscale}
@@ -207,5 +212,3 @@
 
   \printbibliography[heading=subbibliography]
 \end{refsection}
-
-
