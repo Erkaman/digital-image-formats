@@ -95,6 +95,16 @@
 \newcommand*\ShiftRight{\gg}
 \newcommand*\BitNeg{\ensuremath{\mathord{\sim}}}
 
+% Fixes list of algorithms formatting.
+% Thanks Dan: http://newsgroups.derkeiler.com/Archive/Comp/comp.text.tex/2005-10/msg01179.html
+\makeatletter
+\let\l@algorithm\l@figure
+\makeatother
+
+\renewcommand{\listofalgorithms}{\begingroup
+\tocfile{List of Algorithms}{loa}
+\endgroup}
+
 \usepackage[nottoc]{tocbibind}
 
 \begin{document}
