@@ -1,10 +1,12 @@
 \documentclass[a4paper]{report}
 
+% custom makeidx and table of contents.
+
 % fonts
 \usepackage[T1]{fontenc}
 \usepackage{inconsolata}
-\usepackage[kerning,spacing]{microtype}
 \usepackage[charter]{mathdesign}
+\usepackage[kerning,spacing,stretch=10]{microtype}
 
 % index creation
 \usepackage{makeidx}
@@ -19,9 +21,18 @@
 \usepackage{placeins}
 \usepackage{booktabs}
 
+\usepackage{caption}
+\captionsetup{
+  margin=10pt,
+  font=small,
+  labelfont=bf,
+  labelsep=endash,
+  format=hang
+}
+
 % references
 \usepackage[backend=biber,sorting=none]{biblatex}
-%\bibliography{project.bib}
+% \bibliography{project.bib}
 \addbibresource{project.bib}
 
 % tikz
@@ -30,12 +41,14 @@
   shapes,backgrounds,decorations.pathreplacing,
   positioning,fit,shadings,fadings}
 
+
+
 \newenvironment{indentpar}[1][1cm]%
 {\begin{list}{}%
-         {\setlength{\leftmargin}{#1}}%
-         \item[]%
-}
-{\end{list}}
+    {\setlength{\leftmargin}{#1}}%
+  \item[]%
+  }
+  {\end{list}}
 
 % algorithms typesetting.
 \usepackage[chapter]{algorithm}
@@ -49,9 +62,9 @@
 [1]{\algorithmicrepeat\ #1 \ \algorithmicdo}
 {\algorithmicend \ \algorithmicrepeat}
 
+
 \newcommand{\Break}{\State \textbf{break}}
 \newcommand{\VoidCall}[1]{ \Call{#1}{$$}}
-
 
 % miscellaneous configurations
 \pagestyle{headings}
