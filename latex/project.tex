@@ -41,8 +41,6 @@
   shapes,backgrounds,decorations.pathreplacing,
   positioning,fit,shadings,fadings}
 
-
-
 \newenvironment{indentpar}[1][1cm]%
 {\begin{list}{}%
     {\setlength{\leftmargin}{#1}}%
@@ -67,7 +65,15 @@
 \newcommand{\VoidCall}[1]{ \Call{#1}{$$}}
 
 % miscellaneous configurations
-\pagestyle{headings}
+%\pagestyle{headings}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\fancypagestyle{plain}{%
+\fancyhf{} % clear all header and footer fields
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}}
 
 \hyphenpenalty=100000
 
