@@ -45,7 +45,7 @@ typedef struct
     SHORT versionNumber;
     char versionLetter;
     LONG keyColor;
-    SHORT pixelRatoNumerator;
+    SHORT pixelRatioNumerator;
     SHORT pixelRatioDenominator;
     SHORT gammaNumerator;
     SHORT gammaDenominator;

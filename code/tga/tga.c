@@ -8,6 +8,7 @@
 static unsigned getbits(unsigned x, int p, int n);
 
 static SHORT readShort(FILE * fp);
+static LONG readLong(FILE * fp);
 static char readChar(FILE * fp);
 static void readStr(FILE * fp,size_t length,char * str);
 
@@ -123,9 +124,15 @@ void loadTGA(char * file)
         fprintf(out,"Software ID: %s",tgaex.softwareId);
 
 	if(tgaex.versionNumber != 0 ){
-
 	    fprintf(out," %.2f%c\n",tgaex.versionNumber / 100.0,tgaex.versionLetter);
+	}else{
+	    fprintf(out,"\n");
 	}
+
+        fprintf(out,"Key color: %d\n",tgaex.keyColor);
+
+        fprintf(out,"Pixel Ratio Numerator: %d\n",tgaex.pixelRatioNumerator);
+        fprintf(out,"Pixel Ratio Denominator: %d\n",tgaex.pixelRatioDenominator);
 
         fprintf(out,"End of extension area\n");
     }else
@@ -170,6 +177,14 @@ static SHORT readShort(FILE * fp)
     fread(&s,sizeof(SHORT),1,fp);
     return s;
 }
+
+static LONG readLong(FILE * fp)
+{
+    LONG s;
+    fread(&s,sizeof(LONG),1,fp);
+    return s;
+}
+
 
 static char readChar(FILE * fp)
 {
@@ -267,9 +282,13 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp)
     tgaex->jobSecond = readShort(fp);
 
     readStr(fp,41,tgaex->softwareId);
-
     tgaex->versionNumber = readShort(fp);
     tgaex->versionLetter = readChar(fp);
+
+    tgaex->keyColor = readLong(fp);
+
+    tgaex->pixelRatioNumerator = readShort(fp);
+    tgaex->pixelRatioDenominator = readShort(fp);
 
     return 1;
 }
