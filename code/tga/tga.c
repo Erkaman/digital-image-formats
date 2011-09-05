@@ -191,7 +191,8 @@ void loadTGA(char * file)
 
 
     /* read color data */
-    if(tgah.imageType == 3 && tgah.colorMapType == 0){
+    if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE &&
+       tgah.colorMapType == NO_COLOR_MAP){
 
         fprintf(out,"Color data:\n");
 
@@ -200,6 +201,8 @@ void loadTGA(char * file)
                    tgah.pixelDepth,
                    in,
                    out);
+    } else if(tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE &&
+	      tgah.colorMapType == NO_COLOR_MAP){
     }
 
     if(tgaex.stampOffset != 0){
