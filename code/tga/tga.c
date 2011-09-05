@@ -134,6 +134,13 @@ void loadTGA(char * file)
         fprintf(out,"Pixel Ratio Numerator: %d\n",tgaex.pixelRatioNumerator);
         fprintf(out,"Pixel Ratio Denominator: %d\n",tgaex.pixelRatioDenominator);
 
+        fprintf(out,"Gamma value:");
+	if(tgaex.gammaDenominator == 0){
+	    fprintf(out,"Unused\n");
+	} else{
+	    fprintf(out,"%f\n",(float)tgaex.gammaNumerator / (float)tgaex.gammaDenominator);
+	}
+
         fprintf(out,"End of extension area\n");
     }else
         fprintf(out,"Version:%s\n","1.0");
@@ -289,6 +296,9 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp)
 
     tgaex->pixelRatioNumerator = readShort(fp);
     tgaex->pixelRatioDenominator = readShort(fp);
+
+    tgaex->gammaNumerator = readShort(fp);
+    tgaex->gammaDenominator = readShort(fp);
 
     return 1;
 }
