@@ -104,7 +104,7 @@ void loadTGA(char * file)
         printFormatAuthorComment(tgaex.authorComment,out);
         fprintf(out,"End Author Comment:\n");
 
-        fprintf(out,"%d/%d - %d %d:%d:%d\n",
+        fprintf(out,"Stamp date/time: %d/%d - %d %d:%d:%d\n",
 		tgaex.stampDay,
 		tgaex.stampMonth,
 		tgaex.stampYear,
@@ -112,7 +112,14 @@ void loadTGA(char * file)
 		tgaex.stampMinute,
 		tgaex.stampSecond);
 
-        fprintf(out,"End of extension area:\n");
+        fprintf(out,"Job name: %s:\n",tgaex.jobName);
+
+        fprintf(out,"Job time: %d:%d:%d\n",
+		tgaex.jobHour,
+		tgaex.jobMinute,
+		tgaex.jobSecond);
+
+        fprintf(out,"End of extension area\n");
     }else
         fprintf(out,"Version:%s\n","1.0");
 
@@ -237,6 +244,12 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp)
     tgex->stampHour = readShort(fp);
     tgex->stampMinute = readShort(fp);
     tgex->stampSecond = readShort(fp);
+
+    /* read job information */
+    readStr(fp,41,tgex->jobName);
+    tgex->jobHour = readShort(fp);
+    tgex->jobMinute = readShort(fp);
+    tgex->jobSecond = readShort(fp);
 
     return 1;
 }
