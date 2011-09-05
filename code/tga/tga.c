@@ -7,6 +7,7 @@
 /* getbits:  get n bits from position p */
 static unsigned getbits(unsigned x, int p, int n);
 
+
 static SHORT readShort(FILE * fp);
 
 static void readStr(FILE * fp,size_t length,char * str);
@@ -14,6 +15,8 @@ static void readStr(FILE * fp,size_t length,char * str);
 static void getImageDestStr(char * str,int imageOrigin);
 
 extern void loadTGAHeader(TGAHeader * tgah,FILE * fp);
+
+extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp);
 
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
 
@@ -30,8 +33,6 @@ int main(int argc, char * argv[])
     return 0;
 }
 
-
-
 void loadTGA(char * file)
 {
     BYTE alphaChannelBits;
@@ -42,9 +43,11 @@ void loadTGA(char * file)
     char imageID[255];
     int col,row;
     unsigned long data;
+    int hasExtensionArea;
 /*    SHORT * colorMap; */
 /*    int i ; */
     TGAHeader tgah;
+    TGAExtensionArea tgaex;
 
     in = fopen(file,"rb");
 
@@ -53,6 +56,8 @@ void loadTGA(char * file)
         exit(1);
     }
 
+    hasExtensionArea = loadTGAExtensionArea(&tgaex,in);
+    rewind(in);
     loadTGAHeader(&tgah,in);
 
     if(tgah.IDLength > 0)
@@ -89,6 +94,16 @@ void loadTGA(char * file)
     fprintf(out,"Alpha Channel Bits:%d\n",alphaChannelBits);
     fprintf(out,"Screen destination of first pixel:%s\n",imageDestStr);
     fprintf(out,"Image ID:%s\n",imageID);
+
+    if(hasExtensionArea){
+	fprintf(out,"Version:%s\n","2.0");
+	fprintf(out,"Extension Area:\n");
+	fprintf(out,"Extension Size:%d\n",tgaex.size);
+	fprintf(out,"Author Name:%s\n",tgaex.authorName);
+	fprintf(out,"End of extension area:\n");
+    }else
+	fprintf(out,"Version:%s\n","1.0");
+
 
     /* read color map */
 /*    fprintf(out,"Color map:");
@@ -131,7 +146,7 @@ static SHORT readShort(FILE * fp)
 
 static void readStr(FILE * fp,size_t length,char * str)
 {
-    fread(str,sizeof(CHAR),length,fp);
+    fread(str,sizeof(char),length,fp);
 }
 
 static void getImageDestStr(char * str,int imageOrigin)
@@ -166,6 +181,42 @@ extern void loadTGAHeader(TGAHeader * tgah,FILE * fp)
     tgah->height = readShort(fp);
     tgah->pixelDepth = readByte(fp);
     tgah->imageDescriptor = readByte(fp);
+}
+
+extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp)
+{
+    char signature[18];
+    LONG extensionAreaOffset;
+    /* check the footer. */
+    fseek(fp, -26, SEEK_END);
+    fseek(fp, 8, SEEK_CUR);
+
+    readStr(fp,18,signature);
+
+    /* it's not the proper signature, so there's no extension area. */
+    if(strcmp(signature,"TRUEVISION-XFILE."))
+	return 0;
+
+    fseek(fp, -26, SEEK_END);
+
+ /*   printf("%s\n",signature); */
+
+    /* read extension area offset. */
+
+    fread(&extensionAreaOffset,sizeof(LONG),1,fp);
+
+    if(extensionAreaOffset == 0){
+	return 0;
+    }
+
+    fseek(fp,extensionAreaOffset,SEEK_SET);
+
+    /* read extension area */
+
+    tgex->size = readShort(fp);
+    readStr(fp,41,tgex->authorName);
+
+    return 1;
 }
 
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)

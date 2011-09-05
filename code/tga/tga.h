@@ -10,9 +10,6 @@
 /* A short is an unsigned 16-bit integer in the TGA standard. */
 #define LONG uint32_t
 
-/* TGA uses ASCII characters in their strings. */
-#define CHAR uint8_t
-
 typedef struct
 {
     BYTE IDLength;
@@ -32,21 +29,21 @@ typedef struct
 typedef struct
 {
     SHORT size;
-    CHAR authorName[41];
-    CHAR authorComment[324];
+    char authorName[41];
+    char authorComment[324];
     SHORT stampMonth;
     SHORT stampDay;
     SHORT stampYear;
     SHORT stampHour;
     SHORT StampMinute;
     SHORT stampSecond;
-    CHAR jobName[41];
+    char jobName[41];
     SHORT jobHour;
     SHORT jobMinute;
     SHORT jobSecond;
-    CHAR softwareId[41];
+    char softwareId[41];
     SHORT versionNumber;
-    CHAR versionLetter;
+    char versionLetter;
     LONG keyColor;
     SHORT pixelRatoNumerator;
     SHORT pixelRatioDenominator;
