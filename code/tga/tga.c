@@ -72,11 +72,11 @@ void loadTGA(char * file)
     getImageDestStr(imageDestStr,imageDest);
 
 /*    if(tgah.colorMapType != 0){
-        if(tgah.colorMapDepth == 16){
-            colorMap = malloc(sizeof(SHORT) * tgah.colorMapLength);
-            fread(colorMap,sizeof(SHORT),tgah.colorMapLength,in);
-        }
-    }*/
+      if(tgah.colorMapDepth == 16){
+      colorMap = malloc(sizeof(SHORT) * tgah.colorMapLength);
+      fread(colorMap,sizeof(SHORT),tgah.colorMapLength,in);
+      }
+      }*/
 
     fprintf(out,"Id Length:%d\n",tgah.IDLength);
     fprintf(out,"Color map type:%d\n",tgah.colorMapType);
@@ -95,40 +95,48 @@ void loadTGA(char * file)
     fprintf(out,"Image ID:%s\n",imageID);
 
     if(hasExtensionArea){
-	fprintf(out,"Version:%s\n","2.0");
-	fprintf(out,"Extension Area:\n");
-	fprintf(out,"Extension Size:%d\n",tgaex.size);
-	fprintf(out,"Author Name:%s\n",tgaex.authorName);
+        fprintf(out,"Version:%s\n","2.0");
+        fprintf(out,"Extension Area:\n");
+        fprintf(out,"Extension Size:%d\n",tgaex.size);
+        fprintf(out,"Author Name:%s\n",tgaex.authorName);
 
-	fprintf(out,"Author Comment:\n");
-	printFormatAuthorComment(tgaex.authorComment,out);
-	fprintf(out,"End Author Comment:\n");
+        fprintf(out,"Author Comment:\n");
+        printFormatAuthorComment(tgaex.authorComment,out);
+        fprintf(out,"End Author Comment:\n");
 
-	fprintf(out,"End of extension area:\n");
+        fprintf(out,"%d/%d - %d %d:%d:%d\n",
+		tgaex.stampDay,
+		tgaex.stampMonth,
+		tgaex.stampYear,
+		tgaex.stampHour,
+		tgaex.stampMinute,
+		tgaex.stampSecond);
+
+        fprintf(out,"End of extension area:\n");
     }else
-	fprintf(out,"Version:%s\n","1.0");
+        fprintf(out,"Version:%s\n","1.0");
 
 
     /* read color map */
 /*    fprintf(out,"Color map:");
-    if(tgah.colorMapDepth == 0)
-        fprintf(out,"None\n");
-    else{
-        fprintf(out,"\n");
-        for(i = 0; i < tgah.colorMapLength; ++i)
-            fprintf(out,"%d\n",colorMap[i]);
-    }*/
+      if(tgah.colorMapDepth == 0)
+      fprintf(out,"None\n");
+      else{
+      fprintf(out,"\n");
+      for(i = 0; i < tgah.colorMapLength; ++i)
+      fprintf(out,"%d\n",colorMap[i]);
+      }*/
 
     /* read color data */
     if(tgah.imageType == 3 && tgah.colorMapType == 0){
-	for(row = 0; row < tgah.height; ++row){
-	    for(col = 0; col < tgah.width; ++col){
-		fread(&data, tgah.pixelDepth / 8, 1, in);
-		printGrayScaleRGB(data,out);
-	    }
+        for(row = 0; row < tgah.height; ++row){
+            for(col = 0; col < tgah.width; ++col){
+                fread(&data, tgah.pixelDepth / 8, 1, in);
+                printGrayScaleRGB(data,out);
+            }
 
-	}
-	fprintf(out,"\n");
+        }
+        fprintf(out,"\n");
     }
 
     /*    free(colorMap);*/
@@ -199,18 +207,18 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp)
 
     /* it's not the proper signature, so there's no extension area. */
     if(strcmp(signature,"TRUEVISION-XFILE."))
-	return 0;
+        return 0;
 
     fseek(fp, -26, SEEK_END);
 
- /*   printf("%s\n",signature); */
+    /*   printf("%s\n",signature); */
 
     /* read extension area offset. */
 
     fread(&extensionAreaOffset,sizeof(LONG),1,fp);
 
     if(extensionAreaOffset == 0){
-	return 0;
+        return 0;
     }
 
     fseek(fp,extensionAreaOffset,SEEK_SET);
@@ -220,6 +228,15 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp)
     tgex->size = readShort(fp);
     readStr(fp,41,tgex->authorName);
     readStr(fp,324,tgex->authorComment);
+
+    /* read date/time stamp */
+
+    tgex->stampMonth = readShort(fp);
+    tgex->stampDay = readShort(fp);
+    tgex->stampYear = readShort(fp);
+    tgex->stampHour = readShort(fp);
+    tgex->stampMinute = readShort(fp);
+    tgex->stampSecond = readShort(fp);
 
     return 1;
 }
@@ -239,7 +256,7 @@ void printFormatAuthorComment(char * authorComment,FILE * fp)
     int i;
 
     for(i = 0; i < 4; ++i){
-	fprintf(fp,"%d: %s\n",i+1,authorComment);
-	authorComment += 81;
+        fprintf(fp,"%d: %s\n",i+1,authorComment);
+        authorComment += 81;
     }
 }

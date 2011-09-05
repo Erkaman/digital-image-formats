@@ -35,7 +35,7 @@ typedef struct
     SHORT stampDay;
     SHORT stampYear;
     SHORT stampHour;
-    SHORT StampMinute;
+    SHORT stampMinute;
     SHORT stampSecond;
     char jobName[41];
     SHORT jobHour;
