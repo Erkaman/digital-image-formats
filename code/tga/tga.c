@@ -7,19 +7,17 @@
 /* getbits:  get n bits from position p */
 static unsigned getbits(unsigned x, int p, int n);
 
-
 static SHORT readShort(FILE * fp);
-
 static void readStr(FILE * fp,size_t length,char * str);
 
 static void getImageDestStr(char * str,int imageOrigin);
 
 extern void loadTGAHeader(TGAHeader * tgah,FILE * fp);
-
 extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp);
 
-void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
+void printFormatAuthorComment(char * authorComment,FILE * fp);
 
+void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
 void printGrayScaleRGB(unsigned long d,FILE * fp);
 
 int main(int argc, char * argv[])
@@ -44,6 +42,7 @@ void loadTGA(char * file)
     int col,row;
     unsigned long data;
     int hasExtensionArea;
+    /* the author comment field organized into lines. */
 /*    SHORT * colorMap; */
 /*    int i ; */
     TGAHeader tgah;
@@ -100,6 +99,11 @@ void loadTGA(char * file)
 	fprintf(out,"Extension Area:\n");
 	fprintf(out,"Extension Size:%d\n",tgaex.size);
 	fprintf(out,"Author Name:%s\n",tgaex.authorName);
+
+	fprintf(out,"Author Comment:\n");
+	printFormatAuthorComment(tgaex.authorComment,out);
+	fprintf(out,"End Author Comment:\n");
+
 	fprintf(out,"End of extension area:\n");
     }else
 	fprintf(out,"Version:%s\n","1.0");
@@ -215,6 +219,7 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp)
 
     tgex->size = readShort(fp);
     readStr(fp,41,tgex->authorName);
+    readStr(fp,324,tgex->authorComment);
 
     return 1;
 }
@@ -227,4 +232,14 @@ void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)
 void printGrayScaleRGB(unsigned long d,FILE * fp)
 {
     printRGB(d,d,d,fp);
+}
+
+void printFormatAuthorComment(char * authorComment,FILE * fp)
+{
+    int i;
+
+    for(i = 0; i < 4; ++i){
+	fprintf(fp,"%d: %s\n",i+1,authorComment);
+	authorComment += 81;
+    }
 }
