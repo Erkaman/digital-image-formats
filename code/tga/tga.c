@@ -8,12 +8,13 @@
 static unsigned getbits(unsigned x, int p, int n);
 
 static SHORT readShort(FILE * fp);
+static char readChar(FILE * fp);
 static void readStr(FILE * fp,size_t length,char * str);
 
 static void getImageDestStr(char * str,int imageOrigin);
 
 extern void loadTGAHeader(TGAHeader * tgah,FILE * fp);
-extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp);
+extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp);
 
 void printFormatAuthorComment(char * authorComment,FILE * fp);
 
@@ -105,19 +106,26 @@ void loadTGA(char * file)
         fprintf(out,"End Author Comment:\n");
 
         fprintf(out,"Stamp date/time: %d/%d - %d %d:%d:%d\n",
-		tgaex.stampDay,
-		tgaex.stampMonth,
-		tgaex.stampYear,
-		tgaex.stampHour,
-		tgaex.stampMinute,
-		tgaex.stampSecond);
+                tgaex.stampDay,
+                tgaex.stampMonth,
+                tgaex.stampYear,
+                tgaex.stampHour,
+                tgaex.stampMinute,
+                tgaex.stampSecond);
 
-        fprintf(out,"Job name: %s:\n",tgaex.jobName);
+        fprintf(out,"Job name: %s\n",tgaex.jobName);
 
         fprintf(out,"Job time: %d:%d:%d\n",
-		tgaex.jobHour,
-		tgaex.jobMinute,
-		tgaex.jobSecond);
+                tgaex.jobHour,
+                tgaex.jobMinute,
+                tgaex.jobSecond);
+
+        fprintf(out,"Software ID: %s",tgaex.softwareId);
+
+	if(tgaex.versionNumber != 0 ){
+
+	    fprintf(out," %.2f%c\n",tgaex.versionNumber / 100.0,tgaex.versionLetter);
+	}
 
         fprintf(out,"End of extension area\n");
     }else
@@ -163,6 +171,13 @@ static SHORT readShort(FILE * fp)
     return s;
 }
 
+static char readChar(FILE * fp)
+{
+    char s;
+    fread(&s,sizeof(char),1,fp);
+    return s;
+}
+
 static void readStr(FILE * fp,size_t length,char * str)
 {
     fread(str,sizeof(char),length,fp);
@@ -202,7 +217,7 @@ extern void loadTGAHeader(TGAHeader * tgah,FILE * fp)
     tgah->imageDescriptor = readByte(fp);
 }
 
-extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp)
+extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp)
 {
     char signature[18];
     LONG extensionAreaOffset;
@@ -232,24 +247,29 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgex,FILE * fp)
 
     /* read extension area */
 
-    tgex->size = readShort(fp);
-    readStr(fp,41,tgex->authorName);
-    readStr(fp,324,tgex->authorComment);
+    tgaex->size = readShort(fp);
+    readStr(fp,41,tgaex->authorName);
+    readStr(fp,324,tgaex->authorComment);
 
     /* read date/time stamp */
 
-    tgex->stampMonth = readShort(fp);
-    tgex->stampDay = readShort(fp);
-    tgex->stampYear = readShort(fp);
-    tgex->stampHour = readShort(fp);
-    tgex->stampMinute = readShort(fp);
-    tgex->stampSecond = readShort(fp);
+    tgaex->stampMonth = readShort(fp);
+    tgaex->stampDay = readShort(fp);
+    tgaex->stampYear = readShort(fp);
+    tgaex->stampHour = readShort(fp);
+    tgaex->stampMinute = readShort(fp);
+    tgaex->stampSecond = readShort(fp);
 
     /* read job information */
-    readStr(fp,41,tgex->jobName);
-    tgex->jobHour = readShort(fp);
-    tgex->jobMinute = readShort(fp);
-    tgex->jobSecond = readShort(fp);
+    readStr(fp,41,tgaex->jobName);
+    tgaex->jobHour = readShort(fp);
+    tgaex->jobMinute = readShort(fp);
+    tgaex->jobSecond = readShort(fp);
+
+    readStr(fp,41,tgaex->softwareId);
+
+    tgaex->versionNumber = readShort(fp);
+    tgaex->versionLetter = readChar(fp);
 
     return 1;
 }
@@ -258,7 +278,7 @@ void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)
 {
     fprintf(fp,"(%lu , %lu , %lu)",r,g,b);
 }
-
+/* C-c @ C-M-h  */
 void printGrayScaleRGB(unsigned long d,FILE * fp)
 {
     printRGB(d,d,d,fp);
