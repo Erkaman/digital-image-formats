@@ -4,6 +4,8 @@
 #include "tga.h"
 #include "../common.h"
 
+/* TOOD: organize utility methods to util.c */
+
 /* getbits:  get n bits from position p */
 static unsigned getbits(unsigned x, int p, int n);
 
@@ -21,6 +23,41 @@ void printFormatAuthorComment(char * authorComment,FILE * fp);
 
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
 void printGrayScaleRGB(unsigned long d,FILE * fp);
+
+void printImage(SHORT width,
+                SHORT height,
+                size_t pixelDepth,
+                FILE * in,
+                FILE * out)
+{
+    SHORT row,col;
+    unsigned long data;
+
+    for(row = 0; row < height; ++row){
+        for(col = 0; col < width; ++col){
+	    data  = 0;
+            fread(&data, pixelDepth / 8, 1, in);
+            printGrayScaleRGB(data,out);
+        }
+        fprintf(out,"\n");
+    }
+}
+
+void readStamp(LONG offset,TGAHeader tgah,FILE * in,FILE * out)
+{
+    BYTE width,height;
+    fseek(in,offset,SEEK_SET);
+
+    width = readByte(in);
+    height = readByte(in);
+
+    fprintf(out,"Width:%d\n",width);
+    fprintf(out,"Height:%d\n",height);
+
+
+    printImage(width,height,tgah.pixelDepth,in,out);
+
+}
 
 int main(int argc, char * argv[])
 {
@@ -41,10 +78,8 @@ void loadTGA(char * file)
     FILE * in;
     FILE * out;
     char imageID[255];
-    int col,row;
-    unsigned long data;
     int hasExtensionArea;
-    /* the author comment field organized into lines. */
+
 /*    SHORT * colorMap; */
 /*    int i ; */
     TGAHeader tgah;
@@ -123,11 +158,11 @@ void loadTGA(char * file)
 
         fprintf(out,"Software ID: %s",tgaex.softwareId);
 
-	if(tgaex.versionNumber != 0 ){
-	    fprintf(out," %.2f%c\n",tgaex.versionNumber / 100.0,tgaex.versionLetter);
-	}else{
-	    fprintf(out,"\n");
-	}
+        if(tgaex.versionNumber != 0 ){
+            fprintf(out," %.2f%c\n",tgaex.versionNumber / 100.0,tgaex.versionLetter);
+        }else{
+            fprintf(out,"\n");
+        }
 
         fprintf(out,"Key color: %d\n",tgaex.keyColor);
 
@@ -135,20 +170,19 @@ void loadTGA(char * file)
         fprintf(out,"Pixel Ratio Denominator: %d\n",tgaex.pixelRatioDenominator);
 
         fprintf(out,"Gamma value:");
-	if(tgaex.gammaDenominator == 0){
-	    fprintf(out,"Unused\n");
-	} else{
-	    fprintf(out,"%f\n",(float)tgaex.gammaNumerator / (float)tgaex.gammaDenominator);
-	}
+        if(tgaex.gammaDenominator == 0){
+            fprintf(out,"Unused\n");
+        } else{
+            fprintf(out,"%f\n",(float)tgaex.gammaNumerator / (float)tgaex.gammaDenominator);
+        }
 
-	fprintf(out,"color correction offset: %d\n",tgaex.colorOffset);
-	fprintf(out,"Postage stamp offset: %d\n",tgaex.stampOffset);
-	fprintf(out,"Scan line offset: %d\n",tgaex.scanOffset);
+        fprintf(out,"color correction offset: %d\n",tgaex.colorOffset);
+        fprintf(out,"Postage stamp offset: %d\n",tgaex.stampOffset);
+        fprintf(out,"Scan line offset: %d\n",tgaex.scanOffset);
 
-	fprintf(out,"Attributes Type: %d\n",tgaex.attributesType);
+        fprintf(out,"Attributes Type: %d\n",tgaex.attributesType);
 
         fprintf(out,"End of extension area\n");
-
 
     }else
         fprintf(out,"Version:%s\n","1.0");
@@ -164,17 +198,24 @@ void loadTGA(char * file)
       fprintf(out,"%d\n",colorMap[i]);
       }*/
 
+
     /* read color data */
     if(tgah.imageType == 3 && tgah.colorMapType == 0){
-        for(row = 0; row < tgah.height; ++row){
-            for(col = 0; col < tgah.width; ++col){
-                fread(&data, tgah.pixelDepth / 8, 1, in);
-                printGrayScaleRGB(data,out);
-            }
 
-        }
-        fprintf(out,"\n");
+        fprintf(out,"Color data:\n");
+
+        printImage(tgah.width,
+                   tgah.height,
+                   tgah.pixelDepth,
+                   in,
+                   out);
     }
+
+    if(tgaex.stampOffset != 0){
+        fprintf(out,"Stamp postage:\n");
+	readStamp(tgaex.stampOffset,tgah,in,out);
+    }
+
 
     /*    free(colorMap);*/
 
@@ -257,7 +298,7 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp)
 
     readStr(fp,18,signature);
 
-    /* it's not the proper signature, so there's no extension area. */
+    /* It's not the proper signature, so there's no extension area. */
     if(strcmp(signature,"TRUEVISION-XFILE."))
         return 0;
 
