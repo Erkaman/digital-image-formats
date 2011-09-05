@@ -3,21 +3,12 @@
 #include <string.h>
 #include "tga.h"
 #include "../common.h"
+#include "util.h"
 
-/* TOOD: organize utility methods to util.c */
+void getImageDestStr(char * str,int imageOrigin);
 
-/* getbits:  get n bits from position p */
-static unsigned getbits(unsigned x, int p, int n);
-
-static SHORT readShort(FILE * fp);
-static LONG readLong(FILE * fp);
-static char readChar(FILE * fp);
-static void readStr(FILE * fp,size_t length,char * str);
-
-static void getImageDestStr(char * str,int imageOrigin);
-
-extern void loadTGAHeader(TGAHeader * tgah,FILE * fp);
-extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp);
+void loadTGAHeader(TGAHeader * tgah,FILE * fp);
+int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp);
 
 void printFormatAuthorComment(char * authorComment,FILE * fp);
 
@@ -222,39 +213,8 @@ void loadTGA(char * file)
     fclose(in);
 }
 
-static unsigned getbits(unsigned x, int p, int n)
-{
-    return (x >> (p+1-n)) & ~(~0 << n);
-}
 
-static SHORT readShort(FILE * fp)
-{
-    SHORT s;
-    fread(&s,sizeof(SHORT),1,fp);
-    return s;
-}
-
-static LONG readLong(FILE * fp)
-{
-    LONG s;
-    fread(&s,sizeof(LONG),1,fp);
-    return s;
-}
-
-
-static char readChar(FILE * fp)
-{
-    char s;
-    fread(&s,sizeof(char),1,fp);
-    return s;
-}
-
-static void readStr(FILE * fp,size_t length,char * str)
-{
-    fread(str,sizeof(char),length,fp);
-}
-
-static void getImageDestStr(char * str,int imageOrigin)
+ void getImageDestStr(char * str,int imageOrigin)
 {
     switch(imageOrigin){
     case 0:
