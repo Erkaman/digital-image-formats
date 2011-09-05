@@ -141,7 +141,15 @@ void loadTGA(char * file)
 	    fprintf(out,"%f\n",(float)tgaex.gammaNumerator / (float)tgaex.gammaDenominator);
 	}
 
+	fprintf(out,"color correction offset: %d\n",tgaex.colorOffset);
+	fprintf(out,"Postage stamp offset: %d\n",tgaex.stampOffset);
+	fprintf(out,"Scan line offset: %d\n",tgaex.scanOffset);
+
+	fprintf(out,"Attributes Type: %d\n",tgaex.attributesType);
+
         fprintf(out,"End of extension area\n");
+
+
     }else
         fprintf(out,"Version:%s\n","1.0");
 
@@ -299,6 +307,12 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp)
 
     tgaex->gammaNumerator = readShort(fp);
     tgaex->gammaDenominator = readShort(fp);
+
+    tgaex->colorOffset = readLong(fp);
+    tgaex->stampOffset = readLong(fp);
+    tgaex->scanOffset = readLong(fp);
+
+    tgaex->attributesType = readByte(fp);
 
     return 1;
 }
