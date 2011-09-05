@@ -297,7 +297,7 @@ void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)
 {
     fprintf(fp,"(%lu , %lu , %lu)",r,g,b);
 }
-/* C-c @ C-M-h  */
+
 void printGrayScaleRGB(unsigned long d,FILE * fp)
 {
     printRGB(d,d,d,fp);

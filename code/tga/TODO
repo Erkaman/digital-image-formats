@@ -1,0 +1,5 @@
+* Load TGA footer.
+
+* Decide on which format to use for dumping the color data.
+
+* Properly format dates and times in the dump.
