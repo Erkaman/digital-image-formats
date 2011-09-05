@@ -15,6 +15,54 @@ void printFormatAuthorComment(char * authorComment,FILE * fp);
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
 void printGrayScaleRGB(unsigned long d,FILE * fp);
 
+void printcompressedImage(SHORT width,
+                          SHORT height,
+                          size_t pixelDepth,
+                          FILE * in,
+                          FILE * out)
+{
+    /* it is assumed that the encoding always fit on a line */
+    unsigned long data;
+    BYTE length,head;
+    int pixels = width * height;
+    int i = 0;
+
+    for(i = 0; i < pixels; ++i){
+
+        head = readByte(in);
+
+        /* run length packet */
+        if(head & 0x80){
+            length = head & 0x7f;
+            fread(&data, pixelDepth / 8, 1, in);
+
+            for(length = length + 1; length > 0; --length)
+                /* TODO: replace with more generic method */
+                printGrayScaleRGB(data,out);
+        } else {
+            /* raw packet */
+            length = head & 0x7f;
+            for(length = length + 1; length > 0; --length){
+
+                fread(&data, pixelDepth / 8, 1, in);
+
+                printGrayScaleRGB(data,out);
+
+            }
+        }
+
+    }
+/*    for(row = 0; row < height; ++row){
+      for(col = 0; col < width; ++col){
+      data  = 0;
+      fread(&data, pixelDepth / 8, 1, in);
+      printGrayScaleRGB(data,out);
+      }
+      fprintf(out,"\n");
+      }*/
+}
+
+
 void printImage(SHORT width,
                 SHORT height,
                 size_t pixelDepth,
@@ -26,7 +74,7 @@ void printImage(SHORT width,
 
     for(row = 0; row < height; ++row){
         for(col = 0; col < width; ++col){
-	    data  = 0;
+            data  = 0;
             fread(&data, pixelDepth / 8, 1, in);
             printGrayScaleRGB(data,out);
         }
@@ -202,14 +250,18 @@ void loadTGA(char * file)
                    in,
                    out);
     } else if(tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE &&
-	      tgah.colorMapType == NO_COLOR_MAP){
+              tgah.colorMapType == NO_COLOR_MAP){
+        printcompressedImage(tgah.width,
+                             tgah.height,
+                             tgah.pixelDepth,
+                             in,
+                             out);
     }
 
     if(tgaex.stampOffset != 0){
         fprintf(out,"Stamp postage:\n");
-	readStamp(tgaex.stampOffset,tgah,in,out);
+        readStamp(tgaex.stampOffset,tgah,in,out);
     }
-
 
     /*    free(colorMap);*/
 
@@ -217,7 +269,7 @@ void loadTGA(char * file)
 }
 
 
- void getImageDestStr(char * str,int imageOrigin)
+void getImageDestStr(char * str,int imageOrigin)
 {
     switch(imageOrigin){
     case 0:
