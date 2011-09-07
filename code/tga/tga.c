@@ -7,13 +7,16 @@
 
 void getImageDestStr(char * str,int imageOrigin);
 
-void loadTGAHeader(TGAHeader * tgah,FILE * fp);
-int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp);
+void loadTGAHeader(FILE * fp);
+int loadTGAExtensionArea(FILE * fp);
 
 void printFormatAuthorComment(char * authorComment,FILE * fp);
 
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
 void printGrayScaleRGB(unsigned long d,FILE * fp);
+
+TGAHeader tgah;
+TGAExtensionArea tgaex;
 
 void printcompressedImage(SHORT width,
                           SHORT height,
@@ -52,14 +55,6 @@ void printcompressedImage(SHORT width,
         }
 
     }
-/*    for(row = 0; row < height; ++row){
-      for(col = 0; col < width; ++col){
-      data  = 0;
-      fread(&data, pixelDepth / 8, 1, in);
-      printGrayScaleRGB(data,out);
-      }
-      fprintf(out,"\n");
-      }*/
 }
 
 
@@ -82,7 +77,7 @@ void printImage(SHORT width,
     }
 }
 
-void readStamp(LONG offset,TGAHeader tgah,FILE * in,FILE * out)
+void readStamp(LONG offset,FILE * in,FILE * out)
 {
     BYTE width,height;
     fseek(in,offset,SEEK_SET);
@@ -121,8 +116,6 @@ void loadTGA(char * file)
 
 /*    SHORT * colorMap; */
 /*    int i ; */
-    TGAHeader tgah;
-    TGAExtensionArea tgaex;
 
     in = fopen(file,"rb");
 
@@ -131,9 +124,9 @@ void loadTGA(char * file)
         exit(1);
     }
 
-    hasExtensionArea = loadTGAExtensionArea(&tgaex,in);
+    hasExtensionArea = loadTGAExtensionArea(in);
     rewind(in);
-    loadTGAHeader(&tgah,in);
+    loadTGAHeader(in);
 
     if(tgah.IDLength > 0)
         readStr(in,tgah.IDLength * sizeof(char),imageID);
@@ -256,11 +249,15 @@ void loadTGA(char * file)
                              tgah.pixelDepth,
                              in,
                              out);
+    } else if(tgah.imageType ==  UNCOMPRESSED_TRUE_COLOR &&
+	      tgah.colorMapType == NO_COLOR_MAP){
+
     }
+
 
     if(tgaex.stampOffset != 0){
         fprintf(out,"Stamp postage:\n");
-        readStamp(tgaex.stampOffset,tgah,in,out);
+        readStamp(tgaex.stampOffset,in,out);
     }
 
     /*    free(colorMap);*/
@@ -287,23 +284,23 @@ void getImageDestStr(char * str,int imageOrigin)
     }
 }
 
-extern void loadTGAHeader(TGAHeader * tgah,FILE * fp)
+extern void loadTGAHeader(FILE * fp)
 {
-    tgah->IDLength = readByte(fp);
-    tgah->colorMapType = readByte(fp);
-    tgah->imageType = readByte(fp);
-    tgah->colorMapStart = readShort(fp);
-    tgah->colorMapLength = readShort(fp);
-    tgah->colorMapDepth = readByte(fp);
-    tgah->xOrigin = readShort(fp);
-    tgah->yOrigin = readShort(fp);
-    tgah->width = readShort(fp);
-    tgah->height = readShort(fp);
-    tgah->pixelDepth = readByte(fp);
-    tgah->imageDescriptor = readByte(fp);
+    tgah.IDLength = readByte(fp);
+    tgah.colorMapType = readByte(fp);
+    tgah.imageType = readByte(fp);
+    tgah.colorMapStart = readShort(fp);
+    tgah.colorMapLength = readShort(fp);
+    tgah.colorMapDepth = readByte(fp);
+    tgah.xOrigin = readShort(fp);
+    tgah.yOrigin = readShort(fp);
+    tgah.width = readShort(fp);
+    tgah.height = readShort(fp);
+    tgah.pixelDepth = readByte(fp);
+    tgah.imageDescriptor = readByte(fp);
 }
 
-extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp)
+extern int loadTGAExtensionArea(FILE * fp)
 {
     char signature[18];
     LONG extensionAreaOffset;
@@ -333,42 +330,42 @@ extern int loadTGAExtensionArea(TGAExtensionArea * tgaex,FILE * fp)
 
     /* read extension area */
 
-    tgaex->size = readShort(fp);
-    readStr(fp,41,tgaex->authorName);
-    readStr(fp,324,tgaex->authorComment);
+    tgaex.size = readShort(fp);
+    readStr(fp,41,tgaex.authorName);
+    readStr(fp,324,tgaex.authorComment);
 
     /* read date/time stamp */
 
-    tgaex->stampMonth = readShort(fp);
-    tgaex->stampDay = readShort(fp);
-    tgaex->stampYear = readShort(fp);
-    tgaex->stampHour = readShort(fp);
-    tgaex->stampMinute = readShort(fp);
-    tgaex->stampSecond = readShort(fp);
+    tgaex.stampMonth = readShort(fp);
+    tgaex.stampDay = readShort(fp);
+    tgaex.stampYear = readShort(fp);
+    tgaex.stampHour = readShort(fp);
+    tgaex.stampMinute = readShort(fp);
+    tgaex.stampSecond = readShort(fp);
 
     /* read job information */
-    readStr(fp,41,tgaex->jobName);
-    tgaex->jobHour = readShort(fp);
-    tgaex->jobMinute = readShort(fp);
-    tgaex->jobSecond = readShort(fp);
+    readStr(fp,41,tgaex.jobName);
+    tgaex.jobHour = readShort(fp);
+    tgaex.jobMinute = readShort(fp);
+    tgaex.jobSecond = readShort(fp);
 
-    readStr(fp,41,tgaex->softwareId);
-    tgaex->versionNumber = readShort(fp);
-    tgaex->versionLetter = readChar(fp);
+    readStr(fp,41,tgaex.softwareId);
+    tgaex.versionNumber = readShort(fp);
+    tgaex.versionLetter = readChar(fp);
 
-    tgaex->keyColor = readLong(fp);
+    tgaex.keyColor = readLong(fp);
 
-    tgaex->pixelRatioNumerator = readShort(fp);
-    tgaex->pixelRatioDenominator = readShort(fp);
+    tgaex.pixelRatioNumerator = readShort(fp);
+    tgaex.pixelRatioDenominator = readShort(fp);
 
-    tgaex->gammaNumerator = readShort(fp);
-    tgaex->gammaDenominator = readShort(fp);
+    tgaex.gammaNumerator = readShort(fp);
+    tgaex.gammaDenominator = readShort(fp);
 
-    tgaex->colorOffset = readLong(fp);
-    tgaex->stampOffset = readLong(fp);
-    tgaex->scanOffset = readLong(fp);
+    tgaex.colorOffset = readLong(fp);
+    tgaex.stampOffset = readLong(fp);
+    tgaex.scanOffset = readLong(fp);
 
-    tgaex->attributesType = readByte(fp);
+    tgaex.attributesType = readByte(fp);
 
     return 1;
 }
