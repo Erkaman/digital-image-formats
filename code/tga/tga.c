@@ -18,91 +18,13 @@ void printGrayScaleRGB(unsigned long d,FILE * fp);
 TGAHeader tgah;
 TGAExtensionArea tgaex;
 
-void printcompressedImage(SHORT width,
-                          SHORT height,
-                          FILE * in,
-                          FILE * out)
-{
-    /* it is assumed that the encoding always fit on a line */
-    unsigned long data;
-    BYTE length,head;
-    int pixels = width * height;
-    int i = 0;
+void printColorData(unsigned long data,FILE * out);
 
-    size_t pixelDepth = tgah.pixelDepth;
+void printcompressedImage(SHORT width,SHORT height,FILE * in,FILE * out);
 
-    for(i = 0; i < pixels; ++i){
+void printImage(SHORT width,SHORT height,FILE * in,FILE * out);
 
-        head = readByte(in);
-
-        /* run length packet */
-        if(head & 0x80){
-            length = head & 0x7f;
-            fread(&data, pixelDepth / 8, 1, in);
-
-            for(length = length + 1; length > 0; --length)
-                /* TODO: replace with more generic method */
-                printGrayScaleRGB(data,out);
-        } else {
-            /* raw packet */
-            length = head & 0x7f;
-            for(length = length + 1; length > 0; --length){
-
-                fread(&data, pixelDepth / 8, 1, in);
-
-                printGrayScaleRGB(data,out);
-
-            }
-        }
-
-    }
-}
-
-void printImage(SHORT width,
-                SHORT height,
-                FILE * in,
-                FILE * out)
-{
-    SHORT row,col;
-    unsigned long data,r,g,b;
-
-    size_t pixelDepth = tgah.pixelDepth;
-
-
-    for(row = 0; row < height; ++row){
-        for(col = 0; col < width; ++col){
-            data  = 0;
-            fread(&data, pixelDepth / 8, 1, in);
-
-	    if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE)
-		printGrayScaleRGB(data,out);
-	    else if(tgah.imageType == UNCOMPRESSED_TRUE_COLOR){
-		if(tgah.pixelDepth == 24){
-		    r = (data & (0xff << 16)) >> 16;
-		    g = (data & (0xff << 8)) >> 8;
-		    b = data & 0xff;
-
-		    printRGB(r,g,b,out);
-		}
-	    }
-        }
-        fprintf(out,"\n");
-    }
-}
-
-void readStamp(LONG offset,FILE * in,FILE * out)
-{
-    BYTE width,height;
-    fseek(in,offset,SEEK_SET);
-
-    width = readByte(in);
-    height = readByte(in);
-
-    fprintf(out,"Width:%d\n",width);
-    fprintf(out,"Height:%d\n",height);
-
-    printImage(width,height,in,out);
-}
+void readStamp(LONG offset,FILE * in,FILE * out);
 
 int main(int argc, char * argv[])
 {
@@ -259,11 +181,18 @@ void loadTGA(char * file)
                              in,
                              out);
     } else if(tgah.imageType ==  UNCOMPRESSED_TRUE_COLOR &&
-	      tgah.colorMapType == NO_COLOR_MAP){
+              tgah.colorMapType == NO_COLOR_MAP){
         printImage(tgah.width,
                    tgah.height,
                    in,
                    out);
+    } else if(tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR &&
+              tgah.colorMapType == NO_COLOR_MAP){
+
+        printcompressedImage(tgah.width,
+                             tgah.height,
+                             in,
+                             out);
     }
 
     if(tgaex.stampOffset != 0){
@@ -399,4 +328,96 @@ void printFormatAuthorComment(char * authorComment,FILE * fp)
         fprintf(fp,"%d: %s\n",i+1,authorComment);
         authorComment += 81;
     }
+}
+
+void printColorData(unsigned long data,FILE * out)
+{
+    unsigned long r,g,b;
+
+    if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE)
+        printGrayScaleRGB(data,out);
+    else if(tgah.imageType == UNCOMPRESSED_TRUE_COLOR ||
+	    tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR){
+        if(tgah.pixelDepth == 24){
+            r = (data & (0xff << 16)) >> 16;
+            g = (data & (0xff << 8)) >> 8;
+            b = data & 0xff;
+
+            printRGB(r,g,b,out);
+        }
+    }
+}
+
+void printcompressedImage(SHORT width,
+                          SHORT height,
+                          FILE * in,
+                          FILE * out)
+{
+    /* it is assumed that the encoding always fit on a line */
+    unsigned long data;
+    BYTE length,head;
+    int pixels = width * height;
+    int i = 0;
+
+    size_t pixelDepth = tgah.pixelDepth;
+
+    for(i = 0; i < pixels; ++i){
+
+        head = readByte(in);
+
+        /* run length packet */
+        if(head & 0x80){
+            length = head & 0x7f;
+            fread(&data, pixelDepth / 8, 1, in);
+
+            for(length = length + 1; length > 0; --length)
+                /* TODO: replace with more generic method */
+		printColorData(data,out);
+        } else {
+            /* raw packet */
+            length = head & 0x7f;
+            for(length = length + 1; length > 0; --length){
+
+                fread(&data, pixelDepth / 8, 1, in);
+
+		printColorData(data,out);
+            }
+        }
+
+    }
+}
+
+void printImage(SHORT width,
+                SHORT height,
+                FILE * in,
+                FILE * out)
+{
+    SHORT row,col;
+    unsigned long data;
+
+    size_t pixelDepth = tgah.pixelDepth;
+
+    for(row = 0; row < height; ++row){
+        for(col = 0; col < width; ++col){
+            data  = 0;
+            fread(&data, pixelDepth / 8, 1, in);
+
+            printColorData(data,out);
+        }
+        fprintf(out,"\n");
+    }
+}
+
+void readStamp(LONG offset,FILE * in,FILE * out)
+{
+    BYTE width,height;
+    fseek(in,offset,SEEK_SET);
+
+    width = readByte(in);
+    height = readByte(in);
+
+    fprintf(out,"Width:%d\n",width);
+    fprintf(out,"Height:%d\n",height);
+
+    printImage(width,height,in,out);
 }
