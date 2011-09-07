@@ -64,7 +64,7 @@ void printImage(SHORT width,
                 FILE * out)
 {
     SHORT row,col;
-    unsigned long data;
+    unsigned long data,r,g,b;
 
     size_t pixelDepth = tgah.pixelDepth;
 
@@ -73,7 +73,18 @@ void printImage(SHORT width,
         for(col = 0; col < width; ++col){
             data  = 0;
             fread(&data, pixelDepth / 8, 1, in);
-            printGrayScaleRGB(data,out);
+
+	    if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE)
+		printGrayScaleRGB(data,out);
+	    else if(tgah.imageType == UNCOMPRESSED_TRUE_COLOR){
+		if(tgah.pixelDepth == 24){
+		    r = (data & (0xff << 16)) >> 16;
+		    g = (data & (0xff << 8)) >> 8;
+		    b = data & 0xff;
+
+		    printRGB(r,g,b,out);
+		}
+	    }
         }
         fprintf(out,"\n");
     }
@@ -249,13 +260,15 @@ void loadTGA(char * file)
                              out);
     } else if(tgah.imageType ==  UNCOMPRESSED_TRUE_COLOR &&
 	      tgah.colorMapType == NO_COLOR_MAP){
-
+        printImage(tgah.width,
+                   tgah.height,
+                   in,
+                   out);
     }
 
-
     if(tgaex.stampOffset != 0){
-        /*fprintf(out,"Stamp postage:\n");
-        readStamp(tgaex.stampOffset,in,out); */
+        fprintf(out,"Stamp postage:\n");
+        readStamp(tgaex.stampOffset,in,out);
     }
 
     /*    free(colorMap);*/
@@ -308,6 +321,7 @@ extern int loadTGAExtensionArea(FILE * fp)
 
     readStr(fp,18,signature);
 
+    /* read job information */
     /* It's not the proper signature, so there's no extension area. */
     if(strcmp(signature,"TRUEVISION-XFILE."))
         return 0;
@@ -341,7 +355,6 @@ extern int loadTGAExtensionArea(FILE * fp)
     tgaex.stampMinute = readShort(fp);
     tgaex.stampSecond = readShort(fp);
 
-    /* read job information */
     readStr(fp,41,tgaex.jobName);
     tgaex.jobHour = readShort(fp);
     tgaex.jobMinute = readShort(fp);
