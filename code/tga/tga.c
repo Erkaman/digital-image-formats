@@ -20,7 +20,6 @@ TGAExtensionArea tgaex;
 
 void printcompressedImage(SHORT width,
                           SHORT height,
-                          size_t pixelDepth,
                           FILE * in,
                           FILE * out)
 {
@@ -29,6 +28,8 @@ void printcompressedImage(SHORT width,
     BYTE length,head;
     int pixels = width * height;
     int i = 0;
+
+    size_t pixelDepth = tgah.pixelDepth;
 
     for(i = 0; i < pixels; ++i){
 
@@ -57,15 +58,16 @@ void printcompressedImage(SHORT width,
     }
 }
 
-
 void printImage(SHORT width,
                 SHORT height,
-                size_t pixelDepth,
                 FILE * in,
                 FILE * out)
 {
     SHORT row,col;
     unsigned long data;
+
+    size_t pixelDepth = tgah.pixelDepth;
+
 
     for(row = 0; row < height; ++row){
         for(col = 0; col < width; ++col){
@@ -88,9 +90,7 @@ void readStamp(LONG offset,FILE * in,FILE * out)
     fprintf(out,"Width:%d\n",width);
     fprintf(out,"Height:%d\n",height);
 
-
-    printImage(width,height,tgah.pixelDepth,in,out);
-
+    printImage(width,height,in,out);
 }
 
 int main(int argc, char * argv[])
@@ -239,14 +239,12 @@ void loadTGA(char * file)
 
         printImage(tgah.width,
                    tgah.height,
-                   tgah.pixelDepth,
                    in,
                    out);
     } else if(tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE &&
               tgah.colorMapType == NO_COLOR_MAP){
         printcompressedImage(tgah.width,
                              tgah.height,
-                             tgah.pixelDepth,
                              in,
                              out);
     } else if(tgah.imageType ==  UNCOMPRESSED_TRUE_COLOR &&
@@ -256,8 +254,8 @@ void loadTGA(char * file)
 
 
     if(tgaex.stampOffset != 0){
-        fprintf(out,"Stamp postage:\n");
-        readStamp(tgaex.stampOffset,in,out);
+        /*fprintf(out,"Stamp postage:\n");
+        readStamp(tgaex.stampOffset,in,out); */
     }
 
     /*    free(colorMap);*/
