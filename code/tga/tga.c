@@ -14,6 +14,7 @@ void printFormatAuthorComment(char * authorComment,FILE * fp);
 
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
 void printGrayScaleRGB(unsigned long d,FILE * fp);
+void printRGBA(unsigned long r,unsigned long g,unsigned long b,unsigned long a,FILE * fp);
 
 TGAHeader tgah;
 TGAExtensionArea tgaex;
@@ -315,6 +316,12 @@ void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)
     fprintf(fp,"(%lu , %lu , %lu)",r,g,b);
 }
 
+void printRGBA(unsigned long r,unsigned long g,unsigned long b,unsigned long a,FILE * fp)
+{
+    fprintf(fp,"(%lu , %lu , %lu , %lu)",r,g,b,a);
+}
+
+
 void printGrayScaleRGB(unsigned long d,FILE * fp)
 {
     printRGB(d,d,d,fp);
@@ -332,7 +339,7 @@ void printFormatAuthorComment(char * authorComment,FILE * fp)
 
 void printColorData(unsigned long data,FILE * out)
 {
-    unsigned long r,g,b;
+    unsigned long r,g,b,a;
 
     if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE)
         printGrayScaleRGB(data,out);
@@ -344,7 +351,17 @@ void printColorData(unsigned long data,FILE * out)
             b = data & 0xff;
 
             printRGB(r,g,b,out);
-        }
+        } else if(tgah.pixelDepth == 32){
+	    printf("%ld\n",data);
+	    /* need utility python methods for quickly viewing numbers of different lengths */
+            a = (data & (0xff << 24)) >> 24;
+            b = (data & (0xff << 16)) >> 16;
+            g = (data & (0xff << 8)) >> 8;
+            r = data & 0xff;
+
+	    printRGBA(r,g,b,a,out);
+	}
+
     }
 }
 
