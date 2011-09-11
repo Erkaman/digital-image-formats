@@ -160,32 +160,21 @@ void loadTGA(char * file)
       fprintf(out,"%d\n",colorMap[i]);
       }*/
 
+    fprintf(out,"Color data:\n");
 
     /* read color data */
-    if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE &&
+    if((tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE ||
+        tgah.imageType ==  UNCOMPRESSED_TRUE_COLOR) &&
        tgah.colorMapType == NO_COLOR_MAP){
 
-        fprintf(out,"Color data:\n");
-
         printImage(tgah.width,
                    tgah.height,
                    in,
                    out);
-    } else if(tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE &&
-              tgah.colorMapType == NO_COLOR_MAP){
-        printcompressedImage(tgah.width,
-                             tgah.height,
-                             in,
-                             out);
-    } else if(tgah.imageType ==  UNCOMPRESSED_TRUE_COLOR &&
-              tgah.colorMapType == NO_COLOR_MAP){
-        printImage(tgah.width,
-                   tgah.height,
-                   in,
-                   out);
-    } else if(tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR &&
-              tgah.colorMapType == NO_COLOR_MAP){
 
+    } else if((tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE || tgah.imageType ==
+               RUN_LENGTH_ENCODED_TRUE_COLOR) &&
+              tgah.colorMapType == NO_COLOR_MAP){
         printcompressedImage(tgah.width,
                              tgah.height,
                              in,
@@ -197,7 +186,7 @@ void loadTGA(char * file)
         readStamp(tgaex.stampOffset,in,out);
     }
 
-    /*    free(colorMap);*/
+/*    free(colorMap);*/
 
     fclose(in);
 }
@@ -340,23 +329,23 @@ void printColorData(unsigned long data,FILE * out)
     if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE)
         printGrayScaleRGB(data,out);
     else if(tgah.imageType == UNCOMPRESSED_TRUE_COLOR ||
-	    tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR){
+            tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR){
         if(tgah.pixelDepth == 24){
+
             r = (data & (0xff << 16)) >> 16;
             g = (data & (0xff << 8)) >> 8;
             b = data & 0xff;
 
             printRGB(r,g,b,out);
         } else if(tgah.pixelDepth == 32){
-	    printf("%ld\n",data);
-	    /* need utility python methods for quickly viewing numbers of different lengths */
-            a = (data & (0xff << 24)) >> 24;
-            b = (data & (0xff << 16)) >> 16;
-            g = (data & (0xff << 8)) >> 8;
-            r = data & 0xff;
 
-	    printRGBA(r,g,b,a,out);
-	}
+            a = (data & (0xff << 24)) >> 24;
+            r = (data & (0xff << 16)) >> 16;
+            g = (data & (0xff << 8)) >> 8;
+            b = data & 0xff;
+
+            printRGBA(r,g,b,a,out);
+        }
 
     }
 }
@@ -385,7 +374,7 @@ void printcompressedImage(SHORT width,
 
             for(length = length + 1; length > 0; --length)
                 /* TODO: replace with more generic method */
-		printColorData(data,out);
+                printColorData(data,out);
         } else {
             /* raw packet */
             length = head & 0x7f;
@@ -393,7 +382,7 @@ void printcompressedImage(SHORT width,
 
                 fread(&data, pixelDepth / 8, 1, in);
 
-		printColorData(data,out);
+                printColorData(data,out);
             }
         }
 

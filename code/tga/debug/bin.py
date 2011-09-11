@@ -3,7 +3,7 @@ def good_bin(n):
 
    pad = 8
    while True:
-       if pad >= len(s):
+       if pad > len(s):
            break
        pad += 8
 
