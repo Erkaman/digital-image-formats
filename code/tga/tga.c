@@ -5,40 +5,33 @@
 #include "../common.h"
 #include "util.h"
 
-void getImageDestStr(char * str,int imageOrigin);
-
-
 void loadTGAHeader(FILE * fp);
 int loadTGAExtensionArea(FILE * fp);
 
 void printFormatAuthorComment(char * authorComment,FILE * fp);
-
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
 void printGrayScaleRGB(unsigned long d,FILE * fp);
 void printRGBA(unsigned long r,unsigned long g,unsigned long b,unsigned long a,FILE * fp);
+void printColorData(unsigned long data,FILE * out);
+void printcompressedImage(SHORT width,SHORT height,FILE * in,FILE * out);
+void printImage(SHORT width,SHORT height,FILE * in,FILE * out);
+
+void getImageDestStr(char * str,int imageOrigin);
+void readStamp(LONG offset,FILE * in,FILE * out);
 
 TGAHeader tgah;
 TGAExtensionArea tgaex;
 
-void printColorData(unsigned long data,FILE * out);
-
-void printcompressedImage(SHORT width,SHORT height,FILE * in,FILE * out);
-
-void printImage(SHORT width,SHORT height,FILE * in,FILE * out);
-
-void readStamp(LONG offset,FILE * in,FILE * out);
-
 int main(int argc, char * argv[])
 {
     if(argc == 1){
-        printf("No file was specified for loading");
+        printf("No file was specified for loading\n");
         return 1;
-    } else{
+    } else
         loadTGA(argv[1]);
-    }
+
     return 0;
 }
-
 
 void loadTGA(char * file)
 {
