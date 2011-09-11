@@ -7,6 +7,7 @@
 
 void getImageDestStr(char * str,int imageOrigin);
 
+
 void loadTGAHeader(FILE * fp);
 int loadTGAExtensionArea(FILE * fp);
 
@@ -38,6 +39,7 @@ int main(int argc, char * argv[])
     return 0;
 }
 
+
 void loadTGA(char * file)
 {
     BYTE alphaChannelBits;
@@ -65,10 +67,15 @@ void loadTGA(char * file)
     if(tgah.IDLength > 0)
         readStr(in,tgah.IDLength * sizeof(char),imageID);
 
+
     file = changeExtension(file,"dmp");
 
     out = fopen(file,"wb");
+
+
     free(file);
+
+/*    exit(0); */
 
     alphaChannelBits = getbits(tgah.imageDescriptor,3,4);
     imageDest = getbits(tgah.imageDescriptor,5,2);
