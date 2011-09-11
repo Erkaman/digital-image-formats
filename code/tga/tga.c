@@ -7,6 +7,7 @@
 
 void loadTGAHeader(FILE * fp);
 int loadTGAExtensionArea(FILE * fp);
+void loadTGA(char * file);
 
 void printFormatAuthorComment(char * authorComment,FILE * fp);
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
