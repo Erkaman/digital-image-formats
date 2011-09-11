@@ -49,10 +49,7 @@ void loadTGA(char * file)
 
     in = fopen(file,"rb");
 
-    if(in == NULL){
-        perror("An error occurred opening the file");
-        exit(1);
-    }
+    assertFileOpened(in);
 
     hasExtensionArea = loadTGAExtensionArea(in);
     rewind(in);
@@ -65,11 +62,9 @@ void loadTGA(char * file)
     file = changeExtension(file,"dmp");
 
     out = fopen(file,"wb");
-
+    assertFileOpened(out);
 
     free(file);
-
-/*    exit(0); */
 
     alphaChannelBits = getbits(tgah.imageDescriptor,3,4);
     imageDest = getbits(tgah.imageDescriptor,5,2);
