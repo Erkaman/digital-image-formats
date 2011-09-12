@@ -19,9 +19,11 @@ void printImage(SHORT width,SHORT height,FILE * in,FILE * out);
 
 void getImageDestStr(char * str,int imageOrigin);
 void readStamp(LONG offset,FILE * in,FILE * out);
+void readColorMap(FILE * in,FILE * out);
 
 TGAHeader tgah;
 TGAExtensionArea tgaex;
+unsigned long * colorMap;
 
 int main(int argc, char * argv[])
 {
@@ -44,8 +46,7 @@ void loadTGA(char * file)
     char imageID[255];
     int hasExtensionArea;
 
-/*    SHORT * colorMap; */
-/*    int i ; */
+    int compressed;
 
     in = fopen(file,"rb");
 
@@ -56,8 +57,8 @@ void loadTGA(char * file)
     loadTGAHeader(in);
 
     if(tgah.IDLength > 0)
-        readStr(in,tgah.IDLength * sizeof(char),imageID);
-
+        readStr(in,(tgah.IDLength) * sizeof(char),imageID);
+    imageID[tgah.IDLength] = '\0';
 
     file = changeExtension(file,"dmp");
 
@@ -69,13 +70,6 @@ void loadTGA(char * file)
     alphaChannelBits = getbits(tgah.imageDescriptor,3,4);
     imageDest = getbits(tgah.imageDescriptor,5,2);
     getImageDestStr(imageDestStr,imageDest);
-
-/*    if(tgah.colorMapType != 0){
-      if(tgah.colorMapDepth == 16){
-      colorMap = malloc(sizeof(SHORT) * tgah.colorMapLength);
-      fread(colorMap,sizeof(SHORT),tgah.colorMapLength,in);
-      }
-      }*/
 
     fprintf(out,"Id Length:%d\n",tgah.IDLength);
     fprintf(out,"Color map type:%d\n",tgah.colorMapType);
@@ -149,41 +143,34 @@ void loadTGA(char * file)
     }else
         fprintf(out,"Version:%s\n","1.0");
 
-
-    /* read color map */
-/*    fprintf(out,"Color map:");
-      if(tgah.colorMapDepth == 0)
-      fprintf(out,"None\n");
-      else{
-      fprintf(out,"\n");
-      for(i = 0; i < tgah.colorMapLength; ++i)
-      fprintf(out,"%d\n",colorMap[i]);
-      }*/
+    /* read the color map */
+    if(tgah.colorMapType == COLOR_MAPPED){
+	fprintf(out,"Color map:\n");
+        readColorMap(in,out);
+    }
 
     fprintf(out,"Color data:\n");
 
-    /* read color data */
-    if((tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE ||
-        tgah.imageType ==  UNCOMPRESSED_TRUE_COLOR) &&
-       tgah.colorMapType == NO_COLOR_MAP){
+    compressed =
+        tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE ||
+        tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR;
 
+
+    /* read color data */
+    if(!compressed)
         printImage(tgah.width,
                    tgah.height,
                    in,
                    out);
-
-    } else if((tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE || tgah.imageType ==
-               RUN_LENGTH_ENCODED_TRUE_COLOR) &&
-              tgah.colorMapType == NO_COLOR_MAP){
+    else
         printcompressedImage(tgah.width,
                              tgah.height,
                              in,
                              out);
-    }
 
     if(tgaex.stampOffset != 0){
         fprintf(out,"Stamp postage:\n");
-        readStamp(tgaex.stampOffset,in,out);
+/*        readStamp(tgaex.stampOffset,in,out); */
     }
 
 /*    free(colorMap);*/
@@ -326,19 +313,25 @@ void printColorData(unsigned long data,FILE * out)
 {
     unsigned long r,g,b,a;
     int visible;
+    int pixelDepth;
+
+    pixelDepth = tgah.colorMapType == COLOR_MAPPED ? tgah.colorMapDepth : tgah.pixelDepth;
+
+    /* implemented support for 15-bit images? */
 
     if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE)
         printGrayScaleRGB(data,out);
     else if(tgah.imageType == UNCOMPRESSED_TRUE_COLOR ||
-            tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR){
-        if(tgah.pixelDepth == 24){
+            tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR ||
+	tgah.colorMapType == COLOR_MAPPED){
+        if(pixelDepth == 24){
 
             r = (data & (0xff << 16)) >> 16;
             g = (data & (0xff << 8)) >> 8;
             b = data & 0xff;
 
             printRGB(r,g,b,out);
-        } else if(tgah.pixelDepth == 32){
+        } else if(pixelDepth == 32){
 
             a = (data & (0xff << 24)) >> 24;
             r = (data & (0xff << 16)) >> 16;
@@ -346,15 +339,15 @@ void printColorData(unsigned long data,FILE * out)
             b = data & 0xff;
 
             printRGBA(r,g,b,a,out);
-        } else if(tgah.pixelDepth == 16){
+        } else if(pixelDepth == 16){
 
             r = (data & (0x1f << 10)) >> 10;
             g = (data & (0x1f << 5)) >> 5;
             b = data & 0x1f;
             visible = (data & (0x01 << 16)) >> 16;
 
-	    /* TODO: confused to meaning of the value of the alpha channel?*/
-	    a = visible ? 255 : 0;
+            /* TODO: confused to meaning of the value of the alpha channel?*/
+            a = visible ? 255 : 0;
             printRGBA(r,g,b,a,out);
         }
 
@@ -434,4 +427,26 @@ void readStamp(LONG offset,FILE * in,FILE * out)
     fprintf(out,"Height:%d\n",height);
 
     printImage(width,height,in,out);
+}
+
+void readColorMap(FILE * in,FILE * out)
+{
+    size_t pixelDepth = tgah.colorMapDepth;
+    unsigned long data;
+    int i;
+
+    colorMap = (unsigned long *) malloc(tgah.colorMapLength);
+
+    for(i = 0; i <  tgah.colorMapLength; ++i){
+
+	data  = 0;
+	fread(&data, pixelDepth / 8, 1, in);
+	colorMap[0] = data;
+
+	printColorData(colorMap[0],out);
+    }
+
+    fprintf(out,"\n");
+
+    free(colorMap);
 }
