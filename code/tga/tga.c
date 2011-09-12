@@ -325,6 +325,7 @@ void printFormatAuthorComment(char * authorComment,FILE * fp)
 void printColorData(unsigned long data,FILE * out)
 {
     unsigned long r,g,b,a;
+    int visible;
 
     if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE)
         printGrayScaleRGB(data,out);
@@ -345,6 +346,16 @@ void printColorData(unsigned long data,FILE * out)
             b = data & 0xff;
 
             printRGBA(r,g,b,a,out);
+        } else if(tgah.pixelDepth == 16){
+
+            r = (data & (0x1f << 10)) >> 10;
+            g = (data & (0x1f << 5)) >> 5;
+            b = data & 0x1f;
+            visible = (data & (0x01 << 16)) >> 16;
+
+	    /* TODO: confused to meaning of the value of the alpha channel?*/
+	    a = visible ? 255 : 0;
+            printRGBA(r,g,b,a,out);
         }
 
     }
@@ -355,6 +366,7 @@ void printcompressedImage(SHORT width,
                           FILE * in,
                           FILE * out)
 {
+
     /* it is assumed that the encoding always fit on a line */
     unsigned long data;
     BYTE length,head;
