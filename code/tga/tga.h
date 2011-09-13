@@ -82,3 +82,4 @@ void loadTGA(char * file);
 
 #endif /* _TGA_H_ */
 
+

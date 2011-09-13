@@ -4,7 +4,7 @@
 #include "tga.h"
 #include "../common.h"
 #include "util.h"
-/* TODO: properly free the color map */
+
 void loadTGAHeader(FILE * fp);
 int loadTGAExtensionArea(FILE * fp);
 void loadTGA(char * file);
@@ -14,16 +14,18 @@ void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp);
 void printGrayScaleRGB(unsigned long d,FILE * fp);
 void printRGBA(unsigned long r,unsigned long g,unsigned long b,unsigned long a,FILE * fp);
 void printColorData(unsigned long data,FILE * out);
-void printcompressedImage(SHORT width,SHORT height,FILE * in,FILE * out);
-void printImage(SHORT width,SHORT height,FILE * in,FILE * out);
-
+void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out);
+void printImageInfo(FILE * out);
 void getImageDestStr(char * str,int imageOrigin);
 void readStamp(LONG offset,FILE * in,FILE * out);
 void readColorMap(FILE * in,FILE * out);
+void handleNewlines(int i,int width,FILE * out);
 
 TGAHeader tgah;
 TGAExtensionArea tgaex;
 unsigned long * colorMap;
+char imageID[255];
+int hasExtensionArea;
 
 int main(int argc, char * argv[])
 {
@@ -38,14 +40,8 @@ int main(int argc, char * argv[])
 
 void loadTGA(char * file)
 {
-    BYTE alphaChannelBits;
-    BYTE imageDest;
-    char imageDestStr[11];
     FILE * in;
     FILE * out;
-    char imageID[255];
-    int hasExtensionArea;
-
     int compressed;
 
     in = fopen(file,"rb");
@@ -67,118 +63,29 @@ void loadTGA(char * file)
 
     free(file);
 
-    alphaChannelBits = getbits(tgah.imageDescriptor,3,4);
-    imageDest = getbits(tgah.imageDescriptor,5,2);
-    getImageDestStr(imageDestStr,imageDest);
-
-    fprintf(out,"Id Length:%d\n",tgah.IDLength);
-    fprintf(out,"Color map type:%d\n",tgah.colorMapType);
-    fprintf(out,"Image type:%d\n",tgah.imageType);
-    fprintf(out,"Color map start:%d\n",tgah.colorMapStart);
-    fprintf(out,"Color map length:%d\n",tgah.colorMapLength);
-    fprintf(out,"Color map depth:%d\n",tgah.colorMapDepth);
-    fprintf(out,"X origin:%d\n",tgah.xOrigin);
-    fprintf(out,"Y origin:%d\n",tgah.yOrigin);
-    fprintf(out,"Width:%d\n",tgah.width);
-    fprintf(out,"Height:%d\n",tgah.height);
-    fprintf(out,"pixelDepth:%d\n",tgah.pixelDepth);
-    fprintf(out,"Image Descriptor:%d\n",tgah.imageDescriptor);
-    fprintf(out,"Alpha Channel Bits:%d\n",alphaChannelBits);
-    fprintf(out,"Screen destination of first pixel:%s\n",imageDestStr);
-    fprintf(out,"Image ID:%s\n",imageID);
-
-    if(hasExtensionArea){
-        fprintf(out,"Version:%s\n","2.0");
-        fprintf(out,"Extension Area:\n");
-        fprintf(out,"Extension Size:%d\n",tgaex.size);
-        fprintf(out,"Author Name:%s\n",tgaex.authorName);
-
-        fprintf(out,"Author Comment:\n");
-        printFormatAuthorComment(tgaex.authorComment,out);
-        fprintf(out,"End Author Comment:\n");
-
-        fprintf(out,"Stamp date/time: %d/%d - %d %d:%d:%d\n",
-                tgaex.stampDay,
-                tgaex.stampMonth,
-                tgaex.stampYear,
-                tgaex.stampHour,
-                tgaex.stampMinute,
-                tgaex.stampSecond);
-
-        fprintf(out,"Job name: %s\n",tgaex.jobName);
-
-        fprintf(out,"Job time: %d:%d:%d\n",
-                tgaex.jobHour,
-                tgaex.jobMinute,
-                tgaex.jobSecond);
-
-        fprintf(out,"Software ID: %s",tgaex.softwareId);
-
-        if(tgaex.versionNumber != 0 ){
-            fprintf(out," %.2f%c\n",tgaex.versionNumber / 100.0,tgaex.versionLetter);
-        }else{
-            fprintf(out,"\n");
-        }
-
-        fprintf(out,"Key color: %d\n",tgaex.keyColor);
-
-        fprintf(out,"Pixel Ratio Numerator: %d\n",tgaex.pixelRatioNumerator);
-        fprintf(out,"Pixel Ratio Denominator: %d\n",tgaex.pixelRatioDenominator);
-
-        fprintf(out,"Gamma value:");
-        if(tgaex.gammaDenominator == 0){
-            fprintf(out,"Unused\n");
-        } else{
-            fprintf(out,"%f\n",(float)tgaex.gammaNumerator / (float)tgaex.gammaDenominator);
-        }
-
-        fprintf(out,"color correction offset: %d\n",tgaex.colorOffset);
-        fprintf(out,"Postage stamp offset: %d\n",tgaex.stampOffset);
-        fprintf(out,"Scan line offset: %d\n",tgaex.scanOffset);
-
-        fprintf(out,"Attributes Type: %d\n",tgaex.attributesType);
-
-        fprintf(out,"End of extension area\n");
-
-    }else
-        fprintf(out,"Version:%s\n","1.0");
-
+    printImageInfo(out);
     /* read the color map */
     if(tgah.colorMapType == COLOR_MAPPED){
         fprintf(out,"Color map:\n");
         readColorMap(in,out);
     }
 
-
-
     fprintf(out,"Color data:\n");
-
 
     compressed =
         tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE ||
         tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR ||
         tgah.imageType == RUN_LENGTH_ENCODED_COLOR_MAPPED;
 
-
     /* read color data */
-    if(!compressed)
-        printImage(tgah.width,
-                   tgah.height,
-                   in,
-                   out);
-    else
-        printcompressedImage(tgah.width,
-                             tgah.height,
-                             in,
-                             out);
+    printImage(tgah.width,tgah.height,compressed,in,out);
 
     if(tgaex.stampOffset != 0){
         fprintf(out,"Stamp postage:\n");
-/*        readStamp(tgaex.stampOffset,in,out); */
+        readStamp(tgaex.stampOffset,in,out);
     }
 
     free(colorMap);
-
 
     fclose(in);
 }
@@ -290,12 +197,12 @@ extern int loadTGAExtensionArea(FILE * fp)
 
 void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * fp)
 {
-    fprintf(fp,"(%lu , %lu , %lu)",r,g,b);
+    fprintf(fp,"(%lu,%lu,%lu)",r,g,b);
 }
 
 void printRGBA(unsigned long r,unsigned long g,unsigned long b,unsigned long a,FILE * fp)
 {
-    fprintf(fp,"(%lu , %lu , %lu , %lu)",r,g,b,a);
+    fprintf(fp,"(%lu,%lu,%lu,%lu)",r,g,b,a);
 }
 
 
@@ -319,16 +226,18 @@ void printColorData(unsigned long data,FILE * out)
     unsigned long r,g,b,a;
     int visible;
     int pixelDepth;
+    int isGrayScale;
 
     pixelDepth = tgah.colorMapType == COLOR_MAPPED ? tgah.colorMapDepth : tgah.pixelDepth;
 
     /* implemented support for 15-bit images? */
 
-    if(tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE)
+    isGrayScale = (tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE ||
+                   tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE);
+
+    if(isGrayScale)
         printGrayScaleRGB(data,out);
-    else if(tgah.imageType == UNCOMPRESSED_TRUE_COLOR ||
-            tgah.imageType == RUN_LENGTH_ENCODED_TRUE_COLOR ||
-            tgah.colorMapType == COLOR_MAPPED){
+    else{
         if(pixelDepth == 24){
 
             r = (data & (0xff << 16)) >> 16;
@@ -358,10 +267,15 @@ void printColorData(unsigned long data,FILE * out)
     }
 }
 
-void printcompressedImage(SHORT width,
-                          SHORT height,
-                          FILE * in,
-                          FILE * out)
+void handleNewlines(int i,int width,FILE * out)
+{
+    if((i % width) == 0 && i > 0){
+        fprintf(out,"\n\n");
+    }
+}
+
+
+void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
 {
 
     /* it is assumed that the encoding always fit on a line */
@@ -372,68 +286,70 @@ void printcompressedImage(SHORT width,
 
     size_t pixelDepth = tgah.pixelDepth;
 
+    while(i < pixels){
 
-    for(i = 0; i < pixels; ++i){
+        if(compressed){
+            head = readByte(in);
 
-       head = readByte(in);
+            /* run length packet */
+            if(head & 0x80){
 
-        /* run length packet */
-        if(head & 0x80){
-
-            length = head & 0x7f;
-            data = 0;
-            fread(&data, pixelDepth / 8, 1, in);
-
-
-            if(tgah.colorMapType == COLOR_MAPPED)
-                data = colorMap[data];
-
-            for(length = length + 1; length > 0; --length){
-                /* TODO: replace with more generic method */
-                printColorData(data,out);
-            }
-
-        } else {
-
-            /* raw packet */
-            length = head & 0x7f;
-            for(length = length + 1; length > 0; --length){
-
-		data = 0;
+                length = head & 0x7f;
+                data = 0;
                 fread(&data, pixelDepth / 8, 1, in);
 
                 if(tgah.colorMapType == COLOR_MAPPED)
                     data = colorMap[data];
 
-                printColorData(data,out);
+                for(length = length + 1; length > 0; --length){
+                    /* TODO: replace with more generic method */
+
+		    handleNewlines(i,width,out);
+
+                    printColorData(data,out);
+
+                    ++i;
+                }
+
+            } else {
+
+                /* raw packet */
+                length = head & 0x7f;
+                for(length = length + 1; length > 0; --length){
+
+                    data = 0;
+                    fread(&data, pixelDepth / 8, 1, in);
+
+                    if(tgah.colorMapType == COLOR_MAPPED)
+                        data = colorMap[data];
+
+		    handleNewlines(i,width,out);
+
+
+                    printColorData(data,out);
+
+                    ++i;
+                }
             }
-        }
-    }
-}
-
-void printImage(SHORT width,
-                SHORT height,
-                FILE * in,
-                FILE * out)
-{
-    SHORT row,col;
-    unsigned long data;
-
-    size_t pixelDepth = tgah.pixelDepth;
-
-    for(row = 0; row < height; ++row){
-        for(col = 0; col < width; ++col){
+        } else {
             data  = 0;
             fread(&data, pixelDepth / 8, 1, in);
 
             if(tgah.colorMapType == COLOR_MAPPED)
                 data = colorMap[data];
-            printColorData(data,out);
-        }
-        fprintf(out,"\n");
-    }
-}
 
+
+	    handleNewlines(i,width,out);
+
+            printColorData(data,out);
+
+            ++i;
+            /* newline handling */
+        }
+    }
+
+    fprintf(out,"\n");
+}
 void readStamp(LONG offset,FILE * in,FILE * out)
 {
     BYTE width,height;
@@ -445,7 +361,7 @@ void readStamp(LONG offset,FILE * in,FILE * out)
     fprintf(out,"Width:%d\n",width);
     fprintf(out,"Height:%d\n",height);
 
-    printImage(width,height,in,out);
+    printImage(width,height,0,in,out);
 }
 
 void readColorMap(FILE * in,FILE * out)
@@ -465,4 +381,88 @@ void readColorMap(FILE * in,FILE * out)
     }
 
     fprintf(out,"\n");
+}
+
+void printImageInfo(FILE * out)
+{
+    BYTE alphaChannelBits;
+    BYTE imageDest;
+    char imageDestStr[11];
+
+    alphaChannelBits = getbits(tgah.imageDescriptor,3,4);
+    imageDest = getbits(tgah.imageDescriptor,5,2);
+    getImageDestStr(imageDestStr,imageDest);
+
+    fprintf(out,"Id Length:%d\n",tgah.IDLength);
+    fprintf(out,"Color map type:%d\n",tgah.colorMapType);
+    fprintf(out,"Image type:%d\n",tgah.imageType);
+    fprintf(out,"Color map start:%d\n",tgah.colorMapStart);
+    fprintf(out,"Color map length:%d\n",tgah.colorMapLength);
+    fprintf(out,"Color map depth:%d\n",tgah.colorMapDepth);
+    fprintf(out,"X origin:%d\n",tgah.xOrigin);
+    fprintf(out,"Y origin:%d\n",tgah.yOrigin);
+    fprintf(out,"Width:%d\n",tgah.width);
+    fprintf(out,"Height:%d\n",tgah.height);
+    fprintf(out,"pixelDepth:%d\n",tgah.pixelDepth);
+    fprintf(out,"Image Descriptor:%d\n",tgah.imageDescriptor);
+    fprintf(out,"Alpha Channel Bits:%d\n",alphaChannelBits);
+    fprintf(out,"Screen destination of first pixel:%s\n",imageDestStr);
+    fprintf(out,"Image ID:%s\n",imageID);
+
+    if(hasExtensionArea){
+        fprintf(out,"Version:%s\n","2.0");
+        fprintf(out,"Extension Area:\n");
+        fprintf(out,"Extension Size:%d\n",tgaex.size);
+        fprintf(out,"Author Name:%s\n",tgaex.authorName);
+
+        fprintf(out,"Author Comment:\n");
+        printFormatAuthorComment(tgaex.authorComment,out);
+        fprintf(out,"End Author Comment:\n");
+
+        fprintf(out,"Stamp date/time: %d/%d - %d %d:%d:%d\n",
+                tgaex.stampDay,
+                tgaex.stampMonth,
+                tgaex.stampYear,
+                tgaex.stampHour,
+                tgaex.stampMinute,
+                tgaex.stampSecond);
+
+        fprintf(out,"Job name: %s\n",tgaex.jobName);
+
+        fprintf(out,"Job time: %d:%d:%d\n",
+                tgaex.jobHour,
+                tgaex.jobMinute,
+                tgaex.jobSecond);
+
+        fprintf(out,"Software ID: %s",tgaex.softwareId);
+
+        if(tgaex.versionNumber != 0 ){
+            fprintf(out," %.2f%c\n",tgaex.versionNumber / 100.0,tgaex.versionLetter);
+        }else{
+            fprintf(out,"\n");
+        }
+
+        fprintf(out,"Key color: %d\n",tgaex.keyColor);
+
+        fprintf(out,"Pixel Ratio Numerator: %d\n",tgaex.pixelRatioNumerator);
+        fprintf(out,"Pixel Ratio Denominator: %d\n",tgaex.pixelRatioDenominator);
+
+        fprintf(out,"Gamma value:");
+        if(tgaex.gammaDenominator == 0){
+            fprintf(out,"Unused\n");
+        } else{
+            fprintf(out,"%f\n",(float)tgaex.gammaNumerator / (float)tgaex.gammaDenominator);
+        }
+
+        fprintf(out,"color correction offset: %d\n",tgaex.colorOffset);
+        fprintf(out,"Postage stamp offset: %d\n",tgaex.stampOffset);
+        fprintf(out,"Scan line offset: %d\n",tgaex.scanOffset);
+
+        fprintf(out,"Attributes Type: %d\n",tgaex.attributesType);
+
+        fprintf(out,"End of extension area\n");
+
+    }else
+        fprintf(out,"Version:%s\n","1.0");
+
 }
