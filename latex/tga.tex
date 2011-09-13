@@ -74,11 +74,49 @@
   \subsection{Color palette}
   \label{sec:color-pallete}
 
-  Color palettes \index{color palette} are also very common, but far from all images use
-  them, but as good as image format support them, hence why they are
-  included in this sample format.
+  Color palettes \index{color palette} are also very common, but far
+  from all images use them, but as good as image format support them,
+  hence why they are included in this sample format. A color palette
+  is basically an array or list. And each element of this list is a
+  color stored as we talked about in chapter \ref{cha:color}.
 
-  make indexexes
+  \subsection{The color data}
+  \label{sec:color-data}
+
+  Following the header and the optinal color palette is the actual
+  color data. If a color palette in indeed used, this section will
+  only contain index number to the color palette. Otherwise, it will
+  contain a long stream of color, stored in the color-depth specified
+  in the header.
+
+  But it's not really that easy. A majority of all image format have
+  had some sort of compression applied to their color data. Because it
+  just isn't feasible to store them in raw format \index{raw
+    format}. Photgraphies for example, contains thousands perhaps even
+  tenthousands of very varying color data. \todo{find actual
+    statistics for this claim.}. Not even for images with very simple
+  and non varying color data like logos \todo{give example}, is this
+  method good for. It doesn't do try to find the very similar color
+  data and do compression. Even a very,very simple compression like RLE
+  algorithm can do wonder on an image such as \todo{make the logo},
+  cutting down the size by maybe even thousands of kilobytes!
+
+  \todo{show both an example photography and a logo}
+
+  \begin{figure}[h!]
+    \centering
+    \newcommand{\shieldcolor}{red}
+    \begin{tikzpicture}
+      \fill[\shieldcolor] (0,0) rectangle (2,2);
+      \fill[\shieldcolor] (1,0) circle (1);
+
+      \fill[green] (0.5,1) circle (0.3);
+      \fill[green] (1.5,1) circle (0.3);
+      
+    \end{tikzpicture}
+    \caption{Fake logo}
+    \label{fig:logo}
+  \end{figure}
 
   \printbibliography[heading=subbibliography]
 
