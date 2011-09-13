@@ -9,7 +9,6 @@
 
   \cite{91:_truev_tga_file_format_specif}
 
-
   \section{Introduction}
   \label{sec:introduction}
 
@@ -30,17 +29,56 @@
   RLE, which was one of the algoriothms we covered in the last
   chapter.
 
-  Before we dive let me clarify one thing for you: all darta that is
-  stored in a computer is just a sequence of number. How this seuqnece
-  of numbers is to be parsed is defined by it's \textit{format}
-  \index{format}. Thus, the rest of this book will simply be about how
-  you parse the meaning of the numbers that an image file consists
-  of. 
+  Before we dive let me clarify one thing for you: all data that is
+  stored in a computer is just a sequence of number. How this sequence
+  of numbers is to be parsed is defined by it's \textit{file format}
+  \index{file format}. Thus, the rest of this book will
+  simply be about how you parse the meaning of the numbers that an
+  image file consists of.
 
-  \section{Image headers}
+  \begin{figure}[h!]
+    \centering
+    \inputtikz{im_format.tex}
+
+    \caption{IM image format}
+    \label{fig:im}
+  \end{figure}
+
+  \section{The general image format}
+  \label{sec:general-image-format}
+
+  Please observe figure \ref{fig:im}. It demonstrates a picture of a
+  pretty flower in an imaginary
+  file format called \textit{IM}. It demonstrated the common elements
+  of all image formats. Let's go through them one by one:
+
+  \subsection{Image headers}
   \label{sec:image-headers}
 
-  Common for all graphics file formats is the image header.
+  The first few numbers of an image is its image header \index{image
+    header}. This gives general information about an image that
+  greatly helps the parsing process. It usually includes information
+  like width, height, color depth. It often also includes an
+  identification string of the image. Let's look at our example
+  image. The first two bytes is two ASCII letters IM. These numbers
+  are known as magic numbers \index{magic numbers}. You see, at the beginning of every image
+  file there a couple bytes called magic numbers that are common to
+  all images of that type. In other words, they help you identify the
+  type of the image.
+
+  And following the magic number is the width and height of the
+  image. In this case it's width first, but the order is usually
+  carefully specified by the image file format's respective
+  specificatinons.
+
+  \subsection{Color palette}
+  \label{sec:color-pallete}
+
+  Color palettes \index{color palette} are also very common, but far from all images use
+  them, but as good as image format support them, hence why they are
+  included in this sample format.
+
+  make indexexes
 
   \printbibliography[heading=subbibliography]
 
