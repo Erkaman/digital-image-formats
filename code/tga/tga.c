@@ -109,7 +109,7 @@ void getImageDestStr(char * str,int imageOrigin)
     }
 }
 
-extern void loadTGAHeader(FILE * fp)
+void loadTGAHeader(FILE * fp)
 {
     tgah.IDLength = readByte(fp);
     tgah.colorMapType = readByte(fp);
@@ -125,7 +125,7 @@ extern void loadTGAHeader(FILE * fp)
     tgah.imageDescriptor = readByte(fp);
 }
 
-extern int loadTGAExtensionArea(FILE * fp)
+int loadTGAExtensionArea(FILE * fp)
 {
     char signature[18];
     LONG extensionAreaOffset;
@@ -269,9 +269,8 @@ void printColorData(unsigned long data,FILE * out)
 
 void handleNewlines(int i,int width,FILE * out)
 {
-    if((i % width) == 0 && i > 0){
+    if((i % width) == 0 && i > 0)
         fprintf(out,"\n\n");
-    }
 }
 
 
