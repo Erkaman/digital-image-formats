@@ -20,22 +20,49 @@ referred to as \textbf{compression} \index{compression}, and decoding as
 
 % http://www.digitizationguidelines.gov/term.php?term=encoder
 
-\section{Pseudocode}
+\section{Bitwise operators}
+\label{sec:bitwise-operators}
+
+In this chapter we will start using the bitwise operator. If you
+haven't even heard of them, look up them and study them on your own. I
+assumed from the beginning of this book that such knowledge should be
+obvious to you. We will be using the notation introduced in C to
+represent them in pseudocode.
+
+% looks ugly when typeset.
+\begin{description}
+\item[$\BitNeg$] Bitwise \textit{NOT}
+\item[$\BitAnd$] Bitwise \textit{AND}
+\item[$\BitOr$] Bitwise \textit{OR}
+\item[$\BitXor$] Bitwise \textit{XOR}
+\item[$\ShiftLeft$] Left bit shift
+\item[$\ShiftRight$] Right bit shift
+\end{description}
+
+Notice that we are using $\BitXor$ for typesetting bitwise
+\textit{XOR}, rather than the tradtional c notation. This is due to
+the fact that we'd otherwise confuse it with logical and, $\AND$.
+
+\section{Pseudocode Functions}
 \label{sec:pseudocode}
 
 We will be using several functions in the pseudocode.
 
-\textproc{Read} reads a byte from a opened file.
+\textproc{ReadByte} It is assumed from the beginning of the algorithm that
+a file has already been opening for reading. This could be the file
+we're trying to compress, uncompress, and many other things. This
+function reads a byte from that file.
 
-\textproc{EndOfFileReached} true of the end the file have been
-reached.
+\textproc{EndOfFileReached} true of the end the file we're reading
+from have been reached.
 
-\textproc{Write} Writes a byte to a opened file.
+\textproc{WriteByte} At the beginning of every algorithm, we assume
+that there is a file opened for output. This function Writes a byte to
+that opened file.
 
-\textproc{MaxValue(v)} returns the max value of the type of
-\textproc{v}.
 
-We will also a custom control structure, repeat:
+
+We will also a be using custom control structure, repeat:
 
 \begin{algorithm}[h]
   \caption{The repeat control structure.}
@@ -47,18 +74,27 @@ We will also a custom control structure, repeat:
   \end{algorithmic}
 \end{algorithm}
 
+Although we will be dealing in bytes in most of these algorithms, they
+could easily by generalized to larger integer types likes
+\texttt{long}.
+
+\newcommand{\commentsymbol}{\(\triangleright\)}
+\algrenewcommand{\algorithmiccomment}[1]{\hfill\commentsymbol#1}
+
+Comments are signified by the symbol \commentsymbol.
+
 \section{Run Length Encoding}
 \label{sec:rle}
 
-\subsection{Most simple version}
+\subsection{Naive version}
 \label{sec:most-simple-version}
 
 One the most simple compression algorithms is known as Run Length
 Encoding \index{Run Length Encoding}(RLE
 \index{RLE}). \cite{nagarajan11:_enhan_approac_run_lengt_encod_schem}
-The basic working of the algorithm, is that sequences of consecutive
-data is stored count and a single value rather than the entire
-run.
+The algorithm works like: Sequences of consecutive
+data is stored with a data count and a single value rather than the entire
+run in packets.
 
 But what does that mean? Let us consider the string
 
@@ -73,11 +109,14 @@ compressed like this:
   4W4A6C1Q
 \end{indentpar}
 
-So all the RLE encoding algorithm does is encode long consequtive runs
-of the same value as a count and a single data value. But however, the
-same thing is also done for single runs, meaning that the algorithm
-can potentially explode the size of the original data, rather than
-compress it. Consider, for example, the string:
+So all the RLE encoding algorithm really do is encode long consequtive
+runs of the same value as a count and a single data value. We will call a
+sequence of a data count and the data itself a run length
+\textit{packet} \index{packet}.
+
+But however, the same thing is also done for single runs, meaning that
+the algorithm can potentially explode the size of the original data,
+rather than compress it. Consider, for example, the string
 
 \begin{indentpar}
   eric
@@ -92,11 +131,11 @@ this will actually get ``compressed'' down to
 So the size actually doubled for this kind of data! So for very data
 with very varying values, like photos and books, this algorithm will
 do just horrible. But in data in which the values are not varied much
-at all, like line art and simple vector graphics, even for such a
-naive algorithm it will do quite good.
+at all, like that robot logo we showed in the last chapter, even for such a
+naive algorithm, it will do quite good.
 
-It's very easy to see that this is trivial to implement in code Let us
-first consider the compression algorithm:
+But this is essentially trivial to implement in code. Let us first
+consider the compression algorithm, which is shown in algorithm \ref{alg:rle-enc}
 
 \newcommand{\eof}{\ensuremath{\VoidCall{EndOfFileReached}}}
 \newcommand{\neof}{\ensuremath{\NOT \VoidCall{EndOfFileReached}}}
@@ -105,31 +144,38 @@ first consider the compression algorithm:
   \caption{Encoding a file using RLE.}
   \label{alg:rle-enc}
   \begin{algorithmic}[1]
+
     \Let{$length$}{$1$}
     \Let{$passedFirstCharacter$}{\False}
-    \Let{$c_2$}{ \Call{Read}{}}
+    \Let{$c_2$}{ \VoidCall{ReadByte}}
+
     \While{\neof}
+
       \If{$passedFirstCharacter$}
-        \If{$c_2 = c_1 \AND length < \Call{MaxValue}{length}$}
+        \If{$c_2 = c_1 \AND length < 255$}
           \Let{$length$}{$1 + length$}
         \Else
-          \State \Call{Write}{$length$}
-          \State \Call{Write}{$c_1$}
+          \State \Call{WriteByte}{$length$}
+          \State \Call{WriteByte}{$c_1$}
           \Let{$length$}{$1$}
         \EndIf
       \EndIf
+
       \Let{$passedFirstCharacter$}{\True} %
       \Let{$c_1$}{$c_2$}
-      \Let{$c_2$}{ \Call{Read}{}}
+      \Let{$c_2$}{ \VoidCall{Read}}
+
     \EndWhile
+
     \If{$passedFirstCharacter$} \Comment{Write the last bytes.}
-      \State \Call{Write}{$length$}
-      \State \Call{Write}{$c_1$}
+      \State \Call{WriteByte}{$length$}
+      \State \Call{WriteByte}{$c_1$}
     \EndIf
   \end{algorithmic}
 \end{algorithm}
 
-The RLE decoding is very simple:
+The ridiculously simple RLE decoding algorithm is shown in algorithm
+\ref{alg:rle-dec}
 
 \begin{algorithm}[h]
   \caption{Decoding a RLE encoded file.}
@@ -137,7 +183,7 @@ The RLE decoding is very simple:
   \begin{algorithmic}[1]
 
     \While{\neof}
-      \Let{$length$}{\Call{Read}{}}
+      \Let{$length$}{\VoidCall{ReadByte}}
       \Let{$c$}{\Call{Read}{}}
 
       \If{\eof}
@@ -145,7 +191,7 @@ The RLE decoding is very simple:
       \EndIf
 
       \Repeat{$length$}
-        \State \Call{Write}{$b$}
+        \State \Call{WriteByte}{$b$}
       \EndRepeat
     \EndWhile
   \end{algorithmic}
@@ -157,9 +203,114 @@ data and then outputting that data length times to a file.
 \subsection{Packets version}
 \label{sec:packets-version}
 
-packet. \cite{91:_truev_tga_file_format_specif}
+But as previously stated,this algorithm just do horrible on data that
+is not at all repetitive, like this:
 
-\FloatBarrier
+\begin{indentpar}
+  ERICARNE
+\end{indentpar}
+
+It will get ``compressed'' down to
+
+\begin{indentpar}
+  1E1R1I1C1A1R1N1E
+\end{indentpar}
+
+Which is double the size. But we needn't forget that algorithm can
+do wonders on data that is actually repetitive like for example
+
+\begin{indentpar}
+  WWWWWWWWWWWWAAAAAAAAAAAAAAARRRRRRRRRRRR
+\end{indentpar}
+
+So, the question is, can we get rid of potentially doubling the size,
+yet still being able to greatly compress data such as the
+above. Turns out that we can.
+
+We just need to revise out packet format a tiny bit. A byte could be
+written as the following bit pattern
+
+\begin{indentpar}
+  $00000000$
+\end{indentpar}
+
+Now let us reserve the last bit for a flag, and use the rest
+for specifying the size.
+
+\begin{indentpar}
+  $\overbrace{0}^ \text{Flag bit}\underbrace{0000000}_ \text{Length bits}$
+\end{indentpar}
+
+But this last bit won't of course be wasted, it will specify the type
+of the packet. If the value of the it is 1, it will be a raw packet,
+elsewhise it will be a run length packet. A run-length packet is just
+your ordinary packet we used in the naive version. But however, raw
+packet means that the data following the firs byte of the packet is
+entirely uncompressed and is a sequence of raw bytes. The length of
+this sequence, is the value specified by the first seven bytes. And
+the length of a run-length packet is also these seven first
+bytes. Hence, the new maximum length of a run length packet is the
+maximum number of an unsigned 7-bit number, which is $2^7 -1 = 127$.
+
+So we have lost some valuable storage space, but what did we get in
+return? Well, now the string
+
+\begin{indentpar}
+  ERICARNE
+\end{indentpar}
+
+gets compressed down
+
+\begin{indentpar}
+  136ERICARNE
+\end{indentpar}
+
+(do remember that 136 is a byte of the value 136, and not the sequence
+of the number 1,2 and 6)
+
+Which is a huge gain!
+
+But why is the number so huge? Well, that obviously becuase the last
+bit flag in a byte has the value $128$. We can toggle that last flag
+like this: $136 \BitXor 128 = 8$. And doing that operation we end up with
+the value $8$, which is the length of the raw packet.
+
+
+And while \textit{not} exploding the size of certain kinds of data,
+this algorithms can also reap all the benefits the old naive version
+of the algorithm had. So the string
+
+\begin{indentpar}
+  WWWWAAAACCCCCC
+\end{indentpar}
+
+still gets compressed down to
+
+\begin{indentpar}
+  4W4A6C
+\end{indentpar}
+
+And all of this in exchange for just one bit!
+
+As an exercise for the reader, examine the following compression and
+validate its correctness:
+
+\begin{indentpar}
+  EEEEEEERIC
+\end{indentpar}
+
+to
+
+\begin{indentpar}
+  7E131RIC
+\end{indentpar}
+
+Now let's so how we can implement these algorithms. It will be a bit
+harder than the naive version, but we will soon that it is not very
+difficult at all!
+
+This algorithm is actually the one used to compress color data in the
+TGA image format \cite{91:_truev_tga_file_format_specif}.
 
 \printbibliography[heading=subbibliography]
 

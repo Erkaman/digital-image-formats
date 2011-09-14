@@ -67,7 +67,7 @@
 
 
 \newcommand{\Break}{\State \textbf{break}}
-\newcommand{\VoidCall}[1]{ \Call{#1}{$$}}
+\newcommand{\VoidCall}[1]{ \Call{#1}{\ }}
 
 % miscellaneous configurations
 %\pagestyle{headings}
@@ -91,11 +91,11 @@
 \newcommand{\NOT}{\neg}
 \newcommand{\AND}{\wedge}
 \newcommand{\OR}{\vee}
-\newcommand{\XOR}{\otimes}
 \newcommand{\x}{\ensuremath{\times}}
 
 \newcommand*\BitAnd{\mathrel{\&}}
 \newcommand*\BitOr{\mathrel{|}}
+\newcommand*\BitXor{\mathrel{\otimes}}
 \newcommand*\ShiftLeft{\ll}
 \newcommand*\ShiftRight{\gg}
 \newcommand*\BitNeg{\ensuremath{\mathord{\sim}}}
@@ -112,11 +112,12 @@
 
 \usepackage[nottoc]{tocbibind}
 
-
+\includeonly{compression}
 
 \begin{document}
 
-\input{title.tex}
+
+\include{title}
 
 \tableofcontents
 \listoffigures
@@ -128,13 +129,13 @@
 
 \part{Preliminaries}
 
-\input{digital_image.tex}
-\input{im_format.tex}
-\input{compression.tex}
+\include{digital_image}
+\include {im_format}
+\include{compression}
 
 \part{Image Formats}
 
-\input{tga.tex}
+\include{tga}
 
 \chapter{GIF -- Graphics Interchange Format}
 
