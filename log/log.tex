@@ -5,12 +5,11 @@
 \usepackage[charter]{mathdesign}
 \usepackage{datetime}
 \usepackage{hyperref}
+\usepackage{verbatim}
 \hyphenpenalty=100000
 \title{Log book}
 \author{Eric Arnebäck}
 \date{}
-
-\usdate
 
 % day, month,year
 \newcommand{\dayheading}[3]{
@@ -140,65 +139,86 @@ här, är att i 32-bitar largras även en alpha kanal(opasitet).
 
 \dayheading{12}{9}{2011}
 
-Imeplementetare stöd för 16-bitars bilder i laddaren. Vilket var mer
-eller mindre trivialt att göra.
+Implementerade stöd för 16-bitars bilder i TGA-laddaren.
 
+Att implementera stöd för bilder med paletter tog längre tid än jag
+hade väntat, på grund utav att jag hade skapat flera buggar under
+kodningen. Efter att ha fixat alla buggar kunde jag äntligen
+implementera stöd för bilder med paletter. Med det här så har jag
+täckt så mycket av TGA formatet som jag tycket att jag behöver
+göra. Det finns delar laddaren ännu inte hanterar men dem är mycket
+ovanliga och har inte förekommit i några av de TGA-bilder jag har fått
+tag på.
 
-
-Because of several bugs implementing support for color
-mapped images took longer than expected. But now the most important
-parts of the file format has been covered! There are some
-miscellaneous parts, and less important parts left, but I'll cover
-them later. I'll need to look through the loading code tomorrow to
-clean it up(it's gotten quite messy) and fix some potential bugs that
-might have crept in. Then I'll start writing and start trying to
-explain the TGA format as good as I can.
+Imorgon kommer jag att städa upp koden och fixa alla återstående
+buggar, om det finns några.
 
 \dayheading{13}{9}{2011}
 
-Major cleanup of the code today. I cleaned it up to make it easier for
-me to translate it into more generic pseudocode. Fixed several bugs
-caused by my stupity. It wouldn't for example not even attempt to
-translate and dump some kinds of TGA images.
+Städade upp koden för att göra den enklare att översätta till mer
+generel pseudokod och fixade flera buggar.
 
-Made the image dump format easier to read,instead of just one large
-string of RGB triplets. Now every color row is organized into a
-paragraph.
+Resten av dagen planerade jag att dedikera till att beskriva TGA
+formatet skriftligt. Men sen insåg jag att det skulle vara mycket
+enklare för läsaren att förstå bildformat om jag först gick hur de i
+allmänhet är uppbyggda.
 
-The rest of days work spent writing. I was first intending to just
-start explaining the TGA format, but then I realized it would be much
-easier to explain TGA by first introducing a imaginary file format,
-IM. This format is extremely simple and allowed me to much more easily
-explain the common sections of \textit{all} image. I think becuase of
-this, it will be very much easier for the reader to tackle the TGA
-format. Which is what I will attempt to do tomorrow.
+Jag började ett beskriva ett imaginärt bildformat IM som har delar som
+är gemensemma för bildformat. På så sätt för läsaren en mycket bättre
+allmän bild av bildformat.
+
+Detta kommer att göra det så mycket enklare att förklara TGA
+formatet.
 
 \dayheading{14}{9}{2011}
 
-Reorganized the order of the chapter in the book for pedagogic
-reasons. Before the this day, the order was Digital Color, File
-compression IM - Format, File compression, TGA,GIF,PNG. Now the
-chapter on the IM is placed before the chapter on file
-compression. This will make it easier for me to motivate why image
-formats make compression algorithms and why uncompressed images are
-just not reasonable, and then to follow that discussion with the
-chapter on compression algorhtms.
+Förut var ordningen för kapiteln så här:
 
-After last day's work the chapter on IM was a complete mess. Spend
-today making it actually readable and understandable.
+\begin{enumerate}
+\item Digtal färg
+\item Kompressionsalgoritmer
+\item IM - det imaginära bildformatet
+\item TGA
+\item GIF
+\item PNG
+\end{enumerate}
 
-I usually write in style: just let my thoughts flow freely write
-everything I want to say as fast as possible before I forget
-something. After this of flow thoughts has been dumped on paper, the
-actual result is usually a complete mess. So in the next attempt, I
-always clean up this mess. Then I add the rest of the content in
-the many subsequent revisions that I make. This style may sound messy, but it has
-always worked fine for me.
+Men idag så insåg jag att det vore mycket bättre om jag först i
+kapitlet om IM introducerar det allmänna bildformatet och sen enkelt
+motiverar varför kompressions algoritmer behövs och sen kommer
+kapitlet om kompressionsalgoritmer. Så den nya ordningen är:
 
-While I already had implemented the more advanced version the RLE
-algorith, you know, the one with raw packets and stuff, I hadn't yet
-written a section about it in the book. So this is what i spent the
-rest of the day doing. I only had time to explain the algorithm today,
-I'll write the pseudocode next time.
+\begin{enumerate}
+\item Digtal färg
+\item IM - det imaginära bildformatet
+\item Kompressionsalgoritmer
+\item TGA
+\item GIF
+\item PNG
+\end{enumerate}
+
+Renskrev och städade upp kapitlet om IM idag och gjorde det lite mer
+lättförståerligt.
+
+Jag har ännu inte disskuterat RLE2 i boken. Så idag skrev jag
+introduktionen till RLE2 och förklarade algoritmen så väl jag
+kunde. Nästa gång kommer jag även att skriva pseudokoden för den.
+
+\dayheading{14}{10}{2011}
+
+Gjorde ett högst preliminärt veckoschema för resten av projektet.
+
+Letade efter källor som kommer att hjälpa mig att förstå GIF-formatet
+och dess kompressionsalgoritm LZW.
+
+De organizerades i en textfil så här:
+
+GIF:
+
+\verbatiminput{../code/gif/links.org}
+
+LZW:
+
+\verbatiminput{../code/lzw/links.org}
 
 \end{document}
