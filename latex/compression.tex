@@ -306,11 +306,26 @@ to
 \end{indentpar}
 
 Now let's so how we can implement these algorithms. It will be a bit
-harder than the naive version, but we will soon that it is not very
+harder than the naive version, but we will soon find xthat it is not very
 difficult at all!
 
 This algorithm is actually the one used to compress color data in the
 TGA image format \cite{91:_truev_tga_file_format_specif}.
+
+\begin{algorithm}[h]
+  \caption{Writing a run length packet.}
+  \label{alg:rle-packet}
+  \begin{algorithmic}[1]
+    \Require the input is well behaved and length does not break the rules.
+    \Function{writeRunLengthPacket}{length,data}
+      \Let{packetHead}{128}
+      \Let{packetHead}{$packetHead \BitOr length$}
+      \State \Call{writeByte}{packetHead}
+      \State \Call{writeByte}{data}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
 
 \printbibliography[heading=subbibliography]
 

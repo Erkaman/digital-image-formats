@@ -1,5 +1,6 @@
 \documentclass[a4paper]{article}
 \usepackage[T1]{fontenc}
+\usepackage[swedish]{babel}
 \usepackage[kerning,spacing]{microtype}
 \usepackage[charter]{mathdesign}
 \usepackage{datetime}
@@ -24,109 +25,125 @@
 
 \dayheading{1}{9}{2011}
 
-Today I met my supervisor, Aref.
+Jag mötte idag min handledare Aref.
 
-This project will be about how image file formats work. It is mainly
-focused in how color is represented in them and how the color data is
-compressed. Only 3 image formats will be covered: TGA, GIF(no
-animation will be covered, though), and PNG. If there's time over, I
-may also cover JPEG(but I doubt it).
+Det här projektarbetet kommer att handla om hur bildformat
+fungerar. Bildformat handlar egentligen bara om hur man får en lång
+sekvens av nummer(som är hur all data lagras i en dayot ), att
+representera en bild. Fokuset kommer att lägga på digital bild lära
+och bildformats kompressionsalgortimer. Det är troligtvis att jag bara
+kommer att hinna tre bildformnat: TGA, GIF och PNG. PNG är troligen
+vad majoritet av tiden kommer att spenderas på.
 
-I've started working on the project a bit in advance. I have already
-started working on the first chapter of the project: digital color
-representation.
+Arbetet kommer att vara strukturerat som en lärabok. I stället för att
+råa fakta själlöst rabblas upp ska fokuset ligga på att faktiskt
+\textit{lära} läsaren något. Innehåller kommer att struktureras upp i
+kapitel. Språket för den kommer att vara engelska för att så många som
+möjligt ska kunna läsa den.
 
-A tiny bit of work has been done on the TGA loader. But the program
-is far from done and it really only analyzes the image header so far.
+Jag hade redan startat arbetet i förväg innan jag hade börjat skriva
+den här loggboken. Så jag har börjat arbeta på det första kapitlet i
+boken. Det handlar om hur färger representeras i en dator.
 
-The latest days, I've been looking for good sources on how compression
-algorithms work. I quickly noticed compression is a hugely complex
-field with lots of hairy math. But the compression algorithms for the
-format I've chosen are relatively simple, so that shouldn't pose to
-big of a problem.
+För varje bildformat kommer jag att skriva ett program som tolkar data
+i en bildfil och dumpar den råa färgdatan och bildens egenskaper i en
+fil.
 
-Last night, I started working on a program demonstrating the
-extremely simple compression algorithm Run Length Encoding.
+Som så här:
 
-And today, I finished the program demonstrating the most simple
-version of the RLE algorithm. More information on the algorithm can be read here:
-\url{http://www.fileformat.info/mirror/egff/ch09_03.htm}
+\begin{verbatim}
+Width:2
+Height:2
+(1,1,1)(34,2,1)
+(2,1,4)(5,3,1)
+\end{verbatim}
+
+Innan jag hade börjat skriva den här loggboken så hade jag redan
+börjat jobba på programet som gör den här uppgiften för TGA
+formatet. Men än så länger analyserar programmet bara header-delen av
+TGA filer, vilken beskriver saker som hjälper programet med att ladda
+färgdatan, för den inkluderar information som färgdjup, bred, höjd, etc.
+
+Jag har också de senaste dagarna letat efter källor och infromation om
+hur kompressionalgoritmer fungerar. Det är egentligen ett fält med
+mycket invecklad matematik, men som tur så har bildformaten jag valt
+inte så invecklade algoritmer.
+
+Sedan igår natt har också arbetat på ett program som demonstrerar den
+extremt simpla kompressionsalgoritmen RLE. Mer att läsa om denna
+algoritm finns i den skriftliga delen av arbetet.
+
+Och i dag slutförde jag även detta demoprogramet.
 
 \dayheading{2}{9}{2011}
 
-Figured out how to use the algorithmx package in \LaTeX. This allows
-me to very easily write algorithms in documents and have them
-beautifully formatted.
+För att göra de skriftliga delern använder jag faktiskt inte Word,
+utan \LaTeX. Om du inte vet vad \LaTeX så kan det bli svårt att
+förklara det...
 
-Started writing chapter 2 of the project, compression techniques. So
-far I've only written a short introduction to RLE. I've also added a
-psuedocode version the RLE decoding algorithm to the document, using
-the aforementioned algorithmx package.
+Mer att läsa om \LaTeX finns här: http://scottmcpeak.com/latex/whatislatex.html
 
-I've Also started working on the
-psuedocode for the RLE encoding version. It's not done yet, though.
+Men i alla fall, idag listade jag ut hur jag kan skapa vackert
+formatterade algoritmer i \LaTeX dokument. För detta använder jag ett
+paket som heter  algorithmx.
 
-Also fixed several small bugs in rle program which demonstrates rle encoding.
+Kapitel 2 i detta arbetet kommer att handla om
+kompressionsalgoritmer. I introduktionen till kompressionalgoritmer
+kommer beskriver jag hur RLE fungerar och har även börjat skapat pseudokoden
+för den.
+
+Fixade också flera fel och buggar i demoprogrammet för RLE.
 
 \dayheading{3}{9}{2011}
 
-Spent quite a bit of time revising and improving the algorithms for
-Run Length encoding and decoding, and making the pseudocode of them
-easier to understand.
+Gjorde färdigt pseudokoden för RLE och spendara även hel del tid med
+att finputsa algoritmerna och att göra dem enklare att förstå
 
-Implemented the RLE variant TGA in uses in its compression
-scheme.
+Men jag berättade inte riktigt hela historen om RLE. Det finns en
+bättre version av RLE, låt oss kalla den RLE2, som TGA använder. Så
+idag implementerarade jag även ett demoprogram som demontrerar RLE2.
 
-Before I had started writing this log book I had written a couple of
-pages on digital color representation. I had even found quite reliable
-sources on the subject. Sections on color wavelengths, RGB, alpha
-channels, color depth had already been written. Today I revised these
-sections and made them even clearer and added a couple of figures and
-tables to illustrate the concepts better. I also added an entirely new
-section on how grayscale color is represented.
+Hur mycket jag hade skrivit om digital färglära innan jag hade börjat
+skriva den här logboken har jag ännu inte sagt. Men jag hade redan
+fått tag på rätt så bra källor om ämnet. Jag hade redan skrivit om
+RGB, alpha kanaler och färgdjup. Idag renskrev jag sektionerna om de
+här ämnena och gjorde några till figurer för att ytterligare förklara
+bättre. Dessutom skrev jag idag en helt ny sektion om hur gråskalefärg
+representeras digitalt.
 
-Before starting writing this log book I had already done a lot work on a
-demo program that loads dump a TGA. What this program basically will
-do is that will it will load TGA and write all the information
-associated with a TGA to a text file along with the uncompressed color
-data.
-
-After todays work it is able to load and dump uncompressed grayscale
-images.
+Idag fann jag äntligen igen tid till jobba på programmet som laddar
+TGA filer. Och efter lite arbete kan den ladda okomprimerade
+grayskalebilder. Men det finns även en hel sorts bilder som den inte
+kan ladda.
 
 \dayheading{5}{9}{2011}
 
-A image's metadata is basically data describing things like the author
-of the image, the date at which it was created, and soon on. The
-majority of todays work was spent figuring out how to read the
-metadata from TGA image files and then implementing it in code. This
-was a very boring and repetitive process, but along the way I got a
-good sense on the overall structure of the simple TGA format.
+En bilds metadata beskriver saker som bildens skapare, datumet den
+skapades, datum den har ändrats, bildkommentarer och så vidare. Idag
+skrev jag koden som laddar metadatan från en TGA fil, vilket var för
+mesta en rätt så tråkig process.
 
-Was today able to code the functionality that loads a Run Length
-Encoded grayscale TGA image. Now that I have understood the
-compression algorithm of the format, the rest will be trivial to implement. I have
-successfully gotten past my first, but certainly not last, hurdle.
+Dessutom kan nu TGA laddaren lada komprimerade gråskalebilder. TGA
+använder som bekant RLE2 för sin kompression.
 
 \dayheading{7}{9}{2011}
 
-So now the TGA loader program is also capable of correctly loading
-24-bit, uncompressed AND compressed, true color images. If you didn't understand
-anything of that, read the main document. Figuring out how to do this was
-unsurprisingly not very hard at all. Just some elementary bitwise operators...
+Efter dagens arbete kan TGA laddaren ladda 24-bitars okomprimerade och
+komprimerade true color bilder. True color betyder ungefär att
+färgdatan är direkt i bilden och inte använder någon palett.
 
 \dayheading{11}{9}{2011}
 
-After several days of not having any time or energy(been ill) for working on
-the project, I've finally returned. Just a very small thing was done
-today: I've made it possible for the TGA loader to read 32-bit RGBA
-color, both compressed and uncompressed. All that remains to be done
-now are color mapped images, but that shouldn't be very difficult.
+Ett litet framsteg idag också: lyckades efter lite problem lista ut
+hur 32-bitars bilder lagrar sin färgdata. Vad som är speciellt med det
+här, är att i 32-bitar largras även en alpha kanal(opasitet).
 
 \dayheading{12}{9}{2011}
 
-I forgot that TGA also supported 16-bit images, so I quickly
-implemented support for this.
+Imeplementetare stöd för 16-bitars bilder i laddaren. Vilket var mer
+eller mindre trivialt att göra.
+
+
 
 Because of several bugs implementing support for color
 mapped images took longer than expected. But now the most important
@@ -178,6 +195,10 @@ always clean up this mess. Then I add the rest of the content in
 the many subsequent revisions that I make. This style may sound messy, but it has
 always worked fine for me.
 
-
+While I already had implemented the more advanced version the RLE
+algorith, you know, the one with raw packets and stuff, I hadn't yet
+written a section about it in the book. So this is what i spent the
+rest of the day doing. I only had time to explain the algorithm today,
+I'll write the pseudocode next time.
 
 \end{document}

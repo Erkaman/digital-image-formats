@@ -1,0 +1,8 @@
+* LZW Compression Encoding
+http://www.digitalpreservation.gov/formats/fdd/fdd000135.shtml
+
+* LZW Data Compression
+http://marknelson.us/1989/10/01/lzw-data-compression/
+
+* Sad day... GIF patent dead at 20
+http://www.kuro5hin.org/story/2003/6/19/35919/4079

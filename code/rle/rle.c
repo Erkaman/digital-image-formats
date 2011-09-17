@@ -99,8 +99,7 @@ void writeRunLengthPacket(BYTE length,BYTE data,FILE * fp)
 {
     BYTE packetHead;
 
-    packetHead = 0;
-    packetHead |= 0x80;
+    packetHead = 0x80
     packetHead |= length;
     writeByte(packetHead,fp);
     writeByte(data,fp);

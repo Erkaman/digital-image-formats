@@ -1,0 +1,11 @@
+* Sad day... GIF patent dead at 20
+http://www.kuro5hin.org/story/2003/6/19/35919/4079
+
+* What's In A GIF
+http://www.matthewflickinger.com/lab/whatsinagif/
+
+* Lzw, gif decoding"
+http://www.arturocampos.com/ac_lzw_gif.html
+
+* LZW and GIF explained
+http://www.eecis.udel.edu/~amer/CISC651/lzw.and.gif.explained.html
