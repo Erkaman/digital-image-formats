@@ -132,6 +132,9 @@ do just horrible. But in data in which the values are not varied much
 at all, like that robot logo we showed in the last chapter, even for such a
 naive algorithm, it will do quite good.
 
+\subsubsection{Implementation}
+\label{sec:implementation-1}
+
 But this is essentially trivial to implement in code. Let us first
 consider the compression algorithm, which is shown in algorithm
 \ref{alg:rle-enc}. First we need to make sure we have two characrters
@@ -327,10 +330,10 @@ difficult at all!
 This algorithm is actually the one used to compress color data in the
 TGA image format \cite{91:_truev_tga_file_format_specif}.
 
-\subsection{Implementation}
+\subsubsection{Implementation}
 \label{sec:implementation}
 
-\subsubsection{Writing the packets}
+\paragraph{Writing the packets}
 \label{sec:writing-packets}
 
 Let us first consider how to write a raw packet. Consider the function
@@ -377,7 +380,7 @@ last bit in a byte is 128. It is calculated like this: $2^{8-1} =
   \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Compression and decompression.}
+\paragraph{Compression and decompression.}
 \label{sec:compr-decompr}
 
 Now that we know how to write the packets, let us consider how to
@@ -481,7 +484,7 @@ $127$ has the bit pattern.
   01111111
 \end{indentpar}
 
-Thus, make sure that we only extract the length part of the head, and
+Thus, to make sure that we only extract the length part of the head, and
 not the highest bit. Then, we check if the highest bit is toggled. If
 such is the case, then it's a run length packet. So we read in the
 data part of the packet and repeat it $length$ times. Else, it is a
