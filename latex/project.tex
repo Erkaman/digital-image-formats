@@ -55,6 +55,9 @@
 \usepackage[chapter]{algorithm}
 \usepackage{algpseudocode}
 
+\algrenewcommand\alglinenumber[1]{
+  \tt\footnotesize\textcolor[HTML]{888888}{#1}}
+
 \newcommand*\Let[2]{\State #1 $\gets$ #2}
 
 \algblockdefx[REPEAT]

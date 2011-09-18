@@ -10,7 +10,7 @@
 \usepackage{algpseudocode}
 
 \hyphenpenalty=100000
-\title{Log book}
+\title{Loggbok}
 \author{Eric Arnebäck}
 \date{}
 
@@ -27,67 +27,71 @@
 
 \dayheading{1}{9}{2011}
 
-Jag mötte idag min handledare Aref.
+Jag mötte idag min handledare Aref och började skriva i loggboken.
 
 Det här projektarbetet kommer att handla om hur bildformat
-fungerar. Bildformat handlar egentligen bara om hur man får en lång
-sekvens av nummer(som är hur all data lagras i en dayot ), att
-representera en bild. Fokuset kommer att lägga på digital bild lära
-och bildformats kompressionsalgortimer. Det är troligtvis att jag bara
-kommer att hinna tre bildformnat: TGA, GIF och PNG. PNG är troligen
-vad majoritet av tiden kommer att spenderas på.
+är uppbyggda. Bildformat handlar egentligen bara om hur man får en lång
+sekvens av nummer(som är hur all data lagras i en dator ) att
+representera en bild.
+
+Fokuset kommer att läggas på formatens uppbyggnad deras
+kompressionsalgoritmer. Det är högst troligt att jag bara kommer att
+hinna med tre bildformat: TGA, GIF och PNG. PNG är troligen vad
+majoriteten av tiden kommer att spenderas på.
 
 Arbetet kommer att vara strukturerat som en lärabok. I stället för att
-råa fakta själlöst rabblas upp ska fokuset ligga på att faktiskt
+råa fakta själlöst rabblas upp, ska fokuset ligga på att faktiskt
 \textit{lära} läsaren något. Innehåller kommer att struktureras upp i
 kapitel. Språket för den kommer att vara engelska för att så många som
 möjligt ska kunna läsa den.
 
-Jag hade redan startat arbetet i förväg innan jag hade börjat skriva
-den här loggboken. Så jag har börjat arbeta på det första kapitlet i
+Jag hade redan startat arbetet i förväg innan jag hade börjat skriva i
+den här loggboken. Jag har redan börjat arbeta på det första kapitlet i
 boken. Det handlar om hur färger representeras i en dator.
 
-För varje bildformat kommer jag att skriva ett program som tolkar data
-i en bildfil och dumpar den råa färgdatan och bildens egenskaper i en
-fil.
+För varje bildformat kommer jag att skriva ett program som tolkar
+datan i en bildfil och dumpar den råa färgdatan och bildens egenskaper
+i en fil.
 
-Som så här:
+Så här kommer det att se ut:
 
 \begin{verbatim}
 Width:2
 Height:2
-(1,1,1)(34,2,1)
-(2,1,4)(5,3,1)
+(255,255,255)(0,0,0)
+(0,0,0)(255,255,255)
 \end{verbatim}
 
 Innan jag hade börjat skriva den här loggboken så hade jag redan
-börjat jobba på programet som gör den här uppgiften för TGA
+börjat jobba på programmet som gör det här uppgiften för TGA
 formatet. Men än så länger analyserar programmet bara header-delen av
-TGA filer, vilken beskriver saker som hjälper programet med att ladda
-färgdatan, för den inkluderar information som färgdjup, bred, höjd, etc.
+TGA-filer.
 
-Jag har också de senaste dagarna letat efter källor och infromation om
-hur kompressionalgoritmer fungerar. Det är egentligen ett fält med
-mycket invecklad matematik, men som tur så har bildformaten jag valt
-inte så invecklade algoritmer.
+Jag har också de senaste dagarna letat efter källor och information om
+hur kompressionsalgoritmer fungerar. Jag har hittat några bra källor som
+jag har organiserat i en textfil.
 
 Sedan igår natt har också arbetat på ett program som demonstrerar den
 extremt simpla kompressionsalgoritmen RLE. Mer att läsa om denna
 algoritm finns i den skriftliga delen av arbetet.
 
-Och i dag slutförde jag även detta demoprogramet.
+Och i dag slutförde jag även detta demoprogrammet.
 
 \dayheading{2}{9}{2011}
 
-För att göra de skriftliga delern använder jag faktiskt inte Word,
-utan \LaTeX. Om du inte vet vad \LaTeX så kan det bli svårt att
-förklara det...
+För att göra de skriftliga delen och loggboken använder jag faktiskt
+inte Word, utan \LaTeX. Jag föredrar \LaTeX för att det är extremt
+flexibelt, producerar mycket vackrare dokument än Word och för att det
+tilltalar mig mer programmerare. Om du inte vet vad \LaTeX så kan det
+bli svårt att förklara det...
 
-Mer att läsa om \LaTeX finns här: http://scottmcpeak.com/latex/whatislatex.html
+Detta är den bästa förklaring för den oinvigda som jag har hittat:
+
+http://scottmcpeak.com/latex/whatislatex.html
 
 Men i alla fall, idag listade jag ut hur jag kan skapa vackert
 formatterade algoritmer i \LaTeX dokument. För detta använder jag ett
-paket som heter  algorithmx.
+paket som heter \texttt{algorithmx}.
 
 Här är till exempel Euklides algoritm för att finna största gemensamma
 nämnaren av två tal:
@@ -108,76 +112,79 @@ nämnaren av två tal:
 \end{algorithm}
 
 Kapitel 2 i detta arbetet kommer att handla om
-kompressionsalgoritmer. I introduktionen till kompressionalgoritmer
-kommer beskriver jag hur RLE fungerar och har även börjat skapat pseudokoden
-för den.
+kompressionsalgoritmer. Jag har beskrivit hur RLE fungerar och har
+även börjat skapat pseudokoden för den.
 
 Fixade också flera fel och buggar i demoprogrammet för RLE.
 
 \dayheading{3}{9}{2011}
 
-Gjorde färdigt pseudokoden för RLE och spendara även hel del tid med
-att finputsa algoritmerna och att göra dem enklare att förstå
+Gjorde färdigt pseudokoden för RLE och spenderade även hel del tid med
+att finputsa algoritmerna och att göra dem enklare att förstå.
 
 Men jag berättade inte riktigt hela historen om RLE. Det finns en
-bättre version av RLE, låt oss kalla den RLE2, som TGA använder. Så
-idag implementerarade jag även ett demoprogram som demontrerar RLE2.
+bättre, mer effektiv,  version av RLE, som TGA använder. Denna bättre
+version som TGA använder kommer vi att kalla RLE2 från och med nu.
+
+Idag implementerade jag ett demoprogram för RLE2.
 
 Hur mycket jag hade skrivit om digital färglära innan jag hade börjat
 skriva den här logboken har jag ännu inte sagt. Men jag hade redan
-fått tag på rätt så bra källor om ämnet. Jag hade redan skrivit om
-RGB, alpha kanaler och färgdjup. Idag renskrev jag sektionerna om de
-här ämnena och gjorde några till figurer för att ytterligare förklara
-bättre. Dessutom skrev jag idag en helt ny sektion om hur gråskalefärg
+fått tag på rätt så bra källor om ämnet. Jag hade skrivit om
+RGB, alfakanaler och färgdjup. Idag renskrev jag sektionerna om de
+här ämnena och gjorde några figurer för att förklara
+bättre. Dessutom skrev jag idag en helt ny sektion om hur gråskala färg
 representeras digitalt.
 
-Idag fann jag äntligen igen tid till jobba på programmet som laddar
+Idag fann jag äntligen lite tid till jobba på programmet som laddar
 TGA filer. Och efter lite arbete kan den ladda okomprimerade
-grayskalebilder. Men det finns även en hel sorts bilder som den inte
-kan ladda.
+gråskalebilder. Men TGA formatet stödjer flera andra bildtyper som det
+måste implementeras stöd för.
 
 \dayheading{5}{9}{2011}
 
 En bilds metadata beskriver saker som bildens skapare, datumet den
-skapades, datum den har ändrats, bildkommentarer och så vidare. Idag
-skrev jag koden som laddar metadatan från en TGA fil, vilket var för
-mesta en rätt så tråkig process.
+skapades, datum den har ändrats, bildkommentarer och så vidare.
 
-Dessutom kan nu TGA laddaren lada komprimerade gråskalebilder. TGA
+Idag skrev jag koden som laddar metadatan från en TGA-fil.
+
+Dessutom kan nu TGA-laddaren ladda \textit{komprimerade} gråskalebilder. TGA
 använder som bekant RLE2 för sin kompression.
 
 \dayheading{7}{9}{2011}
 
-Efter dagens arbete kan TGA laddaren ladda 24-bitars okomprimerade och
-komprimerade true color bilder. True color betyder ungefär att
-färgdatan är direkt i bilden och inte använder någon palett.
+Efter dagens arbete kan TGA-laddaren ladda 24-bitars okomprimerade och
+komprimerade true-color bilder. True-color betyder ungefär att
+färgdatan finns direkt  i bilden och inte använder någon palett.
 
 \dayheading{11}{9}{2011}
 
 Ett litet framsteg idag också: lyckades efter lite problem lista ut
-hur 32-bitars bilder lagrar sin färgdata. Vad som är speciellt med det
-här, är att i 32-bitar largras även en alpha kanal(opasitet).
+hur 32-bitars bilder lagrar sin färgdata och implementera stöd för att
+ladda bilder med 32-bitars färgdjup.
 
 \dayheading{12}{9}{2011}
 
 Implementerade stöd för 16-bitars bilder i TGA-laddaren.
 
 Att implementera stöd för bilder med paletter tog längre tid än jag
-hade väntat, på grund utav att jag hade skapat flera buggar under
-kodningen. Efter att ha fixat alla buggar kunde jag äntligen
-implementera stöd för bilder med paletter. Med det här så har jag
-täckt så mycket av TGA formatet som jag tycket att jag behöver
-göra. Det finns delar laddaren ännu inte hanterar men dem är mycket
-ovanliga och har inte förekommit i några av de TGA-bilder jag har fått
-tag på.
+hade väntat, på grund utav att jag hade skapat flera irriterande
+buggar under kodningen. Efter att ha fixat alla buggar kunde jag
+äntligen implementera stöd för bilder med paletter. Med det här så har
+jag täckt så mycket av TGA formatet som jag tycket att jag behöver
+göra. Fortfarande finns det delar av TGA formatet jag inte täkt, men
+de är obskyra och jag har aldrig träffat på några bilder som använder
+dem.
 
 Imorgon kommer jag att städa upp koden och fixa alla återstående
-buggar, om det finns några.
+buggar om det finns några.
 
 \dayheading{13}{9}{2011}
 
 Städade upp koden för att göra den enklare att översätta till mer
 generel pseudokod och fixade flera buggar.
+
+% TODO: this reamins
 
 Resten av dagen planerade jag att dedikera till att beskriva TGA
 formatet skriftligt. Men sen insåg jag att det skulle vara mycket
@@ -249,8 +256,8 @@ för att förklara algoritmen skriftligt, men jag misstänker att
 förklaringen behöver renskrivas ett flertal gånger.
 
 Har påbörjat renskrivningen av det upp till nu skrivna material. Först
-så har jag renskrivit kapitel 1: digital färglära. Jag lade även till
-lite nytt material, som handlar färgmodellen CMYK.
+så har jag renskrivit kapitel 1 om digital färglära. Jag lade även till
+lite nytt material som handlar om färgmodellen CMYK.
 
 
 \end{document}
