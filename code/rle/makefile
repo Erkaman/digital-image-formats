@@ -1,6 +1,6 @@
 PROG = rle.exe
-CFLAGS = -Wall -c -pedantic -ansi
 objects = rle.o ../common.o
+include ../flags
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)

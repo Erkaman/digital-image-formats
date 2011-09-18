@@ -5,6 +5,7 @@
 #include "../common.h"
 #include "util.h"
 
+
 void loadTGAHeader(FILE * fp);
 int loadTGAExtensionArea(FILE * fp);
 void loadTGA(char * file);

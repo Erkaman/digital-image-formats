@@ -133,7 +133,23 @@ at all, like that robot logo we showed in the last chapter, even for such a
 naive algorithm, it will do quite good.
 
 But this is essentially trivial to implement in code. Let us first
-consider the compression algorithm, which is shown in algorithm \ref{alg:rle-enc}
+consider the compression algorithm, which is shown in algorithm
+\ref{alg:rle-enc}. First we need to make sure we have two characrters
+to compare for equalirt and possible pack together. So we have the
+need of the flag $passedFirstCharacter$ that tells when the first
+character has been passed(duh!). Once we have two character then we
+can compare then for equality and if they are equal we increase a
+counter that keeps tracks of the size of the current packet. If they
+are not equal or the current packet is full, we write the
+packet. First the length of the packet is written and then the actual
+data that is repeated in the package. And the counter is reset and a
+new packet is read in.
+
+However, once we have reached the end of the file, we still haven't
+written the last packet. But if the file was entiely empty, we'd have
+nothing to write, so we need to check that we have passed the first
+character. If we have, we simply write the last packet like all the
+other packets are written.
 
 \newcommand{\eof}{\ensuremath{\VoidCall{EndOfFileReached}}}
 \newcommand{\neof}{\ensuremath{\NOT \VoidCall{EndOfFileReached}}}
@@ -161,7 +177,7 @@ consider the compression algorithm, which is shown in algorithm \ref{alg:rle-enc
 
       \Let{$passedFirstCharacter$}{\True} %
       \Let{$c_1$}{$c_2$}
-      \Let{$c_2$}{ \VoidCall{Read}}
+      \Let{$c_2$}{ \VoidCall{ReadByte}}
 
     \EndWhile
 
@@ -180,23 +196,24 @@ The ridiculously simple RLE decoding algorithm is shown in algorithm
   \label{alg:rle-dec}
   \begin{algorithmic}[1]
 
+    \Let{$length$}{\VoidCall{ReadByte}}
+    \Let{$c$}{\VoidCall{ReadByte}}
+
     \While{\neof}
-      \Let{$length$}{\VoidCall{ReadByte}}
-      \Let{$c$}{\Call{Read}{}}
-
-      \If{\eof}
-        \Break
-      \EndIf
-
       \Repeat{$length$}
         \State \Call{WriteByte}{$b$}
       \EndRepeat
+
+      \Let{$length$}{\VoidCall{ReadByte}}
+      \Let{$c$}{\VoidCall{ReadByte}}
+
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
 
-All we're really doing here is reading packet length and the packet
-data and then outputting that data length times to a file.
+While we still haven't reached the end of the file, we read a packet
+length and the replicated data number. Once we have done, we simply
+write out the data length times.
 
 \subsection{Packets version}
 \label{sec:packets-version}
@@ -335,12 +352,12 @@ last bit in a byte is 128. It is calculated like this: $2^{8-1} =
   \label{alg:raw-packet}
   \begin{algorithmic}[1]
     \Require $length$ is a list or array containing the data to be written
-    \Function{writeRawPacket}{length,data}
-      \Let{packetHead}{0}
-      \Let{packetHead}{$packetHead \BitOr length$}
-      \State \Call{writeByte}{packetHead}
-      \ForEach{raw}{data}
-        \State \Call{writeByte}{raw}
+    \Function{writeRawPacket}{$length,data$}
+      \Let{$packetHead$}{$0$}
+      \Let{$packetHead$}{$packetHead \BitOr length$}
+      \State \Call{writeByte}{$packetHead$}
+      \ForEach{$raw$}{$data$}
+        \State \Call{writeByte}{$raw$}
       \EndForEach
     \EndFunction
   \end{algorithmic}
@@ -351,11 +368,11 @@ last bit in a byte is 128. It is calculated like this: $2^{8-1} =
   \label{alg:rle-packet}
   \begin{algorithmic}[1]
     \Require $length > 0$
-    \Function{writeRunLengthPacket}{length,data}
-      \Let{packetHead}{128}
+    \Function{writeRunLengthPacket}{$length,data$}
+      \Let{packetHead}{$128$}
       \Let{packetHead}{$packetHead \BitOr length$}
-      \State \Call{writeByte}{packetHead}
-      \State \Call{writeByte}{data}
+      \State \Call{writeByte}{$packetHead$}
+      \State \Call{writeByte}{$data$}
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
@@ -364,7 +381,100 @@ last bit in a byte is 128. It is calculated like this: $2^{8-1} =
 \label{sec:compr-decompr}
 
 Now that we know how to write the packets, let us consider how to
-implement the algorithm itself. 
+implement the algorithm itself.
+
+
+
+\begin{algorithm}[h]
+  \caption{Encoding a file using RLE.}
+  \label{alg:rle-enc}
+  \begin{algorithmic}[1]
+    \Require $RawPacket = 0 and RunLengthPacket = 1. data is an array.$
+
+    \Let{$length$}{$0$}
+    \Let{$passedFirstCharacter$}{\False}
+    \Let{$c_2$}{ \VoidCall{ReadByte}}
+    \Let{$packetType$}{$RawPacket$}
+
+    \While{\neof}
+
+      \If{$passedFirstCharacter$}
+        \If{$c_2 = c_1 \AND length < 127$}
+
+          \If{$packetType = RawPacket \AND length > 0$}
+            \State \Call{writeRawPacket}{$length-1,data,out$}
+          \EndIf
+
+          \Let{$length$}{$1 + length$}
+          \Let{$packetType$}{$RunLengthPacket$}
+
+        \Else
+
+          \If{$packetType = RunLengthPacket$}
+
+            \State \Call{writeRunLengthPacket}{$length,c_1$}
+            \Let{$packetType$}{$RawPacket$}
+            \Let{$length$}{$0$}
+
+          \Else
+
+            \Let{$data[length]$}{$c_1$}
+            \Let{$length$}{$length + 1$}
+            \Let{$packetType$}{$RawPacket$}
+
+          \EndIf
+
+        \EndIf
+      \EndIf
+
+      \Let{$passedFirstCharacter$}{\True}
+      \Let{$c_1$}{$c_2$}
+      \Let{$c_2$}{ \VoidCall{ReadByte}}
+
+    \EndWhile
+
+    \If{$passedFirstCharacter$}
+      \If{$packetType = RunLengthPacket$}
+        \State \Call{$writeRunLengthPacket$}{$length,c_1$}
+      \Else
+        \Let{$data[length]$}{$c_1$}
+        \State \Call{$writeRawLengthPacket$}{$length,data$}
+      \EndIf
+    \EndIf
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[h]
+  \caption{Decoding a RLE packbits encoded file.}
+  \label{alg:tga-rle-dec}
+  \begin{algorithmic}[1]
+
+    \Let{$head$}{\VoidCall{ReadByte}}
+
+    \While{\neof}
+    
+      \Let{$length$}{$head \BitAnd 127$}
+
+      \If{$head \BitAnd 128$}
+        \Let{$data$}{\VoidCall{ReadByte}}
+
+        \Repeat{$length$}
+          \State \Call{WriteByte}{$data$}
+        \EndRepeat
+      \Else
+
+        \Repeat{$length$}
+          \Let{$data$}{\VoidCall{ReadByte}}
+          \State \Call{WriteByte}{$data$}
+        \EndRepeat
+
+      \EndIf
+
+      \Let{$head$}{\VoidCall{ReadByte}}
+
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
 
 
 \printbibliography[heading=subbibliography]

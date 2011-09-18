@@ -1,8 +1,6 @@
 PROG = tga
 CC = gcc
-WARNINGS = -Wall -Wextra -Werror -Wdeclaration-after-statement  -Wshadow -Wstrict-overflow=5 -Wpointer-arith -Wcast-qual -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations  -Winit-self -Wcast-align -Wformat=2 -Wmissing-include-dirs -Wunused-parameter
-
-CFLAGS =  $(WARNINGS) -c -pedantic -ansi
+include ../flags
 objects = tga.o ../common.o util.o
 
 $(PROG) : $(objects)
