@@ -381,15 +381,39 @@ last bit in a byte is 128. It is calculated like this: $2^{8-1} =
 \label{sec:compr-decompr}
 
 Now that we know how to write the packets, let us consider how to
-implement the algorithm itself.
+implement the algorithm itself. The encoding algorithm can be seen in
+algorithm \ref{alg:tga-rle-enc}. This algorithm has a significantly
+more complex control flow than algoritms up to this point, so read
+carefully.
 
+In the same manner as the naive version, we read in the first two
+values. If they are equal, we start writing a run length packet. But
+what we have to keep in mind as that we could have been writing raw
+packet up to this point. The type of the packet currently being made
+is signified by the variable $packetType$. So if a raw packet is being
+made, we must finish it by writing it the file. And the counter of the
+current package is reset. Otherwise it would not have been reset, as
+you could have been writing a run length packet at the time. But why
+is only one less of the raw packet length written?
 
+To understand, let us see what happens when the two values are
+\textit{not} equal. Then there are two cases to consider again: a run
+length packet is being written or a raw packet is being written.
+
+In the first case, we the run length packet is finished och the packet
+type is set to raw packet and the counter is reset.
+
+However in the second case, we are writing a raw packet. And so, the
+first value is put in the raw packet data array. And the length is
+increased. Now it makes sense why one less of the raw packet length is
+written, because the length is increase even though the next reas
+could result in a run length packet started being written.
 
 \begin{algorithm}[h]
   \caption{Encoding a file using RLE.}
-  \label{alg:rle-enc}
+  \label{alg:tga-rle-enc}
   \begin{algorithmic}[1]
-    \Require $RawPacket = 0 and RunLengthPacket = 1. data is an array.$
+    \Require $RawPacket = 0,RunLengthPacket = 1$
 
     \Let{$length$}{$0$}
     \Let{$passedFirstCharacter$}{\False}
@@ -403,6 +427,7 @@ implement the algorithm itself.
 
           \If{$packetType = RawPacket \AND length > 0$}
             \State \Call{writeRawPacket}{$length-1,data,out$}
+            \Let{$length$}{$0$}
           \EndIf
 
           \Let{$length$}{$1 + length$}
@@ -444,6 +469,25 @@ implement the algorithm itself.
   \end{algorithmic}
 \end{algorithm}
 
+Phew! Thankfully, the decoding algorithm is not as complex. It can be
+seen at algorithm \ref{alg:tga-rle-dec}.
+
+First we read in the packet head of the packet. If the end of the file
+has not been reached, we first extract the length out of the packet
+head, by using a bitwise and operation on it. This makes sense, as
+$127$ has the bit pattern.
+
+\begin{indentpar}
+  01111111
+\end{indentpar}
+
+Thus, make sure that we only extract the length part of the head, and
+not the highest bit. Then, we check if the highest bit is toggled. If
+such is the case, then it's a run length packet. So we read in the
+data part of the packet and repeat it $length$ times. Else, it is a
+raw packet, and so we just read the data and write it back $length$
+times.
+
 \begin{algorithm}[h]
   \caption{Decoding a RLE packbits encoded file.}
   \label{alg:tga-rle-dec}
@@ -452,7 +496,7 @@ implement the algorithm itself.
     \Let{$head$}{\VoidCall{ReadByte}}
 
     \While{\neof}
-    
+
       \Let{$length$}{$head \BitAnd 127$}
 
       \If{$head \BitAnd 128$}
@@ -475,7 +519,6 @@ implement the algorithm itself.
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
-
 
 \printbibliography[heading=subbibliography]
 
