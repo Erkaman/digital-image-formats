@@ -16,7 +16,8 @@
   \newcommand{\bluewave}{\ensuremath{\SI{400}{\nano\meter}}}
 
   Light is composed of tiny particles traveling at different
-  wavelengths. \cite{neider93:_openg_progr_guide} Different colors
+  wavelengths \index{wavelength}. They are also called light waves
+  \index{light waves} \cite{neider93:_openg_progr_guide} Different colors
   are light traveling at different wavelengths. For example, blue has
   a wavelength of \bluewave. \cite{ohlsson99:_digit_bild_kreat}
 
@@ -30,11 +31,9 @@
   \subsection{RGB}
   \label{sec:rgb}
 
-  Color models \index{color model} are ways specifying color numerically \todo{mention
-    additive and subtractive color models here}
-  \cite{fadgi11:color_model}. They are of course very convenient for
-  computers who are very good at dealing with numbers. A very widely
-  used color model for representing color in computers is \textbf{RGB}
+  Color models \index{color model} are ways of specifying colors
+  numerically \cite{fadgi11:color_model}. A very widely used color
+  model for representing color in computers is \textbf{RGB}
   \index{RGB}.
 
   \begin{figure}[h]
@@ -51,10 +50,25 @@
   that white is achieved by mixing all of three colors. Black is
   represented by no light at all.
 
+  The RGB color model is called additive \index{additive color model} because makes different color
+  by adding together light.
+
   The different amounts of red ,blue and green in a color, are called
   their respective color channels \index{color channel}.
 
-  \subsection{Alpha channel}
+  \subsection{CMYK}
+  \label{sec:cmyk}
+
+  Instead of mixing light,we can spread color out on paper to make all
+  the different colors. Doing this, we have created a new color model:
+  \textbf{CMYK} \index{CMYK}. It stands for \textbf{C}yan,
+  \textbf{M}agenta, \textbf{Y}ellow and blac\textbf{K}.
+
+  It is subtractive \index{subtractive color model}, meaning that
+  instead of adding light, we subtract the light by adding more and
+  more ink to the paper.
+
+  \subsection{Alpha channels}
   \label{sec:alpha_chan}
 
   But there is actually even more to RGB. There is an extended color
@@ -76,10 +90,6 @@
     \caption{A rectangle with a lower and lower alpha channel.}
     \label{fig:alpha}
   \end{figure}
-
-  \subsection{CMYK}
-  \label{sec:cmyk}
-
 
   \section{Color depth}
   \label{sec:color-depth}
