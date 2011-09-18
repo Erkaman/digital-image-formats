@@ -248,7 +248,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if(optimize){ /* */
+    if(optimize){
         if(decompress){
             decode_opt(argv[0],argv[1]);
         } else{

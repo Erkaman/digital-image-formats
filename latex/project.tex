@@ -65,6 +65,13 @@
 [1]{\algorithmicrepeat\ #1 \ \algorithmicdo}
 {\algorithmicend \ \algorithmicrepeat}
 
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+
+\algblockdefx[FOREACH]
+{ForEach}
+{EndForEach}
+[2]{\algorithmicforeach \ #1 \ \textbf{in} \ #2 \algorithmicdo}
+{\algorithmicend \ \algorithmicforeach}
 
 \newcommand{\Break}{\State \textbf{break}}
 \newcommand{\VoidCall}[1]{ \Call{#1}{\ensuremath{}}}
@@ -112,7 +119,7 @@
 
 \usepackage[nottoc]{tocbibind}
 
-%\includeonly{compression}
+\includeonly{compression}
 
 \begin{document}
 

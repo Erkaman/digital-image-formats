@@ -60,8 +60,6 @@ from have been reached.
 that there is a file opened for output. This function Writes a byte to
 that opened file.
 
-
-
 We will also a be using custom control structure, repeat:
 
 \begin{algorithm}[h]
@@ -306,17 +304,53 @@ to
 \end{indentpar}
 
 Now let's so how we can implement these algorithms. It will be a bit
-harder than the naive version, but we will soon find xthat it is not very
+harder than the naive version, but we will soon find that it is not very
 difficult at all!
 
 This algorithm is actually the one used to compress color data in the
 TGA image format \cite{91:_truev_tga_file_format_specif}.
 
+\subsection{Implementation}
+\label{sec:implementation}
+
+\subsubsection{Writing the packets}
+\label{sec:writing-packets}
+
+Let us first consider how to write a raw packet. Consider the function
+\textproc{writeRawPacket}(algorithm \ref{alg:raw-packet}). We'll
+call the first byte of a packet the packet head. Making the packet head
+is trivial. It is first given an initial value of zero, to specify
+that it's a run length packet. Then it's bitwise or-ed with the length
+of the packet. After that the entire raw data stream is written to the
+file.
+
+And writing a Run Length Packet is even easier! Please observe
+algorithm \ref{alg:rle-packet}. Do note that we in this case give the
+packet head an initial value of 128. This is because the value of the
+last bit in a byte is 128. It is calculated like this: $2^{8-1} =
+128$.
+
+\begin{algorithm}[h]
+  \caption{Writing a raw packet.}
+  \label{alg:raw-packet}
+  \begin{algorithmic}[1]
+    \Require $length$ is a list or array containing the data to be written
+    \Function{writeRawPacket}{length,data}
+      \Let{packetHead}{0}
+      \Let{packetHead}{$packetHead \BitOr length$}
+      \State \Call{writeByte}{packetHead}
+      \ForEach{raw}{data}
+        \State \Call{writeByte}{raw}
+      \EndForEach
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
 \begin{algorithm}[h]
   \caption{Writing a run length packet.}
   \label{alg:rle-packet}
   \begin{algorithmic}[1]
-    \Require the input is well behaved and length does not break the rules.
+    \Require $length > 0$
     \Function{writeRunLengthPacket}{length,data}
       \Let{packetHead}{128}
       \Let{packetHead}{$packetHead \BitOr length$}
@@ -325,6 +359,12 @@ TGA image format \cite{91:_truev_tga_file_format_specif}.
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
+
+\subsubsection{Compression and decompression.}
+\label{sec:compr-decompr}
+
+Now that we know how to write the packets, let us consider how to
+implement the algorithm itself. 
 
 
 \printbibliography[heading=subbibliography]

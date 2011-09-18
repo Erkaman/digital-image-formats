@@ -3,11 +3,11 @@
 \usepackage[swedish]{babel}
 \usepackage[charter]{mathdesign}
 \usepackage[kerning,spacing]{microtype}
-\usepackage{array}
+\usepackage{longtable}
 \hyphenpenalty=100000
 \title{Schema projektarbete}
 \author{Eric Arnebäck}
-
+\date{}
 \setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
 \setlength{\parindent}{0pt}
 
@@ -24,45 +24,68 @@
 
 \maketitle
 
-\nextweek \nextweek
+(Om en vecka är tom betyder det att samma sak görs som förra veckan.)
 
 \centering
-\begin{tabular}{p{1cm}p{10cm}}
+\begin{longtable}{p{1cm}p{10cm}}
   \textbf{v.} & \textbf{Att göra} \\
-  \weekschedule{Gör färdigt skriftliga delen om RLE. }
-  \weekschedule{Gör färdigt skriftliga delen om TGA. }
-  \weekschedule{kompressionsalgoritmen LZW.}
-  \weekschedule{LZW -sammanfattas skriftligt.}
-  \weekschedule{börja koda GIF-laddare. }
+
+  \weekschedule{Gör färdigt skriftliga delen om RLE. Renskriv och
+    städa upp allt nuvarande material. Eftersom jag tidigare inte
+    följde ett riktigt schema är det nuvarande materialet lite rörigt,
+    därför krävs det en vecka för att renskriva det. }
+
+  \weekschedule{Sammanfatta TGA skriftligt. }
+
+  \weekschedule{Utforska och förstå kompressionsalgoritmen LZW}
+
+  \weekschedule{LZW sammanfattas skriftligt.}
+
+  \weekschedule{Koda GIF-laddare. }
+
   \weekschedule{Gör färdigt GIF laddare. }
-  \weekschedule{Börja att sammanfatta GIF formatet skriftligt. }
-  \weekschedule{Gör färdigt den skriftliga sammanfattningen av GIF
-    formatet. }
+
+  \weekschedule{Sammanfatta GIF formatet skriftligt. }
+  \weekschedule{}
+
   \weekschedule{Renskrivning och av uppstäddning  av det upp till nu
-    skrivna materialet. Om nytt material behövs för att förtydliga
-    vissa saker framskaffas mer material och fler källor. }
-  \weekschedule{Samma som förra veckan.}
-  \weekschedule{Jobbet på PNG påbörjas. DEFLATE algoritmen utforskas,
-    som PNG använder i sin kopmression. Algoritmerna LZZ7 och
-    Huffmankodning(som DEFLATE är en kombination av) utforkas}
-  \weekschedule{Samma som förra veckan.}
-  \weekschedule{Samma som förra veckan. Om det finns tid över börjas
-    DEFLATE algoritmen sammanfattas skriftligt}
+    skrivna materialet. Om nytt material behövs för att förtydliga vissa saker framskaffas mer material och fler källor.}
+
+
+  \weekschedule{Jobbet på PNG påbörjas med att DEFLATE algoritmen
+    utforskas. Algoritmerna LZZ7 och Huffmankodning(som DEFLATE är en
+    kombination av) utforskas}
+
+  \weekschedule{}
+  \weekschedule{}
+
+  \weekschedule{DEFLATE algoritmen sammanfattas skriftligt}
+  \setcounter{week}{2}
   \weekschedule{DEFLATE algoritmen sammanfattas skriftligt}
   \weekschedule{DEFLATE algoritmen sammanfattas skriftligt}
+
   \weekschedule{PNG specifikation skummas igenom och boken ``PNG - the
   definitive guide'' läses som ett stöd vid sidan av.}
-  \weekschedule{PNG laddaren börjas att kodas}
-  \weekschedule{Samma}
-  \weekschedule{Samma}
+  \weekschedule{}
+
+  \weekschedule{Koda PNG-laddaren}
+  \weekschedule{}
+  \weekschedule{}
+  \weekschedule{}
+
   \weekschedule{PNG börjas att sammanfattas skriftligt}
-  \weekschedule{Samma}
-  \weekschedule{Samma}
-  \weekschedule{Samma}
+  \weekschedule{}
+  \weekschedule{}
+  \weekschedule{}
+
   \weekschedule{Renskrivnign och uppstädning av allt material.}
-  \weekschedule{Renskrivnign och uppstädning av allt material.}
-  \weekschedule{Renskrivnign och uppstädning av allt material.}
-  \weekschedule{Renskrivnign och uppstädning av allt material.}
-\end{tabular}
+
+  \weekschedule{}
+
+  \weekschedule{}
+
+  \weekschedule{}
+
+\end{longtable}
 
 \end{document}
