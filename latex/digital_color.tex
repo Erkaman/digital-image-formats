@@ -165,27 +165,26 @@
   \subsection{Grayscale}
   \label{sec:other-colors-depths}
 
-  \newcommand{\selfrgbtrip}[3]{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}
+  \newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
   \newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
 
   If every color channel of a RGB color is set to the same value, the
-  resulting color will be a grayscale color\index{grayscale color},
-  and nothing else. Using 24-bit color, we can for example make the
-  following grayscales:
+  resulting color will be a grayscale color\index{grayscale
+    color}. Using 24-bit color, we can for example make the following
+  grayscales:
   \selfrgbtripgray{100},\selfrgbtripgray{210},\selfrgbtripgray{60}. Using
   24-bits you can really only represent 256 different possible
-  grayscale colors. 256 is how many different values can be
-  represented by an 8-bit number. So if we assign each of thse rgb
-  triples to a number that can be fitted into 8 bits, we have thus
-  invented 8-bit grayscale\index{8-bit grayscale}! So in this system,
-  the number 80 would represent the color \selfrgbtripgray{80}, 180 by
+  grayscale colors because $256$ is how many different values can be
+  represented by an 8-bit number. So if we assign each of these RGB
+  triples to an 8-bit number, we have thus invented 8-bit
+  grayscale\index{8-bit grayscale}! So in this system, the number 80
+  would represent the color \selfrgbtripgray{80}, 180 would represent
   \selfrgbtripgray{180}, and so on. \cite{puglia00:_handbook_dig_proj}
 
-  So 8-bit grayscale means that we have $2^8=256$ different shades of
+  8-bit grayscale means that we have $2^8=256$ different shades of
   gray. This system is actually applicable to any bit count, as is
-  demonstrated in table \ref{tab:grayscale}. And you will probably meet at least one of
-  these grayscale color depths out in the wild. 8-bit grayscale is not
-  really the grayscale that is used.
+  demonstrated in table \ref{tab:grayscale}. You will probably meet at least one of
+  these grayscale color depths out in the wild.
 
   \begin{table}[h!]
     \centering
@@ -202,11 +201,6 @@
     \caption{Different bit counts of grayscale}
     \label{tab:grayscale}
   \end{table}
-
-  \subsection{Indexed Color}
-  \label{sec:indexed-color}
-
-  % 8-bit color 1-bit color, palettes need to be covered.-
 
   \printbibliography[heading=subbibliography]
 \end{refsection}
