@@ -16,10 +16,11 @@
   \newcommand{\bluewave}{\ensuremath{\SI{400}{\nano\meter}}}
 
   Light is composed of tiny particles traveling at different
-  wavelengths \index{wavelength}. They are also called light waves
-  \index{light waves} \cite{neider93:_openg_progr_guide} Different colors
-  are light traveling at different wavelengths. For example, blue has
-  a wavelength of \bluewave. \cite{ohlsson99:_digit_bild_kreat}
+  wavelengths\index{wavelength}. They are also called light
+  waves\index{light waves} \cite{neider93:_openg_progr_guide}
+  Different colors are light traveling at different wavelengths. For
+  example, blue has a wavelength of
+  \bluewave. \cite{ohlsson99:_digit_bild_kreat}
 
   But how do our eyes \textit{see} these light waves? In our eyes,
   there are cells for perceiving three different kinds of wavelengths
@@ -31,40 +32,40 @@
   \subsection{RGB}
   \label{sec:rgb}
 
-  Color models \index{color model} are ways of specifying colors
+  Color models\index{color model} are ways of specifying colors
   numerically \cite{fadgi11:color_model}. A very widely used color
-  model for representing color in computers is \textbf{RGB}
-  \index{RGB}.
+  model for representing color in computers is \textbf{RGB}\index{RGB}.
 
   \begin{figure}[h]
     \centering
     \inputtikz{rgb.tex}
-    \caption{RGB color model}
+    \caption{The RGB color model}
     \label{fig:rgb}
   \end{figure}
 
   The color model is, of course, based on how our eyes perceive color,
-  as mentioned in section \ref{sec:what-color}. Observe figure
-  \ref{fig:rgb}. As it can be seen, all the colors cyan ,magenta and
-  yellow can be achieved by mixing either red, blue and green. Also note
-  that white is achieved by mixing all of three colors. Black is
-  represented by no light at all.
+  as mentioned in section \ref{sec:what-color}. As it can be seen in
+  figure \ref{fig:rgb}, the colors cyan ,magenta and yellow can
+  be achieved by mixing either red, blue and green. Also note that
+  white is achieved by mixing all of three colors. Black is
+  represented by no light at all. The rest of the colors can be
+  achieved by mixing different amounts of red,green and blue.
 
-  The RGB color model is called additive \index{additive color model} because makes different color
-  by adding together light.
+  The RGB color model is called additive\index{additive color model}
+  because it makes different colors by adding together light.
 
-  The different amounts of red ,blue and green in a color, are called
-  their respective color channels \index{color channel}.
+  The different amounts of red, green and blue in a color, are called
+  their respective color channels\index{color channel}.
 
   \subsection{CMYK}
   \label{sec:cmyk}
 
   Instead of mixing light,we can spread color out on paper to make all
   the different colors. Doing this, we have created a new color model:
-  \textbf{CMYK} \index{CMYK}. It stands for \textbf{C}yan,
+  \textbf{CMYK}\index{CMYK}. It stands for \textbf{C}yan,
   \textbf{M}agenta, \textbf{Y}ellow and blac\textbf{K}.
 
-  It is subtractive \index{subtractive color model}, meaning that
+  It is subtractive\index{subtractive color model}, meaning that
   instead of adding light, we subtract the light by adding more and
   more ink to the paper.
 
@@ -72,22 +73,22 @@
   \label{sec:alpha_chan}
 
   But there is actually even more to RGB. There is an extended color
-  model of RGB that's called RGBA \index{RGBA}(it is sometimes also
-  referred to as ARGB \index{ARGB}). In this model a new channel is
-  added: the alpha channel \index{alpha channel}. This new channel
+  model of RGB that's called RGBA \index{RGBA}. In this model, a new channel is
+  added: the alpha channel\index{alpha channel}. This new channel
   represents the opacity of a color. Opacity is simply the opposite of
   transparency \cite{porter84_compos_dig_img}. Take
-  a good look at figure \ref{fig:alpha}. It demonstrates how a square
-  gets a lower and lower value of its alpha channel until it turns
-  transparent. In the leftmost part of the rectangle , the color has
-  its maximum possible alpha channel, meaning that it's fully
-  visible. On the other hand, the leftmost color has its lowest
-  possible alpha value, $0$, meaning that it's fully transparent.
+  a good look at figure \ref{fig:alpha}.
+
+  It demonstrates how a the color blue gets a lower and lower value of
+  its alpha channel until it turns transparent. In the leftmost part,
+  the color has its maximum possible alpha channel value, meaning that it's
+  fully visible. On the other hand, the leftmost color has its lowest
+  possible alpha value, $0$, and as a result is fully transparent.
 
   \begin{figure}[h!]
     \centering
     \inputtikz{alpha.tex}
-    \caption{A rectangle with a lower and lower alpha channel.}
+    \caption{The color blue with an increasingly lower alpha channel.}
     \label{fig:alpha}
   \end{figure}
 
@@ -107,11 +108,11 @@
   us represent colors as a triple of three numbers, like this:
   \rgbtrip{123}{21}{91}, which is \textcolor[RGB]{123,21,91}{this color}.
 
-  An 8-bit number has, as you should be familiar with, only $256$ possible values. If we
-  assign an  8-bit number to each color channel, the color's total size
-  will be 24-bits. This way of representing color is called 24-bit color
-  \index{24-bit color}. You can also say that its color depth \index{color
-    depth} is 24 bits.
+  An 8-bit number has, as you should be familiar with, only $256$
+  possible values. If we assign an 8-bit number to each color channel,
+  the color's total size will be 24-bits. This way of representing
+  color is called 24-bit color\index{24-bit color}. You can also say
+  that its color depth\index{color depth} is 24 bits.
 
   \newcommand{\selfcolor}[1]{\textcolor{#1}{#1}}
 
@@ -170,7 +171,7 @@ g
   \newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
 
   If every color channel of a RGB color is set to the same value, the
-  resulting color will be a grayscale color \index{grayscale color},
+  resulting color will be a grayscale color\index{grayscale color},
   and nothing else. Using 24-bit color, we can for example make the
   following grayscales:
   \selfrgbtripgray{100},\selfrgbtripgray{210},\selfrgbtripgray{60}. Using
@@ -178,7 +179,7 @@ g
   grayscale colors. 256 is how many different values can be
   represented by an 8-bit number. So if we assign each of thse rgb
   triples to a number that can be fitted into 8 bits, we have thus
-  invented 8-bit grayscale \index{8-bit grayscale}! So in this system,
+  invented 8-bit grayscale\index{8-bit grayscale}! So in this system,
   the number 80 would represent the color \selfrgbtripgray{80}, 180 by
   \selfrgbtripgray{180}, and so on. \cite{puglia00:_handbook_dig_proj}
 
