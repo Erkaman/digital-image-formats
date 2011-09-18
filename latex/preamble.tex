@@ -1,0 +1,117 @@
+% fonts
+\usepackage[T1]{fontenc}
+\usepackage{inconsolata}
+\usepackage[charter]{mathdesign}
+\usepackage[kerning,spacing,stretch=10]{microtype}
+\microtypecontext{spacing=nonfrench}
+
+% index creation
+\usepackage{makeidx}
+
+\makeindex
+
+% miscellaneous packages
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage[hyperindex,colorlinks]{hyperref}
+\usepackage{verbatim}
+\usepackage{siunitx}
+\usepackage{todonotes}
+\usepackage{placeins}
+\usepackage{booktabs}
+\usepackage{graphicx}
+
+\usepackage{caption}
+\captionsetup{
+  margin=10pt,
+  font=small,
+  labelfont=bf,
+  labelsep=endash,
+  format=hang
+}
+
+% references
+\usepackage[backend=biber,sorting=none]{biblatex}
+\addbibresource{project.bib}
+
+% tikz
+\usepackage{tikz}
+\usetikzlibrary{
+  shapes,backgrounds,decorations.pathreplacing,
+  positioning,fit,shadings,fadings,matrix}
+
+\newenvironment{indentpar}[1][1cm]%
+{\begin{list}{}%
+    {\setlength{\leftmargin}{#1}}%
+  \item[]%
+  }
+  {\end{list}}
+
+% algorithms typesetting.
+\usepackage[chapter]{algorithm}
+\usepackage{algpseudocode}
+
+\algrenewcommand\alglinenumber[1]{
+  \tt\footnotesize\textcolor[HTML]{888888}{#1}}
+
+\newcommand*\Let[2]{\State #1 $\gets$ #2}
+
+\algblockdefx[REPEAT]
+{Repeat}
+{EndRepeat}
+[1]{\algorithmicrepeat\ #1 \ \algorithmicdo}
+{\algorithmicend \ \algorithmicrepeat}
+
+\algnewcommand\algorithmicforeach{\textbf{for each}}
+
+\algblockdefx[FOREACH]
+{ForEach}
+{EndForEach}
+[2]{\algorithmicforeach \ #1 \ \textbf{in} \ #2 \algorithmicdo}
+{\algorithmicend \ \algorithmicforeach}
+
+\newcommand{\Break}{\State \textbf{break}}
+\newcommand{\VoidCall}[1]{ \Call{#1}{\ensuremath{}}}
+
+% miscellaneous configurations
+%\pagestyle{headings}
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+
+\fancypagestyle{plain}{%
+\fancyhf{} % clear all header and footer fields
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}}
+
+\hyphenpenalty=100000
+
+% macros
+
+\newcommand{\inputtikz}[1]{\input{tikz_img/#1}}
+
+\newcommand{\True}{\textbf{true}}
+\newcommand{\False}{\textbf{false}}
+\newcommand{\NOT}{\neg}
+\newcommand{\AND}{\wedge}
+\newcommand{\OR}{\vee}
+\newcommand{\x}{\ensuremath{\times}}
+
+\newcommand*\BitAnd{\mathrel{\&}}
+\newcommand*\BitOr{\mathrel{|}}
+\newcommand*\BitXor{\mathrel{\otimes}}
+\newcommand*\ShiftLeft{\ll}
+\newcommand*\ShiftRight{\gg}
+\newcommand*\BitNeg{\ensuremath{\mathord{\sim}}}
+
+% Fixes list of algorithms formatting.
+% Thanks Dan: http://newsgroups.derkeiler.com/Archive/Comp/comp.text.tex/2005-10/msg01179.html
+\makeatletter
+\let\l@algorithm\l@figure
+\makeatother
+
+\renewcommand{\listofalgorithms}{\begingroup
+\tocfile{List of Algorithms}{loa}
+\endgroup}
+
+\usepackage[nottoc]{tocbibind}
