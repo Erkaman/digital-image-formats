@@ -3,31 +3,76 @@
 \end{comment}
 
 \chapter{Compression techniques}
-\label{cha:digital-image}
+\label{cha:compress-techn}
 
 \begin{refsection}
 
 \section{Some terminology}
 \label{sec:some-terminology}
 
-Coding a data into another form is often referred to as
-\textbf{encoding} \index{encoding}. Converting that encoded data back
-into its orginal form is called \textbf{decoding}
-\index{decoding}. \todo{Need sources on these two terms.}. In the
-circumstanes of compression techniques, encoding is also often
-referred to as \textbf{compression} \index{compression}, and decoding as
-\textbf{decompression} \index{decompression} or \textbf{uncompression} \index{uncompression}
+\subsection{Encoding and decoding}
+\label{sec:encoding-decoding}
+
+Coding data into another form is often referred to as
+\textbf{encoding}\index{encoding}. Converting that encoded data back
+to its original form is called
+\textbf{decoding}\index{decoding}. \todo{Need sources on these two
+  terms.} In the circumstances of compression techniques, encoding and
+decoding are also often referred to as
+\textbf{compression}\index{compression} and
+\textbf{decompression}\index{decompression}.
+
+\subsection{Compression ratio}
+\label{sec:compression-ratio}
+
+The compression ratio\index{compression ratio} is a very useful concept when talking about a
+compression algorithms efficiency. The compression ratio of an
+algorithm is calculated like this:
+
+\begin{equation}
+  \label{eq:compress-ratio}
+  {\rm Compression\;Ratio} = \frac{\rm Compressed\;Size}{\rm Uncompressed\;Size}
+\end{equation}
+
+So the compression ratio basically tells how much data was
+compressed. Of course, the lower compression ratio the better. But
+there are ratios to take in heed, like performance and complexity of
+the algorithm, but we will ignore these concepts in this book to book
+to keep things simple. We will for the rest of the book specify the
+compression ratio in percentages, $\%$\cite{Salomon:2004:DCC}.
 
 % http://www.digitizationguidelines.gov/term.php?term=encoder
 
-\section{Bitwise operators}
+\section{Pseudocode conventions}
+\label{sec:pseud-conv}
+
+In this chapter, we'll actually start covering some algorithms. We
+will describe these using pseudocode. The pseudocode will try to kept
+as traditional as possible, but we'll still need to establish some
+conventions for it:
+
+\subsection{Boolean operators}
+\label{sec:boolean-operators}
+
+For signifying the boolean operators we'll be using the following
+symbols:
+
+\begin{description}
+\item[$\NOT$] logical \textit{not}
+\item[$\AND$] logical \textit{and}
+\item[$\OR$] logical \textit{or}
+\end{description}
+
+\subsection{Bitwise operators}
 \label{sec:bitwise-operators}
 
-In this chapter we will start using the bitwise operator. If you
+\newcommand{\C}{\textsc{C}}
+
+We will for example also use the bitwise operators. If you
 haven't even heard of them, look up them and study them on your own. I
 assumed from the beginning of this book that such knowledge should be
-obvious to you. We will be using the notation introduced in C to
-represent them in pseudocode.
+obvious to you. We will be using the notation used in \C{} to
+represent them in pseudocode:
 
 % looks ugly when typeset.
 \begin{description}
@@ -40,46 +85,53 @@ represent them in pseudocode.
 \end{description}
 
 Notice that we are using $\BitXor$ for typesetting bitwise
-\textit{XOR}, rather than the tradtional c notation. This is due to
+\textit{XOR} rather than the traditional \C{} notation. This is due to
 the fact that we'd otherwise confuse it with logical and, $\AND$.
 
-\section{Pseudocode Functions}
+\subsection{Pseudocode Functions}
 \label{sec:pseudocode}
 
-We will be using several functions in the pseudocode.
+We'll be dealing with files in these compression algorithms. Do not
+forget that these algorithms could of course the implemented  using
+ordinary array or lists. So we'll need to introduce several functions
+for dealing with files:
 
-\textproc{ReadByte} It is assumed from the beginning of the algorithm that
-a file has already been opening for reading. This could be the file
-we're trying to compress, uncompress, and many other things. This
-function reads a byte from that file.
+\begin{description}
+\item[\textproc{ReadByte}] It is assumed from the beginning of the
+  algorithm that a file has already been opened for reading. This
+  could be the file we're either trying to compress or
+  decompress. This function reads a byte from that file.
 
-\textproc{EndOfFileReached} true of the end the file we're reading
-from have been reached.
+\item[\textproc{WriteByte}] At the beginning of every algorithm, we also
+  assume that there is a file opened for output. This function writes
+  a byte to that file.
 
-\textproc{WriteByte} At the beginning of every algorithm, we assume
-that there is a file opened for output. This function Writes a byte to
-that opened file.
+\item[\textproc{EndOfFileReached}] \True{} if the end the file we're
+  reading from have been reached.
 
-We will also a be using custom control structure, repeat:
+\end{description}
+
+Although we will be dealing in bytes in these algorithms, they could
+easily by generalized to compression or decompressing other integer
+types likes \texttt{long} or \texttt{short}.
+
+\subsection{Other conventions}
+\label{sec:other-conventions}
+
+We will also a be using a custom control structure \algorithmicrepeat,
+which is demonstrated in algorithm \ref{alg:repeat}.
 
 \begin{algorithm}[h]
   \caption{The repeat control structure.}
   \label{alg:repeat}
   \begin{algorithmic}[1]
     \Repeat{$n$}
-      \State $actions...$ \Comment{Repeats $actions...$ $n$ times} %
+      \State $actions\ldots$ \Comment{Repeats $actions\ldots n$ times} %
     \EndRepeat
   \end{algorithmic}
 \end{algorithm}
 
-Although we will be dealing in bytes in most of these algorithms, they
-could easily by generalized to larger integer types likes
-\texttt{long}.
-
-\newcommand{\commentsymbol}{\(\triangleright\)}
-\algrenewcommand{\algorithmiccomment}[1]{\hfill\commentsymbol#1}
-
-Comments are signified by the symbol \commentsymbol.
+The start of a comment is specified by the symbol \commentsymbol.
 
 \section{Run Length Encoding}
 \label{sec:rle}
@@ -87,34 +139,41 @@ Comments are signified by the symbol \commentsymbol.
 \subsection{Naive version}
 \label{sec:most-simple-version}
 
-One the most simple compression algorithms is known as Run Length
-Encoding \index{Run Length Encoding}(RLE
-\index{RLE}). \cite{nagarajan11:_enhan_approac_run_lengt_encod_schem}
-The algorithm works like: Sequences of consecutive
-data is stored with a data count and a single value rather than the entire
-run in packets.
+One the most simple compression algorithms is known as \textit{Run
+  Length Encoding}\index{Run Length Encoding}(abbreviated
+RLE\index{RLE})\cite{nagarajan11:_enhan_approac_run_lengt_encod_schem}.
+The algorithm works like this: Sequences of consecutive data are stored
+in packets containing a data count and a single value, rather than the
+entire run of data.
 
-But what does that mean? Let us consider the string
+But what does that actually \textit{mean}? Let us consider the string
 
 \begin{indentpar}
   WWWWAAAACCCCCCQ
 \end{indentpar}
 
-When running the RLE encoding algorithm on this string, it is
+As we can see, there are several runs of duplicated data in this
+string. What if we instead of storing all of the duplicated data,
+stored a number that tells how many times the following character
+is replicated. And that's the RLE algorithm in a nutshell.
+
+So when running the RLE encoding algorithm on this string, it is
 compressed like this:
 
+\newcommand{\pkt}[2]{\textbf{#1}#2}
+
 \begin{indentpar}
-  4W4A6C1Q
+  \pkt{4}{W}\pkt{4}{A}\pkt{6}{C}\pkt{1}{Q}
 \end{indentpar}
 
-So all the RLE encoding algorithm really do is encode long consequtive
-runs of the same value as a count and a single data value. We will call a
-sequence of a data count and the data itself a run length
-\textit{packet} \index{packet}.
+So all the RLE encoding algorithm really does is encode long
+consecutive runs of the same value as a count and a single data
+value. We from now on will call a sequence of a data count and the
+data itself a \textit{packet}\index{packet}.
 
 But however, the same thing is also done for single runs, meaning that
-the algorithm can potentially explode the size of the original data,
-rather than compress it. Consider, for example, the string
+the algorithm can potentially explode the size of the original data
+rather than compress it. Consider,for example, the string
 
 \begin{indentpar}
   eric
@@ -122,15 +181,37 @@ rather than compress it. Consider, for example, the string
 
 this will actually get ``compressed'' down to
 
+\newcommand{\spkt}[1]{\pkt{1}{#1}}
+
 \begin{indentpar}
-  1e1r1i1c
+  \spkt{e}\spkt{r}\spkt{i}\spkt{c}
 \end{indentpar}
 
 So the size actually doubled for this kind of data! So for very data
 with very varying values, like photos and books, this algorithm will
 do just horrible. But in data in which the values are not varied much
 at all, like that robot logo we showed in the last chapter, even for such a
-naive algorithm, it will do quite good.
+naive algorithm, it will do quite good. In table \ref{tab:rle-comp} the compression
+ratio of the algorithm for some sample data is demonstrated. As can be
+seen from the table, the comrpession algorithm is a single value that
+can be assgined to an algorithm, but it depents on the kind of data
+that is being compressed. Some data may yield a high compression ratio
+for a simple algorithm, while data may potentially explode it.
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}[h!]{llr}
+    \toprule
+    Uncompressed data & compressed data & compression ratio($\%$) \\
+    \midrule
+    AAAEEERR & \pkt{3}{A}\pkt{3}{E}\pkt{2}{R} & $75$ \\
+    ericarne & \spkt{e}\spkt{r}\spkt{i}\spkt{c}\spkt{a}\spkt{r}\spkt{n}\spkt{e} & $200$ \\
+    BBBWWWBBBWWWBBBWWW & \pkt{3}{B}\pkt{3}{W}\pkt{3}{B}\pkt{3}{W}\pkt{3}{B}\pkt{3}{W} & $66.666\dots$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{RLE compression}
+  \label{tab:rle-comp}
+\end{table}
 
 \subsubsection{Implementation}
 \label{sec:implementation-1}
@@ -522,6 +603,8 @@ times.
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
+
+\FloatBarrier
 
 \printbibliography[heading=subbibliography]
 
