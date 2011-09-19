@@ -85,8 +85,8 @@ void decode(char * inputfile,char * outputfile)
         for(; length > 0; --length)
             writeByte(c,out);
 
-	length = readByte(in);
-	c = readByte(in);
+        length = readByte(in);
+        c = readByte(in);
     }
 
     fclose(in);
@@ -189,9 +189,18 @@ void encode_opt(char * inputfile,char * outputfile)
         /* if it's not the first character. */
         if(passedFirstCharacter){
 
-            /* compress a run length packet. */
-            if(c2 == c1 && length < 127){
-
+            /* if the packet is full.*/
+            if(length == 127){
+                if(packetType == RUN_LENGTH_PACKET){
+                    writeRunLengthPacket(length,c1,out);
+                    packetType = RAW_PACKET;
+                    length = 0;
+                }else{
+                    writeRawPacket(length-1,data,out);
+                    length = 1;
+                }
+            }
+            else if(c2 == c1){
                 /* if a raw packet was being written, finish it. */
                 if(packetType == RAW_PACKET && length > 0){
                     writeRawPacket(length-1,data,out);
@@ -202,17 +211,11 @@ void encode_opt(char * inputfile,char * outputfile)
             }
             /* if it's a raw packet, or the run length packet is full. */
             else{
-                /* Finished run length packet */
                 if(packetType == RUN_LENGTH_PACKET){
-
                     writeRunLengthPacket(length,c1,out);
-
-                    /* begin a raw packet */
                     packetType = RAW_PACKET;
-
-                    /* reset the length. */
                     length = 0;
-                } else{
+                }else{
                     /* continue raw packet */
                     data[length] = c1;
                     length = length + 1;
@@ -225,7 +228,7 @@ void encode_opt(char * inputfile,char * outputfile)
         c2 = readByte(in);
     }
 
-    /* write the last bytes. */
+/* write the last bytes. */
     if(passedFirstCharacter){
         if(packetType == RUN_LENGTH_PACKET){
             writeRunLengthPacket(length,c1,out);
@@ -273,7 +276,7 @@ void decode_opt(char * inputfile,char * outputfile)
             }
         }
 
-	head = readByte(in);
+        head = readByte(in);
     }
 
     fclose(in);
