@@ -51,6 +51,9 @@
 \usepackage[chapter]{algorithm}
 \usepackage{algpseudocode}
 
+\newcommand{\commentsymbol}{$\triangleright$}
+\algrenewcommand{\algorithmiccomment}[1]{\hfill\commentsymbol#1}
+
 \algrenewcommand\alglinenumber[1]{
   \tt\footnotesize\textcolor[HTML]{888888}{#1}}
 
@@ -72,6 +75,7 @@
 
 \newcommand{\Break}{\State \textbf{break}}
 \newcommand{\VoidCall}[1]{ \Call{#1}{\ensuremath{}}}
+
 
 % miscellaneous configurations
 %\pagestyle{headings}
