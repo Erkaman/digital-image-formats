@@ -418,7 +418,26 @@ to
   7E131RIC
 \end{indentpar}
 
-To further demonstrate the efficiency of this algorithm, please study table ?
+To further demonstrate the efficiency of this algorithm, please study
+table \ref{tab:packbits-comp}. As it can be seen, this algorithm
+maintains the occasional efficency of RLE, while not doubling the size
+of non-repetitive data.
+
+\begin{table}[h!]
+  \centering
+  \begin{tabular}[h!]{llr}
+    \toprule
+    Uncompressed data & compressed data & compression ratio($\%$) \\
+    \midrule
+    AAAEEERR & \pkt{3}{A}\pkt{3}{E}\pkt{2}{R} & $75$ \\
+    ericarne & \pkt{136}{ericarne} & $112.5$ \\
+    BBBWWWBBBWWWBBBWWW & \pkt{3}{B}\pkt{3}{W}\pkt{3}{B}\pkt{3}{W}\pkt{3}{B}\pkt{3}{W} & $66.666\dots$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{PackBits compression}
+  \label{tab:packbits-comp}
+\end{table}
+
 
 \subsubsection{Usage}
 \label{sec:usage}
