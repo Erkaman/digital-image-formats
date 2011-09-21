@@ -7,18 +7,19 @@
 #define RUN_LENGTH_PACKET 1
 #define RAW_PACKET 0
 
-void decode(char * inputfile,char * outputfile);
-void encode(char * inputfile,char * outputfile);
-void writeRawPacket(BYTE length,BYTE * data,FILE * fp);
+void RLE_Encode(char * inputfile,char * outputfile);
+void RLE_Decode(char * inputfile,char * outputfile);
+void packBitsEncode(char * inputfile,char * outputfile);
+void packBitsDecode(char * inputfile,char * outputfile);
 void writeRunLengthPacket(BYTE length,BYTE data,FILE * fp);
-void encode_opt(char * inputfile,char * outputfile);
-void decode_opt(char * inputfile,char * outputfile);
+void writeRawPacket(BYTE length,BYTE * data,FILE * fp);
+void showHelp(void);
 
 int main(int argc, char *argv[])
 {
-
     int decompress = 0;
     int optimize = 0;
+    int help = 0;
     int n;
 
     if(argc == 1){
@@ -36,12 +37,20 @@ int main(int argc, char *argv[])
         case 'd':
             decompress = 1;
             break;
-        case 'o':
+        case 'p':
             optimize = 1;
+            break;
+        case 'h':
+            help = 1;
             break;
         }
         ++argv;
         ++n;
+    }
+
+    if(help){
+	showHelp();
+	return 0;
     }
 
     if((argc - n) < 2){
@@ -49,24 +58,36 @@ int main(int argc, char *argv[])
         return 1;
     }
 
+
     if(optimize){
         if(decompress){
-            decode_opt(argv[0],argv[1]);
+            packBitsDecode(argv[0],argv[1]);
         } else{
-            encode_opt(argv[0],argv[1]);
+            packBitsEncode(argv[0],argv[1]);
         }
     } else{
         if(decompress){
-            decode(argv[0],argv[1]);
+            RLE_Decode(argv[0],argv[1]);
         }else{
-            encode(argv[0],argv[1]);
+            RLE_Encode(argv[0],argv[1]);
         }
     }
 
     return 0;
 }
 
-void decode(char * inputfile,char * outputfile)
+void showHelp(void)
+{
+    printf("Usage: rle [OPTION]... IN OUT\n");
+    printf("Compress or decompress the IN file to the OUT file using the Run Length Encoding algorithm.\n");
+
+    printf("  -h\tDisplay this help message.\n");
+    printf("  -p\tUse the packBits algorithm for the (de)compression(default is RLE).\n");
+    printf("  -d\t Perform a decompression rather than a compression to the output file..\n");
+}
+
+
+void RLE_Decode(char * inputfile,char * outputfile)
 {
     FILE * in;
     FILE * out;
@@ -93,7 +114,7 @@ void decode(char * inputfile,char * outputfile)
     fclose(out);
 }
 
-void encode(char * inputfile,char * outputfile)
+void RLE_Encode(char * inputfile,char * outputfile)
 {
     FILE * in;
     FILE * out;
@@ -162,7 +183,7 @@ void writeRunLengthPacket(BYTE length,BYTE data,FILE * fp)
 }
 
 
-void encode_opt(char * inputfile,char * outputfile)
+void packBitsEncode(char * inputfile,char * outputfile)
 {
     FILE * in;
     FILE * out;
@@ -242,7 +263,7 @@ void encode_opt(char * inputfile,char * outputfile)
     fclose(out);
 }
 
-void decode_opt(char * inputfile,char * outputfile)
+void packBitsDecode(char * inputfile,char * outputfile)
 {
     FILE * in;
     FILE * out;
@@ -282,3 +303,5 @@ void decode_opt(char * inputfile,char * outputfile)
     fclose(in);
     fclose(out);
 }
+
+
