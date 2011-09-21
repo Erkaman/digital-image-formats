@@ -10,7 +10,6 @@
   \section{Introduction}
   \label{sec:tga-introduction}
 
-  \cite{91:_truev_tga_file_format_specif}
 
   The whole purpose of this book was to give a good understanding of
   how image formats really work under the hood. But we couldn't just
@@ -28,6 +27,56 @@
   parts common to all image formats and it even features a very simple
   compression algoriothm: RLE, which was one of the algoriothms we
   covered in the last chapter.
+
+  But the TGA format is also pretty huge and supports several
+  features. However, just a very few of these features are used in
+  images you met out in the field, so we will just focused on these
+  selected features. And remember, I'm only here to try and get you an
+  \textit{overview} of the structure of a TGA file, not to tell how
+  exactly everything in the format works. If you want to know more
+  about the other features of the format, or more in depth of the
+  features I will cover, I highly reccomend you to read the TGA
+  specification: \cite{91:_truev_tga_file_format_specif}. As far as
+  file format standards go, it's a very well written and clear
+  specification and that is part of the reason why I chose to first
+  cover the TGA format.
+
+  \newcommand{\plural}[3]{\ifstrequal{#1}{1}{#2}{#3}}
+
+  \newcommand{\fieldlength}[1]{\ifstrequal{#1}{0}{variable}{#1 \plural{#1}{byte}{bytes}}}
+
+  \newcommand{\imgfield}[2]{\subsection{#1(\fieldlength{#2})}}
+
+  \section{File Header}
+
+  \imgfield{ID Length}{1}
+
+  Surprisingly enough, this is one the few image format that doesn't
+  have a set of magic numbers at the beginning. Instead, something
+  known as the of the image is used. In a later field of
+  the format, there is a field called the image ID. It is disscussed
+  in the future section.
+
+  \imgfield{Color Map Type}{1}
+
+  The TGA format supports palettetes. An alternative term for palette
+  is Color map\index{color map} and that word is used in the TGA
+  standard.
+
+  \imgfield{Image Type}{1}
+
+  \imgfield{Color map specification}{5}
+
+  \path|code/tga/tga.c|
+
+  \section{Color Data}
+
+  \section{Extension Area}
+
+  The extension area includes other miscellaneous information about an
+  image. However, I consider it uncessasy for you to know this
+  information. you should read the TGA standard for information on
+  this area and also read the sample source code in:
 
   \printbibliography[heading=subbibliography]
 
