@@ -45,7 +45,7 @@
 
   \newcommand{\fieldlength}[1]{\ifstrequal{#1}{0}{variable}{#1 \plural{#1}{byte}{bytes}}}
 
-  \newcommand{\imgfield}[2]{\subsection{#1(\fieldlength{#2})}}
+  \newcommand{\imgfield}[2]{\subsection*{#1(\fieldlength{#2})}}
 
   \section{File Header}
 
@@ -61,13 +61,46 @@
 
   The TGA format supports palettetes. An alternative term for palette
   is Color map\index{color map} and that word is used in the TGA
-  standard.
+  standard. This field could simply be seen a boolean value indicating
+  whether or not the image has a color map or not. So if it is $1$,
+  there is indeed a color map in the image, otherwhise; there's no
+  color map.
 
   \imgfield{Image Type}{1}
 
-  \imgfield{Color map specification}{5}
+  There are several ways of storing color as we talked about in
+  chapter \ref{cha:color}. In the TGA format there's
+  pseudo-color\index{pseudo-color}, which means that the color data
+  uses a palette and there's true-color\index{true-color}, meaning that the raw
+  color data is stored in the image. And furthermore, the color data
+  may either be stored in RGB values, grayscale values and the data
+  may even be compressed.
 
-  \path|code/tga/tga.c|
+  In the end, this all amounts to $6$ different kinds of images. The
+  image type is specified by the number value of this field. Table \ref{tab:imgtype}
+  shows all of these different kinds of images. If you have been
+  reading carefully up to this point, all the terms of the table
+  should make perfect sense to you.
+
+  \begin{table}[h!]
+    \centering
+    \begin{tabular}[h!]{ll}
+      \toprule
+      Image Type & Properties \\
+      \midrule
+      1 & Uncompressed, Color-mapped \\
+      2 & Uncompressed, True-color \\
+      3 & Uncompressed, Grayscale\\
+      9 & Run-length encoded, Color-mapped \\
+      10 & Run-length encoded, True-color \\
+      11 & Run-length encoded, Grayscale\\
+      \bottomrule
+    \end{tabular}
+    \caption{Image Type}
+    \label{tab:imgtype}
+  \end{table}
+
+  \imgfield{Color map specification}{5}
 
   \section{Color Data}
 
