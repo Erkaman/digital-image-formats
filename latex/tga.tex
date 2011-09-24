@@ -28,49 +28,53 @@
   covered in chapter \ref{cha:compress-techn}.
 
   But the TGA format is also has its share of complexity. To make the
-  format more extensible for programmers such us, Several features
-  were added in the second version of the format specification. But we
-  will ignore these features as they are not really needed to just
-  make an ordinary image, and few images out in the field use them. To
-  not make this chapter a complete rip-off of the TGA specification
+  format more extensible for programmers such as us, several features
+  were added in the second version of the format. But we will ignore
+  these features as they are not really needed to just make an
+  ordinary image, and few images out in the wild use them. To not
+  make this chapter a complete rip-off of the TGA specification
   \cite{91:_truev_tga_file_format_specif} I will only cover the
   features that are required to load the color data out of the
   image. The rest of the features of the TGA format are free for you
   to explore. This shouldn't be very hard for you to do, as the TGA
-  specification is the most well written image format specifications I
-  have read.
+  specification is an easy read, at least compared to other image
+  formats specifications.
+
+  \section{Some Terminology}
 
   The TGA format consists things called fields\index{field}. A field
   gives information about the image you're trying to open. It could
-  give information like image name, color depth, the entire color data
+  give information like the name of the image, color depth, the entire color data
   of the image and so soon. It could really contain of anything. And
   field also has a specific size.
 
   \newcommand{\plural}[3]{\ifstrequal{#1}{1}{#2}{#3}}
   \newcommand{\fieldlength}[1]{\ifstrequal{#1}{0}{variable}{#1 \plural{#1}{byte}{bytes}}}
   \newcommand{\imgfield}[2]{\subsection*{#1(\fieldlength{#2})}}
+  \newcommand{\imgsubfield}[2]{\subsubsection*{#1(\fieldlength{#2})}}
 
-  The contents of fields will be organized under subsections. The heading:
+  We will describe these fields in the order that they occur. Each
+  field will given it's own subsection, organized under headings:
 
   \imgfield{Name}{3}
 
-  Specifies that we will be discussing a field named Name with a length
-  of 3 bytes.
+  This heading specifies that we will be discussing a field named Name
+  that has a length of 3 bytes. The byte size of course very useful
+  for writing the loading code.
 
   On the other hand, the heading:
 
   \imgfield{Name}{0}
 
-  Shows that we will be covering a field named Name that a length
-  that varies depending on the image we're dealing with. The color
-  data field is an perfect example of this; it just contains all the
-  color of the image and it thus varies with the size and color depth
-  of the image. The sizes of these fields could also be specified in
-  earlier fields, as we will see example of later.
+  Shows that we will be covering a field named Name with a length that
+  varies depending on the image we're dealing with. The color data
+  field is an perfect example of this; it just contains all the color
+  data of the image and it thus varies with the size, width, height
+  and color depth of the image. The sizes of these fields could also
+  be specified in earlier fields, as we soon will see an example of.
 
-  The TGA format consists of three major sections: The File Header,
-  The Color Data, The Developer Area, The Extension Area, The TGA File
-  Footer.
+  The fields are also organized into so called sections\index{section} in the
+  file. We will now be covering these section one after one:
 
   \section{File Header}
 
@@ -78,19 +82,18 @@
 
   Surprisingly enough, this is one the few image formats that doesn't
   have a set of magic numbers at the beginning. Instead, something
-  known as the of the image is used. In a later field of
-  the format, there is a field called the image ID. This field
-  specified the length of that field. It is disscussed
-  in the future section.
+  known as the ID Length of the image is used. In a later field of the
+  format, there is a field called the image ID. This field specifies
+  the length of that field. It is discussed in depth in section
+  \ref{sec:color-data}.
 
   \imgfield{Color Map Type}{1}
 
-  The TGA format supports palettetes. An alternative term for palette
-  is Color map\index{color map} and that word is used in the TGA
-  standard. This field could simply be seen a boolean value indicating
-  whether or not the image has a color map or not. So if it is $1$,
-  there is indeed a color map in the image, otherwhise; there's no
-  color map.
+  The TGA format supports color palettes. An alternative term for a
+  palette is Color map\index{color map}. This field could simply be
+  seen as a boolean value indicating whether or not the image has a color
+  map or not. So if it is $1$, there is a color map in the
+  image, otherwise; there's no color map is used.
 
   \imgfield{Image Type}{1}
 
@@ -126,17 +129,100 @@
     \label{tab:imgtype}
   \end{table}
 
-  \imgfield{Color map specification}{5}
+  \imgfield{Color Map Specification}{5}
 
-  \section{Color Data}
+  The color map specification fields consists of a bunch of subfields
+  describing the color map include in this image. If the image doesn't
+  even have color map to begin with, these fields will be totally
+  useless to you, but on to the subject:
 
-  \section{Other Fields}
+  \imgsubfield{Color map offset}{2}
 
-  The extension area includes other miscellaneous information about an
-  image. But this information really has nothing to do with the way
-  the color data is stored, so we won't explore these fields. But you
-  are of course free to explore this area.
+  \imgsubfield{Color map length}{2}
 
-  \printbibliography[heading=subbibliography]
+  \imgsubfield{Color map entry size}{1}
+
+  \imgsubfield{Color map entry size}{1}
+
+  \imgfield{Image Specification}{10}
+
+  \imgsubfield{X-origin of Image}{2}
+
+  \imgsubfield{Y-origin of Image}{2}
+
+  \imgsubfield{Image Width}{2}
+
+  \imgsubfield{Image Height}{2}
+
+  \imgsubfield{Pixel Depth}{1}
+
+  \imgsubfield{Image descriptor}{1}
+
+  \section{Loading the file header}
+  \label{sec:loading-file-header}
+
+  These fields occur in the order that I just described
+  them. Algorithm ref{alg:load-file-header} shows how to load them. The values of these fields
+  will be used in the loading code for the color data, so do take note
+  of their names. As can be seen, I'm almost being condescending
+  towards you by even bothering to include this extremely simple
+  code. I promise I won't be as condescending in the future.
+
+  \begin{algorithm}
+    \caption{Loading the file header of a TGA image.}
+    \label{alg:load-file-header}
+    \newcommand{\loadfield}[2]{\Let{$#1$}{\Call{Read}{$#2$}}}
+  \begin{algorithmic}[1]
+    \loadfield{IDLength}{1}
+    \loadfield{colorMapType}{1}
+    \loadfield{imageType}{1}
+    \linecomment{The Color Map Specification}
+    \loadfield{colorMapOffset}{2}
+    \loadfield{colorMapLength}{2}
+    \loadfield{colorMapEntrySize}{2}
+    \linecomment{Image Specification}
+    \loadfield{xOrigin}{2}
+    \loadfield{yOrigin}{2}
+    \loadfield{imageWidth}{2}
+    \loadfield{imageHeight}{2}
+    \loadfield{pixelDepth}{1}
+    \loadfield{imageDescriptor}{1}
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Color Data}
+\label{sec:color-data}
+
+\imgfield{Image ID}{0}
+
+\imgfield{Color Map Data}{0}
+
+\imgfield{Color Map Specification}{0}
+
+\section{Developer Area}
+
+The extension area is useful to programmers.
+
+\section{Extension Area}
+
+The extension area includes many different fields containing mostly
+miscellaneous information about an image. We will not be covering
+here, but the sample source code includes does load this area and
+all of it's fields. See the TGA specification for more information
+on this area.
+
+\section{TGA File Footer}
+
+The file footer of a TGA image always occurs in the end of it, if it
+has one. Images made before the version 2 of the TGA format tend not
+to have one, and neither do they have an extension area nor
+developer area. Speaking of that, all this section really contains
+is the offset the developer area and extension area. \todo{mention
+  the fseek function}. Because you see, these fields can occur
+anywhere in a TGA image.\todo{mention order implications}.
+
+what.
+
+\printbibliography[heading=subbibliography]
 
 \end{refsection}

@@ -22,6 +22,7 @@
 \usepackage{graphicx}
 \usepackage{etoolbox}
 \usepackage{path}
+\usepackage{enumitem}
 
 \usepackage{caption}
 \captionsetup{
@@ -55,15 +56,16 @@
 
 \newcommand{\commentsymbol}{$\triangleright$}
 \algrenewcommand{\algorithmiccomment}[1]{\hfill\commentsymbol#1}
+\newcommand{\linecomment}[1]{\State\commentsymbol#1}
 
 \algrenewcommand\alglinenumber[1]{
   \tt\footnotesize\textcolor[HTML]{888888}{#1}}
 
 \newcommand*\Let[2]{\State #1 $\gets$ #2}
 
-\algblockdefx[REPEAT]
-{Repeat}
-{EndRepeat}
+\algblockdefx[REPEATN]
+{Repeatn}
+{EndRepeatn}
 [1]{\algorithmicrepeat\ #1 \ \algorithmicdo}
 {\algorithmicend \ \algorithmicrepeat}
 
@@ -123,6 +125,4 @@
 \newcommand*{\tikzname}{Ti\emph{k}Z}
 \newcommand*{\pgfname}{\textsc{pgf}}
 
-%\usepackage{titlesec}
-%\newcommand{\headingfont}{\fontfamily{helvetica}\selectfont}
-%\titleformat*{\section}{\headingfont}
+\newcommand{\C}{\textsc{C}}

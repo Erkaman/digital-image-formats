@@ -1,15 +1,15 @@
 \begin{comment}
   \bibliography{project.bib}
 \end{comment}
-\chapter{Compression techniques}
+\chapter{Compression Techniques}
 \label{cha:compress-techn}
 
 \begin{refsection}
 
-\section{Some terminology}
+\section{Some Terminology}
 \label{sec:some-terminology}
 
-\subsection{Encoding and decoding}
+\subsection{Encoding And Decoding}
 \label{sec:encoding-decoding}
 
 Coding data into another form is often referred to as
@@ -21,7 +21,7 @@ decoding are also often referred to as
 \textbf{compression}\index{compression} and
 \textbf{decompression}\index{decompression}.
 
-\subsection{Compression ratio}
+\subsection{Compression Ratio}
 \label{sec:compression-ratio}
 
 The compression ratio\index{compression ratio} is a very useful concept when talking about a
@@ -40,100 +40,14 @@ the algorithm, but we will ignore these concepts in this book to book
 to keep things simple. We will for the rest of the book specify the
 compression ratio in percentages, $\%$\cite{Salomon:2004:DCC}.
 
-\section{Pseudocode conventions}
-\label{sec:pseud-conv}
-
-In this chapter, we'll actually start covering some algorithms. We
-will describe these using pseudocode. The pseudocode will try to kept
-as traditional as possible, but we'll still need to establish some
-conventions for it:
-
-\subsection{Boolean operators}
-\label{sec:boolean-operators}
-
-For the boolean operators we'll be using the following
-symbols:
-
-\begin{description}
-\item[$\NOT$] logical \textit{not}
-\item[$\AND$] logical \textit{and}
-\item[$\OR$] logical \textit{or}
-\end{description}
-
-\subsection{Bitwise operators}
-\label{sec:bitwise-operators}
-
-\newcommand{\C}{\textsc{C}}
-
-We will for example also use the bitwise operators. If you
-haven't even heard of them, look up them and study them on your own. I
-assumed from the beginning of this book that such knowledge should be
-obvious to you. We will be using the notation used in \C{} to
-represent them in pseudocode:
-
-% looks ugly when typeset. check this:
-% http://www.troubleshooters.com/linux/lyx/ownlists.htm
-
-\begin{description}
-\item[$\BitNeg$] Bitwise \textit{NOT}
-\item[$\BitAnd$] Bitwise \textit{AND}
-\item[$\BitOr$] Bitwise \textit{OR}
-\item[$\BitXor$] Bitwise \textit{XOR}
-\item[$\ShiftLeft$] Left bit shift
-\item[$\ShiftRight$] Right bit shift
-\end{description}
-
-Notice that we are using $\BitXor$ for typesetting bitwise
-\textit{XOR} rather than the traditional \C{} notation. This is due to
-the fact that we'd otherwise confuse it with logical and, $\AND$.
-
-\subsection{Pseudocode Functions}
-\label{sec:pseudocode}
-
-We'll be dealing with files in these compression algorithms. So we'll
-need to introduce several functions for dealing with files:
-
-\begin{description}
-\item[\textproc{ReadByte}] It is assumed from the beginning of the
-  algorithm that a file has already been opened for reading. This
-  could be the file we're either trying to compress or
-  decompress. This function reads a byte from that file.
-
-\item[\textproc{WriteByte}] At the beginning of every algorithm, we also
-  assume that there is a file opened for output. This function writes
-  a byte to that file.
-
-\item[\textproc{EndOfFileReached}] \True{} if the end the file we're
-  reading from have been reached.
-
-\end{description}
-
 Although we will be dealing mostly with bytes in these algorithms, they could
 easily by generalized to compression or decompressing other integer
 types likes \texttt{long} or \texttt{short}.
 
-\subsection{Other conventions}
-\label{sec:other-conventions}
-
-We will also a be using a custom control structure called \algorithmicrepeat,
-which is demonstrated in algorithm \ref{alg:repeat}.
-
-\begin{algorithm}
-  \caption{The repeat control structure.}
-  \label{alg:repeat}
-  \begin{algorithmic}[1]
-    \Repeat{$n$}
-      \State $actions\ldots$ \Comment{Repeats $actions\ldots n$ times} %
-    \EndRepeat
-  \end{algorithmic}
-\end{algorithm}
-
-The start of a comment is indicated by the symbol \commentsymbol.
-
 \section{Run Length Encoding}
 \label{sec:rle}
 
-\subsection{Naive version}
+\subsection{Naive Version}
 \label{sec:naive-version}
 
 \subsubsection{Description}
@@ -285,9 +199,9 @@ manner as all the other packets.
     \Let{$c$}{\VoidCall{ReadByte}}
 
     \While{\neof}
-      \Repeat{$length$}
+      \Repeatn{$length$}
         \State \Call{WriteByte}{$b$}
-      \EndRepeat
+      \EndRepeatn
 
       \Let{$length$}{\VoidCall{ReadByte}}
       \Let{$c$}{\VoidCall{ReadByte}}
@@ -306,7 +220,7 @@ as the packet length.
 
 
 
-\subsection{PackBits version}
+\subsection{PackBits Version}
 \label{sec:packbits-version}
 
 
@@ -452,7 +366,7 @@ TGA image format \cite{91:_truev_tga_file_format_specif}.
 \subsubsection{Implementation}
 \label{sec:packbits-implementation}
 
-\paragraph{Writing the packets}
+\paragraph{Writing The Packets}
 \label{sec:writing-packets}
 
 Let us first consider how to write a raw packet. This is shown in
@@ -500,7 +414,7 @@ file.
   \end{algorithmic}
 \end{algorithm}
 
-\paragraph{Compression and decompression}
+\paragraph{Compression And Decompression}
 \label{sec:compr-decompr}
 
 Now that we know how to write the packets, let us consider how to
@@ -637,15 +551,15 @@ we just read the data and write it back $length$ times.
       \If{$head \BitAnd 128$}
         \Let{$data$}{\VoidCall{ReadByte}}
 
-        \Repeat{$length$}
+        \Repeatn{$length$}
           \State \Call{WriteByte}{$data$}
-        \EndRepeat
+        \EndRepeatn
       \Else
 
-        \Repeat{$length$}
+        \Repeatn{$length$}
           \Let{$data$}{\VoidCall{ReadByte}}
           \State \Call{WriteByte}{$data$}
-        \EndRepeat
+        \EndRepeatn
 
       \EndIf
 
@@ -655,7 +569,7 @@ we just read the data and write it back $length$ times.
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{Last things}
+\subsection{Last Things}
 
 Both of these algorithm are implemented in the sample program
 \path|code/tga/tga|. You can get instructions on how to use this command
