@@ -10,7 +10,6 @@
   \section{Introduction}
   \label{sec:tga-introduction}
 
-
   The whole purpose of this book was to give a good understanding of
   how image formats really work under the hood. But we couldn't just
   have jumped right in, we required knowledge of how color is stored
@@ -20,41 +19,68 @@
   explore. And furthermore, the digital color storage model we have
   learned about is used extensively in image formats.
 
-  Now it's time to explore our real first image format: TGA
-  \index{TGA}. But why TGA of all image formats? Because the format is
-  an extremely simple one at that, yet it is actually videly used in
-  some areas, including games and video processing. It has all the
+  Now it's time to explore our real first image format:
+  TGA\index{TGA}. But why TGA of all image formats? Because the format
+  is an extremely simple one at that, yet it is actually widely used
+  in certain areas, like games and video processing. And it has all the
   parts common to all image formats and it even features a very simple
-  compression algoriothm: RLE, which was one of the algoriothms we
-  covered in the last chapter.
+  compression algorithm: PackBits RLE, which was one of the algorithm we
+  covered in chapter \ref{cha:compress-techn}.
 
-  But the TGA format is also pretty huge and supports several
-  features. However, just a very few of these features are used in
-  images you met out in the field, so we will just focused on these
-  selected features. And remember, I'm only here to try and get you an
-  \textit{overview} of the structure of a TGA file, not to tell how
-  exactly everything in the format works. If you want to know more
-  about the other features of the format, or more in depth of the
-  features I will cover, I highly reccomend you to read the TGA
-  specification: \cite{91:_truev_tga_file_format_specif}. As far as
-  file format standards go, it's a very well written and clear
-  specification and that is part of the reason why I chose to first
-  cover the TGA format.
+  But the TGA format is also has its share of complexity. To make the
+  format more extensible for programmers such us, Several features
+  were added in the second version of the format specification. But we
+  will ignore these features as they are not really needed to just
+  make an ordinary image, and few images out in the field use them. To
+  not make this chapter a complete rip-off of the TGA specification
+  \cite{91:_truev_tga_file_format_specif} I will only cover the
+  features that are required to load the color data out of the
+  image. The rest of the features of the TGA format are free for you
+  to explore. This shouldn't be very hard for you to do, as the TGA
+  specification is the most well written image format specifications I
+  have read.
+
+  The TGA format consists things called fields\index{field}. A field
+  gives information about the image you're trying to open. It could
+  give information like image name, color depth, the entire color data
+  of the image and so soon. It could really contain of anything. And
+  field also has a specific size.
 
   \newcommand{\plural}[3]{\ifstrequal{#1}{1}{#2}{#3}}
-
   \newcommand{\fieldlength}[1]{\ifstrequal{#1}{0}{variable}{#1 \plural{#1}{byte}{bytes}}}
-
   \newcommand{\imgfield}[2]{\subsection*{#1(\fieldlength{#2})}}
+
+  The contents of fields will be organized under subsections. The heading:
+
+  \imgfield{Name}{3}
+
+  Specifies that we will be discussing a field named Name with a length
+  of 3 bytes.
+
+  On the other hand, the heading:
+
+  \imgfield{Name}{0}
+
+  Shows that we will be covering a field named Name that a length
+  that varies depending on the image we're dealing with. The color
+  data field is an perfect example of this; it just contains all the
+  color of the image and it thus varies with the size and color depth
+  of the image. The sizes of these fields could also be specified in
+  earlier fields, as we will see example of later.
+
+  The TGA format consists of three major sections: The File Header,
+  The Color Data, The Developer Area, The Extension Area, The TGA File
+  Footer.
 
   \section{File Header}
 
   \imgfield{ID Length}{1}
 
-  Surprisingly enough, this is one the few image format that doesn't
+  Surprisingly enough, this is one the few image formats that doesn't
   have a set of magic numbers at the beginning. Instead, something
   known as the of the image is used. In a later field of
-  the format, there is a field called the image ID. It is disscussed
+  the format, there is a field called the image ID. This field
+  specified the length of that field. It is disscussed
   in the future section.
 
   \imgfield{Color Map Type}{1}
@@ -82,9 +108,9 @@
   reading carefully up to this point, all the terms of the table
   should make perfect sense to you.
 
-  \begin{table}[h!]
+  \begin{table}
     \centering
-    \begin{tabular}[h!]{ll}
+    \begin{tabular}{ll}
       \toprule
       Image Type & Properties \\
       \midrule
@@ -104,12 +130,12 @@
 
   \section{Color Data}
 
-  \section{Extension Area}
+  \section{Other Fields}
 
   The extension area includes other miscellaneous information about an
-  image. However, I consider it uncessasy for you to know this
-  information. you should read the TGA standard for information on
-  this area and also read the sample source code in:
+  image. But this information really has nothing to do with the way
+  the color data is stored, so we won't explore these fields. But you
+  are of course free to explore this area.
 
   \printbibliography[heading=subbibliography]
 
