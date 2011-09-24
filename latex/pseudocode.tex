@@ -74,7 +74,12 @@ need to introduce several functions for dealing with them:
 \item[\Call{Read}{$size$}] Just being able to read a byte may not
   always be enough. We may want to read a number of a specific size
   from a file. We will do that with this function. This functions
-  reads a number of the size $size$ \textit{bytes}(not bits) from a file.
+  reads a number of the size $size$ \textit{bytes}(not bits) from a
+  file.
+
+\item[\Call{Seek}{$offset$}] Move from the beginning of the $offset$
+  bytes forward in the file we're currently reading.
+
 
 \end{description}
 

@@ -136,15 +136,30 @@
   even have color map to begin with, these fields will be totally
   useless to you, but on to the subject:
 
-  \imgsubfield{Color map offset}{2}
+  \imgsubfield{First Entry Index}{2}
+
+  You could theoretically start anywhere in a color map. But this
+  field specified the color will start. It is counter in bytes from
+  the beginning of the file. The \textproc{Seek} is used for moving
+  the file the first index of the color map in this case. And most
+  programming languages have an equivalent to this functions for
+  reading files.
 
   \imgsubfield{Color map length}{2}
 
-  \imgsubfield{Color map entry size}{1}
+  In this field, the length of the color map is specified(duh!)
 
   \imgsubfield{Color map entry size}{1}
+
+  Because the color map is just an array of colors, of course these
+  colors must have some sort of color depth. That color depth is
+  specified by this field.
 
   \imgfield{Image Specification}{10}
+
+  Following the color map specification is the image specification,
+  specifying other, miscellaneous, properties of an image useful for
+  loading it.
 
   \imgsubfield{X-origin of Image}{2}
 
@@ -152,11 +167,22 @@
 
   \imgsubfield{Image Width}{2}
 
+  The width of the image in pixels is specified by this field.
+
   \imgsubfield{Image Height}{2}
+
+  The height of the image in pixels is specified by this field.
 
   \imgsubfield{Pixel Depth}{1}
 
+  Even if the image includes a color palette, this field would still
+  be very important. Because the image in that is just a bunch of
+  indices, they could still have a depth, or size as would be more
+  conventient to say in this case.
+
   \imgsubfield{Image descriptor}{1}
+
+  Describes the image and bla.
 
   \section{Loading the file header}
   \label{sec:loading-file-header}
