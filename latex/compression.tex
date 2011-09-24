@@ -1,7 +1,6 @@
 \begin{comment}
   \bibliography{project.bib}
 \end{comment}
-
 \chapter{Compression techniques}
 \label{cha:compress-techn}
 
@@ -119,7 +118,7 @@ types likes \texttt{long} or \texttt{short}.
 We will also a be using a custom control structure called \algorithmicrepeat,
 which is demonstrated in algorithm \ref{alg:repeat}.
 
-\begin{algorithm}[h]
+\begin{algorithm}
   \caption{The repeat control structure.}
   \label{alg:repeat}
   \begin{algorithmic}[1]
@@ -201,9 +200,9 @@ algorithm, but it highly depends on the kind of data that is being
 compressed. Some data may yield a high compression ratio for a simple
 algorithm, while some data may potentially explode the size.
 
-\begin{table}[h!]
+\begin{table}
   \centering
-  \begin{tabular}[h!]{llr}
+  \begin{tabular}{llr}
     \toprule
     Uncompressed data & compressed data & compression ratio($\%$) \\
     \midrule
@@ -226,7 +225,7 @@ All of this is essentially trivial to implement in code. Let us first
 consider the compression algorithm, which is shown in algorithm
 \ref{alg:rle-enc}. What follows is the explanation of this algorithm.
 
-\begin{algorithm}[h]
+\begin{algorithm}
   \caption{Encoding a file using RLE.}
   \label{alg:rle-enc}
   \begin{algorithmic}[1]
@@ -277,7 +276,7 @@ nothing to write, so we need to check that we have passed the first
 character. If we have, we simply write the last packet in the same
 manner as all the other packets.
 
-\begin{algorithm}[h]
+\begin{algorithm}
   \caption{Decoding a RLE encoded file.}
   \label{alg:rle-dec}
   \begin{algorithmic}[1]
@@ -343,7 +342,7 @@ reserve the last bit in the packet header for a flag, and use the
 seven remaining bits for specifying the size as is demonstrated in
 figure \ref{fig:packbits-header}.
 
-\begin{figure}[h!]
+\begin{figure}
   \centering
   $\mbox{\fontsize{30}{0} $\underbrace{0}_\text{Flag bit}\overbrace{0000000}^\text{Length bits}$}$
   \caption{PackBits header}
@@ -425,9 +424,9 @@ table \ref{tab:packbits-comp}. As it can be seen, this algorithm
 maintains the occasional efficency of RLE, while not doubling the size
 of non-repetitive data.
 
-\begin{table}[h!]
+\begin{table}
   \centering
-  \begin{tabular}[h!]{llr}
+  \begin{tabular}{llr}
     \toprule
     Uncompressed data & compressed data & compression ratio($\%$) \\
     \midrule
@@ -464,7 +463,7 @@ bitwise operator \textit{OR} with the length of the packet, to pack in
 the length in the head. After that, the entire raw data which is
 contained in the array $data$ is written one by one to the compressed file.
 
-\begin{algorithm}[h]
+\begin{algorithm}
   \caption{Writing a raw packet.}
   \label{alg:raw-packet}
   \begin{algorithmic}[1]
@@ -487,7 +486,7 @@ value of $128$. Then the length is packed in the head, then we simply
 write the data value that is to be replicated $length$ times to the
 file.
 
-\begin{algorithm}[h]
+\begin{algorithm}
   \caption{Writing a run length packet.}
   \label{alg:rle-packet}
   \begin{algorithmic}[1]
@@ -532,7 +531,7 @@ file has been reached. The last step is done differently depending on
 the type of the current packet. \todo{the explanation needs a lot more
 work.}
 
-\begin{algorithm}[h]
+\begin{algorithm}
   \caption{Encoding a file using PackBits.}
   \label{alg:packbits-enc}
   \begin{algorithmic}[1]
@@ -624,7 +623,7 @@ case, then it's a run length packet. And so we read in the data part of
 the packet and repeat it $length$ times. Else, it is a raw packet, and
 we just read the data and write it back $length$ times.
 
-\begin{algorithm}[h]
+\begin{algorithm}
   \caption{Decoding a RLE packbits encoded file.}
   \label{alg:packbits-dec}
   \begin{algorithmic}[1]

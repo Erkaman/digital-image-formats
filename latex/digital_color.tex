@@ -36,7 +36,7 @@
   numerically \cite{fadgi11:color_model}. A very widely used color
   model for representing color in computers is \textbf{RGB}\index{RGB}.
 
-  \begin{figure}[h]
+  \begin{figure}
     \centering
     \inputtikz{rgb.tex}
     \caption{The RGB color model}
@@ -85,7 +85,7 @@
   fully visible. On the other hand, the leftmost color has its lowest
   possible alpha value, $0$, and as a result is fully transparent.
 
-  \begin{figure}[h!]
+  \begin{figure}
     \centering
     \inputtikz{alpha.tex}
     \caption{The color blue with an increasingly lower alpha channel.}
@@ -124,11 +124,11 @@
   colors can be represented. See table \ref{tab:color-examples} for
   examples of other color values.
 
-  \begin{table}[h!]
+  \begin{table}
     \newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
       \textcolor[RGB]{#1,#2,#3}{#4} \\}
     \centering
-    \begin{tabular}[h!]{lr}
+    \begin{tabular}{lr}
       \toprule
       RGB triple & Resulting color \\
       \midrule
@@ -186,7 +186,7 @@
   demonstrated in table \ref{tab:grayscale}. You will probably meet at least one of
   these grayscale color depths out in the wild.
 
-  \begin{table}[h!]
+  \begin{table}
     \centering
     \begin{tabular}{ll}
       \toprule
