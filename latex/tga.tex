@@ -2,6 +2,7 @@
   \bibliography{project.bib}
 \end{comment}
 
+% TODO: describe the seek Seek functions and it's options carefully.
 \chapter{TGA -- Truevision Graphics Adapter}
 \label{cha:tga}
 
@@ -78,7 +79,7 @@
 
   \section{File Header}
 
-  \imgfield{ID Length}{1}
+  \imgfield{ID Length\index{ID Length}}{1}
 
   Surprisingly enough, this is one the few image formats that doesn't
   have a set of magic numbers at the beginning. Instead, something
@@ -87,7 +88,7 @@
   the length of that field. It is discussed in depth in section
   \ref{sec:color-data}.
 
-  \imgfield{Color Map Type}{1}
+  \imgfield{Color Map Type\index{Color Map Type}}{1}
 
   The TGA format supports color palettes. An alternative term for a
   palette is Color map\index{color map}. This field could simply be
@@ -95,7 +96,7 @@
   map or not. So if it is $1$, there is a color map in the
   image, otherwise; there's no color map is used.
 
-  \imgfield{Image Type}{1}
+  \imgfield{Image Type\index{Image Type}}{1}
 
   There are several ways of storing color as we talked about in
   chapter \ref{cha:color}. In the TGA format there's
@@ -129,14 +130,14 @@
     \label{tab:imgtype}
   \end{table}
 
-  \imgfield{Color Map Specification}{5}
+  \imgfield{Color Map Specification\index{Color Map Specification}}{5}
 
   The color map specification fields consists of a bunch of subfields
   describing the color map include in this image. If the image doesn't
   even have color map to begin with, these fields will be totally
   useless to you, but on to the subject:
 
-  \imgsubfield{First Entry Index}{2}
+  \imgsubfield{First Entry Index\index{First Entry Index}}{2}
 
   You could theoretically start anywhere in a color map. But this
   field specified the color will start. It is counter in bytes from
@@ -145,17 +146,17 @@
   programming languages have an equivalent to this functions for
   reading files.
 
-  \imgsubfield{Color map length}{2}
+  \imgsubfield{Color map length\index{Color map length}}{2}
 
   In this field, the length of the color map is specified(duh!)
 
-  \imgsubfield{Color map entry size}{1}
+  \imgsubfield{Color map entry size\index{Color map entry size}}{1}
 
   Because the color map is just an array of colors, of course these
   colors must have some sort of color depth. That color depth is
   specified by this field.
 
-  \imgfield{Image Specification}{10}
+  \imgfield{Image Specification\index{Image Specification}}{10}
 
   Following the color map specification is the image specification,
   specifying other, miscellaneous, properties of an image useful for
@@ -165,22 +166,22 @@
 
   \imgsubfield{Y-origin of Image}{2}
 
-  \imgsubfield{Image Width}{2}
+  The position of the image on the screen.
 
-  The width of the image in pixels is specified by this field.
+  \imgsubfield{Image Width\index{Image Width}}{2}
 
-  \imgsubfield{Image Height}{2}
+  \imgsubfield{Image Height\index{Image Height}}{2}
 
-  The height of the image in pixels is specified by this field.
+  These two fields specify the measurements of the image in pixels.
 
-  \imgsubfield{Pixel Depth}{1}
+  \imgsubfield{Pixel Depth\index{Pixel Depth}}{1}
 
   Even if the image includes a color palette, this field would still
   be very important. Because the image in that is just a bunch of
   indices, they could still have a depth, or size as would be more
   conventient to say in this case.
 
-  \imgsubfield{Image descriptor}{1}
+  \imgsubfield{Image Descriptor\index{Image Descriptor}}{1}
 
   Describes the image and bla.
 
@@ -198,57 +199,77 @@
     \caption{Loading the file header of a TGA image.}
     \label{alg:load-file-header}
     \newcommand{\loadfield}[2]{\Let{$#1$}{\Call{Read}{$#2$}}}
-  \begin{algorithmic}[1]
-    \loadfield{IDLength}{1}
-    \loadfield{colorMapType}{1}
-    \loadfield{imageType}{1}
-    \linecomment{The Color Map Specification}
-    \loadfield{colorMapOffset}{2}
-    \loadfield{colorMapLength}{2}
-    \loadfield{colorMapEntrySize}{2}
-    \linecomment{Image Specification}
-    \loadfield{xOrigin}{2}
-    \loadfield{yOrigin}{2}
-    \loadfield{imageWidth}{2}
-    \loadfield{imageHeight}{2}
-    \loadfield{pixelDepth}{1}
-    \loadfield{imageDescriptor}{1}
-  \end{algorithmic}
-\end{algorithm}
+    \begin{algorithmic}[1]
+      \loadfield{IDLength}{1}
+      \loadfield{colorMapType}{1}
+      \loadfield{imageType}{1}
+      \linecomment{The Color Map Specification}
+      \loadfield{colorMapOffset}{2}
+      \loadfield{colorMapLength}{2}
+      \loadfield{colorMapEntrySize}{2}
+      \linecomment{Image Specification}
+      \loadfield{xOrigin}{2}
+      \loadfield{yOrigin}{2}
+      \loadfield{imageWidth}{2}
+      \loadfield{imageHeight}{2}
+      \loadfield{pixelDepth}{1}
+      \loadfield{imageDescriptor}{1}
+    \end{algorithmic}
+  \end{algorithm}
 
-\section{Color Data}
-\label{sec:color-data}
+  \section{Color Data\index{Color Data}}
+  \label{sec:color-data}
 
-\imgfield{Image ID}{0}
+  Here's where the fun part starts!
 
-\imgfield{Color Map Data}{0}
+  \imgfield{Image ID\index{Image ID}}{0}
 
-\imgfield{Color Map Specification}{0}
+  This field contains identifying information about the image. The
+  ID Length field found in the header is the length of this field. If
+  the ID Length is 0, this field doesn't exist. This field is an ASCII
+  string.
 
-\section{Developer Area}
+  \imgfield{Color Map Data\index{Color Map Data}}{0}
 
-The extension area is useful to programmers.
+  Loading code in algorithm \ref{alg:read-colormap}.
 
-\section{Extension Area}
+  \begin{algorithm}[H]
+    \caption{Reading the color map of a TGA file.}
+    \label{alg:read-colormap}
+    \begin{algorithmic}[1]
+      \ForTo{$i$}{$0$}{$colorMapLength$}
+        \Let{$data$}{\Call{Read}{$pixelDepth / 8$}}
+        \Let{$colorMap[i]$}{$data$}
+      \EndFor
+    \end{algorithmic}
+  \end{algorithm}
 
-The extension area includes many different fields containing mostly
-miscellaneous information about an image. We will not be covering
-here, but the sample source code includes does load this area and
-all of it's fields. See the TGA specification for more information
-on this area.
+  \imgfield{Color Map Specification\index{Color Map Specification}}{0}
 
-\section{TGA File Footer}
+  \section{Developer Area\index{Developer Area}}
 
-The file footer of a TGA image always occurs in the end of it, if it
-has one. Images made before the version 2 of the TGA format tend not
-to have one, and neither do they have an extension area nor
-developer area. Speaking of that, all this section really contains
-is the offset the developer area and extension area. \todo{mention
-  the fseek function}. Because you see, these fields can occur
-anywhere in a TGA image.\todo{mention order implications}.
+  The extension area is useful to programmers.
 
-what.
+  \section{Extension Area\index{Extension Area}}
 
-\printbibliography[heading=subbibliography]
+  The extension area includes many different fields containing mostly
+  miscellaneous information about an image. We will not be covering
+  here, but the sample source code includes does load this area and
+  all of it's fields. See the TGA specification for more information
+  on this area.
+
+  \section{TGA File Footer\index{File Footer}}
+
+  The file footer of a TGA image always occurs in the end of it, if it
+  has one. Images made before the version 2 of the TGA format tend not
+  to have one, and neither do they have an extension area nor
+  developer area. Speaking of that, all this section really contains
+  is the offset the developer area and extension area. \todo{mention
+    the fseek function}. Because you see, these fields can occur
+  anywhere in a TGA image.\todo{mention order implications}.
+
+  what.
+
+  \printbibliography[heading=subbibliography]
 
 \end{refsection}
