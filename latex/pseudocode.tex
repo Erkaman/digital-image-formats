@@ -1,27 +1,30 @@
 \chapter{Pseudocode Conventions}
 \label{cha:pseudocode-convent}
 
-Instead of showing code examples in an programming language, we'll be
-using pseudocode to explain the algorithms in this book. This is keep
-things as general as possible, and not force the reader into knowing a
-specific programming language before reading this book.
+Instead of showing code examples in some random programming language,
+we'll be using pseudocode to explain the algorithms in this book. This
+will keep things as general as possible, and not force the reader into
+knowing a specific programming language before reading this book.
 
-Sample code in the programming language \C{}, however, is provided. It
-can be found in the \path|/code| directory. But we will not disscuss
-this code, however, but the pseudocode.
+But on the other hand, sample code in the programming language \C{} is
+provided. It can be found in the \path|/code| directory. But the code
+that we will discuss and analyze in the book is the pseudocode and not
+the \C{}-code.
 
-The pseudocode will try to kept as traditional as possible, but we'll
-still need to establish several conventions for it:
+The pseudocode will be kept as traditional as possible, but we'll
+still need to establish several conventions for it, which is what
+we're going to do for the rest of the chapter.
 
 \section{Typographical Conventions}
 
-For showing keywords, \textbf{bold font} is used. Functions use
-\textproc{Small Caps}, Variable names use an $italic$-like font.
+This is how we'll use fonts in the pseudocode:
 
-\section{Boolean Operators}
+\textbf{keywords}, \textproc{functions}, and $variables$!
+
+\section{Boolean Algebra}
 \label{sec:boolean-operators}
 
-For the boolean operators we'll be using the following
+For the boolean operators, we'll be using the following
 symbols:
 
 \begin{description}
@@ -30,14 +33,19 @@ symbols:
 \item[$\OR$] logical \textit{or}
 \end{description}
 
+Boolean truth is represented by \True{}, and falseness is represented by
+\False{}.
+
 \section{Bitwise Operators}
 \label{sec:bitwise-operators}
 
-We will also use the bitwise operators. If you haven't even heard of
-them, look up them and study them on your own. I assumed from the
-beginning of this book that such knowledge should be obvious to
-you. We will be using the notation used in \C{} to represent them in
-pseudocode:
+It is very rare that bitwise operators are ever used in
+pseudocode. However, digital image och compression algorithms are
+areas where they are almost mandatory to understand the algorithms. If
+you are not familiar with bitwise operators, look up them and study
+them on your own, as I assumed from the beginning of this book that such
+knowledge should be obvious to you. We will be using the notation used
+in \C{} to represent them in pseudocode:
 
 \begin{description}
 \item[$\BitNeg$] Bitwise \textit{NOT}
@@ -55,14 +63,13 @@ the fact that we'd otherwise confuse it with logical and, $\AND$.
 \section{Functions}
 \label{sec:pseudocode}
 
-We'll be dealing with files in these compression algorithms, so we'll
-need to introduce several functions for dealing with them:
+We'll be dealing with files in many of these algorithms, so we'll need
+to introduce several functions for file handling operations.
 
 \begin{description}[font=\normalfont]
 \item[\textproc{ReadByte}] It is assumed from the beginning of the
   algorithm that a file has already been opened for reading. This
-  could be the file we're either trying to compress or
-  decompress. This function reads a byte from that file.
+  function reads a byte from that file.
 
 \item[\Call{WriteByte}{$byte$}] At the beginning of every algorithm,
   we also assume that there is a file opened for output. This function
@@ -77,9 +84,8 @@ need to introduce several functions for dealing with them:
   reads a number of the size $size$ \textit{bytes}(not bits) from a
   file.
 
-\item[\Call{Seek}{$offset$}] Move from the beginning of the $offset$
-  bytes forward in the file we're currently reading.
-
+%\item[\Call{Seek}{$offset$}] Move from the beginning of the $offset$
+%  bytes forward in the file we're currently reading.
 
 \end{description}
 
@@ -88,9 +94,8 @@ need to introduce several functions for dealing with them:
 
 As a decently competent programmer, you should be familiar with most
 of the control structures we'll be using. One control structure that
-may be unfamiliar to you, is the custom control structure called
-\algorithmicrepeat, which is demonstrated in algorithm
-\ref{alg:repeat}.
+is probably unfamiliar to you is the custom control structure called
+\algorithmicrepeat, which is demonstrated in algorithm \ref{alg:repeat}.
 
 \todo{Cover all the control structures?}
 
@@ -127,7 +132,7 @@ algorithm. It is shown in algorithm \ref{alg:binary-search}.
   \caption{Binary Search.}
   \label{alg:binary-search}
   \begin{algorithmic}[1]
-    \Function{writeRunLengthPacket}{$list,length,x$}
+    \Function{BinarySearch}{$list,length,x$}
       \Let{$min$}{$1$}
       \Let{$max$}{$length$}
       \Repeat

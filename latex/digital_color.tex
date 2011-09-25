@@ -204,15 +204,19 @@
   \section{Parsing Color Data}
   \label{sec:parsing-color-data}
 
-  So color is specified by having certain bits in a number specify
-  certain color channels. So how do we extract these bits. That is
-  what are going to discuss in the section.
+  A random 8-bit number, for example, could be written as a string of
+  ones and zeroes, 00011010. From now on we will refer to such a
+  string as a bit pattern.
+
+  Color is specified by bit ranges in numbers of certain
+  sizes. So how do we extract these bits? That is what are going to
+  discuss in the section.
 
   \subsection{Grayscale}
 
-  The most trivial one to parse it grayscale color. Since a grayscale
-  color is specified by just one number, there's no need to do any
-  parsing. As we discussed before, the number $x$ specifies the
+  The most trivial color type to parse is grayscale color. Since a
+  grayscale color is specified by just one number, there's no need to
+  do any parsing. As we discussed before, the number $x$ specifies the
   grayscale color \mbox{($x,x,x$)}. \todo{discuss different bit depths
     of grayscale}
 
@@ -220,24 +224,24 @@
 
   Things do however become more interesting when we try to parse RGB
   and RGBA color. There are several bit depths possible for RGB
-  color. We'll be covering the most common ones. In all of these
-  algorithms we'll be using the variable $data$ to contain the color
-  value we want to parse.
+  color but we'll only be covering some of the most common ones.
+
+  In all of these algorithms we'll be using the variable $data$ to
+  represent the color value we want to parse.
 
   \subsubsection{24-bit color}
-
-  Inspect figure \ref{fig:24-bit-colors-bits}. It shows how the
-  different color channel's values are stored in the 24-bit RGB
-  color. Algorithm \ref{alg:read-24-bit-rgb} demonstrated how to read
-  the separate color channels. It works like this:
-
 
   \begin{figure}
     \centering
     {\huge\textcolor{red}{10001011}\textcolor{green}{01010010}\textcolor{blue}{\fullbyte}}
     \label{fig:24-bit-colors-bits}
-    \caption{The bit pattern for this \textcolor[HTML]{8B52FF}{purple color}.}
+    \caption{The RGB bit pattern for this \textcolor[HTML]{8B52FF}{purple color}.}
   \end{figure}
+
+  Inspect figure \ref{fig:24-bit-colors-bits}. It shows how the
+  different color channel's values are stored in 24-bit RGB
+  color. Algorithm \ref{alg:read-24-bit-rgb} demonstrates how to read
+  all the separate color channels. It basically works like this:
 
   \begin{algorithm}[H]
     \caption{Reading the color channels of RGB 24-bit number.}
@@ -249,8 +253,8 @@
     \end{algorithmic}
   \end{algorithm}
 
-  $255$ is in binary \fullbyte. That means we can get the value of the
-  blue color channel like this:
+  $255$'s binary pattern is binary \fullbyte. That means we can get
+  the value of the blue color channel like this:
 
   \begin{center}
     \begin{tabular}{*{4}{c}}
@@ -263,9 +267,9 @@
   \end{center}
 
   For getting the value of the next color channel we'll need a new
-  value. The operations $255 \ShiftLeft 8$ result the next byte
-  pattern \emptybyte\fullbyte\emptybyte. Thus we get the value of the
-  green color channel this way
+  value. The operations $255 \ShiftLeft 8$ results in the formerly
+  used byte pattern being shifted 8 bits forwards. This pattern we can
+  used for matching the green color channel.
 
   \begin{center}
     \begin{tabular}{*{4}{c}}
@@ -277,20 +281,22 @@
     \end{tabular}
   \end{center}
 
-  But the resulting value will have to have right shifted 8 bits,
-  other whise it'd be $2^8$ times big as its actual value. And
-  therfore the operation to get the value of the green color channel
+  But the resulting value will have to have right shifted back 8 bits,
+  otherwise it'd be $2^8$ times big as its actual value! And
+  therefore, the operation to get the value of the green color channel
   is $(data \BitAnd (255 \ShiftLeft 8)) \ShiftRight 8$. And in same
   way the operation for getting the value of the red channel can be
   derived: $(data \BitAnd (255 \ShiftLeft 16)) \ShiftRight 16$.
 
   \subsubsection{32-bit color}
 
-  32-bit color is very much like 24-bit color. Figure shows two
-  different ways 32-bit color can be laid out in memory. As you can
-  see, the alpha channel have two different placements in the 32-bit
-  color. In algorithm \ref{alg:read-32-bit-rgb} we show how to parse the first variant, but do
-  keep in mind that both variants occur out in the wild.
+  32-bit color is very much like 24-bit color. But the alpha channel
+  can either come before the RGB color values, ARGB\index{ARGB}, or
+  they can occur after the RGB color values, RGBA\index{RGBA}. Figure
+  \ref{fig:32-bit-colors-bits} shows both the variants. The first one
+  is ARGB och the second one RGBA. In algorithm
+  \ref{alg:read-32-bit-rgb} we show how to parse the first variant,
+  ARGB, but do keep in mind that both variants occur out in the wild.
 
   \begin{figure}
     \centering
@@ -299,7 +305,6 @@
       \textcolor{red}{10001011}%
       \textcolor{green}{01010010}%
       \textcolor{blue}{\fullbyte}}
-    \par
     {\huge%
       \textcolor{red}{10001011}%
       \textcolor{green}{01010010}%
@@ -308,7 +313,7 @@
     }
 
     \label{fig:32-bit-colors-bits}
-    \caption{The bit pattern for this \textcolor[HTML]{8B52FF}{purple color}.}
+    \caption{The ARGB and RGBA color depths.}
   \end{figure}
 
   \begin{algorithm}[H]
@@ -324,7 +329,34 @@
 
   \subsubsection{16-bit color}
 
-  This is one usual color depth variant indeed.
+  \paragraph{TGA version}
+
+  The kind of 16-bit color available in the TGA format is shown in
+  figure \ref{fig:tga-16-bit-colors-bits}. And it can be trivially
+  parsed with algorithm \ref{alg:read-32-bit-rgb}. What is unsual here is that the values of the
+  color channel's are stored in 5-bit number, meaning that the bit
+  pattern $2^5 - 1 =$  11111 is used. The last bit a basically boolean
+  flag that specifies whether or not the color is visible.
+
+  \begin{figure}
+    \centering
+    {\huge\textcolor{gray}{0}%
+      \textcolor{red}{10101}\textcolor{green}{11100}\textcolor{blue}{01010}}
+    \label{fig:tga-16-bit-colors-bits}
+    \caption{Sample 16-bit color.}
+  \end{figure}
+
+  \begin{algorithm}[H]
+    \caption{Reading TGA 16-bit number.}
+    \label{alg:read-32-bit-rgb}
+    \begin{algorithmic}[1]
+      \Let{$B$}{$data \BitAnd 31$}
+      \Let{$G$}{$(data \BitAnd (31 \ShiftLeft 5)) \ShiftRight 5$}
+      \Let{$R$}{$(data \BitAnd (31 \ShiftLeft 10)) \ShiftRight 10$}
+      \Let{$A$}{$(data \BitAnd (1 \ShiftLeft 16)) \ShiftRight 16$}
+    \end{algorithmic}
+  \end{algorithm}
+
 
   \printbibliography[heading=subbibliography]
 \end{refsection}
