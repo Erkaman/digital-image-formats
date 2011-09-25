@@ -71,6 +71,10 @@
 
 \algnewcommand\algorithmicforeach{\textbf{for each}}
 
+\newcommand{\algto}{\textbf{to}}
+
+
+
 \algblockdefx[FOREACH]
 {ForEach}
 {EndForEach}
@@ -79,7 +83,7 @@
 
 \newcommand{\Break}{\State \textbf{break}}
 \newcommand{\VoidCall}[1]{ \Call{#1}{\ensuremath{}}}
-
+\newcommand{\ForTo}[3]{\For{ #1 $\gets$ #2 \algto\  #3}}
 
 % miscellaneous configurations
 %\pagestyle{headings}
