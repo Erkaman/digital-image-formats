@@ -130,6 +130,19 @@
     \label{tab:imgtype}
   \end{table}
 
+  From table \ref{tab:imgtype} we can derive the simple algorithm
+  \ref{alg:tga-compressed} for determining whether an image is
+  compressed.
+
+  \begin{algorithm}[H]
+    \caption{Determining if a TGA image is compressed or not.}
+    \label{alg:tga-compressed}
+    \begin{algorithmic}[1]
+      \Let{$compressed$}{$imageType = 9 \OR imageType = 10 \OR
+        imageType = 11$}
+    \end{algorithmic}
+  \end{algorithm}
+
   \imgfield{Color Map Specification\index{Color Map Specification}}{5}
 
   The color map specification fields consists of a bunch of subfields
@@ -231,7 +244,10 @@
 
   \imgfield{Color Map Data\index{Color Map Data}}{0}
 
-  Loading code in algorithm \ref{alg:read-colormap}.
+  Loading the color map is easy, as shown in algorithm
+  \ref{alg:read-colormap}. \todo{deal with color map entry index}. You
+  biggest worry is that you might forgot to divide the pixel depth by
+  8, as it is measured in bits and \textit{not bytes}.
 
   \begin{algorithm}[H]
     \caption{Reading the color map of a TGA file.}
@@ -244,7 +260,77 @@
     \end{algorithmic}
   \end{algorithm}
 
-  \imgfield{Color Map Specification\index{Color Map Specification}}{0}
+  \imgfield{Color Data\index{Color Data}}{0}
+
+  Here we have true ``meat and blood'' of the TGA format. In this
+  field the color data of the image is stored. The way this data is
+  stored depends on the image type. We'll be using the $compressed$
+  variable we created in algorithm \ref{alg:tga-compressed}.
+
+  \begin{algorithm}[H]
+    \caption{Reading the color data of a TGA file.}
+    \label{alg:TGA-read-colordata}
+    \newcommand{\process}{\State Process the color $data$ \dots}
+    \begin{algorithmic}[1]
+      \Let{$length$}{$imageWidth \mul imageHeigth$}
+      \Let{$i$}{$0$}
+      \While{$i < length$}
+        \If{$compressed$}
+
+          \Let{$head$}{\VoidCall{ReadByte}}
+          \Let{$length$}{$head \BitAnd 127$}
+
+          \If{$head \BitAnd 128$}
+
+            \Let{$data$}{$pixelDepth / 8$}
+
+            \If{colorMapType}
+              \Let{$data$}{colorMap[data]}
+            \EndIf
+
+            \Repeatn{length}
+
+              \process
+
+              \Inc{$i$}{$1$}
+
+            \EndRepeatn
+
+          \Else
+
+            \Repeatn{length}
+
+              \Let{$data$}{$pixelDepth / 8$}
+
+              \If{colorMapType}
+                \Let{$data$}{$colorMap[data]$}
+              \EndIf
+
+              \process
+
+              \Inc{$i$}{$1$}
+
+            \EndRepeatn
+
+          \EndIf
+        \Else
+
+          \Let{$data$}{\Call{Read}{pixelDepth / 8}}
+
+          \If{colorMapType}
+            \Let{$data$}{colorMap[data]}
+          \EndIf
+
+          \process
+
+          \Inc{$i$}{$1$}
+
+        \EndIf
+      \EndWhile
+    \end{algorithmic}
+  \end{algorithm}
+
+  Most of the algorithm should already be familiar to you.
 
   \section{Developer Area\index{Developer Area}}
 

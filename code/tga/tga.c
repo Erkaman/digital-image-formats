@@ -290,10 +290,11 @@ void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
         if(compressed){
             head = readByte(in);
 
+	    length = head & 0x7f;
+	    
             /* run length packet */
             if(head & 0x80){
 
-                length = head & 0x7f;
                 data = 0;
                 fread(&data, pixelDepth / 8, 1, in);
 
@@ -301,8 +302,6 @@ void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
                     data = colorMap[data];
 
                 for(length = length + 1; length > 0; --length){
-                    /* TODO: replace with more generic method */
-
 		    handleNewlines(i,width,out);
 
                     printColorData(data,out);
@@ -313,7 +312,6 @@ void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
             } else {
 
                 /* raw packet */
-                length = head & 0x7f;
                 for(length = length + 1; length > 0; --length){
 
                     data = 0;
