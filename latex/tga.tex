@@ -346,27 +346,28 @@
   talking in more detail about this section. If you have found an
   \tga image out in the wild that actually uses this, you can really
   guess how you are supposed to use this data, so you can't really
-  load it ``properly''.
+  load it properly.
 
   \section{Extension Area\index{Extension Area}}
 
-  The extension area includes many different fields containing mostly
-  miscellaneous information about an image. We will not be covering
-  here, but the sample source code includes does load this area and
-  all of it's fields. See the \tga specification for more information
-  on this area.
+  The extension area is a huge section containing many different
+  fields that gives a lot of miscellaneous information about an
+  image. As they are essentially trivial to load, we will not be
+  covering them here, but the sample \tga dumper does does load this
+  area and all of it's fields. See the source code to that program and
+  the \tga specification for more information on this area.
 
   \section{\tga File Footer\index{File Footer}}
 
-  The file footer of a \tga image always occurs in the end of it, if it
-  has one. Images made before the version 2 of the \tga format tend not
-  to have one, and neither do they have an extension area nor
-  developer area. Speaking of that, all this section really contains
-  is the offset the developer area and extension area. \todo{mention
-    the fseek function}. Because you see, these fields can occur
-  anywhere in a \tga image.\todo{mention order implications}.
-
-  \tga  \png \gif
+  The file footer of a \tga image always occurs in the end of it. But
+  not all \tga images have a file footer, however. Images made before
+  the version 2 of the \tga format tend not to have one, and neither
+  do they have an extension area nor a developer area. Because all
+  information that the file footer really includes is the location of
+  the developer and extension area. These are two fields that can
+  really occur anywhere in a \tga image, except for in the beginning
+  and the end of the image, that is why the location information is
+  included.
 
   \printbibliography[heading=subbibliography]
 
