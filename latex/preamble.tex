@@ -23,6 +23,7 @@
 \usepackage{etoolbox}
 \usepackage{path}
 \usepackage{enumitem}
+\usepackage{xspace}
 
 \usepackage{caption}
 \captionsetup{
@@ -128,10 +129,20 @@
 
 \usepackage[nottoc]{tocbibind}
 
-\newcommand*{\tikzname}{Ti\emph{k}Z}
-\newcommand*{\pgfname}{\textsc{pgf}}
+\newcommand*{\tikzname}{Ti\emph{k}Z\xspace}
 
-\newcommand{\C}{\textsc{C}}
+\newcommand{\fullbyte}{$11111111$\xspace}
+\newcommand{\emptybyte}{$00000000$\xspace}
 
-\newcommand{\fullbyte}{$11111111$}
-\newcommand{\emptybyte}{$00000000$}
+% Thanks to Philip:
+% http://tex.stackexchange.com/questions/2933/parse-comma-separated-list-of-command-names-with-spaces
+
+\newcommand*\acronymstyle{\scshape}
+\newcommand*\newacronym[1]{
+  \expandafter\newcommand\csname#1\endcsname[1][]{{\acronymstyle#1}##1\xspace}}
+
+\newcommand*{\newacronyms}{%
+  \let\do\newacronym
+  \docsvlist
+}
+\newacronyms{tga,png,gif,C,pgf}
