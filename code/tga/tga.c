@@ -230,7 +230,7 @@ void printColorData(unsigned long data,FILE * out)
 
     pixelDepth = tgah.colorMapType == COLOR_MAPPED ? tgah.colorMapDepth : tgah.pixelDepth;
 
-    /* implemented support for 15-bit images? */
+    /* implement support for 15-bit images? */
 
     isGrayScale = (tgah.imageType == UNCOMPRESSED_BLACK_AND_WHITE ||
                    tgah.imageType == RUN_LENGTH_ENCODED_BLACK_AND_WHITE);
@@ -291,7 +291,7 @@ void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
             head = readByte(in);
 
 	    length = head & 0x7f;
-	    
+
             /* run length packet */
             if(head & 0x80){
 
@@ -365,11 +365,18 @@ void readColorMap(FILE * in,FILE * out)
 {
     size_t pixelDepth = tgah.colorMapDepth;
     unsigned long data;
-    int i;
+    int i,skip;
 
     colorMap = (unsigned long *) malloc(tgah.colorMapLength * tgah.colorMapDepth);
 
-    for(i = 0; i <  tgah.colorMapLength; ++i){
+    skip = tgah.colorMapStart;
+
+    while(--skip > 0){
+	data = 0;
+	fread(&data, pixelDepth / 8, 1, in);
+    }
+
+    for(i = tgah.colorMapStart; i <  tgah.colorMapLength; ++i){
 
         data  = 0;
         fread(&data, pixelDepth / 8, 1, in);
