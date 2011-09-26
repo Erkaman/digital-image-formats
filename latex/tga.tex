@@ -88,10 +88,10 @@
 
   Surprisingly enough, this is one the few image formats that doesn't
   have a set of magic numbers at the beginning. Instead, something
-  known as the ID Length of the image is used. In a later field of the
-  format, there is a field called the image ID. This field specifies
-  the length of that field. It is discussed in depth in section
-  \ref{sec:color-data}.
+  known as the ID Length of the image occurs in the beginning. In a
+  later field of the format, there is a field called the image
+  ID and this field specifies the length of that field. It is discussed
+  in depth in section \ref{sec:color-data}.
 
   \imgfield{Color Map Type\index{Color Map Type}}{1}
 
@@ -99,23 +99,24 @@
   palette is Color map\index{color map}. This field could simply be
   seen as a boolean value indicating whether or not the image has a color
   map or not. So if it is $1$, there is a color map in the
-  image, otherwise; there's no color map is used.
+  image, otherwise; there's no color map.
 
   \imgfield{Image Type\index{Image Type}}{1}
 
-  There are several ways of storing color as we talked about in
-  chapter \ref{cha:color}. In the \tga format there's
-  pseudo-color\index{pseudo-color}, which means that the color data
-  uses a palette and there's true-color\index{true-color}, meaning that the raw
-  color data is stored in the image. And furthermore, the color data
-  may either be stored in RGB values, grayscale values and the data
-  may even be compressed.
+  In the \tga format color can be stored in three different ways:
+  grayscale\index{grayscale}, color-mapped\index{color-mapped} and
+  true-color\index{true-color}.
 
-  In the end, this all amounts to $6$ different kinds of images. The
-  image type is specified by the number value of this field. Table \ref{tab:imgtype}
-  shows all of these different kinds of images. If you have been
-  reading carefully up to this point, all the terms of the table
-  should make perfect sense to you.
+  Grayscale should be familiar to you by now. Color-mapped color
+  basically means that the color uses a palette, or color-map as it is
+  also called. But what on earth could true-color be? This means that
+  it uses RGB or RGBA color storage. The possible color depths are
+  16,24 and 32, as talked about in chapter \ref{cha:color}.
+
+  Since the color data can also be compressed, in the end this all
+  amounts to $6$ different kinds of images. The image type is
+  specified by the number value of this field. Table \ref{tab:imgtype}
+  shows all of these different kinds of images.
 
   \begin{table}
     \centering
@@ -135,7 +136,7 @@
     \label{tab:imgtype}
   \end{table}
 
-  From table \ref{tab:imgtype} we can derive the simple algorithm
+  From table \ref{tab:imgtype}, we can derive the simple algorithm
   \ref{alg:tga-compressed} for determining whether an image is
   compressed.
 
