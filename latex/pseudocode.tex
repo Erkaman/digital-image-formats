@@ -84,8 +84,12 @@ to introduce several functions for file handling operations.
   reads a number of the size $size$ \textit{bytes}(not bits) from a
   file.
 
-%\item[\Call{Seek}{$offset$}] Move from the beginning of the $offset$
-%  bytes forward in the file we're currently reading.
+\item[\Call{Seek}{$offset,origin$}] Move the from current position in
+  the file offset bytes forward. The current position in the file is
+  specified by the argument $origin$. If it is $START$, we move from the
+  beginning of the file, if it is $END$ we move from the end of the
+  file, and if it is $CURRENT$ we move from the current position in
+  the file.
 
 \end{description}
 

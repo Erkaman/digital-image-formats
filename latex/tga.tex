@@ -152,22 +152,20 @@
   \imgfield{Color Map Specification\index{Color Map Specification}}{5}
 
   The color map specification fields consists of a bunch of subfields
-  describing the color map include in this image. If the image doesn't
-  even have color map to begin with, these fields will be totally
-  useless to you, but on to the subject:
+  describing the color map included in this image. If the image
+  doesn't even have color map to begin with, these fields can simply
+  be ignored. Let us describe these subfields one after one
 
   \imgsubfield{First Entry Index\index{First Entry Index}}{2}
 
-  You could theoretically start anywhere in a color map. But this
-  field specified the color will start. It is counter in bytes from
-  the beginning of the file. The \textproc{Seek} is used for moving
-  the file the first index of the color map in this case. And most
-  programming languages have an equivalent to this functions for
-  reading files.
+  A color map essentially consists of sequence of color. The value of
+  this field is how many of those color that should be skipped in the
+  beginning. Don't know why you'd \textit{ever} want to do this, though.
 
   \imgsubfield{Color map length\index{Color map length}}{2}
 
-  In this field, the length of the color map is specified(duh!)
+  In this field, the length of the color map is specified(duh!). The
+  length is the number of colors in the color map.
 
   \imgsubfield{Color map entry size\index{Color map entry size}}{1}
 
@@ -259,7 +257,8 @@
     \caption{Reading the color map of a \tga file.}
     \label{alg:read-colormap}
     \begin{algorithmic}[1]
-      \ForTo{$i$}{$0$}{$colorMapLength$}
+      \State \Call{$Seek$}{$colorMapStart,CURRENT$}
+      \ForTo{$i$}{$colorMapStart$}{$colorMapLength$}
         \Let{$data$}{\Call{Read}{$pixelDepth / 8$}}
         \Let{$colorMap[i]$}{$data$}
       \EndFor
@@ -269,7 +268,7 @@
   \imgfield{Color Data\index{Color Data}}{0}
 
   Here we have true ``meat and blood'' of the \tga format. In this
-  field the color data of the image is stored. The way this data is
+  field, the color data of the image is stored. The way this data is
   stored depends on the image type. We'll be using the $compressed$
   variable we created in algorithm \ref{alg:tga-compressed}.
 

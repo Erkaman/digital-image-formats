@@ -365,16 +365,11 @@ void readColorMap(FILE * in,FILE * out)
 {
     size_t pixelDepth = tgah.colorMapDepth;
     unsigned long data;
-    int i,skip;
+    int i;
 
     colorMap = (unsigned long *) malloc(tgah.colorMapLength * tgah.colorMapDepth);
 
-    skip = tgah.colorMapStart;
-
-    while(--skip > 0){
-	data = 0;
-	fread(&data, pixelDepth / 8, 1, in);
-    }
+    fseek(in,tgah.colorMapStart,SEEK_CUR);
 
     for(i = tgah.colorMapStart; i <  tgah.colorMapLength; ++i){
 
