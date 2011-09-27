@@ -153,7 +153,7 @@
 
   The color map specification fields consists of a bunch of subfields
   describing the color map included in this image. If the image
-  doesn't even have color map to begin with, these fields can simply
+  doesn't even have a color map to begin with, these fields can simply
   be ignored. Let us describe these subfields one after one
 
   \imgsubfield{First Entry Index\index{First Entry Index}}{2}
@@ -216,7 +216,6 @@
   The next two bytes are a bit more insetting. Basically, they specify
   the from where the start of the displays of the pixels on screen
   should start.
-
 
   \begin{table}
     \centering
@@ -303,6 +302,40 @@
       \EndIf
     \end{algorithmic}
   \end{algorithm}
+
+%  \subsection*{The getBits function}
+
+  For extracting the alpha channel bits we will something a bit more
+  complex. To match for the first fours bits, we need the binary
+  number 00001111, then we'd get the alpha channel bits though the
+  following operation:
+
+  \begin{center}
+    \begin{tabular}{*{4}{c}}
+      & 01010010 & (example number) \\
+      $\BitAnd$ & 00001111 & \\
+      \cline{1-2}
+      &  00000010 \\
+    \end{tabular}
+  \end{center}
+
+  00001111 is simply the value $1 + 2 + 4 + 8 = 15$. Thus we are able
+  to extract the alpha channel bits through algorithm
+  \ref{alg:tga-alpha-channel-bits}.
+
+  \begin{algorithm}[H]
+    \caption{Getting the alpha channel bits out of the image descriptor.}
+    \label{alg:tga-alpha-channel-bits}
+    \begin{algorithmic}[1]
+      \Let{$alphaChannelBits$}{$imageDescriptor \BitAnd 15$}
+    \end{algorithmic}
+  \end{algorithm}
+
+
+  % Being able to exact ranges of bits out of number is quite useful
+  % operation, so let us make a function out of it.
+
+
 
   \section{Color Data\index{Color Data}}
   \label{sec:color-data}

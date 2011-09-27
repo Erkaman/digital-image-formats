@@ -257,7 +257,10 @@ Kapitel 3 är renskrivet.
 
 Har kommit igång med att beskriva TGA formatet. Har än så länge bara
 börjat att beskriva file header delen av formatet och mycket jobb
-återstår.
+återstår. TGA formatet består av så kallade \textit{fält} som lagrar
+information om bilden. dessa fält delas i sin tur upp i olika
+\textit{sektioner}. File Headern är en sådan sektion och den
+förekommer alltid i början av bildfilen.
 
 \dayheading{24}{10}{2011}
 
@@ -303,7 +306,22 @@ A Technique for High-Performance Data Compressio
 
 Påbörjade renskrivningen idag.
 
-Renskrivningen är nästan färdig. Nu är det bara några ytterligare
-saker som jag behöver förtydliga \dots
+Renskrivningen är nästan färdig. Sen är det ett till fält som jag
+måste beskriva imorgon. Jag har väntar med att beskriva det tills nu
+för det är lite inveklat och det är hel del jobb att beskirva det.
+
+\dayheading{26}{10}{2011}
+
+Fältet som jag jobbar med att beskriva just nu är ett fält som heter
+image descriptor, på svenska blir det ungefär bild deskriptor. Den är
+en byte stor, vilket är ett binärt tal med åtta siffror, som tex
+01110110. De separata siffrorna i det binära talet brukar vi inom
+datorer kalla för bitar. Det interessanta med bild deskriptorn är att
+olika bitar i den beskriver olika data. Bitarna 0-3(vi börjar räkna
+från 0 och från vänster), 4-5 och 6-7 beskriver olika sorts data. Det
+invecklade med detta är hur man får ut de separata bitarna. Och därför
+är det här fältet lite svårare att förklara att skriftligt och därför
+har jag väntat med att beskriva det här fältet till sist.
 
 \end{document}
+
