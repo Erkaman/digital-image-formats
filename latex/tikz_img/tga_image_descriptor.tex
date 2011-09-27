@@ -1,0 +1,36 @@
+    \begin{tikzpicture}
+
+      \newcommand{\digitabove}{5mm}
+
+      \newcommand{\delim}[2]{%
+        \draw(#1,-0.1) -- (#1,-0.6);
+        \node (#2) at (#1,-0.35){};}
+
+      \newcommand{\descriptcenter}[3]{\node at ($(#1)!0.5!(#2)$) {\footnotesize #3};}
+
+      \draw (0,0) rectangle node[above=\digitabove]{7} node{0}(1,1);
+
+      \draw (1,0) rectangle node[above=\digitabove]{6} node{0}(2,1);
+
+      \draw (2,0) rectangle node[above=\digitabove]{5} (3,1);
+
+      \draw (3,0) rectangle node[above=\digitabove]{4} (4,1);
+
+      \draw (4,0) rectangle node[above=\digitabove]{3} (5,1);
+
+      \draw (5,0) rectangle node[above=\digitabove]{2} (6,1);
+
+      \draw (6,0) rectangle node[above=\digitabove]{1} (7,1);
+
+      \draw (7,0) rectangle node[above=\digitabove]{0} (8,1);
+
+      \delim{0}{A}
+      \delim{2}{B}
+      \delim{4}{C}
+      \delim{8}{D}
+
+      \descriptcenter{A}{B}{Unused}
+      \descriptcenter{B}{C}{Image Origin}
+      \descriptcenter{C}{D}{Alpha Channel Bits}
+
+    \end{tikzpicture}

@@ -193,14 +193,22 @@
 
   \imgsubfield{Pixel Depth\index{Pixel Depth}}{1}
 
-  Even if the image includes a color palette, this field would still
-  be very important. Because the image in that is just a bunch of
-  indices, they could still have a depth, or size as would be more
-  conventient to say in this case.
+  This is just the color depth of the image and this concept should
+  hopefully be nothing new to you.
+
+  If the image uses a color palette, this field just specifies the
+  size of the number indices that the image in that case consists of.
 
   \imgsubfield{Image Descriptor\index{Image Descriptor}}{1}
 
-  Describes the image and bla.
+  Describes the image and bla. \ref{fig:tga-image-desc}
+
+  \begin{figure}[H]
+    \centering
+    \inputtikz{tga_image_descriptor}
+    \caption{Image descriptor}
+    \label{fig:tga-image-desc}
+  \end{figure}
 
   \section{Loading the file header}
   \label{sec:loading-file-header}
