@@ -201,7 +201,10 @@
 
   \imgsubfield{Image Descriptor\index{Image Descriptor}}{1}
 
-  Describes the image and bla. \ref{fig:tga-image-desc}
+  The image desciptor is an interesting,albeit useless field. It is a
+  single byte whose values are structured in the way in figure
+  \ref{fig:tga-image-desc}. As can be seen, the two highest
+  bits are unused and should be ignored. They are always zero.
 
   \begin{figure}[H]
     \centering
@@ -210,11 +213,35 @@
     \label{fig:tga-image-desc}
   \end{figure}
 
-  \section{Loading the file header}
-  \label{sec:loading-file-header}
+  The next two bytes are a bit more insetting. Basically, they specify
+  the from where the start of the displays of the pixels on screen
+  should start.
+
+
+  \begin{table}
+    \centering
+    \begin{tabular}{lrr}
+      \toprule
+      Screen destination \\ of first pixel & bit 5 & bit 4 \\
+      \midrule
+      bottom left & 0 & 0 \\
+      bottom right & 0 & 1 \\
+      top left & 1 & 0 \\
+      top right & 1 & 1 \\
+      \bottomrule
+    \end{tabular}
+    \caption{The different image origin combinations}
+    \label{tab:image-origin}
+  \end{table}
+
+  The last four bits are the alpha channel bits. These specify how
+  many bits in a separate color is used for the alpha channel. For
+  images without an alpha channel this value will of course be
+  zero. For 16-bit images it will be 1, and for 32-bit images it will
+  be 8.
 
   These fields occur in the order that I just described
-  them. Algorithm ref{alg:load-file-header} shows how to load them. The values of these fields
+  them. Algorithm \ref{alg:load-file-header} shows how to load them. The values of these fields
   will be used in the loading code for the color data, so do take note
   of their names. As can be seen, I'm almost being condescending
   towards you by even bothering to include this extremely simple
@@ -239,6 +266,41 @@
       \loadfield{imageHeight}{2}
       \loadfield{pixelDepth}{1}
       \loadfield{imageDescriptor}{1}
+    \end{algorithmic}
+  \end{algorithm}
+
+  But parsing the data from the image descriptor is not as easy. Let
+  us consider how to parse the image origin data. If the 5:th bit is
+  one that means that first part of the destination is
+  ``bottom''. Else it must be ``top''. The fifth bit has be value
+  $1 \ShiftLeft 5$, thus we can get the value of the fifth bit of the
+  image descriptor by the operation $(1 \ShiftLeft 5) \BitAnd
+  imageDescriptor$.
+
+  In the same way the value of the 4:th bit is $(1 \ShiftLeft 4)
+  \BitAnd imageDescriptor$. If the 4:th bit is toggled then second
+  part of the destination string must ``right'', else it must be
+  ``left''.
+
+  We summarize this whole disscussion in algorithm
+  \ref{alg:tga-dest-str}.
+
+  \todo{fix strings description}
+  \begin{algorithm}[H]
+    \caption{Getting the destination string of image descriptor.}
+    \label{alg:tga-dest-str}
+    \begin{algorithmic}[1]
+      \Let{$destStr$}{``''}
+      \If{$(1 \ShiftLeft 5) \BitAnd imageDescriptor$}
+        \Inc{$destStr$}{``Top ''}
+      \Else
+        \Inc{$destStr$}{``Bottom ''}
+      \EndIf
+      \If{$(1 \ShiftLeft 4) \BitAnd imageDescriptor$}
+        \Inc{$destStr$}{``right''}
+      \Else
+        \Inc{$destStr$}{``left''}
+      \EndIf
     \end{algorithmic}
   \end{algorithm}
 
