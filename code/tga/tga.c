@@ -91,22 +91,17 @@ void loadTGA(char * file)
 }
 
 
-void getImageDestStr(char * str,int imageOrigin)
+void getImageDestStr(char * str,int imageDescriptor)
 {
-    switch(imageOrigin){
-    case 0:
-        strcpy(str,"Bottom Left");
-        break;
-    case 1:
-        strcpy(str,"Bottom Rigth");
-        break;
-    case 2:
-        strcpy(str,"Top Left");
-        break;
-    case 3:
-        strcpy(str,"Top Right");
-        break;
-    }
+    if((1 << 5) & imageDescriptor)
+	strcat(str,"Top ");
+    else
+	strcat(str,"Bottom ");
+
+    if((1 << 4) & imageDescriptor)
+	strcat(str,"right");
+    else
+	strcat(str,"left");
 }
 
 void loadTGAHeader(FILE * fp)
@@ -385,12 +380,10 @@ void readColorMap(FILE * in,FILE * out)
 void printImageInfo(FILE * out)
 {
     BYTE alphaChannelBits;
-    BYTE imageDest;
     char imageDestStr[11];
 
     alphaChannelBits = getbits(tgah.imageDescriptor,3,4);
-    imageDest = getbits(tgah.imageDescriptor,5,2);
-    getImageDestStr(imageDestStr,imageDest);
+    getImageDestStr(imageDestStr,tgah.imageDescriptor);
 
     fprintf(out,"Id Length:%d\n",tgah.IDLength);
     fprintf(out,"Color map type:%d\n",tgah.colorMapType);
