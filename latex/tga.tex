@@ -274,47 +274,20 @@
     \end{algorithmic}
   \end{algorithm}
 
-  But parsing the data from the image descriptor is not as easy. Let
-  us consider how to parse the image origin data. If the 5:th bit is
-  one that means that first part of the destination is
-  ``bottom''. Else it must be ``top''. The fifth bit has be value
-  $1 \ShiftLeft 5$, thus we can get the value of the fifth bit of the
-  image descriptor by the operation $(1 \ShiftLeft 5) \BitAnd
-  imageDescriptor$.
+  But parsing the data from the image descriptor is not as easy.
 
-  In the same way the value of the 4:th bit is $(1 \ShiftLeft 4)
-  \BitAnd imageDescriptor$. If the 4:th bit is toggled then second
-  part of the destination string must ``right'', else it must be
-  ``left''.
+  Let us first consider how to parse the image origin data.The fifth
+  bit of a binary number has be value $1 \ShiftLeft 5$, thus we can
+  get the value of the fifth bit of the image descriptor with the
+  operation $(1 \ShiftLeft 5) \BitAnd imageDescriptor$. In the same
+  way the value of the 4:th bit is $(1 \ShiftLeft 4) \BitAnd
+  imageDescriptor$. Then, we can match these bit values with the
+  description of table \ref{tab:image-origin}.
 
-  We summarize this whole disscussion in algorithm
-  \ref{alg:tga-dest-str}.
-
-  \todo{fix strings description}
-  \begin{algorithm}[H]
-    \caption{Getting the destination string of image descriptor.}
-    \label{alg:tga-dest-str}
-    \begin{algorithmic}[1]
-      \Let{$destStr$}{``''}
-      \If{$(1 \ShiftLeft 5) \BitAnd imageDescriptor$}
-        \Inc{$destStr$}{``Top ''}
-      \Else
-        \Inc{$destStr$}{``Bottom ''}
-      \EndIf
-      \If{$(1 \ShiftLeft 4) \BitAnd imageDescriptor$}
-        \Inc{$destStr$}{``right''}
-      \Else
-        \Inc{$destStr$}{``left''}
-      \EndIf
-    \end{algorithmic}
-  \end{algorithm}
-
-%  \subsection*{The getBits function}
-
-  For extracting the alpha channel bits we will something a bit more
-  complex. To match for the first fours bits, we need the binary
-  number 00001111, then we'd get the alpha channel bits though the
-  following operation:
+  For extracting the alpha channel bits we will need to do something a
+  bit more complex. To match for the first fours bits, we need the
+  binary number 00001111, then we'd get the alpha channel bits though
+  the following operation:
 
   \begin{center}
     \begin{tabular}{*{4}{c}}
@@ -341,8 +314,6 @@
   % Being able to exact ranges of bits out of number is quite useful
   % operation, so let us make a function out of it.
 
-
-
   \section{Color Data\index{Color Data}}
   \label{sec:color-data}
 
@@ -358,7 +329,7 @@
   \imgfield{Color Map Data\index{Color Map Data}}{0}
 
   Loading the color map is easy, as shown in algorithm
-  \ref{alg:read-colormap}. \todo{deal with color map entry index}. You
+  \ref{alg:read-colormap}. You
   biggest worry is that you might forgot to divide the pixel depth by
   8, as it is measured in bits and \textit{not bytes}.
 
