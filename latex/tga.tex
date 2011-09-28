@@ -182,29 +182,35 @@
 
   \imgfield{Image Specification\index{Image Specification}}{10}
 
-  Following the color map specification is the image specification,
-  specifying other, miscellaneous, properties of an image useful for
-  loading it.
+  Following the color map specification is the image
+  specification. This field specifies very important properties that
+  are essential to loading an image.
 
   \imgsubfield{X-origin of Image}{2}
 
   \imgsubfield{Y-origin of Image}{2}
 
-  The position of the image on the screen.
+  These two subfields specify the coordinates of the image on the
+  screen. The values of both of these fields are usually $0$, and I
+  have never ever used an image viewer program that has actually used
+  these two values. You can for the most part ignore these two values.
 
   \imgsubfield{Image Width\index{Image Width}}{2}
 
   \imgsubfield{Image Height\index{Image Height}}{2}
 
-  These two fields specify the measurements of the image in pixels.
+  These two fields specify the size of the image in pixels.
 
   \imgsubfield{Pixel Depth\index{Pixel Depth}}{1}
 
   This is just the color depth of the image and this concept should
   hopefully be nothing new to you.
 
-  If the image uses a color palette, this field just specifies the
-  size of the number indices that the image in that case consists of.
+  Even if the image uses a color palette, this value is still used. If
+  the image uses a color map the image data is just a list indices to
+  a color map. Even so, these indices must have some sort of size, and
+  that is what this field specifies. In the case color maps, this
+  field is basically the ``Index Number Size''.
 
   \imgsubfield{Image Descriptor\index{Image Descriptor}}{1}
 
