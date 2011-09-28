@@ -88,7 +88,7 @@
   could also be specified in \textit{earlier} fields, as we soon will see an
   example of.
 
-  \section{File Header}
+  \section{The File Header}
 
   \imgfield{ID Length\index{ID Length}}{1}
 
@@ -448,35 +448,35 @@
 
   \section{Developer Area\index{Developer Area}}
 
-  The extension area is useful to programmers. It allows program add
-  information to the \tga format that is specific to their
-  applications. But this information is useless if you're only trying
-  to load the color data from the \tga image, hence why we are no
-  talking in more detail about this section. If you have found an
-  \tga image out in the wild that actually uses this, you can really
-  guess how you are supposed to use this data, so you can't really
-  load it properly.
+  The extension area is really only useful to programmers. It allows
+  programmers to add information to the \tga format that is specific
+  to their applications. But this information is useless if you're
+  only trying to load the color data from the \tga image, hence why we
+  are no talking in more detail about this section. If you have
+  actually found a \tga image out in the wild that uses this
+  section, you can only really guess how you are supposed to use this
+  data, as this is entirely dependent on the source program of the image.
 
   \section{Extension Area\index{Extension Area}}
 
   The extension area is a huge section containing many different
   fields that gives a lot of miscellaneous information about an
-  image. As they are essentially trivial to load, we will not be
-  covering them here, but the sample \tga dumper does does load this
-  area and all of it's fields. See the source code to that program and
+  image. As they are all essentially trivial to load, we will not be
+  covering them here, but the sample \tga dumper does indeed load this
+  section and all of it's fields. See the source code to that program and
   the \tga specification for more information on this area.
 
-  \section{\tga File Footer\index{File Footer}}
+  \section{File Footer\index{File Footer}}
 
-  The file footer of a \tga image always occurs in the end of it. But
+  The file footer of a \tga image always occurs at the end of it. But
   not all \tga images have a file footer, however. Images made before
-  the version 2 of the \tga format tend not to have one, and neither
-  do they have an extension area nor a developer area. Because all
-  information that the file footer really includes is the location of
-  the developer and extension area. These are two fields that can
-  really occur anywhere in a \tga image, except for in the beginning
-  and the end of the image, that is why the location information is
-  included.
+  the version 2 of the \tga format do \textit{not} have one, and
+  neither do they have an extension area nor a developer area. Because
+  all information that the file footer really includes is the
+  \textit{location} of the developer and extension area. These are two
+  fields that can occur anywhere in a \tga image, except for in the
+  beginning and the end of the image, that is why this location
+  information is included with the file footer.
 
   \printbibliography[heading=subbibliography]
 
