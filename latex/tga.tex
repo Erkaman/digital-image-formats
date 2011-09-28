@@ -158,25 +158,26 @@
   \imgfield{Color Map Specification\index{Color Map Specification}}{5}
 
   The color map specification fields consists of a bunch of subfields
-  describing the color map included in this image. If the image
+  describing the color map included in the image. If the image
   doesn't even have a color map to begin with, these fields can simply
   be ignored. Let us describe these subfields one after one
 
   \imgsubfield{First Entry Index\index{First Entry Index}}{2}
 
-  A color map essentially consists of sequence of color. The value of
-  this field is how many of those color that should be skipped in the
-  beginning. Don't know why you'd \textit{ever} want to do this, though.
+  A color map essentially consists of a sequence of colors. The value
+  of this field is how many of those colors that should be skipped in
+  the beginning of that sequence. Don't know why you'd \textit{ever}
+  want to do this, though.
 
   \imgsubfield{Color map length\index{Color map length}}{2}
 
-  In this field, the length of the color map is specified(duh!). The
+  In this field, the length of the color map is specified. The
   length is the number of colors in the color map.
 
   \imgsubfield{Color map entry size\index{Color map entry size}}{1}
 
-  Because the color map is just an array of colors, of course these
-  colors must have some sort of color depth. That color depth is
+  Because the color map is just an array of colors, of course all
+  these colors must have a specific color depth. That color depth is
   specified by this field.
 
   \imgfield{Image Specification\index{Image Specification}}{10}
