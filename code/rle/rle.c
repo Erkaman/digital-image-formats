@@ -13,7 +13,7 @@ void packBitsEncode(char * inputfile,char * outputfile);
 void packBitsDecode(char * inputfile,char * outputfile);
 void writeRunLengthPacket(BYTE length,BYTE data,FILE * fp);
 void writeRawPacket(BYTE length,BYTE * data,FILE * fp);
-void showHelp(void);
+void printHelp(void);
 
 int main(int argc, char *argv[])
 {
@@ -23,7 +23,8 @@ int main(int argc, char *argv[])
     int n;
 
     if(argc == 1){
-        printf("No arguments specified\n");
+        printf("No arguments specified.\n");
+        printf("Try --help for more information.\n");
         return 1;
     }
 
@@ -33,24 +34,25 @@ int main(int argc, char *argv[])
     n = 1;
 
     while(n < argc && (*argv)[0] == '-'){
-        switch((*argv)[1]){
-        case 'd':
-            decompress = 1;
-            break;
-        case 'p':
-            optimize = 1;
-            break;
-        case 'h':
+
+        if(!strcmp(*argv,"--help"))
             help = 1;
-            break;
-        }
+        else
+            switch((*argv)[1]){
+            case 'd':
+                decompress = 1;
+                break;
+            case 'p':
+                optimize = 1;
+                break;
+            }
         ++argv;
         ++n;
     }
 
     if(help){
-	showHelp();
-	return 0;
+        printHelp();
+        return 0;
     }
 
     if((argc - n) < 2){
@@ -76,12 +78,12 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void showHelp(void)
+void printHelp(void)
 {
     printf("Usage: rle [OPTION]... IN OUT\n");
     printf("Compress or decompress the IN file to the OUT file using the Run Length Encoding algorithm.\n");
 
-    printf("  -h\tDisplay this help message.\n");
+    printf("  --help\tDisplay this help message.\n");
     printf("  -p\tUse the packBits algorithm for the (de)compression(default is RLE).\n");
     printf("  -d\t Perform a decompression rather than a compression to the output file..\n");
 }
