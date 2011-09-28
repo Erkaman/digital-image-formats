@@ -20,6 +20,7 @@ void getImageDestStr(char * str,int imageOrigin);
 void readStamp(LONG offset,FILE * in,FILE * out);
 void readColorMap(FILE * in,FILE * out);
 void handleNewlines(int i,int width,FILE * out);
+void printHelp(void);
 
 TGAHeader tgah;
 TGAExtensionArea tgaex;
@@ -31,11 +32,23 @@ int main(int argc, char * argv[])
 {
     if(argc == 1){
         printf("No file was specified for loading\n");
+        printf("Try --help for more information.\n");
         return 1;
     } else
-        loadTGA(argv[1]);
+        if(!strcmp("--help",argv[1]))
+            printHelp();
+    loadTGA(argv[1]);
 
     return 0;
+}
+
+void printHelp(void)
+{
+    printf("Usage: tga IN\n");
+    printf("Dump the information and color data of a TGA file.\n"
+	   "If, for example, the file ex.tga was specified, the information is dumped to the file ex.dmp\n\n");
+    printf("  --help\tDisplay this help message.\n");
+
 }
 
 void loadTGA(char * file)
@@ -94,14 +107,14 @@ void loadTGA(char * file)
 void getImageDestStr(char * str,int imageDescriptor)
 {
     if((1 << 5) & imageDescriptor)
-	strcat(str,"Top ");
+        strcat(str,"Top ");
     else
-	strcat(str,"Bottom ");
+        strcat(str,"Bottom ");
 
     if((1 << 4) & imageDescriptor)
-	strcat(str,"right");
+        strcat(str,"right");
     else
-	strcat(str,"left");
+        strcat(str,"left");
 }
 
 void loadTGAHeader(FILE * fp)
@@ -285,7 +298,7 @@ void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
         if(compressed){
             head = readByte(in);
 
-	    length = head & 0x7f;
+            length = head & 0x7f;
 
             /* run length packet */
             if(head & 0x80){
@@ -297,7 +310,7 @@ void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
                     data = colorMap[data];
 
                 for(length = length + 1; length > 0; --length){
-		    handleNewlines(i,width,out);
+                    handleNewlines(i,width,out);
 
                     printColorData(data,out);
 
@@ -315,7 +328,7 @@ void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
                     if(tgah.colorMapType == COLOR_MAPPED)
                         data = colorMap[data];
 
-		    handleNewlines(i,width,out);
+                    handleNewlines(i,width,out);
 
 
                     printColorData(data,out);
@@ -331,7 +344,7 @@ void printImage(SHORT width,SHORT height,int compressed,FILE * in, FILE * out)
                 data = colorMap[data];
 
 
-	    handleNewlines(i,width,out);
+            handleNewlines(i,width,out);
 
             printColorData(data,out);
 
