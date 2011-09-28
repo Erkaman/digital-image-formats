@@ -49,41 +49,44 @@
   The \tga format consists things called fields\index{field}. A field
   gives information about the image you're trying to open. It could
   give information like the name of the image, color depth, all the
-  color data of the image and so on. It could really contain of
-  anything. A field also often has a specific size. The size
-  information is of course essential to load a \tga file,otherwise
-  you'd not know how the big the respective fields are that you are
-  supposed to load.
+  color data of the image and so on. It could really contain any sort
+  of data.
+
+  A field also often has a specific size. Knowing the size of a field
+  is course essential to loading its data, since you cannot just let
+  the computer guess the size of a field. It's all just a long sequence
+  of numbers to the computer, so you as the programmer will have to
+  tell the computer how big the respective fields are in order to load
+  them.
 
   \newcommand{\plural}[3]{\ifstrequal{#1}{1}{#2}{#3}}
   \newcommand{\fieldlength}[1]{\ifstrequal{#1}{0}{variable}{#1 \plural{#1}{byte}{bytes}}}
   \newcommand{\imgfield}[2]{\subsection*{#1(\fieldlength{#2})}}
   \newcommand{\imgsubfield}[2]{\subsubsection*{#1(\fieldlength{#2})}}
 
-  We will describe these fields in the order that they occur in their
-  respective sections. The separate fields are organized in
-  subheadings like this:
+  Fields are organized into larger units known as
+  \textit{sections}\index{section}. We will in this chapter cover
+  these sections one after one and we will describe the fields in the
+  order that they occur in their respective sections. The separate
+  fields are organized in subheadings like this:
 
   \imgfield{Data}{3}
 
   This subheading specifies that we will be discussing a field named
-  Data that has a length of 3 bytes.
+  Data that has a size of 3 bytes.
 
   On the other hand, the subheading:
 
   \imgfield{Name}{0}
 
-  Shows that we will be covering a field named Name with a length that
-  varies depending on the image we're dealing with. The color data
-  field is an perfect example of this; it just contains all the color
-  data of the image, it thus is obvious that it would vary with the
-  size, width, height and color depth of the image in question. The
-  sizes of these fields could also be specified in earlier fields, as
-  we soon will see an example of.
-
-  The fields are organized into \textit{sections}\index{section} in
-  the image format. We will now be covering these sections one after
-  one:
+  Shows that we will be covering a field named Data with a variable
+  size.That is, the size varies depending on the image we're
+  dealing with. The color data field is an perfect example of this; it
+  just contains all the color data of the image, it is thus obvious
+  that it would vary with the size, width, height and color depth of
+  the specific image we're dealing with. The sizes of these fields
+  could also be specified in \textit{earlier} fields, as we soon will see an
+  example of.
 
   \section{File Header}
 
