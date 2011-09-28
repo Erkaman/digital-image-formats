@@ -214,10 +214,12 @@
 
   \imgsubfield{Image Descriptor\index{Image Descriptor}}{1}
 
-  The image desciptor is an interesting,albeit useless field. It is a
-  single byte whose values are structured in the way in figure
-  \ref{fig:tga-image-desc}. As can be seen, the two highest
-  bits are unused and should be ignored. They are always zero.
+  The image descriptor is an interesting field in the way that it
+  stores its data. It is a single byte whose bits are structured as
+  can bee seen in figure shows \ref{fig:tga-image-desc}.
+
+  The two highest bits of this field are unused and should be
+  ignored. They are always zero.
 
   \begin{figure}[H]
     \centering
@@ -226,9 +228,8 @@
     \label{fig:tga-image-desc}
   \end{figure}
 
-  The next two bytes are a bit more insetting. Basically, they specify
-  the from where the start of the displays of the pixels on screen
-  should start.
+  The next two bytes are a bit more insetting. The screen destination
+  of the first pixel.
 
   \begin{table}
     \centering
@@ -257,7 +258,7 @@
   will be used in the loading code for the color data, so do take note
   of their names. As can be seen, I'm almost being condescending
   towards you by even bothering to include this extremely simple
-  code. I promise I won't be as condescending in the future.
+  algorithm. I promise I won't be as condescending in the future.
 
   \begin{algorithm}
     \caption{Loading the file header of a \tga image.}
@@ -293,7 +294,7 @@
 
   For extracting the alpha channel bits we will need to do something a
   bit more complex. To match for the first fours bits, we need the
-  binary number 00001111, then we'd get the alpha channel bits though
+  binary number 00001111, then we'd get the alpha channel bits through
   the following operation:
 
   \begin{center}
@@ -317,28 +318,21 @@
     \end{algorithmic}
   \end{algorithm}
 
-
-  % Being able to exact ranges of bits out of number is quite useful
-  % operation, so let us make a function out of it.
-
   \section{Color Data\index{Color Data}}
   \label{sec:color-data}
 
-  Here's where the fun part starts!
-
   \imgfield{Image ID\index{Image ID}}{0}
 
-  This field contains identifying information about the image. The
-  ID Length field found in the header is the length of this field. If
-  the ID Length is 0, this field doesn't exist. This field is an ASCII
-  string.
+  This field contains identifying information about the image in form
+  of an ASCII string. The ID Length field found in the header is the
+  size of this field. If the ID Length is 0, this field doesn't
+  exist.
 
   \imgfield{Color Map Data\index{Color Map Data}}{0}
 
   Loading the color map is easy, as shown in algorithm
-  \ref{alg:read-colormap}. You
-  biggest worry is that you might forgot to divide the pixel depth by
-  8, as it is measured in bits and \textit{not bytes}.
+  \ref{alg:read-colormap}. The pixel depth is like all other the size
+  fields in the \tga format is measured in bits, and \textit{not bytes}.
 
   \begin{algorithm}[H]
     \caption{Reading the color map of a \tga file.}
@@ -356,8 +350,8 @@
 
   Here we have true ``meat and blood'' of the \tga format. In this
   field, the color data of the image is stored. The way this data is
-  stored depends on the image type. We'll be using the $compressed$
-  variable we created in algorithm \ref{alg:tga-compressed}.
+  stored depends on the image type. If the variable $compressed$ seems
+  unfamiliar to you, please reread algorithm \ref{alg:tga-compressed}.
 
   \begin{algorithm}[H]
     \caption{Reading the color data of a \tga file.}
@@ -422,7 +416,18 @@
     \end{algorithmic}
   \end{algorithm}
 
-  Most of the algorithm should already be familiar to you.
+  Most of the algorithm should already be familiar to you. If the data
+  non-compressed we just read it pixel by pixel. If a color map is
+  used, the read value is used an index to the color map to get the
+  true color value.
+
+  If it is compressed, we basically relpicate algorithm
+  \ref{alg:packbits-dec}. Check that algorithm and you should
+  understand how this algorithm works.
+
+  We do no color paring in this algorithm. I refer you back to chapter
+  \ref{cha:color}'s section \ref{sec:parsing-color-data} for a
+  discussion on how to do this.
 
   \section{Developer Area\index{Developer Area}}
 
