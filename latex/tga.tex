@@ -2,8 +2,7 @@
   \bibliography{project.bib}
 \end{comment}
 
-% TODO: describe the seek Seek functions and it's options carefully.
-\chapter{\tga -- Truevision Graphics Adapter}
+\chapter{\tga{} -- Truevision Graphics Adapter}
 \label{cha:tga}
 
 \begin{refsection}
@@ -11,35 +10,39 @@
   \section{Introduction}
   \label{sec:tga-introduction}
 
-  The whole purpose of this book was to give a good understanding of
+  The  purpose of this whole book was to give a good understanding of
   how image formats really work under the hood. But we couldn't just
   have jumped right in, we required knowledge of how color is stored
   digitally and how compression algorithms work. Now it's time to put
-  that knowledge to good use. \textit{All} the compression algorithms
-  we have just covered are used in the image formats we are going to
-  explore. And of course, knowledge how color is stored digitally is
-  going to be purely essential to go on.
+  that knowledge to good use.
 
-  Now it's time to explore our real first image format:
-  \tga\index{TGA}. But why \tga of all image formats? Because the format
-  is an extremely simple one at that, yet it is actually widely used
-  in certain areas, like games and video processing. And it has all
-  the parts common to all image formats and it even features a very
-  simple compression algorithm: PackBits RLE, which was one of the
-  algorithms we covered in chapter \ref{cha:compress-techn}.
+  That's right, we are finally going to explore our first \textit{real} image format:
+  \tga\index{TGA}. But why \tga of all image formats? Because the
+  format is an extremely simple one at that, yet it is actually widely
+  used in certain areas, like games and video processing. It has all
+  the parts common to all image formats and features a very simple
+  compression algorithm: PackBits RLE, which was one of the algorithms
+  we covered in chapter \ref{cha:compress-techn}.
 
   But the \tga format is also has its share of complexity. To make the
-  format more extensible for programmers such as us, several features
-  were added in the second version of the format. But we will only
-  mention but not explain these features as they are not really needed
-  to understand ordinary \tga images. To not make this chapter a
-  complete rip-off of the \tga specification
-  \cite{91:_truev_tga_file_format_specif} I will only cover the
-  features that are required to load the color data out of the
-  image. The rest of the features of the \tga format are free for you
-  to explore. And also, the source code for the demo \tga dumper, found
-  in \path|code/tga|, will be covering several of these more unusual
-  features, but not all of them.
+  format more easily extensible by programmers, several features were
+  added in the second version of the format, which is the version we
+  are going to cover. But we will only mention and not explain these
+  features, as they are not really needed to load the color data
+  stored in \tga images.
+
+  The source code accompanying this chapter is a \tga dumper. All this
+  program really do is load the color right out of a \tga file and
+  dump it is as raw ASCII strings on the form \verb|(R,G,B)|. It will
+  also dump information about the image, like color depth and image
+  width.  This dumper will cover several of the features \textit{not}
+  covered in this chapter, so please have a peek at the source code of
+  this program if you hunger for more information about the \tga
+  format.
+
+  And if you want to know very detailed information about the TGA
+  format, then you should most definitely read the \tga specification:
+  \cite{91:_truev_tga_file_format_specif}.
 
   \section{Some Terminology}
 
