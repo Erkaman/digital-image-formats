@@ -96,33 +96,33 @@
   have a set of magic numbers at the beginning. Instead, something
   known as the ID Length of the image occurs in the beginning. In a
   later field of the format, there is a field called the image
-  ID and this field specifies the length of that field. It is discussed
+  ID and this field specifies the size of that field. It is discussed
   in depth in section \ref{sec:color-data}.
 
   \imgfield{Color Map Type\index{Color Map Type}}{1}
 
   The \tga format supports color palettes. An alternative term for a
   palette is Color map\index{color map}. This field could simply be
-  seen as a boolean value indicating whether or not the image has a color
-  map or not. So if it is $1$, there is a color map in the
-  image, otherwise; there's no color map.
+  seen as a boolean value indicating whether or not the image has a
+  color map. So if it the value of this field is $1$, the image uses a
+  color map, otherwise; there's no color map.
 
   \imgfield{Image Type\index{Image Type}}{1}
 
-  In the \tga format color can be stored in three different ways:
+  The \tga format allows three different ways of storing color:
   grayscale\index{grayscale}, color-mapped\index{color-mapped} and
   true-color\index{true-color}.
 
   Grayscale should be familiar to you by now. Color-mapped color
-  basically means that the color uses a palette, or color-map as it is
-  also called. But what on earth could true-color be? This means that
-  it uses RGB or RGBA color storage. The possible color depths are
-  16,24 and 32, as talked about in chapter \ref{cha:color}.
+  obviously means that the color uses a color-map. But what on earth
+  could true-color be? This simply means that it uses the RGB or RGBA
+  color models. The color depths supported by the \tga format are
+  16,24 and 32.
 
-  Since the color data can also be compressed, in the end this all
-  amounts to $6$ different kinds of images. The image type is
-  specified by the number value of this field. Table \ref{tab:imgtype}
-  shows all of these different kinds of images.
+  Since the color data can also be compressed, this all amounts to $6$
+  different kinds of images. The image type is specified by the number
+  value of this field. Table \ref{tab:imgtype} shows all the different
+  number value's respective image type.
 
   \begin{table}
     \centering
