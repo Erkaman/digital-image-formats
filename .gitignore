@@ -1,8 +1,11 @@
 *.exe
 *.o
 
-# outputted from tga.exe.
+# outputted from tga
 *.dmp
+
+# outputted from lze
+*.lzw
 
 auto/
 
