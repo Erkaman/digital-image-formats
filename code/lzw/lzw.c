@@ -34,8 +34,6 @@ int main(int argc, char *argv[])
     char * inFile;
     int i;
 
-    out = fopen("codes","wb");
-
     if(argc == 1){
         printf("No file was specified.\n");
         printf("Try --help for more information.\n");
@@ -73,7 +71,7 @@ int main(int argc, char *argv[])
             fclose(out);
 
             printf("Dictionary\n");
-            for(i = 0;i < 13; ++i){
+            for(i = 0;i < 11; ++i){
                 printf("%d : %s\n",i + 256,dictionary[i]);
             }
         }
@@ -94,20 +92,17 @@ void printHelp(void)
 
 void lzw_compress(FILE * in,FILE * out)
 {
-/*    unsigned int stringCode; */
     unsigned int charCode;
     unsigned int i;
     int index;
     int formerIndex;
 
-    for(i = 0; i < SIZE; ++i){
+    for(i = 0; i < SIZE; ++i)
         dictionary[i] = NULL;
-    }
 
     formerIndex = -1;
 
     stringCodeStack[stackp++] = getc(in);
-/*    stringCode = getc(in); */
 
     charCode = getc(in);
     while (charCode != (unsigned int)EOF){
@@ -119,34 +114,31 @@ void lzw_compress(FILE * in,FILE * out)
             formerIndex = index;
         }else{
 
-            if(formerIndex != -1){
+            if(formerIndex != -1)
                 outputCode(out,formerIndex + 256);
-            } else{
+            else
                 outputStringCode(out);
-            }
+
             formerIndex = -1;
-/*            outputCode(out,stringCode); */
 
             /* if less than the maximum size */
             if(1){
-                addToDictionary(index,charCode);
+                dictionary[index] = constructNewDictionaryEntry(charCode);
             }
 
-	    stackp = 0;
+            stackp = 0;
 
             stringCodeStack[stackp++] = charCode;
-/*            stringCode = charCode;*/
         }
 
         charCode = getc(in);
     }
 
-/*    outputStringCode(out); */
-    if(formerIndex != -1){
+    if(formerIndex != -1)
         outputCode(out,formerIndex + 256);
-    } else{
+    else
         outputStringCode(out);
-    }
+
     outputCode(out,0);
 }
 
@@ -155,9 +147,8 @@ void outputStringCode(FILE * out)
     int length = stackp;
     int i;
 
-    for(i = 0; i < length; ++i){
+    for(i = 0; i < length; ++i)
         outputCode(out,stringCodeStack[i]);
-    }
 }
 
 void outputCode(FILE * out,unsigned int code)
@@ -192,7 +183,6 @@ int find_code(unsigned int charCode)
         if(dictionary[index] == NULL){
             break;
         }
-
         if(!strcmp(str,dictionary[index])){
             break;
         }
@@ -206,7 +196,6 @@ char * constructNewDictionaryEntry(unsigned int charCode)
 {
     char * str;
     int i;
-    /* string + character */
 
     str = (char * )malloc((stackp + 1) * sizeof(char));
 
@@ -219,13 +208,3 @@ char * constructNewDictionaryEntry(unsigned int charCode)
 
     return str;
 }
-
-void addToDictionary (int index,unsigned int charCode)
-{
-    char * str;
-
-    str = constructNewDictionaryEntry(charCode);
-
-    dictionary[index] = str;
-}
-
