@@ -4,7 +4,9 @@
 #include "../common.h"
 
 void printHelp(void);
-void lzw_compress(FILE * in,FILE * our);
+void lzw_compress(FILE * in,FILE * out);
+void lzw_decompress(FILE * in,FILE * out);
+
 void outputCode(FILE * out,unsigned int code);
 
 void outputStringCode(FILE * out);
@@ -23,6 +25,8 @@ int dictionarySize;
 
 char * strAppend ( char * str, const char * appendee );
 
+char * strncpyReverse( char * destination, const char * source, size_t num );
+
 int find_code(unsigned int charCode);
 
 char * constructNewDictionaryEntry(unsigned int charCode);
@@ -37,6 +41,7 @@ int main(int argc, char *argv[])
     char * outFile;
     char * inFile;
     int i;
+    char extension[5];
 
     if(argc == 1){
         printf("No file was specified.\n");
@@ -61,7 +66,23 @@ int main(int argc, char *argv[])
         assertFileOpened(in);
 
         if(decompress){
-	    
+            strncpyReverse(extension,*argv,4);
+
+            if(!strcmp(extension,".lzw")){
+                outFile = changeExtension(*argv,"unc");
+
+                out = fopen(outFile,"wb");
+                free(outFile);
+                assertFileOpened(out);
+            }else{
+
+                outFile = strAppend(*argv,".unc");
+                out = fopen(outFile,"wb");
+                free(outFile);
+                assertFileOpened(out);
+            }
+
+            lzw_decompress(in,out);
         }else{
             outFile = strAppend(*argv,".lzw");
             out = fopen(outFile,"wb");
@@ -69,14 +90,16 @@ int main(int argc, char *argv[])
             assertFileOpened(out);
 
             lzw_compress(in,out);
-            fclose(in);
-            fclose(out);
 
             printf("Dictionary\n");
             for(i = 0;i < 11; ++i){
                 printf("%d : %s\n",i + 256,dictionary[i]);
             }
         }
+
+        fclose(in);
+        fclose(out);
+
     }
 
     return 0;
@@ -90,6 +113,12 @@ void printHelp(void)
     printf("  --help\tDisplay this help message.\n");
     printf("  -d\tPerform decompression.\n");
 
+}
+
+void lzw_decompress(FILE * in,FILE * out)
+{
+    in = in;
+    out = out;
 }
 
 void lzw_compress(FILE * in,FILE * out)
@@ -223,4 +252,17 @@ char * strAppend ( char * str, const char * appendee )
     strcat(appended,appendee);
 
     return appended;
+}
+
+char * strncpyReverse( char * destination, const char * source, size_t num )
+{
+    int skip;
+
+    skip = strlen(source) - num;
+
+    source += skip;
+
+    strncpy(destination,source,num + 1);
+
+    return destination;
 }
