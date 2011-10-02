@@ -18,6 +18,10 @@ char ** dictionary;
 
 char stringCodeStack[40000];
 int stackp;
+int dictionarySize;
+
+
+char * strAppend ( char * str, const char * appendee );
 
 int find_code(unsigned int charCode);
 
@@ -52,16 +56,14 @@ int main(int argc, char *argv[])
 
         dictionary = (char **)malloc(sizeof(char *) * SIZE);
 
+        inFile = *argv;
+        in = fopen(inFile,"rb");
+        assertFileOpened(in);
+
         if(decompress){
-
+	    
         }else{
-            inFile = *argv;
-            in = fopen(inFile,"rb");
-            assertFileOpened(in);
-
-            outFile = (char *)malloc(strlen(*argv) + 4);
-            strcpy(outFile,*argv);
-            strcat(outFile,".lzw");
+            outFile = strAppend(*argv,".lzw");
             out = fopen(outFile,"wb");
             free(outFile);
             assertFileOpened(out);
@@ -97,6 +99,8 @@ void lzw_compress(FILE * in,FILE * out)
     int index;
     int formerIndex;
 
+    dictionarySize = 0;
+
     for(i = 0; i < SIZE; ++i)
         dictionary[i] = NULL;
 
@@ -122,8 +126,9 @@ void lzw_compress(FILE * in,FILE * out)
             formerIndex = -1;
 
             /* if less than the maximum size */
-            if(1){
+            if(dictionarySize < MAX_VALUE){
                 dictionary[index] = constructNewDictionaryEntry(charCode);
+                ++dictionarySize;
             }
 
             stackp = 0;
@@ -160,7 +165,7 @@ void outputCode(FILE * out,unsigned int code)
       code += 256;
       }*/
 
-    printf("%d=%c\n",code,(char)(code));
+/*    printf("%d=%c\n",code,(char)(code)); */
 
     output_bit_buffer |= (unsigned long) code << (32 - BITS- output_bit_count);
     output_bit_count += BITS;
@@ -207,4 +212,15 @@ char * constructNewDictionaryEntry(unsigned int charCode)
     str[i] = '\0';
 
     return str;
+}
+
+char * strAppend ( char * str, const char * appendee )
+{
+    char * appended;
+
+    appended = (char *)malloc(strlen(str) + strlen(appendee));
+    strcpy(appended,str);
+    strcat(appended,appendee);
+
+    return appended;
 }
