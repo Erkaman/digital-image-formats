@@ -8,8 +8,14 @@ void lzw_compress(FILE * in,FILE * out);
 void lzw_decompress(FILE * in,FILE * out);
 
 void outputCode(FILE * out,unsigned int code);
+unsigned int inputCode(FILE *input);
 
 void outputStringCode(FILE * out);
+
+unsigned int lastNBits(unsigned int num,unsigned int n,unsigned int bits);
+unsigned int firstNBits(unsigned int num,unsigned int n);
+
+char translateCode(unsigned int newCode);
 
 #define BITS 12
 #define SIZE 4096 /* or sumthin */
@@ -115,9 +121,40 @@ void printHelp(void)
 
 }
 
+char translateCode(unsigned int newCode)
+{
+
+}
+
 void lzw_decompress(FILE * in,FILE * out)
 {
-    in = in;
+    unsigned int oldCode;
+    unsigned int newCode;
+    char firstString;
+
+    oldCode = inputCode(in);
+    putc(oldCode,out);
+
+    newCode = inputCode(in);
+
+    while (newCode != (MAX_VALUE)){
+
+	newCode = inputCode(in);
+
+	firstString = translateCode(newCode);
+    }
+
+/*    oldCode = inputCode(in);
+    printf("READ: %d=%c\n",oldCode,oldCode);
+    oldCode = inputCode(in);
+    printf("READ: %d=%c\n",oldCode,oldCode);
+    oldCode = inputCode(in);
+    printf("READ: %d=%c\n",oldCode,oldCode);
+    oldCode = inputCode(in);
+    printf("READ: %d=%c\n",oldCode,oldCode);*/
+
+/*    putc(oldCode,out); */
+
     out = out;
 }
 
@@ -155,7 +192,7 @@ void lzw_compress(FILE * in,FILE * out)
             formerIndex = -1;
 
             /* if less than the maximum size */
-            if(dictionarySize < MAX_VALUE){
+            if(dictionarySize <= MAX_CODE){
                 dictionary[index] = constructNewDictionaryEntry(charCode);
                 ++dictionarySize;
             }
@@ -173,6 +210,7 @@ void lzw_compress(FILE * in,FILE * out)
     else
         outputStringCode(out);
 
+    outputCode(out,MAX_VALUE);
     outputCode(out,0);
 }
 
@@ -190,10 +228,6 @@ void outputCode(FILE * out,unsigned int code)
     static int output_bit_count=0;
     static unsigned long output_bit_buffer=0L;
 
-/*    if(dictionary[code] != NULL){
-      code += 256;
-      }*/
-
 /*    printf("%d=%c\n",code,(char)(code)); */
 
     output_bit_buffer |= (unsigned long) code << (32 - BITS- output_bit_count);
@@ -205,6 +239,64 @@ void outputCode(FILE * out,unsigned int code)
         output_bit_count -= 8;
     }
 }
+
+unsigned int lastNBits(unsigned int num,unsigned int n,unsigned int bits)
+{
+    return (num & (~0 << (bits - n))) >> (bits - n);
+}
+
+unsigned int firstNBits(unsigned int num,unsigned int n)
+{
+    return (num & ~(~0 << n));
+}
+
+unsigned int inputCode(FILE *input)
+{
+    unsigned int returnValue;
+    static int inputBitCount=0;
+    static unsigned long inputBitBuffer=0L;
+    unsigned int firstN;
+    unsigned int lastN;
+    unsigned char ch;
+
+    inputBitCount = BITS + inputBitCount;
+
+    while (inputBitCount > 0)
+    {
+        ch = getc(input);
+        if(ch == (unsigned char)EOF){
+            returnValue = (unsigned int)EOF;
+            break;
+        }
+
+        printf("NEXT BYTE\n");
+
+        printf("ch:%d\n",ch);
+
+        if(inputBitCount < 8){
+            lastN = lastNBits(ch,4,8);
+            firstN = firstNBits(ch,4);
+            printf("lastN: %d\n",lastN);
+            printf("firstN: %d\n",firstN);
+
+            returnValue = (inputBitBuffer << (BITS - 8)) | lastN;
+            inputBitBuffer = firstN;
+        } else{
+            inputBitBuffer = (inputBitBuffer << (BITS - 8)) | ch;
+
+            if(inputBitCount == 8){
+		returnValue = inputBitBuffer;
+		inputBitBuffer = 0;
+            }
+        }
+
+        printf("Inputbuffer:%lu\n",inputBitBuffer);
+
+        inputBitCount -= 8;
+    }
+    return returnValue;
+}
+
 
 int find_code(unsigned int charCode)
 {
@@ -266,3 +358,7 @@ char * strncpyReverse( char * destination, const char * source, size_t num )
 
     return destination;
 }
+
+
+
+/* you don't need to use dictionary when decoding! */
