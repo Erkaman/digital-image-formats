@@ -1,12 +1,13 @@
 PROG = lzw
 CC = gcc
 include ../flags
-objects = lzw.o ../common.o
+objects = lzw.o util.o ../common.o
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
 lzw.o : lzw.c ../common.h
+util.o : util.h
 ../common.o : ../common.h
 
 clean :
