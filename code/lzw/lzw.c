@@ -4,25 +4,15 @@
 #include "../common.h"
 #include "util.h"
 
-/* TODO: go to line  91 NAO */
 void printHelp(void);
 
 /* compression */
 
 void lzw_compress(FILE * in,FILE * out);
 
-void outputCode(FILE * out,unsigned int code);
-unsigned int inputCode(FILE *input);
+void outputCode(unsigned int code,FILE * out);
 
-void outputStringCode(FILE * out);
-
-char * constructNewDictionaryEntry(unsigned int charCode);
-
-void printStringCode(unsigned int stringCode);
-
-void addToDictionary (int index,unsigned int charCode);
-
-int find_code(unsigned int charCode);
+int findMatch(unsigned int hash_prefix,unsigned int hash_character);
 
 /* decompression */
 
@@ -30,17 +20,27 @@ void lzw_decompress(FILE * in,FILE * out);
 
 void addToTable(unsigned int oldCode,char character);
 
-
 void translateCode(unsigned int newCode);
 char printString(FILE * out);
 
+unsigned int inputCode(FILE *input);
 
 #define BITS 12
-#define SIZE 4096
+
+#define HASHING_SHIFT (BITS-8)
+
+#if BITS == 14
+#define SIZE 18041
+#endif
+#if BITS == 13
+#define SIZE 9029
+#endif
+#if BITS <= 12
+#define SIZE 5021
+#endif
+
 #define MAX_VALUE (1 << BITS) - 1
 #define MAX_CODE MAX_VALUE - 1
-
-char ** dictionary;
 
 typedef struct {
     unsigned int stringCode;
@@ -49,9 +49,11 @@ typedef struct {
 
 tableEntry * stringTable;
 
+/* -1 of it's not been used yet */
+int * codeValues;
+
 char stringCodeStack[40000];
 int stackp;
-int dictionarySize;
 unsigned int dictionaryIndex;
 
 int main(int argc, char *argv[])
@@ -61,7 +63,6 @@ int main(int argc, char *argv[])
     FILE * out;
     char * outFile;
     char * inFile;
-    int i;
     char extension[5];
 
     if(argc == 1){
@@ -80,16 +81,14 @@ int main(int argc, char *argv[])
             ++argv;
         }
 
-        dictionary = (char **)malloc(sizeof(char *) * SIZE);
-
         stringTable = (tableEntry *)malloc(sizeof(tableEntry) * SIZE);
+
+        codeValues = (int *)malloc(sizeof(int) * SIZE);
+
 
         inFile = *argv;
         in = fopen(inFile,"rb");
         assertFileOpened(in);
-
-        for(i = 0; i < SIZE; ++i)
-            dictionary[i] = NULL;
 
         if(decompress){
             strncpyBack(extension,*argv,4);
@@ -110,12 +109,12 @@ int main(int argc, char *argv[])
 
             lzw_decompress(in,out);
 
-            printf("String table\n");
+/*            printf("String table\n");
             for(i = 0;i < 11; ++i){
                 printf("%d : %d,%d\n",
                        i+256,stringTable[i+256].stringCode,
                        stringTable[i+256].characterCode);
-            }
+            }*/
 
         }else{
             outFile = strAppend(*argv,".lzw");
@@ -126,11 +125,6 @@ int main(int argc, char *argv[])
             lzw_compress(in,out);
 
 
-        }
-
-        printf("Dictionary\n");
-        for(i = 0;i < 11; ++i){
-            printf("%d : %s\n",i + 256,dictionary[i]);
         }
 
         fclose(in);
@@ -157,7 +151,7 @@ void translateCode(unsigned int newCode)
 
 /*    printf("translateCode\n");
 
-    printf("newCode:%d\n",newCode); */
+      printf("newCode:%d\n",newCode); */
 
     entry = stringTable[newCode];
 
@@ -196,8 +190,8 @@ void addToTable(unsigned int oldCode,char character)
     tableEntry newEntry;
 
 /*    printf("addToTable code %d\n",dictionaryIndex);
-    printf("oldCode:%d\n",oldCode);
-    printf("character:%d\n",character); */
+      printf("oldCode:%d\n",oldCode);
+      printf("character:%d\n",character); */
 
     newEntry.stringCode = oldCode;
     newEntry.characterCode = character;
@@ -218,6 +212,7 @@ void lzw_decompress(FILE * in,FILE * out)
     dictionaryIndex = 256;
 
     oldCode = inputCode(in);
+
     putc(oldCode,out);
 
     character = oldCode;
@@ -228,8 +223,8 @@ void lzw_decompress(FILE * in,FILE * out)
     while (newCode != MAX_VALUE){
 
 /*        printf("NEW LOOP\n");
-        printf("newCode:%d\n",newCode);
-        printf("oldCode:%d\n",oldCode);*/
+          printf("newCode:%d\n",newCode);
+          printf("oldCode:%d\n",oldCode);*/
 
         /* if it is not in the translation table. */
         if(!(newCode < dictionaryIndex)){
@@ -258,66 +253,53 @@ void lzw_decompress(FILE * in,FILE * out)
 void lzw_compress(FILE * in,FILE * out)
 {
     unsigned int charCode;
+    unsigned int stringCode;
+    /* rename the currentCode? */
+    int nextCode;
     int index;
-    int formerIndex;
-
-    dictionarySize = 0;
 
 
-    formerIndex = -1;
+    for(nextCode = 0; nextCode < SIZE; ++nextCode)
+	codeValues[nextCode] = -1;
 
-    stringCodeStack[stackp++] = getc(in);
+    nextCode = 256;
+
+    stringCode = getc(in);
 
     charCode = getc(in);
+
     while (charCode != (unsigned int)EOF){
 
-        index = find_code(charCode);
+        index = findMatch(stringCode,charCode);
 
-        if(dictionary[index] != NULL){
-            stringCodeStack[stackp++] = charCode;
-            formerIndex = index;
+	/* if it's in the table */
+        if(codeValues[index] != -1){
+	    stringCode = codeValues[index];
         }else{
+	    /* not in the table */
 
-            if(formerIndex != -1)
-                outputCode(out,formerIndex + 256);
-            else
-                outputStringCode(out);
-
-            formerIndex = -1;
+	    outputCode(stringCode,out);
 
             /* if less than the maximum size */
-            if(dictionarySize <= MAX_CODE){
-                dictionary[index] = constructNewDictionaryEntry(charCode);
-                ++dictionarySize;
+            if(nextCode <= MAX_CODE){
+                stringTable[index].characterCode = charCode;
+                stringTable[index].stringCode = stringCode;
+
+		codeValues[index] = nextCode++;
             }
 
-            stackp = 0;
-
-            stringCodeStack[stackp++] = charCode;
+            stringCode = charCode;
         }
 
         charCode = getc(in);
     }
 
-    if(formerIndex != -1)
-        outputCode(out,formerIndex + 256);
-    else
-        outputStringCode(out);
-
-    outputCode(out,MAX_VALUE);
-    outputCode(out,0);
+    outputCode(stringCode,out);
+    outputCode(MAX_VALUE,out);
+    outputCode(0,out);
 }
 
-void outputStringCode(FILE * out)
-{
-    int length = stackp;
-    int i;
-
-    for(i = 0; i < length; ++i)
-        outputCode(out,stringCodeStack[i]);
-}
-
-void outputCode(FILE * out,unsigned int code)
+void outputCode(unsigned int code,FILE * out)
 {
     static int output_bit_count=0;
     static unsigned long output_bit_buffer=0L;
@@ -352,39 +334,28 @@ unsigned int inputCode(FILE *input)
     return(return_value);
 }
 
-int find_code(unsigned int charCode)
+int findMatch(unsigned int stringCode,unsigned int charCode)
 {
     int index;
-    char * str;
+    int offset;
 
-    str = constructNewDictionaryEntry(charCode);
+    index = (charCode << HASHING_SHIFT) ^ stringCode;
+    if (index == 0)
+        offset = 1;
+    else
+        offset = SIZE - index;
+    while (1)
+    {
+        if (codeValues[index] == -1)
+            return index;
 
-    for(index = 0;index < SIZE; ++index){
-        if(dictionary[index] == NULL){
-            break;
-        }
-        if(!strcmp(str,dictionary[index])){
-            break;
-        }
+        if (stringTable[index].stringCode == stringCode &&
+            stringTable[index].characterCode == charCode)
+            return index;
+
+        index -= offset;
+
+        if (index < 0)
+            index += SIZE;
     }
-    free(str);
-
-    return index;
-}
-
-char * constructNewDictionaryEntry(unsigned int charCode)
-{
-    char * str;
-    int i;
-
-    str = (char * )malloc((stackp + 1) * sizeof(char));
-
-    for(i = 0; i < stackp; ++i){
-        str[i] = stringCodeStack[i];
-    }
-
-    str[i++] = charCode;
-    str[i] = '\0';
-
-    return str;
 }
