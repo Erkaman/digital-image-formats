@@ -28,9 +28,12 @@ int find_code(unsigned int charCode);
 
 void lzw_decompress(FILE * in,FILE * out);
 
-void addToTable(unsigned int oldCode,char firstString);
+void addToTable(unsigned int oldCode,char character);
 
-char translateCode(unsigned int newCode,FILE * out);
+
+void translateCode(unsigned int newCode);
+char printString(FILE * out);
+
 
 #define BITS 12
 #define SIZE 4096
@@ -114,13 +117,6 @@ int main(int argc, char *argv[])
                        stringTable[i+256].characterCode);
             }
 
-/*          typedef struct {
-            unsigned int stringCode;
-            unsigned int characterCode;
-            } tableEntry;*/
-
-
-
         }else{
             outFile = strAppend(*argv,".lzw");
             out = fopen(outFile,"wb");
@@ -155,22 +151,21 @@ void printHelp(void)
 
 }
 
-char translateCode(unsigned int newCode,FILE * out)
+void translateCode(unsigned int newCode)
 {
     tableEntry entry;
-    char returnValue;
 
-    printf("translateCode\n");
+/*    printf("translateCode\n");
 
-    printf("newCode:%d\n",newCode);
+    printf("newCode:%d\n",newCode); */
 
     entry = stringTable[newCode];
 
-    printf("Grabbed entry\n");
+/*    printf("Grabbed entry\n"); */
 
     while(1){
 
-        printf("characterCode:%d\n",entry.characterCode);
+/*        printf("characterCode:%d\n",entry.characterCode); */
         stringCodeStack[stackp++] = entry.characterCode;
 
         if(entry.stringCode == ((unsigned int)-1) )
@@ -179,26 +174,33 @@ char translateCode(unsigned int newCode,FILE * out)
             entry = stringTable[entry.stringCode];
     }
 
+
+}
+
+char printString(FILE * out)
+{
+    char returnValue;
+
     returnValue = stringCodeStack[stackp - 1];
 
     while(stackp > 0){
-        printf("Stackoutput:%d\n",stringCodeStack[stackp-1]);
+/*        printf("Stackoutput:%d\n",stringCodeStack[stackp-1]); */
         putc(stringCodeStack[--stackp],out);
     }
 
     return returnValue;
 }
 
-void addToTable(unsigned int oldCode,char firstString)
+void addToTable(unsigned int oldCode,char character)
 {
     tableEntry newEntry;
 
-    printf("addToTable code %d\n",dictionaryIndex);
+/*    printf("addToTable code %d\n",dictionaryIndex);
     printf("oldCode:%d\n",oldCode);
-    printf("firstString:%d\n",firstString);
+    printf("character:%d\n",character); */
 
     newEntry.stringCode = oldCode;
-    newEntry.characterCode = firstString;
+    newEntry.characterCode = character;
     stringTable[dictionaryIndex++] = newEntry;
 }
 
@@ -206,7 +208,7 @@ void lzw_decompress(FILE * in,FILE * out)
 {
     unsigned int oldCode;
     unsigned int newCode;
-    char firstString;
+    char character;
 
     for(dictionaryIndex = 0; dictionaryIndex < 256; ++dictionaryIndex){
         stringTable[dictionaryIndex].characterCode = dictionaryIndex;
@@ -218,23 +220,36 @@ void lzw_decompress(FILE * in,FILE * out)
     oldCode = inputCode(in);
     putc(oldCode,out);
 
+    character = oldCode;
+
     newCode = inputCode(in);
 
     /* max_value should be checked for here but it doesn't work. */
-    while (newCode != ((unsigned int)(-1))){
+    while (newCode != MAX_VALUE){
 
-        printf("NEW LOOP\n");
+/*        printf("NEW LOOP\n");
         printf("newCode:%d\n",newCode);
-        printf("oldCode:%d\n",oldCode);
+        printf("oldCode:%d\n",oldCode);*/
 
-        firstString = translateCode(newCode,out);
+        /* if it is not in the translation table. */
+        if(!(newCode < dictionaryIndex)){
+            /* wut*/
+            translateCode(character);
+            translateCode(oldCode);
+        } else{
+            translateCode(newCode);
+        }
 
-        if(1){
-            addToTable(oldCode,firstString);
+        character = printString(out);
+
+        if(dictionaryIndex <= MAX_CODE){
+            addToTable(oldCode,character);
         }
 
         oldCode = newCode;
         newCode = inputCode(in);
+
+/*        printf("newCode before end of loop:%d\n",newCode); */
     }
 
     out = out;
@@ -307,7 +322,7 @@ void outputCode(FILE * out,unsigned int code)
     static int output_bit_count=0;
     static unsigned long output_bit_buffer=0L;
 
-    printf("%d=%c\n",code,(char)(code));
+/*    printf("%d=%c\n",code,(char)(code)); */
 
     output_bit_buffer |= (unsigned long) code << (32 - BITS- output_bit_count);
     output_bit_count += BITS;
@@ -321,34 +336,61 @@ void outputCode(FILE * out,unsigned int code)
 
 unsigned int inputCode(FILE *input)
 {
+    unsigned int return_value;
+    static int input_bit_count=0;
+    static unsigned int input_bit_buffer=0L;
+
+    while (input_bit_count <= 24)
+    {
+        input_bit_buffer |=
+            (unsigned int) getc(input) << (24-input_bit_count);
+        input_bit_count += 8;
+    }
+    return_value=input_bit_buffer >> (32-BITS);
+    input_bit_buffer <<= BITS;
+    input_bit_count -= BITS;
+    return(return_value);
+}
+
+#if 0
+unsigned int inputCode(FILE *input)
+{
     unsigned int returnValue;
     static int inputBitCount=0;
     static unsigned long inputBitBuffer=0L;
     unsigned int firstN;
     unsigned int lastN;
-    unsigned char ch;
+    int ch;
+
+/*    printf("Start inputCode\n"); */
 
     inputBitCount = BITS + inputBitCount;
+
+/*    printf("InputBitCount before start: %d\n",inputBitCount);
+    printf("InputBitBuffer before start: %lu\n",inputBitBuffer); */
+
 
     while (inputBitCount > 0)
     {
         ch = getc(input);
-        if(ch == (unsigned char)EOF){
-            returnValue = (unsigned int)EOF;
+/*	printf("ch:%d\n",ch); */
+
+        if(ch == EOF){
+            returnValue = EOF;
             break;
         }
 
 /*        printf("NEXT BYTE\n");
-          printf("inputBitCount:%d\n",inputBitCount);
-          printf("Before Inputbuffer:%lu\n",inputBitBuffer);
+        printf("inputBitCount:%d\n",inputBitCount);
+        printf("Before Inputbuffer:%lu\n",inputBitBuffer);
 
-          printf("ch:%d\n",ch); */
+        printf("ch:%d\n",ch);*/
 
         if(inputBitCount < 8){
             lastN = lastNBits(ch,4,8);
             firstN = firstNBits(ch,4);
-/*           printf("lastN: %d\n",lastN);
-             printf("firstN: %d\n",firstN);*/
+/*            printf("lastN: %d\n",lastN);
+            printf("firstN: %d\n",firstN); */
 
             returnValue = (inputBitBuffer << (BITS - 8)) | lastN;
             inputBitBuffer = firstN;
@@ -369,6 +411,8 @@ unsigned int inputCode(FILE *input)
 /*    printf("RETURN:%d\n",returnValue); */
     return returnValue;
 }
+
+#endif
 
 
 int find_code(unsigned int charCode)
