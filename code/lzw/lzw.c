@@ -4,9 +4,7 @@
 #include "../common.h"
 #include "util.h"
 
-/* TODO: free the fucking memory */
-/* TODO: optimize */
-
+/* TODO: go to line  91 NAO */
 void printHelp(void);
 
 /* compression */
@@ -41,6 +39,13 @@ char translateCode(unsigned int newCode,FILE * out);
 
 char ** dictionary;
 
+typedef struct {
+    unsigned int stringCode;
+    unsigned int characterCode;
+} tableEntry;
+
+tableEntry * stringTable;
+
 char stringCodeStack[40000];
 int stackp;
 int dictionarySize;
@@ -74,13 +79,14 @@ int main(int argc, char *argv[])
 
         dictionary = (char **)malloc(sizeof(char *) * SIZE);
 
+        stringTable = (tableEntry *)malloc(sizeof(tableEntry) * SIZE);
+
         inFile = *argv;
         in = fopen(inFile,"rb");
         assertFileOpened(in);
 
         for(i = 0; i < SIZE; ++i)
             dictionary[i] = NULL;
-
 
         if(decompress){
             strncpyBack(extension,*argv,4);
@@ -100,6 +106,19 @@ int main(int argc, char *argv[])
             }
 
             lzw_decompress(in,out);
+
+            printf("String table\n");
+            for(i = 0;i < 11; ++i){
+                printf("%d : %d,%d\n",
+                       i+256,stringTable[i+256].stringCode,
+                       stringTable[i+256].characterCode);
+            }
+
+/*          typedef struct {
+            unsigned int stringCode;
+            unsigned int characterCode;
+            } tableEntry;*/
+
 
 
         }else{
@@ -138,45 +157,49 @@ void printHelp(void)
 
 char translateCode(unsigned int newCode,FILE * out)
 {
-    /* if it's a single character */
-    if(newCode < 256){
-        putc(newCode,out);
-        return newCode;
-    } else{
-        fprintf(out,"%s",dictionary[newCode-256]);
-/*        printf("dict:%s\n",dictionary[newCode-256]); */
-        return dictionary[newCode-256][0];
+    tableEntry entry;
+    char returnValue;
+
+    printf("translateCode\n");
+
+    printf("newCode:%d\n",newCode);
+
+    entry = stringTable[newCode];
+
+    printf("Grabbed entry\n");
+
+    while(1){
+
+        printf("characterCode:%d\n",entry.characterCode);
+        stringCodeStack[stackp++] = entry.characterCode;
+
+        if(entry.stringCode == ((unsigned int)-1) )
+            break;
+        else
+            entry = stringTable[entry.stringCode];
     }
+
+    returnValue = stringCodeStack[stackp - 1];
+
+    while(stackp > 0){
+        printf("Stackoutput:%d\n",stringCodeStack[stackp-1]);
+        putc(stringCodeStack[--stackp],out);
+    }
+
+    return returnValue;
 }
 
 void addToTable(unsigned int oldCode,char firstString)
 {
-    char * oldCodeStr;
-    char charStr[2];
+    tableEntry newEntry;
 
-/*    printf("oldCode:%d=%c\n",oldCode,oldCode);
-      printf("firstString:%d=%c\n",firstString,firstString); */
+    printf("addToTable code %d\n",dictionaryIndex);
+    printf("oldCode:%d\n",oldCode);
+    printf("firstString:%d\n",firstString);
 
-    /* TODO: fix the allocation sizes */
-
-    if(oldCode < 256){
-        oldCodeStr = (char *)malloc(2 + 1);
-        oldCodeStr[0] = (char) oldCode;
-        oldCodeStr[1] = '\0';
-    }else{
-        /* problem, when a new string is added the table is may overwrite previous one */
-        oldCodeStr = (char *)malloc(strlen(dictionary[oldCode-256]) + 2);
-        strcpy(oldCodeStr,dictionary[oldCode-256]);
-    }
-
-    charStr[0] = firstString;
-    charStr[1] = '\0';
-
-    strcat(oldCodeStr,charStr);
-
-/*    printf("oldCodeStr:%s\n",oldCodeStr); */
-
-    dictionary[dictionaryIndex++] = oldCodeStr;
+    newEntry.stringCode = oldCode;
+    newEntry.characterCode = firstString;
+    stringTable[dictionaryIndex++] = newEntry;
 }
 
 void lzw_decompress(FILE * in,FILE * out)
@@ -185,7 +208,12 @@ void lzw_decompress(FILE * in,FILE * out)
     unsigned int newCode;
     char firstString;
 
-    dictionaryIndex = 0;
+    for(dictionaryIndex = 0; dictionaryIndex < 256; ++dictionaryIndex){
+        stringTable[dictionaryIndex].characterCode = dictionaryIndex;
+        stringTable[dictionaryIndex].stringCode = (unsigned int) -1;
+    }
+
+    dictionaryIndex = 256;
 
     oldCode = inputCode(in);
     putc(oldCode,out);
@@ -195,11 +223,12 @@ void lzw_decompress(FILE * in,FILE * out)
     /* max_value should be checked for here but it doesn't work. */
     while (newCode != ((unsigned int)(-1))){
 
-/*        printf("newCode:%d\n",newCode); */
-
-        printf("%c=%d\n",oldCode,oldCode);
+        printf("NEW LOOP\n");
+        printf("newCode:%d\n",newCode);
+        printf("oldCode:%d\n",oldCode);
 
         firstString = translateCode(newCode,out);
+
         if(1){
             addToTable(oldCode,firstString);
         }
@@ -309,17 +338,17 @@ unsigned int inputCode(FILE *input)
             break;
         }
 
-        printf("NEXT BYTE\n");
-        printf("inputBitCount:%d\n",inputBitCount);
-        printf("Before Inputbuffer:%lu\n",inputBitBuffer);
+/*        printf("NEXT BYTE\n");
+          printf("inputBitCount:%d\n",inputBitCount);
+          printf("Before Inputbuffer:%lu\n",inputBitBuffer);
 
-        printf("ch:%d\n",ch);
+          printf("ch:%d\n",ch); */
 
         if(inputBitCount < 8){
             lastN = lastNBits(ch,4,8);
             firstN = firstNBits(ch,4);
-            printf("lastN: %d\n",lastN);
-            printf("firstN: %d\n",firstN);
+/*           printf("lastN: %d\n",lastN);
+             printf("firstN: %d\n",firstN);*/
 
             returnValue = (inputBitBuffer << (BITS - 8)) | lastN;
             inputBitBuffer = firstN;
@@ -332,12 +361,12 @@ unsigned int inputCode(FILE *input)
             }
         }
 
-        printf("After Inputbuffer:%lu\n",inputBitBuffer);
+/*        printf("After Inputbuffer:%lu\n",inputBitBuffer); */
 
         inputBitCount -= 8;
     }
 
-    printf("RETURN:%d\n",returnValue);
+/*    printf("RETURN:%d\n",returnValue); */
     return returnValue;
 }
 
