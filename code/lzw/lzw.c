@@ -352,69 +352,6 @@ unsigned int inputCode(FILE *input)
     return(return_value);
 }
 
-#if 0
-unsigned int inputCode(FILE *input)
-{
-    unsigned int returnValue;
-    static int inputBitCount=0;
-    static unsigned long inputBitBuffer=0L;
-    unsigned int firstN;
-    unsigned int lastN;
-    int ch;
-
-/*    printf("Start inputCode\n"); */
-
-    inputBitCount = BITS + inputBitCount;
-
-/*    printf("InputBitCount before start: %d\n",inputBitCount);
-    printf("InputBitBuffer before start: %lu\n",inputBitBuffer); */
-
-
-    while (inputBitCount > 0)
-    {
-        ch = getc(input);
-/*	printf("ch:%d\n",ch); */
-
-        if(ch == EOF){
-            returnValue = EOF;
-            break;
-        }
-
-/*        printf("NEXT BYTE\n");
-        printf("inputBitCount:%d\n",inputBitCount);
-        printf("Before Inputbuffer:%lu\n",inputBitBuffer);
-
-        printf("ch:%d\n",ch);*/
-
-        if(inputBitCount < 8){
-            lastN = lastNBits(ch,4,8);
-            firstN = firstNBits(ch,4);
-/*            printf("lastN: %d\n",lastN);
-            printf("firstN: %d\n",firstN); */
-
-            returnValue = (inputBitBuffer << (BITS - 8)) | lastN;
-            inputBitBuffer = firstN;
-        } else{
-            inputBitBuffer = (inputBitBuffer << (inputBitCount)) | ch;
-
-            if(inputBitCount == 8){
-                returnValue = inputBitBuffer;
-                inputBitBuffer = 0;
-            }
-        }
-
-/*        printf("After Inputbuffer:%lu\n",inputBitBuffer); */
-
-        inputBitCount -= 8;
-    }
-
-/*    printf("RETURN:%d\n",returnValue); */
-    return returnValue;
-}
-
-#endif
-
-
 int find_code(unsigned int charCode)
 {
     int index;
