@@ -30,25 +30,7 @@ char printString(FILE * out);
 
 unsigned int inputCode(FILE *input);
 
-#define BITS 15
 
-#define HASHING_SHIFT (BITS-8)
-
-#if BITS == 15
-#define SIZE 33941
-#endif
-#if BITS == 14
-#define SIZE 18041
-#endif
-#if BITS == 13
-#define SIZE 9029
-#endif
-#if BITS <= 12
-#define SIZE 5021
-#endif
-
-#define MAX_VALUE (1 << BITS) - 1
-#define MAX_CODE MAX_VALUE - 1
 
 typedef struct {
     unsigned int stringCode;
@@ -63,6 +45,14 @@ int stackp;
 
 int verbose;
 
+unsigned int codeSize;
+unsigned int tableSize;
+
+unsigned int  hashingShift;
+
+unsigned int maxValue;
+unsigned int maxCode;
+
 unsigned int dictionaryIndex;
 
 int main(int argc, char *argv[])
@@ -73,6 +63,8 @@ int main(int argc, char *argv[])
     char * outFile;
     char * inFile;
     char extension[5];
+
+    codeSize = 12;
 
     verbose = 0;
 
@@ -95,12 +87,40 @@ int main(int argc, char *argv[])
                 decompress = 1;
             else if(!strcmp("-v",*argv))
                 verbose = 1;
+            else if(!strncmp("-bs=",*argv,4)){
+                (*argv)+= 4;
+                debugPrint("-bs= %s\n",*argv);
+
+                codeSize = atoi(*argv);
+
+                if(!(codeSize >= 9 && codeSize<=15)){
+                    printf("Code length specifier is invalid, defaulting to 12.\n");
+                    codeSize = 12;
+
+                }
+                verbose = 1;
+            }
 
             ++argv;
+
         }
 
-        stringTable = (tableEntry *)malloc(sizeof(tableEntry) * SIZE);
-        codeValues = (int *)malloc(sizeof(int) * SIZE);
+        if(codeSize == 15)
+            tableSize = 33941;
+        else if(codeSize == 14)
+            tableSize =  18041;
+        else if(codeSize == 13)
+            tableSize =  9029;
+        else if(codeSize <= 12)
+            tableSize = 5021;
+
+        hashingShift = (codeSize-8);
+        maxValue = (1 << codeSize) - 1;
+        maxCode =  maxValue - 1 ;
+
+
+        stringTable = (tableEntry *)malloc(sizeof(tableEntry) * tableSize);
+        codeValues = (int *)malloc(sizeof(int) * tableSize);
 
         inFile = *argv;
         in = fopen(inFile,"rb");
@@ -124,13 +144,6 @@ int main(int argc, char *argv[])
             }
 
             lzw_decompress(in,out);
-/*
-  for(i = 0;i < 11; ++i){
-  printf("%d : %d,%d\n",
-  i+256,stringTable[i+256].stringCode,
-  stringTable[i+256].characterCode);
-  }*/
-
         }else{
             outFile = strAppend(*argv,".lzw");
             out = fopen(outFile,"wb");
@@ -217,7 +230,7 @@ void lzw_decompress(FILE * in,FILE * out)
     newCode = inputCode(in);
 
     /* max_value should be checked for here but it doesn't work. */
-    while (newCode != MAX_VALUE){
+    while (newCode != maxValue){
 
 /*        printf("NEW LOOP\n");
           printf("newCode:%d\n",newCode);
@@ -235,7 +248,7 @@ void lzw_decompress(FILE * in,FILE * out)
         character = printString(out);
 
         /* add it the table */
-        if(dictionaryIndex <= MAX_CODE){
+        if(dictionaryIndex <= maxCode){
 
             stringTable[dictionaryIndex].stringCode = oldCode;
             stringTable[dictionaryIndex].characterCode = character;
@@ -256,11 +269,10 @@ void lzw_compress(FILE * in,FILE * out)
 {
     unsigned int charCode;
     unsigned int stringCode;
-    int nextCode;
+    unsigned int nextCode;
     int index;
 
-
-    for(nextCode = 0; nextCode < SIZE; ++nextCode)
+    for(nextCode = 0; nextCode < tableSize; ++nextCode)
         codeValues[nextCode] = -1;
 
     nextCode = 256;
@@ -282,14 +294,14 @@ void lzw_compress(FILE * in,FILE * out)
             outputCode(stringCode,out);
 
             /* if less than the maximum size */
-            if(nextCode <= MAX_CODE){
+            if(nextCode <= maxCode){
 
-		verbosePrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
-			     nextCode,
-			     stringCode,
-			     stringCode,
-			     charCode,
-			     charCode);
+                verbosePrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
+                             nextCode,
+                             stringCode,
+                             stringCode,
+                             charCode,
+                             charCode);
 
                 stringTable[index].characterCode = charCode;
                 stringTable[index].stringCode = stringCode;
@@ -304,7 +316,7 @@ void lzw_compress(FILE * in,FILE * out)
     }
 
     outputCode(stringCode,out);
-    outputCode(MAX_VALUE,out);
+    outputCode(maxValue,out);
     outputCode(0,out);
 }
 
@@ -315,8 +327,8 @@ void outputCode(unsigned int code,FILE * out)
 
     verbosePrint("Outputted code: %d=%c\n",code,(char)(code));
 
-    output_bit_buffer |= (unsigned int) code << (32 - BITS- output_bit_count);
-    output_bit_count += BITS;
+    output_bit_buffer |= (unsigned int) code << (32 - codeSize- output_bit_count);
+    output_bit_count += codeSize;
     while (output_bit_count >= 8)
     {
         putc(output_bit_buffer >> 24,out);
@@ -337,9 +349,9 @@ unsigned int inputCode(FILE *input)
             (unsigned int) getc(input) << (24-input_bit_count);
         input_bit_count += 8;
     }
-    return_value=input_bit_buffer >> (32-BITS);
-    input_bit_buffer <<= BITS;
-    input_bit_count -= BITS;
+    return_value=input_bit_buffer >> (32-codeSize);
+    input_bit_buffer <<= codeSize;
+    input_bit_count -= codeSize;
     return(return_value);
 }
 
@@ -348,11 +360,11 @@ int findMatch(unsigned int stringCode,unsigned int charCode)
     int index;
     int offset;
 
-    index = (charCode << HASHING_SHIFT) ^ stringCode;
+    index = (charCode << hashingShift) ^ stringCode;
     if (index == 0)
         offset = 1;
     else
-        offset = SIZE - index;
+        offset = tableSize - index;
     while (1)
     {
         if (codeValues[index] == -1)
@@ -365,7 +377,7 @@ int findMatch(unsigned int stringCode,unsigned int charCode)
         index -= offset;
 
         if (index < 0)
-            index += SIZE;
+            index += tableSize;
     }
 }
 
