@@ -6,7 +6,6 @@
 #include "util.h"
 
 void printHelp(void);
-
 void verbosePrint(const char * format, ...);
 void debugPrint(const char * format, ...);
 
@@ -16,19 +15,14 @@ void debugPrint(const char * format, ...);
 /* compression */
 
 void lzw_compress(FILE * in,FILE * out);
-
 void outputCode(unsigned int code,FILE * out);
-
 int findMatch(unsigned int hash_prefix,unsigned int hash_character);
 
 /* decompression */
 
 void lzw_decompress(FILE * in,FILE * out);
-
-
 void translateCode(unsigned int newCode);
 char printString(FILE * out);
-
 unsigned int inputCode(FILE *input);
 
 typedef struct {
@@ -46,9 +40,7 @@ int verbose;
 
 unsigned int codeSize;
 unsigned int tableSize;
-
 unsigned int  hashingShift;
-
 unsigned int maxValue;
 unsigned int maxCode;
 
@@ -64,7 +56,6 @@ int main(int argc, char *argv[])
     char extension[5];
 
     codeSize = 12;
-
     verbose = 0;
 
     if(argc == 1){
@@ -95,9 +86,7 @@ int main(int argc, char *argv[])
 
                 }
             }
-
             ++argv;
-
         }
 
         if(codeSize == 15)
@@ -112,7 +101,6 @@ int main(int argc, char *argv[])
         hashingShift = (codeSize-8);
         maxValue = (1 << codeSize) - 1;
         maxCode =  maxValue - 1 ;
-
 
         stringTable = (tableEntry *)malloc(sizeof(tableEntry) * tableSize);
         codeValues = (int *)malloc(sizeof(int) * tableSize);
@@ -163,7 +151,8 @@ void printHelp(void)
            "Compression is done by default");
     printf("  --help\tDisplay this help message.\n");
     printf("  -d\tPerform decompression.\n");
-    printf("  -v\tVerbose output..\n");
+    printf("  -v\tVerbose output.\n");
+    printf("  -bs=\tSet the outputted code sizes.\n");
 
 }
 
@@ -191,7 +180,7 @@ char printString(FILE * out)
     returnValue = stringCodeStack[stackp - 1];
 
     while(stackp > 0){
-        verbosePrint("Stackoutput:%d\n",stringCodeStack[stackp-1]);
+        verbosePrint("Outputted translated character:%d\n",stringCodeStack[stackp-1]);
         putc(stringCodeStack[--stackp],out);
     }
 
@@ -213,6 +202,7 @@ void lzw_decompress(FILE * in,FILE * out)
 
     oldCode = inputCode(in);
 
+    verbosePrint("Outputted translated character:%d\n",oldCode);
     putc(oldCode,out);
 
     character = oldCode;
@@ -236,6 +226,14 @@ void lzw_decompress(FILE * in,FILE * out)
 
             stringTable[dictionaryIndex].stringCode = oldCode;
             stringTable[dictionaryIndex].characterCode = character;
+
+            verbosePrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
+                         dictionaryIndex,
+                         oldCode,
+                         oldCode,
+                         character,
+                         character);
+
 
             dictionaryIndex++;
         }
@@ -321,20 +319,20 @@ void outputCode(unsigned int code,FILE * out)
 
 unsigned int inputCode(FILE *input)
 {
-    unsigned int return_value;
-    static int input_bit_count=0;
-    static unsigned int input_bit_buffer=0L;
+    unsigned int returnValue;
+    static int inputBitCount=0;
+    static unsigned int inputBitBuffer=0;
 
-    while (input_bit_count <= 24)
+    while (inputBitCount <= 24)
     {
-        input_bit_buffer |=
-            (unsigned int) getc(input) << (24-input_bit_count);
-        input_bit_count += 8;
+        inputBitBuffer |=
+            (unsigned int) getc(input) << (24 - inputBitCount);
+        inputBitCount += 8;
     }
-    return_value=input_bit_buffer >> (32-codeSize);
-    input_bit_buffer <<= codeSize;
-    input_bit_count -= codeSize;
-    return(return_value);
+    returnValue = inputBitBuffer >> (32-codeSize);
+    inputBitBuffer <<= codeSize;
+    inputBitCount -= codeSize;
+    return(returnValue);
 }
 
 int findMatch(unsigned int stringCode,unsigned int charCode)
@@ -343,10 +341,12 @@ int findMatch(unsigned int stringCode,unsigned int charCode)
     int offset;
 
     index = (charCode << hashingShift) ^ stringCode;
+
     if (index == 0)
         offset = 1;
     else
         offset = tableSize - index;
+
     while (1)
     {
         if (codeValues[index] == -1)
@@ -383,5 +383,4 @@ void debugPrint(const char * format, ...)
         vprintf(format, vl);
         va_end(vl);
     }
-
 }
