@@ -18,7 +18,6 @@ int findMatch(unsigned int hash_prefix,unsigned int hash_character);
 
 void lzw_decompress(FILE * in,FILE * out);
 
-void addToTable(unsigned int oldCode,char character);
 
 void translateCode(unsigned int newCode);
 char printString(FILE * out);
@@ -84,9 +83,7 @@ int main(int argc, char *argv[])
         }
 
         stringTable = (tableEntry *)malloc(sizeof(tableEntry) * SIZE);
-
         codeValues = (int *)malloc(sizeof(int) * SIZE);
-
 
         inFile = *argv;
         in = fopen(inFile,"rb");
@@ -112,11 +109,11 @@ int main(int argc, char *argv[])
             lzw_decompress(in,out);
 
 /*            printf("String table\n");
-            for(i = 0;i < 11; ++i){
-                printf("%d : %d,%d\n",
-                       i+256,stringTable[i+256].stringCode,
-                       stringTable[i+256].characterCode);
-            }*/
+              for(i = 0;i < 11; ++i){
+              printf("%d : %d,%d\n",
+              i+256,stringTable[i+256].stringCode,
+              stringTable[i+256].characterCode);
+              }*/
 
         }else{
             outFile = strAppend(*argv,".lzw");
@@ -125,8 +122,6 @@ int main(int argc, char *argv[])
             assertFileOpened(out);
 
             lzw_compress(in,out);
-
-
         }
 
         fclose(in);
@@ -157,8 +152,6 @@ void translateCode(unsigned int newCode)
 
     entry = stringTable[newCode];
 
-/*    printf("Grabbed entry\n"); */
-
     while(1){
 
 /*        printf("characterCode:%d\n",entry.characterCode); */
@@ -169,8 +162,6 @@ void translateCode(unsigned int newCode)
         else
             entry = stringTable[entry.stringCode];
     }
-
-
 }
 
 char printString(FILE * out)
@@ -185,19 +176,6 @@ char printString(FILE * out)
     }
 
     return returnValue;
-}
-
-void addToTable(unsigned int oldCode,char character)
-{
-    tableEntry newEntry;
-
-/*    printf("addToTable code %d\n",dictionaryIndex);
-      printf("oldCode:%d\n",oldCode);
-      printf("character:%d\n",character); */
-
-    newEntry.stringCode = oldCode;
-    newEntry.characterCode = character;
-    stringTable[dictionaryIndex++] = newEntry;
 }
 
 void lzw_decompress(FILE * in,FILE * out)
@@ -239,8 +217,13 @@ void lzw_decompress(FILE * in,FILE * out)
 
         character = printString(out);
 
+	/* add it the table */
         if(dictionaryIndex <= MAX_CODE){
-            addToTable(oldCode,character);
+
+            stringTable[dictionaryIndex].stringCode = oldCode;
+            stringTable[dictionaryIndex].characterCode = character;
+
+	    dictionaryIndex++;
         }
 
         oldCode = newCode;
@@ -262,7 +245,7 @@ void lzw_compress(FILE * in,FILE * out)
 
 
     for(nextCode = 0; nextCode < SIZE; ++nextCode)
-	codeValues[nextCode] = -1;
+        codeValues[nextCode] = -1;
 
     nextCode = 256;
 
@@ -274,20 +257,20 @@ void lzw_compress(FILE * in,FILE * out)
 
         index = findMatch(stringCode,charCode);
 
-	/* if it's in the table */
+        /* if it's in the table */
         if(codeValues[index] != -1){
-	    stringCode = codeValues[index];
+            stringCode = codeValues[index];
         }else{
-	    /* not in the table */
+            /* not in the table */
 
-	    outputCode(stringCode,out);
+            outputCode(stringCode,out);
 
             /* if less than the maximum size */
             if(nextCode <= MAX_CODE){
                 stringTable[index].characterCode = charCode;
                 stringTable[index].stringCode = stringCode;
 
-		codeValues[index] = nextCode++;
+                codeValues[index] = nextCode++;
             }
 
             stringCode = charCode;
@@ -304,11 +287,11 @@ void lzw_compress(FILE * in,FILE * out)
 void outputCode(unsigned int code,FILE * out)
 {
     static int output_bit_count=0;
-    static unsigned long output_bit_buffer=0L;
+    static unsigned int output_bit_buffer=0L;
 
 /*    printf("%d=%c\n",code,(char)(code)); */
 
-    output_bit_buffer |= (unsigned long) code << (32 - BITS- output_bit_count);
+    output_bit_buffer |= (unsigned int) code << (32 - BITS- output_bit_count);
     output_bit_count += BITS;
     while (output_bit_count >= 8)
     {
