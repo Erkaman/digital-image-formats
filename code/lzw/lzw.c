@@ -25,10 +25,13 @@ char printString(FILE * out);
 
 unsigned int inputCode(FILE *input);
 
-#define BITS 12
+#define BITS 15
 
 #define HASHING_SHIFT (BITS-8)
 
+#if BITS == 15
+#define SIZE 33941
+#endif
 #if BITS == 14
 #define SIZE 18041
 #endif
@@ -48,12 +51,11 @@ typedef struct {
 } tableEntry;
 
 tableEntry * stringTable;
-
-/* -1 of it's not been used yet */
 int * codeValues;
 
 char stringCodeStack[40000];
 int stackp;
+
 unsigned int dictionaryIndex;
 
 int main(int argc, char *argv[])
