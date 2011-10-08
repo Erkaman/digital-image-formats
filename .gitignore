@@ -4,8 +4,9 @@
 # outputted from tga
 *.dmp
 
-# outputted from lze
+# outputted from lzw
 *.lzw
+*.unc
 
 auto/
 
