@@ -10,7 +10,8 @@ void printHelp(void);
 void verbosePrint(const char * format, ...);
 void debugPrint(const char * format, ...);
 
-#define DEBUG 1
+/* Set this macro to 1 if you want helpful debug messages */
+#define DEBUG 0
 
 /* compression */
 
@@ -29,8 +30,6 @@ void translateCode(unsigned int newCode);
 char printString(FILE * out);
 
 unsigned int inputCode(FILE *input);
-
-
 
 typedef struct {
     unsigned int stringCode;
@@ -77,8 +76,6 @@ int main(int argc, char *argv[])
 
         while(--argc != 1){
 
-            debugPrint("Argv:%s\n",*argv);
-
             if(!strcmp("--help",*argv)){
                 printHelp();
                 return 0;
@@ -89,7 +86,6 @@ int main(int argc, char *argv[])
                 verbose = 1;
             else if(!strncmp("-bs=",*argv,4)){
                 (*argv)+= 4;
-                debugPrint("-bs= %s\n",*argv);
 
                 codeSize = atoi(*argv);
 
@@ -98,7 +94,6 @@ int main(int argc, char *argv[])
                     codeSize = 12;
 
                 }
-                verbose = 1;
             }
 
             ++argv;
@@ -176,14 +171,9 @@ void translateCode(unsigned int newCode)
 {
     tableEntry entry;
 
-    debugPrint("translateCode\n");
-    debugPrint("newCode:%d\n",newCode);
-
     entry = stringTable[newCode];
 
     while(1){
-
-        debugPrint("characterCode:%d\n",entry.characterCode);
 
         stringCodeStack[stackp++] = entry.characterCode;
 
@@ -201,7 +191,7 @@ char printString(FILE * out)
     returnValue = stringCodeStack[stackp - 1];
 
     while(stackp > 0){
-/*        printf("Stackoutput:%d\n",stringCodeStack[stackp-1]); */
+        verbosePrint("Stackoutput:%d\n",stringCodeStack[stackp-1]);
         putc(stringCodeStack[--stackp],out);
     }
 
@@ -232,18 +222,12 @@ void lzw_decompress(FILE * in,FILE * out)
     /* max_value should be checked for here but it doesn't work. */
     while (newCode != maxValue){
 
-/*        printf("NEW LOOP\n");
-          printf("newCode:%d\n",newCode);
-          printf("oldCode:%d\n",oldCode);*/
-
         /* if it is not in the translation table. */
         if(!(newCode < dictionaryIndex)){
-            /* wut*/
             translateCode(character);
             translateCode(oldCode);
-        } else{
+        } else
             translateCode(newCode);
-        }
 
         character = printString(out);
 
@@ -258,8 +242,6 @@ void lzw_decompress(FILE * in,FILE * out)
 
         oldCode = newCode;
         newCode = inputCode(in);
-
-/*        printf("newCode before end of loop:%d\n",newCode); */
     }
 
     out = out;
