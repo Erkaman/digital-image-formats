@@ -1,10 +1,16 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include "../common.h"
 #include "util.h"
 
 void printHelp(void);
+
+void verbosePrint(const char * format, ...);
+void debugPrint(const char * format, ...);
+
+#define DEBUG 1
 
 /* compression */
 
@@ -55,6 +61,8 @@ int * codeValues;
 char stringCodeStack[40000];
 int stackp;
 
+int verbose;
+
 unsigned int dictionaryIndex;
 
 int main(int argc, char *argv[])
@@ -66,6 +74,8 @@ int main(int argc, char *argv[])
     char * inFile;
     char extension[5];
 
+    verbose = 0;
+
     if(argc == 1){
         printf("No file was specified.\n");
         printf("Try --help for more information.\n");
@@ -73,12 +83,19 @@ int main(int argc, char *argv[])
 
         ++argv;
 
-        if(!strcmp("--help",*argv)){
-            printHelp();
-            return 0;
-        }
-        if(!strcmp("-d",*argv)){
-            decompress = 1;
+        while(--argc != 1){
+
+            debugPrint("Argv:%s\n",*argv);
+
+            if(!strcmp("--help",*argv)){
+                printHelp();
+                return 0;
+            }
+            else if(!strcmp("-d",*argv))
+                decompress = 1;
+            else if(!strcmp("-v",*argv))
+                verbose = 1;
+
             ++argv;
         }
 
@@ -107,13 +124,12 @@ int main(int argc, char *argv[])
             }
 
             lzw_decompress(in,out);
-
-/*            printf("String table\n");
-              for(i = 0;i < 11; ++i){
-              printf("%d : %d,%d\n",
-              i+256,stringTable[i+256].stringCode,
-              stringTable[i+256].characterCode);
-              }*/
+/*
+  for(i = 0;i < 11; ++i){
+  printf("%d : %d,%d\n",
+  i+256,stringTable[i+256].stringCode,
+  stringTable[i+256].characterCode);
+  }*/
 
         }else{
             outFile = strAppend(*argv,".lzw");
@@ -139,6 +155,7 @@ void printHelp(void)
            "Compression is done by default");
     printf("  --help\tDisplay this help message.\n");
     printf("  -d\tPerform decompression.\n");
+    printf("  -v\tVerbose output..\n");
 
 }
 
@@ -146,15 +163,15 @@ void translateCode(unsigned int newCode)
 {
     tableEntry entry;
 
-/*    printf("translateCode\n");
-
-      printf("newCode:%d\n",newCode); */
+    debugPrint("translateCode\n");
+    debugPrint("newCode:%d\n",newCode);
 
     entry = stringTable[newCode];
 
     while(1){
 
-/*        printf("characterCode:%d\n",entry.characterCode); */
+        debugPrint("characterCode:%d\n",entry.characterCode);
+
         stringCodeStack[stackp++] = entry.characterCode;
 
         if(entry.stringCode == ((unsigned int)-1) )
@@ -217,13 +234,13 @@ void lzw_decompress(FILE * in,FILE * out)
 
         character = printString(out);
 
-	/* add it the table */
+        /* add it the table */
         if(dictionaryIndex <= MAX_CODE){
 
             stringTable[dictionaryIndex].stringCode = oldCode;
             stringTable[dictionaryIndex].characterCode = character;
 
-	    dictionaryIndex++;
+            dictionaryIndex++;
         }
 
         oldCode = newCode;
@@ -239,7 +256,6 @@ void lzw_compress(FILE * in,FILE * out)
 {
     unsigned int charCode;
     unsigned int stringCode;
-    /* rename the currentCode? */
     int nextCode;
     int index;
 
@@ -267,6 +283,14 @@ void lzw_compress(FILE * in,FILE * out)
 
             /* if less than the maximum size */
             if(nextCode <= MAX_CODE){
+
+		verbosePrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
+			     nextCode,
+			     stringCode,
+			     stringCode,
+			     charCode,
+			     charCode);
+
                 stringTable[index].characterCode = charCode;
                 stringTable[index].stringCode = stringCode;
 
@@ -289,7 +313,7 @@ void outputCode(unsigned int code,FILE * out)
     static int output_bit_count=0;
     static unsigned int output_bit_buffer=0L;
 
-/*    printf("%d=%c\n",code,(char)(code)); */
+    verbosePrint("Outputted code: %d=%c\n",code,(char)(code));
 
     output_bit_buffer |= (unsigned int) code << (32 - BITS- output_bit_count);
     output_bit_count += BITS;
@@ -343,4 +367,27 @@ int findMatch(unsigned int stringCode,unsigned int charCode)
         if (index < 0)
             index += SIZE;
     }
+}
+
+void verbosePrint(const char * format, ...)
+{
+    va_list vl;
+
+    if(verbose){
+        va_start(vl, format);
+        vprintf(format, vl);
+        va_end(vl);
+    }
+}
+
+void debugPrint(const char * format, ...)
+{
+    va_list vl;
+
+    if(DEBUG){
+        va_start(vl, format);
+        vprintf(format, vl);
+        va_end(vl);
+    }
+
 }
