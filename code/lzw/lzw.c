@@ -10,7 +10,7 @@ void verbosePrint(const char * format, ...);
 void debugPrint(const char * format, ...);
 
 /* Set this macro to 1 if you want helpful debug messages */
-#define DEBUG 0
+#define DEBUG 1
 
 /* compression */
 
@@ -214,8 +214,10 @@ void lzw_decompress(FILE * in,FILE * out)
 
         /* if it is not in the translation table. */
         if(!(newCode < dictionaryIndex)){
-            translateCode(character);
+	    
+	    stringCodeStack[stackp++] = character;
             translateCode(oldCode);
+	    
         } else
             translateCode(newCode);
 
