@@ -14,6 +14,7 @@ it is described in
 \section{Compression algorithm}
 
 \subsection{Description}
+\label{sec:lzw-desc}
 
 The \lzw compression\index{\lzw compression} algorithm is best
 understood by walking through the LZW algorithms process of
@@ -139,10 +140,12 @@ until you fully understand it.
   \label{tab:lzw-walkthru}
 \end{table}
 
-3\subsection{Algorithm}
+\subsection{Algorithm}
 
-\ref{alg:lzw-compression}
-
+In algorithm \ref{alg:lzw-compression} the complete LZW compression
+algorithm is presented. Try reading thourhg through it once, but I'd
+doubt you'd be able to understand all of it at this. We are going to
+have discuss several more concepts before you can understand it.
 
 \begin{algorithm}[H]
   \caption{Settings the constants for the LZW algorithm}
@@ -155,7 +158,7 @@ until you fully understand it.
 \end{algorithm}
 
 \begin{algorithm}[H]
-  \caption{LZW compression algorithm.}
+  \caption{The LZW compression algorithm.}
   \label{alg:lzw-compression}
   \begin{algorithmic}[1]
     \ForTo{$nextCode$}{$0$}{$tableSize$}
@@ -197,6 +200,91 @@ until you fully understand it.
 
   \end{algorithmic}
 \end{algorithm}
+
+\subsubsection{Codes sizes}
+
+All a \lzw compressed file will consist of after this algorithm has
+been run, is a long sequence of outputted number codes.
+
+Since all the of the actual strings in the string table have codes
+values over $255$, bytes will obviously not be sufficient to store
+these codes in a file. You may think we instead use 16-bit numbers to
+store the codes, but then you will probably be surprised to know that
+traditionally code sizes\index{code size} are in the ranges $9 <
+codeSize < 15$. But among all code sizes 12-bit codes are probably the
+most frequent ones.
+
+Since most of all file writing funcitons of a language standard
+library do not really suppot writing numbers that are not a multiple
+of 8, we will also need to figure out of how write number whose sizes
+are in the ranges $9 < x < 15$.
+
+\subsubsection{String storage}
+
+\newcommand{\strpair}[2]{(#1,#2)}
+
+You could of course just store all the strings in the string table as
+real string data types. However, these strings are going to end up
+taking way more space than they really need to.
+
+As you probably remember from section \ref{sec:lzw-desc}, the adde
+strings to the table is just the concatenation of the currnently read
+in character and the former string. The concatenation of the
+characters characters \texttt{a} and \texttt{b} could be expressed as
+the string \texttt{ab}. But however, the could also be described by
+the pair\index{pair} \strpair{97}{98}, which consists of the two codes
+of the two  characters. Okay, there is no real big
+difference in size yet, but now consider \texttt{abcbde} and
+\texttt{a} and their concatenation \texttt{abcbdea}. If
+\texttt{abcbde} has the code, say,  289, then surely the pair
+\strpair{289}{97} is much more storage efficent than \texttt{abcbdea}?
+Yes, it is of course! You may think we are just nit picking here, but
+also need to consider that with huge files this string could end up
+becoming very big. And besides, pair of numbers are often easier much easier to deal
+with than strings, espically in languages like \C! So there's end much
+smaller chance of making sily  mistakes and creating bugs that could
+have been avoided if you hade selected the string storage model more
+wisely.
+
+Using this new string storage model table \ref{tab:str-tab-str} ends up becoming this
+table \ref{tab:str-tab-pair}. You may notice that we end creating this
+beautiful recursive structure using this model. We will find out more
+about this later when are going to decompress the data.
+
+\newcommand{\pairrow}[3]{$#1$ & \strpair{#2}{#3} \\}
+
+\begin{table}
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    String & Code \\
+    \midrule
+    \dotsrow
+    \pairrow{256}{97}{b}
+    \pairrow{257}{98}{a}
+    \pairrow{258}{256}{c}
+    \pairrow{259}{99}{b}
+    \pairrow{260}{257}{b}
+    \pairrow{261}{260}{a}
+    \pairrow{262}{87}{a}
+    \pairrow{263}{262}{a}
+    \pairrow{264}{263}{a}
+    \bottomrule
+  \end{tabular}
+  \caption{The string table after the \lzw algorithm has been run.}
+  \label{tab:str-tab-pair}
+\end{table}
+
+\subsubsection{Table size}
+
+And we can't just of course add strings to the string table willy
+nilly. For very large files this table may grow extremely large and
+the compression program would end of being a hog on the computers
+resources.
+
+\subsubsection{Finding the correct codes}
+
+Hashing bla bla.
 
 \section{Decompression algorithm}
 
