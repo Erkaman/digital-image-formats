@@ -772,6 +772,46 @@ But what is this string table I am speaking of? At the beginning
 
 \subsection{Decompression algorithm}
 
+\subsubsection{Description}
+
+Using the compression algorithm LZW we on the string
+\texttt{ababcbababaaaaaaa} we end up with the compressed data
+\texttt{97 98 256 99 257 260 97 262 263 264}. As you may have noticed
+before, in a LZW compressed file the string is not included. Then how
+could you possibly decompress the file without such essential
+information. It turns out that all the corresponding LZW decompression
+algorithm do is
+
+\subsubsection{Algorithm}
+
+
+\begin{algorithm}[H]
+  \caption{LZW non-working decompression algorithm.}
+  \label{alg:lzw-non-working-decompression}
+  \begin{algorithmic}[1]
+    \Let{$oldCode$}{\VoidCall{$ReadByte$}}
+    \State \Call{WriteByte}{$oldCode$}
+    \Let{$newCode$}{\VoidCall{$ReadByte$}}
+    \While{\neof}
+
+%      \If{\Call{NotInTable}{newCode}}
+%      \Else
+%      \EndIf
+
+      \Let{$string$}{\Call{translate}{$newCode$}}
+      \State \Call{outputString}{$string$}
+      \Let{$character$}{$string[0]$}
+
+      \State \Call{$AddToStringTable$}{$oldCode, character$}
+
+      \Let{$oldCode$}{$newCode$}
+      \Let{$newCode$}{\VoidCall{$ReadByte$}}
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Efficiency}
+
 
 
 \FloatBarrier
