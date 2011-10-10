@@ -5,6 +5,8 @@
 #include "../common.h"
 #include "util.h"
 
+/* FIX THE DAMN COMMAD LINE PARSER: THE LINE ./lzw --help doesn't work!!!! */
+
 void printHelp(void);
 void verbosePrint(const char * format, ...);
 void debugPrint(const char * format, ...);
@@ -214,10 +216,10 @@ void lzw_decompress(FILE * in,FILE * out)
 
         /* if it is not in the translation table. */
         if(!(newCode < dictionaryIndex)){
-	    
+
 	    stringCodeStack[stackp++] = character;
             translateCode(oldCode);
-	    
+
         } else
             translateCode(newCode);
 
