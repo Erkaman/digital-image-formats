@@ -715,13 +715,63 @@ But what is this string table I am speaking of? At the beginning
 
 \ref{alg:lzw-compression}
 
+
+\begin{algorithm}[H]
+  \caption{Settings the constants for the LZW algorithm}
+  \label{alg:lzw-constants}
+  \begin{algorithmic}[1]
+    \Let{$codeSize$}{12}
+    \Let{$maxValue$}{$(1 << codeSize) - 1$}
+    \Let{$maxCode$}{$maxValue - 1$}
+  \end{algorithmic}
+\end{algorithm}
+
 \begin{algorithm}[H]
   \caption{LZW compression algorithm.}
   \label{alg:lzw-compression}
   \begin{algorithmic}[1]
-   
+    \ForTo{$nextCode$}{$0$}{$tableSize$}
+      \Let{$codeValues[nextCode]$}{$-1$}
+    \EndFor
+
+    \Let{$nextCode$}{$256$}
+
+    \Let{$stringCode$}{\VoidCall{$ReadByte$}}
+    \Let{$charCode$}{\VoidCall{$ReadByte$}}
+
+    \While{\neof}
+      \Let{$index$}{\Call{GetHashTableIndex}{$stringCode,charCode$}}
+
+      \If{$codeValues[index] \neq -1$} \Comment{If it's in the table}
+        \Let{$stringCode$}{$codeValues[index]$}
+      \Else \Comment{If it's not in the table}
+        \State \Call{outputCode}{$stringCode$}
+
+        \If{$nextCode \leq maxCode$}
+
+          \Let{$stringTable[index]$}{$(stringCode, charCode)$}
+
+          \Let{$codeValues[index]$}{$nextCode$}
+          \Let{$nextCode$}{$nextCode + 1$}
+
+        \EndIf
+
+        \Let{$stringCode$}{$charCode$}
+
+      \EndIf
+
+      \Let{$charCode$}{\VoidCall{$ReadByte$}}
+
+    \EndWhile
+
+    \State \Call{outputCode}{$stringCode$}
+    \State \Call{outputCode}{$maxValue$}
+
   \end{algorithmic}
 \end{algorithm}
+
+\subsection{Decompression algorithm}
+
 
 
 \FloatBarrier
