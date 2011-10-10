@@ -1,0 +1,254 @@
+\begin{comment}
+  \bibliography{project.bib}
+\end{comment}
+
+\chapter{LZW}
+\label{ch:rle}
+
+\begin{refsection}
+
+In this chapter we will discuss the data compression algorithm \lzw as
+it is described in
+\cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}
+
+\section{Compression algorithm}
+
+\subsection{Description}
+
+The \lzw compression algorithm is best understood by walking through a
+compression of some data with it. Let's we want to compress the
+string \texttt{ababcbababaaaaaaa}.
+
+First we will a string table\index{string table} containing all the characters that can
+possibly fit in a byte. Alongside the character, we will also store
+the \ascii number value of it. We will from now on call these numbers
+codes. You will soon see why. See table \ref{tab:str-tab-ascii} for an
+example of how this table looks like at the beginning of the algorithm.
+
+First we read the first character \texttt{a}. If we look up this
+letter in the table we get the number $97$, so we just output this
+number. Next, we read in the character \texttt{b}, which has the
+number. But now get to the real meat of the algorithm. We append
+these two read characters together, and get  the string
+\texttt{ab}. Now we check if this string exists in the string
+table. If you consider the fact that we at the beginning of this
+algorithm filled it with only the single character strings of the
+ASCII table, You must realise that the string cannot possibly exist
+in the table. So the string is added to the table and given the next
+available code, $256$.
+
+\texttt{a} is discarded, we keep and output the code of \texttt{b} and
+we read in another \texttt{a}. This time, we end with the appended
+string \texttt{ba}. This string doesn't either exist in the table and
+so we add it with the code $257$. We throw away \texttt{b}, output \texttt{a} and read in
+another \texttt{b}. Now something very interesting thing happens. The
+appended string we end up with is this time \texttt{ab}. But wait a
+minute, haven't we already added that string to the string table? Yes
+we have. So instead of re-adding that string to table, we output its
+code, $256$. This means we instead separately adding the codes of \texttt{a} and
+\texttt{b}, we just output one single code! You should now start to
+realize why this compression algorthm works. In the next step the
+algorithm, we will let the appended string \texttt{ab} represent the
+former character.
+
+And so we read in the character \texttt{c}. The string \texttt{abc}
+doesn't exist in the table, so we output the single code for
+\texttt{ab}.
+
+And it just keeps going like this. Just keeping describign it like
+would add nothing to your understanding, thus I will step and refer
+you to table ? for the resulting output and string table.
+
+\newcommand{\dotsrow}{\dots & \dots \\}
+\newcommand{\strrow}[2]{$#1$ & #2 \\}
+
+\begin{table}
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    String & Code \\
+    \midrule
+
+    \dotsrow
+    \strrow{33}{!}
+    \strrow{34}{"}
+    \strrow{35}{\#}
+    \dotsrow
+    \strrow{97}{a}
+    \strrow{98}{b}
+    \strrow{99}{c}
+    \strrow{255}{ }
+
+    \dotsrow
+    \bottomrule
+  \end{tabular}
+  \caption{Initial LZW string table}
+  \label{tab:str-tab-ascii}
+\end{table}
+
+\begin{table}
+  \centering
+  \newcommand{\lzwrow}[4]{#1 & #2 & #3 & #4 \\}
+  \begin{tabular}{llll}
+    \toprule
+    String code & Character Code & Output Code & New table entry \\
+    \midrule
+
+    \lzwrow{a}{b}{a}{ab}
+    \lzwrow{b}{a}{b}{ba}
+    \lzwrow{a}{b}{}{}
+    \lzwrow{ab}{c}{256}{abc}
+    \lzwrow{c}{b}{c}{cb}
+    \lzwrow{b}{a}{}{}
+    \lzwrow{ba}{b}{ba}{bab}
+    \lzwrow{b}{a}{}{}
+    \lzwrow{ba}{b}{}{}
+    \lzwrow{bab}{a}{bab}{baba}
+    \lzwrow{a}{a}{a}{aa}
+    \lzwrow{a}{a}{}{}
+    \lzwrow{aa}{a}{aa}{aaa}
+    \lzwrow{a}{a}{}{}
+    \lzwrow{aa}{a}{}{}
+    \lzwrow{aaa}{a}{aaa}{aaaa}
+
+    \bottomrule
+  \end{tabular}
+  \caption{the LZW string table after the algorithm has been run}
+  \label{tab:str-tab-str}
+\end{table}
+
+\begin{table}
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    String & Code \\
+    \midrule
+
+    \dotsrow
+    \strrow{256}{ab}
+    \strrow{257}{ba}
+    \strrow{258}{abc}
+    \strrow{259}{cb}
+    \strrow{260}{bab}
+    \strrow{261}{baba}
+    \strrow{262}{aa}
+    \strrow{263}{aaa}
+    \strrow{264}{aaaa}
+    \bottomrule
+  \end{tabular}
+  \caption{LZW control flow}
+  \label{tab:str-tab-str}
+\end{table}
+
+But what is this string table I am speaking of? At the beginning
+
+\subsection{Algorithm}
+
+\ref{alg:lzw-compression}
+
+
+\begin{algorithm}[H]
+  \caption{Settings the constants for the LZW algorithm}
+  \label{alg:lzw-constants}
+  \begin{algorithmic}[1]
+    \Let{$codeSize$}{12}
+    \Let{$maxValue$}{$(1 << codeSize) - 1$}
+    \Let{$maxCode$}{$maxValue - 1$}
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{algorithm}[H]
+  \caption{LZW compression algorithm.}
+  \label{alg:lzw-compression}
+  \begin{algorithmic}[1]
+    \ForTo{$nextCode$}{$0$}{$tableSize$}
+      \Let{$codeValues[nextCode]$}{$-1$}
+    \EndFor
+
+    \Let{$nextCode$}{$256$}
+
+    \Let{$stringCode$}{\VoidCall{$ReadByte$}}
+    \Let{$charCode$}{\VoidCall{$ReadByte$}}
+
+    \While{\neof}
+      \Let{$index$}{\Call{GetHashTableIndex}{$stringCode,charCode$}}
+
+      \If{$codeValues[index] \neq -1$} \Comment{If it's in the table}
+        \Let{$stringCode$}{$codeValues[index]$}
+      \Else \Comment{If it's not in the table}
+        \State \Call{outputCode}{$stringCode$}
+
+        \If{$nextCode \leq maxCode$}
+
+          \Let{$stringTable[index]$}{$(stringCode, charCode)$}
+
+          \Let{$codeValues[index]$}{$nextCode$}
+          \Let{$nextCode$}{$nextCode + 1$}
+
+        \EndIf
+
+        \Let{$stringCode$}{$charCode$}
+
+      \EndIf
+
+      \Let{$charCode$}{\VoidCall{$ReadByte$}}
+
+    \EndWhile
+
+    \State \Call{outputCode}{$stringCode$}
+    \State \Call{outputCode}{$maxValue$}
+
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Decompression algorithm}
+
+\subsection{Description}
+
+Using the compression algorithm LZW we on the string
+\texttt{ababcbababaaaaaaa} we end up with the compressed data
+\texttt{97 98 256 99 257 260 97 262 263 264}. As you may have noticed
+before, in a LZW compressed file the string is not included. Then how
+could you possibly decompress the file without such essential
+information. It turns out that all the corresponding LZW decompression
+algorithm do is
+
+\subsection{Algorithm}
+
+
+\begin{algorithm}[H]
+  \caption{LZW non-working decompression algorithm.}
+  \label{alg:lzw-non-working-decompression}
+  \begin{algorithmic}[1]
+    \Let{$oldCode$}{\VoidCall{$ReadByte$}}
+    \State \Call{WriteByte}{$oldCode$}
+    \Let{$newCode$}{\VoidCall{$ReadByte$}}
+    \While{\neof}
+
+%      \If{\Call{NotInTable}{newCode}}
+%      \Else
+%      \EndIf
+
+      \Let{$string$}{\Call{translate}{$newCode$}}
+      \State \Call{outputString}{$string$}
+      \Let{$character$}{$string[0]$}
+
+      \State \Call{$AddToStringTable$}{$oldCode, character$}
+
+      \Let{$oldCode$}{$newCode$}
+      \Let{$newCode$}{\VoidCall{$ReadByte$}}
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Efficiency}
+
+AS you may noticed doing LZW compression on small files is a small
+gain operation. However, doing this on larger files do actully yield a
+significant decrease in file sizes.
+
+\FloatBarrier
+
+\printbibliography[heading=subbibliography]
+
+\end{refsection}

@@ -1,0 +1,536 @@
+\begin{comment}
+  \bibliography{project.bib}
+\end{comment}
+
+
+\chapter{Run Length Encoding}
+\label{sec:rle}
+
+\begin{refsection}
+
+\section{Naive Version}
+\label{sec:naive-version}
+
+\subsection{Description}
+\label{sec:description}
+
+One the most simple compression algorithms is known as \textit{Run
+  Length Encoding}\index{Run Length Encoding}, or simply,
+RLE\index{RLE}\cite{nagarajan11:_enhan_approac_run_lengt_encod_schem}.
+The algorithm works like this: Sequences of consecutive data are
+stored in packets containing a data count and a single value, rather
+than the entire run of data.
+
+But what does that actually \textit{mean}? Let us consider the string
+
+\begin{indentpar}
+  WWWWAAAACCCCCCQ
+\end{indentpar}
+
+As we can see, there are several runs of duplicated data in this
+string. What if we instead of storing all of the duplicated data,
+stored a number that tells how many times the following character
+is replicated? And that's the RLE algorithm in a nutshell.
+
+So when running the RLE encoding algorithm on this string, it is
+compressed like this:
+
+\newcommand{\pkt}[2]{\textbf{#1}#2}
+
+\begin{indentpar}
+  \pkt{4}{W}\pkt{4}{A}\pkt{6}{C}\pkt{1}{Q}
+\end{indentpar}
+
+So all the RLE encoding algorithm really does is encode long
+consecutive runs of the same value as a count and a single data
+value. We from now on will call a sequence of a data count and the
+data itself a \textit{packet}\index{packet}.
+
+But however, the same thing is also done for single runs, meaning that
+the algorithm can potentially explode the size of the original data
+rather than compress it. Consider,for example, the string
+
+\begin{indentpar}
+  eric
+\end{indentpar}
+
+this will actually get ``compressed'' down to
+
+\newcommand{\spkt}[1]{\pkt{1}{#1}}
+
+\begin{indentpar}
+  \spkt{e}\spkt{r}\spkt{i}\spkt{c}
+\end{indentpar}
+
+So the size actually doubled for this kind of data! So for very data
+with very varying values, like photos and books, this algorithm will
+do just horrible. But in data in which the values are not varied much
+at all, like that robot logo we showed in the last chapter, even for
+such a naive algorithm, it will do quite good.
+
+In table \ref{tab:rle-comp} the compression ratio of the algorithm for
+some sample data is demonstrated. As can be seen from the table, the
+comrpession algorithm is not a single value that can be assgined to an
+algorithm, but it highly depends on the kind of data that is being
+compressed. Some data may yield a high compression ratio for a simple
+algorithm, while some data may potentially explode the size.
+
+\begin{table}
+  \centering
+  \begin{tabular}{llr}
+    \toprule
+    Uncompressed data & compressed data & compression ratio($\%$) \\
+    \midrule
+    AAAEEERR & \pkt{3}{A}\pkt{3}{E}\pkt{2}{R} & $75$ \\
+    ericarne & \spkt{e}\spkt{r}\spkt{i}\spkt{c}\spkt{a}\spkt{r}\spkt{n}\spkt{e} & $200$ \\
+    BBBWWWBBBWWWBBBWWW & \pkt{3}{B}\pkt{3}{W}\pkt{3}{B}\pkt{3}{W}\pkt{3}{B}\pkt{3}{W} & $66.666\dots$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{RLE compression}
+  \label{tab:rle-comp}
+\end{table}
+
+\subsection{Implementation}
+\label{sec:implementation-1}
+
+
+All of this is essentially trivial to implement in code. Let us first
+consider the compression algorithm, which is shown in algorithm
+\ref{alg:rle-enc}. What follows is the explanation of this algorithm.
+
+\begin{algorithm}
+  \caption{Encoding a file using RLE.}
+  \label{alg:rle-enc}
+  \begin{algorithmic}[1]
+
+    \Let{$length$}{$1$}
+    \Let{$passedFirstCharacter$}{\False}
+    \Let{$c_2$}{ \VoidCall{ReadByte}}
+
+    \While{\neof}
+
+      \If{$passedFirstCharacter$}
+        \If{$c_2 = c_1 \AND length < 255$}
+          \Let{$length$}{$1 + length$}
+        \Else
+          \State \Call{WriteByte}{$length$}
+          \State \Call{WriteByte}{$c_1$}
+          \Let{$length$}{$1$}
+        \EndIf
+      \EndIf
+
+      \Let{$passedFirstCharacter$}{\True} %
+      \Let{$c_1$}{$c_2$}
+      \Let{$c_2$}{ \VoidCall{ReadByte}}
+
+    \EndWhile
+
+    \If{$passedFirstCharacter$} \Comment{Write the last bytes.}
+      \State \Call{WriteByte}{$length$}
+      \State \Call{WriteByte}{$c_1$}
+    \EndIf
+  \end{algorithmic}
+\end{algorithm}
+
+First we need to make sure we have two characters to compare for
+equality and possible pack together for this we use the flag
+$passedFirstCharacter$ . Once we have two character then we can
+compare then for equality and if they are equal we increase the packet
+length counter. If they are not equal or the current packet is full,
+we write the packet.
+
+To write a packet, we first write the length of the packet and then
+the actual data that is repeated by the package. And then the counter is
+reset.
+
+However, once we have reached the end of the file, we still haven't
+written the last packet. But if the file was entiely empty, we'd have
+nothing to write, so we need to check that we have passed the first
+character. If we have, we simply write the last packet in the same
+manner as all the other packets.
+
+\begin{algorithm}
+  \caption{Decoding a RLE encoded file.}
+  \label{alg:rle-dec}
+  \begin{algorithmic}[1]
+
+    \Let{$length$}{\VoidCall{ReadByte}}
+    \Let{$c$}{\VoidCall{ReadByte}}
+
+    \While{\neof}
+      \Repeatn{$length$}
+        \State \Call{WriteByte}{$b$}
+      \EndRepeatn
+
+      \Let{$length$}{\VoidCall{ReadByte}}
+      \Let{$c$}{\VoidCall{ReadByte}}
+
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
+The ridiculously simple RLE decoding algorithm is shown in algorithm
+\ref{alg:rle-dec}.
+
+It is very simple: While we still haven't reached the end of the file,
+we read a packet length and the packet data and then write out the
+packet data to a uncompressed file $length$ the same number of times
+as the packet length.
+
+\section{PackBits Version}
+\label{sec:packbits-version}
+
+But as we previously stated,this algorithm just do horrible on data that
+is not at all repetitive. For example data such as this
+
+\begin{indentpar}
+  ERICARNE
+\end{indentpar}
+
+But we needn't to forget that even for such a simple algorithm it can do
+wonders on data that is actually repetitive, like for example
+
+\begin{indentpar}
+  WWWWWWWWWWWWAAAAAAAAAAAAAAARRRRRRRRRRRR
+\end{indentpar}
+
+So the question is, can we get rid of the effect of potentially
+doubling the size, yet still being able to effectively compress data
+such as the above?  It turns out that we can. We just need to revise
+our packet format a tiny bit.
+
+A byte is written as the following bit pattern
+
+\begin{indentpar}
+  $00000000$
+\end{indentpar}
+
+Let us now call the first byte of a packet, the part that specifies
+the length of a packet, the packet head\index{packet head}. Let us
+reserve the last bit in the packet header for a flag, and use the
+seven remaining bits for specifying the size as is demonstrated in
+figure \ref{fig:packbits-header}.
+
+\begin{figure}
+  \centering
+  $\mbox{\fontsize{30}{0} $\underbrace{0}_\text{Flag bit}\overbrace{0000000}^\text{Length bits}$}$
+  \caption{PackBits header}
+  \label{fig:packbits-header}
+\end{figure}
+
+But this last bit of course won't be wasted, it will specify the
+\textit{type} of the packet. If the value of flag is 1, it will be a
+raw packet, elsewise it will be a run length packet.
+
+A run-length packet is just your ordinary run length packet, you know,
+the one we used in the last algorithm. But we need to keep that in
+this case only the first seven bytes are used for specifying the size.
+
+But however, a raw packet means that the data following the firs byte
+of the packet is just a sequence of uncompressed raw data. The length
+of this sequence is the value specified by the first seven bytes.
+
+And the length of a run-length packet is also these seven first
+bytes
+
+Both of these packet types use only seven bits for specifying their
+sizes. Hence, the new maximum length of a run length packet is the
+maximum number of an unsigned 7-bit number, which is $2^7 -1 = 127$.
+
+So we just have lost some valuable storage space, but what did we get in
+return? Well, now the string
+
+\begin{indentpar}
+  ERICARNE
+\end{indentpar}
+
+gets compressed down
+
+\begin{indentpar}
+  136ERICARNE
+\end{indentpar}
+
+(do keep in mind that 136 is a byte of the value 136, and not the
+sequence of the numbers 1,3 and 6)
+
+Which is a huge gain!
+
+But why is the packet head number so huge? Well, that's obviously
+because the last bit flag in a byte has the value $128$. If we toggle
+off that bit we end up with the packet length: $136 \BitXor 128 = 8$.
+
+And while \textit{not} exploding the size of certain kinds of data,
+this algorithms can also reap all of the benefits the old, naive, version
+of the algorithm had. So the string
+
+\begin{indentpar}
+  WWWWAAAACCCCCC
+\end{indentpar}
+
+still gets compressed down to
+
+\begin{indentpar}
+  4W4A6C
+\end{indentpar}
+
+And all of this in exchange for just one bit!
+
+As an exercise for the reader, examine the following compression and
+validate its correctness:
+
+\begin{indentpar}
+  EEEEEEERIC
+\end{indentpar}
+
+to
+
+\begin{indentpar}
+  7E131RIC
+\end{indentpar}
+
+To further demonstrate the efficiency of this algorithm, please study
+table \ref{tab:packbits-comp}. As it can be seen, this algorithm
+maintains the occasional efficency of RLE, while not doubling the size
+of non-repetitive data.
+
+\begin{table}
+  \centering
+  \begin{tabular}{llr}
+    \toprule
+    Uncompressed data & compressed data & compression ratio($\%$) \\
+    \midrule
+    AAAEEERR & \pkt{3}{A}\pkt{3}{E}\pkt{2}{R} & $75$ \\
+    ericarne & \pkt{136}{ericarne} & $112.5$ \\
+    BBBWWWBBBWWWBBBWWW & \pkt{3}{B}\pkt{3}{W}\pkt{3}{B}\pkt{3}{W}\pkt{3}{B}\pkt{3}{W} & $66.666\dots$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{PackBits compression}
+  \label{tab:packbits-comp}
+\end{table}
+
+
+\subsection{Usage}
+\label{sec:usage}
+
+This algorithm is commonly referred to as the PackBits\index{PackBits} algorithm, but
+it is really just a variant of the RLE algorithm \cite{96:_techn_note_tn102}.
+
+This algorithm is actually the one used to compress color data in the
+TGA image format \cite{91:_truev_tga_file_format_specif}.
+
+\subsection{Implementation}
+\label{sec:packbits-implementation}
+
+\subsubsection{Writing The Packets}
+\label{sec:writing-packets}
+
+Let us first consider how to write a raw packet. This is shown in
+function \textproc{writeRawPacket}(algorithm
+\ref{alg:raw-packet}). The packet head is first given an initial value
+of zero to specify that it's a raw packet. Then it's applied to
+bitwise operator \textit{OR} with the length of the packet, to pack in
+the length in the head. After that, the entire raw data which is
+contained in the array $data$ is written one by one to the compressed file.
+
+\begin{algorithm}
+  \caption{Writing a raw packet.}
+  \label{alg:raw-packet}
+  \begin{algorithmic}[1]
+    \Require $length$ is a list or array containing the data to be written
+    \Function{writeRawPacket}{$length,data$}
+      \Let{$packetHead$}{$0$}
+      \Let{$packetHead$}{$packetHead \BitOr length$}
+      \State \Call{writeByte}{$packetHead$}
+      \ForEach{$raw$}{$data$}
+        \State \Call{writeByte}{$raw$}
+      \EndForEach
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+And writing a Run Length Packet is even easier! Please observe
+algorithm \ref{alg:rle-packet}. Since it is a run length packet in
+this case, we toggle the last bit on by assigning it to an initial
+value of $128$. Then the length is packed in the head, then we simply
+write the data value that is to be replicated $length$ times to the
+file.
+
+\begin{algorithm}
+  \caption{Writing a run length packet.}
+  \label{alg:rle-packet}
+  \begin{algorithmic}[1]
+    \Require $length > 0$
+    \Function{writeRunLengthPacket}{$length,data$}
+      \Let{packetHead}{$128$}
+      \Let{packetHead}{$packetHead \BitOr length$}
+      \State \Call{writeByte}{$packetHead$}
+      \State \Call{writeByte}{$data$}
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
+\subsubsection{Compression And Decompression}
+\label{sec:compr-decompr}
+
+Now that we know how to write the packets, let us consider how to
+implement the algorithm itself.
+
+The encoding algorithm can be seen in algorithm
+\ref{alg:packbits-enc}. This algorithm has a significantly more
+complex control flow than any other algorithm up to this point, so please
+read the following explanation carefully.
+
+In the same manner as the previous version of the algorithm we first
+read in the first two values. First we check if the current packet is
+full. If it is, we write it differently depending on whether it's a
+raw or run length packet.
+
+If the current two values are equal, we first need to check whether we
+are currently writing a raw packet. If we are, we write the raw
+packet. And then we increase the run length packet length by one.
+
+If the packet is not full and it is not writing a run length packet,
+it must be writing a raw packet. However, if we are transitioning from
+writing run length to a raw packet, we need to, of course, write out
+the run length packet first. Else we put the current value into the
+data array and increase the count.
+
+And we must of course write out the last packet after the end of the
+file has been reached. The last step is done differently depending on
+the type of the current packet. \todo{the explanation needs a lot more
+work.}
+
+\begin{algorithm}
+  \caption{Encoding a file using PackBits.}
+  \label{alg:packbits-enc}
+  \begin{algorithmic}[1]
+    \Require $RawPacket = 0,RunLengthPacket = 1$
+
+    \Let{$length$}{$0$}
+    \Let{$passedFirstCharacter$}{\False}
+    \Let{$c_2$}{ \VoidCall{ReadByte}}
+    \Let{$packetType$}{$RawPacket$}
+
+    \While{\neof}
+
+      \If{$passedFirstCharacter$}
+        \If{$length = 127$}
+          \Comment{If the packet is full.}
+          \If{$length = 127$}
+
+            \State \Call{writeRunLengthPacket}{$length,c_1$}
+            \Let{$packetType$}{$RawPacket$}
+            \Let{$length$}{$0$}
+
+          \Else
+
+            \State \Call{writeRawPacket}{$length-1,data,out$}
+            \Let{$length$}{$1$}
+
+          \EndIf
+        \ElsIf{$c_2 = c_1$}
+
+          \If{$packetType = RawPacket \AND length > 0$}
+            \State \Call{writeRawPacket}{$length-1,data,out$}
+            \Let{$length$}{$0$}
+          \EndIf
+
+          \Let{$length$}{$1 + length$}
+          \Let{$packetType$}{$RunLengthPacket$}
+
+        \Else
+
+          \If{$packetType = RunLengthPacket$}
+
+            \State \Call{writeRunLengthPacket}{$length,c_1$}
+            \Let{$packetType$}{$RawPacket$}
+            \Let{$length$}{$0$}
+
+          \Else
+
+            \Let{$data[length]$}{$c_1$}
+            \Let{$length$}{$length + 1$}
+            \Let{$packetType$}{$RawPacket$}
+
+          \EndIf
+
+        \EndIf
+      \EndIf
+
+      \Let{$passedFirstCharacter$}{\True}
+      \Let{$c_1$}{$c_2$}
+      \Let{$c_2$}{ \VoidCall{ReadByte}}
+
+    \EndWhile
+
+    \If{$passedFirstCharacter$}
+      \If{$packetType = RunLengthPacket$}
+        \State \Call{$writeRunLengthPacket$}{$length,c_1$}
+      \Else
+        \Let{$data[length]$}{$c_1$}
+        \State \Call{$writeRawLengthPacket$}{$length,data$}
+      \EndIf
+    \EndIf
+  \end{algorithmic}
+\end{algorithm}
+
+Phew! Thankfully, the decoding algorithm is not as complex. It is
+shown in algorithm \ref{alg:packbits-dec}.
+
+First we read in the packet head of the packet. If the end of the file
+has not been reached, we first extract the length out of the packet
+head using the operation $x \BitAnd 127$. This makes sense, as
+$127$ has the bit pattern
+
+\begin{indentpar}
+  01111111
+\end{indentpar}
+
+Thus, we only extract the length part of the head, and not the highest
+bit. Then we check if the highest bit is toggled, and if such is the
+case, then it's a run length packet. And so we read in the data part of
+the packet and repeat it $length$ times. Else, it is a raw packet, and
+we just read the data and write it back $length$ times.
+
+\begin{algorithm}
+  \caption{Decoding a RLE packbits encoded file.}
+  \label{alg:packbits-dec}
+  \begin{algorithmic}[1]
+
+    \Let{$head$}{\VoidCall{ReadByte}}
+
+    \While{\neof}
+
+      \Let{$length$}{$head \BitAnd 127$}
+
+      \If{$head \BitAnd 128$}
+        \Let{$data$}{\VoidCall{ReadByte}}
+
+        \Repeatn{$length$}
+          \State \Call{WriteByte}{$data$}
+        \EndRepeatn
+      \Else
+
+        \Repeatn{$length$}
+          \Let{$data$}{\VoidCall{ReadByte}}
+          \State \Call{WriteByte}{$data$}
+        \EndRepeatn
+
+      \EndIf
+
+      \Let{$head$}{\VoidCall{ReadByte}}
+
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Last Things}
+
+Both of these algorithm are implemented in the sample program found
+the directory \path|code/rle|.
+
+\FloatBarrier
+
+\printbibliography[heading=subbibliography]
+
+\end{refsection}
