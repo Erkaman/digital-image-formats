@@ -7,7 +7,7 @@
 
 \begin{refsection}
 
-In this chapter we will discuss the data compression algorithm \lzw as
+In this chapter we will discuss the data compression algorithm \lzw\index{LZW} as
 it is described in
 \cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}
 
@@ -15,49 +15,16 @@ it is described in
 
 \subsection{Description}
 
-The \lzw compression algorithm is best understood by walking through a
-compression of some data with it. Let's we want to compress the
-string \texttt{ababcbababaaaaaaa}.
+The \lzw compression\index{\lzw compression} algorithm is best
+understood by walking through the LZW algorithms process of
+compressing some sample data. Let's we want to compress the string
+\texttt{ababcbababaaaaaaa}.
 
-First we will a string table\index{string table} containing all the characters that can
-possibly fit in a byte. Alongside the character, we will also store
-the \ascii number value of it. We will from now on call these numbers
-codes. You will soon see why. See table \ref{tab:str-tab-ascii} for an
-example of how this table looks like at the beginning of the algorithm.
-
-First we read the first character \texttt{a}. If we look up this
-letter in the table we get the number $97$, so we just output this
-number. Next, we read in the character \texttt{b}, which has the
-number. But now get to the real meat of the algorithm. We append
-these two read characters together, and get  the string
-\texttt{ab}. Now we check if this string exists in the string
-table. If you consider the fact that we at the beginning of this
-algorithm filled it with only the single character strings of the
-ASCII table, You must realise that the string cannot possibly exist
-in the table. So the string is added to the table and given the next
-available code, $256$.
-
-\texttt{a} is discarded, we keep and output the code of \texttt{b} and
-we read in another \texttt{a}. This time, we end with the appended
-string \texttt{ba}. This string doesn't either exist in the table and
-so we add it with the code $257$. We throw away \texttt{b}, output \texttt{a} and read in
-another \texttt{b}. Now something very interesting thing happens. The
-appended string we end up with is this time \texttt{ab}. But wait a
-minute, haven't we already added that string to the string table? Yes
-we have. So instead of re-adding that string to table, we output its
-code, $256$. This means we instead separately adding the codes of \texttt{a} and
-\texttt{b}, we just output one single code! You should now start to
-realize why this compression algorthm works. In the next step the
-algorithm, we will let the appended string \texttt{ab} represent the
-former character.
-
-And so we read in the character \texttt{c}. The string \texttt{abc}
-doesn't exist in the table, so we output the single code for
-\texttt{ab}.
-
-And it just keeps going like this. Just keeping describign it like
-would add nothing to your understanding, thus I will step and refer
-you to table ? for the resulting output and string table.
+First we will fill a string table\index{string table} containing all
+the numbers possible in byte, from 0 to 255, and their corresponding
+letters as is shown in table \ref{tab:str-tab-ascii}. We will from now
+on refer to these numbers as number codes\index{number code}, or
+simply codes\index{code}.
 
 \newcommand{\dotsrow}{\dots & \dots \\}
 \newcommand{\strrow}[2]{$#1$ & #2 \\}
@@ -77,45 +44,46 @@ you to table ? for the resulting output and string table.
     \strrow{97}{a}
     \strrow{98}{b}
     \strrow{99}{c}
-    \strrow{255}{ }
-
     \dotsrow
+    \strrow{255}{}
+
     \bottomrule
   \end{tabular}
-  \caption{Initial LZW string table}
+  \caption{The initial LZW string table}
   \label{tab:str-tab-ascii}
 \end{table}
 
-\begin{table}
-  \centering
-  \newcommand{\lzwrow}[4]{#1 & #2 & #3 & #4 \\}
-  \begin{tabular}{llll}
-    \toprule
-    String code & Character Code & Output Code & New table entry \\
-    \midrule
+Now let's go through the sample string. First we read the first
+character \texttt{a}. If we look up this letter in the table we get
+the number code $97$, so we just output this code. Next, we read in
+the character \texttt{b}, which has the number $98$. We first output
+the code of b, $98$, and then we append the two up until now read
+characters together, and get the string \texttt{ab}. After this we
+check if this string exists in the string table. If we inspect table
+\ref{tab:str-tab-ascii}, we soon realize that the string is
+\textit{not} in the table. So the string is added to the table and it
+is assigned to the next available code, $256$.
 
-    \lzwrow{a}{b}{a}{ab}
-    \lzwrow{b}{a}{b}{ba}
-    \lzwrow{a}{b}{}{}
-    \lzwrow{ab}{c}{256}{abc}
-    \lzwrow{c}{b}{c}{cb}
-    \lzwrow{b}{a}{}{}
-    \lzwrow{ba}{b}{ba}{bab}
-    \lzwrow{b}{a}{}{}
-    \lzwrow{ba}{b}{}{}
-    \lzwrow{bab}{a}{bab}{baba}
-    \lzwrow{a}{a}{a}{aa}
-    \lzwrow{a}{a}{}{}
-    \lzwrow{aa}{a}{aa}{aaa}
-    \lzwrow{a}{a}{}{}
-    \lzwrow{aa}{a}{}{}
-    \lzwrow{aaa}{a}{aaa}{aaaa}
+\texttt{a} is discarded, we keep \texttt{b} and we read in another
+\texttt{a}. First we output \texttt{b}, but however this time, we end with the appended string
+\texttt{ba}. This string doesn't either exist in the table and so we
+add it with the code $257$. We throw away \texttt{b}, output
+\texttt{a} and read in another \texttt{b}. Now something very
+interesting thing happens; The appended string we end up with is this
+time \texttt{ab}. But wait a minute, haven't we already added that
+string to the string table? Yes, we have, so instead of re-adding that
+string to table, we output its code, $256$. This means we instead
+separately adding the codes of \texttt{a} and \texttt{b}, we just
+output one single code! In the next step the algorithm, we will
+let the appended string \texttt{ab} represent the former character.
 
-    \bottomrule
-  \end{tabular}
-  \caption{the LZW string table after the algorithm has been run}
-  \label{tab:str-tab-str}
-\end{table}
+So we output the single code for \texttt{ab}.  And then we read in the
+character \texttt{c}. The string \texttt{abc} doesn't exist in the
+table, so we give it the code $258$ and it just keeps going like
+this. Table \ref{tab:str-tab-str} shows the codes that were added during the compression
+of the string. Table \ref{tab:lzw-walkthru} gives a detailed walkthrough of the compression
+of the string, do study this table carefully and don't go on reading
+until you fully understand it.
 
 \begin{table}
   \centering
@@ -136,13 +104,42 @@ you to table ? for the resulting output and string table.
     \strrow{264}{aaaa}
     \bottomrule
   \end{tabular}
-  \caption{LZW control flow}
+  \caption{The string table after the \lzw algorithm has been run.}
   \label{tab:str-tab-str}
 \end{table}
 
-But what is this string table I am speaking of? At the beginning
+\begin{table}
+  \centering
+  \newcommand{\lzwrow}[4]{#1 & #2 & #3 & #4 \\}
+  \begin{tabular}{llll}
+    \toprule
+    String Code & New Code & Output Code & New table entry \\
+    \midrule
 
-\subsection{Algorithm}
+    \lzwrow{a}{b}{a = 97}{ab = 256}
+    \lzwrow{b}{a}{b = 98}{ba = 257}
+    \lzwrow{a}{b}{}{}
+    \lzwrow{ab}{c}{ab = 256}{abc = 258}
+    \lzwrow{c}{b}{c = 99}{cb = 259}
+    \lzwrow{b}{a}{}{}
+    \lzwrow{ba}{b}{ba = 257}{bab = 260}
+    \lzwrow{b}{a}{}{}
+    \lzwrow{ba}{b}{}{}
+    \lzwrow{bab}{a}{bab = 260}{baba = 260}
+    \lzwrow{a}{a}{a = 97}{aa = 261}
+    \lzwrow{a}{a}{}{}
+    \lzwrow{aa}{a}{aa = 262}{aaa = 262}
+    \lzwrow{a}{a}{}{}
+    \lzwrow{aa}{a}{}{}
+    \lzwrow{aaa}{a}{aaa = 263}{aaaa = 263}
+
+    \bottomrule
+  \end{tabular}
+  \caption{LZW control flow.}
+  \label{tab:lzw-walkthru}
+\end{table}
+
+3\subsection{Algorithm}
 
 \ref{alg:lzw-compression}
 
