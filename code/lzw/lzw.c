@@ -245,8 +245,6 @@ void lzw_decompress(FILE * in,FILE * out)
         oldCode = newCode;
         newCode = inputCode(in);
     }
-
-    out = out;
 }
 
 void lzw_compress(FILE * in,FILE * out)
