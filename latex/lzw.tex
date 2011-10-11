@@ -143,46 +143,29 @@ until you fully understand it.
 \subsection{Algorithm}
 
 In algorithm \ref{alg:lzw-compression} the complete LZW compression
-algorithm is presented. Try reading thourhg through it once, but I'd
-doubt you'd be able to understand all of it at this. We are going to
-have discuss several more concepts before you can understand it.
-
-\begin{algorithm}[H]
-  \caption{Settings the constants for the LZW algorithm}
-  \label{alg:lzw-constants}
-  \begin{algorithmic}[1]
-    \Let{$codeSize$}{12}
-    \Let{$maxValue$}{$(1 << codeSize) - 1$}
-    \Let{$maxCode$}{$maxValue - 1$}
-  \end{algorithmic}
-\end{algorithm}
+algorithm is presented. Try reading through it at least once,
+but I doubt you'd be able to understand all of it at this point. The
+implementation of the aglorithm turns out not be as easy as it
+sounds.
 
 \begin{algorithm}[H]
   \caption{The LZW compression algorithm.}
   \label{alg:lzw-compression}
   \begin{algorithmic}[1]
-    \ForTo{$nextCode$}{$0$}{$tableSize$}
-      \Let{$codeValues[nextCode]$}{$-1$}
-    \EndFor
-
     \Let{$nextCode$}{$256$}
-
     \Let{$stringCode$}{\VoidCall{$ReadByte$}}
     \Let{$charCode$}{\VoidCall{$ReadByte$}}
 
     \While{\neof}
-      \Let{$index$}{\Call{GetHashTableIndex}{$stringCode,charCode$}}
 
-      \If{$codeValues[index] \neq -1$} \Comment{If it's in the table}
-        \Let{$stringCode$}{$codeValues[index]$}
-      \Else \Comment{If it's not in the table}
+      \If{\Call{InStringTable}{$stringCode,charCode$}} \label{algl:hasingcheckintable}
+        \Let{$stringCode$}{\Call{GetCode}{$stringCode,charCode$}} \label{algl:hasgetcode}
+      \Else
         \State \Call{outputCode}{$stringCode$}
 
         \If{$nextCode \leq maxCode$}
 
-          \Let{$stringTable[index]$}{$(stringCode, charCode)$}
-
-          \Let{$codeValues[index]$}{$nextCode$}
+          \State \Call{AddToStringTable}{$nextCode, stringCode, charCode$}\label{algl:hashadd}
           \Let{$nextCode$}{$nextCode + 1$}
 
         \EndIf
@@ -227,11 +210,11 @@ You could of course just store all the strings in the string table as
 real string data types. However, these strings are going to end up
 taking way more space than they really need to.
 
-As you probably remember from section \ref{sec:lzw-desc}, the adde
+As you probably remember from section \ref{sec:lzw-desc}, the added
 strings to the table is just the concatenation of the currnently read
 in character and the former string. The concatenation of the
 characters characters \texttt{a} and \texttt{b} could be expressed as
-the string \texttt{ab}. But however, the could also be described by
+the string \texttt{ab}. But however, they could also be described by
 the pair\index{pair} \strpair{97}{98}, which consists of the two codes
 of the two  characters. Okay, there is no real big
 difference in size yet, but now consider \texttt{abcbde} and
@@ -277,14 +260,55 @@ about this later when are going to decompress the data.
 
 \subsubsection{Table size}
 
-And we can't just of course add strings to the string table willy
-nilly. For very large files this table may grow extremely large and
+And we can't just add strings to the string table willy
+nilly. For very large files this table may grow unacceptably large and
 the compression program would end of being a hog on the computers
-resources.
+resources. And besides, since we are using fixed code sizes there is
+limit on how large the string table can grow. For example, for 11-bit
+codes the maximum size of the string table will be $2^{11}=2048$. In
+algorithm \ref{alg:lzw-constants} we show how set the size constants
+for the example code size 12. Notice the maximum value of the final
+code, $maxCode$ is one less than the actual max size of the
+table. That's becuase at the end of algorithm
+\ref{alg:lzw-compression} we output the final code to always be the
+maximum value of the current code size type. You will see why we do
+this when discuss the decompression algorithm, but for now ignore it.
+
+\begin{algorithm}[H]
+  \caption{Settings the constants for the LZW algorithm for the
+    example code size 12.}
+  \label{alg:lzw-constants}
+  \begin{algorithmic}[1]
+    \Let{$codeSize$}{12}
+    \Let{$maxValue$}{$(1 << codeSize) - 1$}
+    \Let{$maxCode$}{$maxValue - 1$}
+  \end{algorithmic}
+\end{algorithm}
 
 \subsubsection{Finding the correct codes}
 
-Hashing bla bla.
+When checking if a string is in the string
+table \algref{alg:lzw-compression}{algl:hasingcheckintable} and when
+we in line \algref{alg:lzw-compression}{algl:hasgetcode} get the code
+of string, the functions \textproc{InStringTable} and
+\textproc{GetCode} will have to some way or another search the hash
+table for the corresponding code. One way to implement these two
+funcitons would be two use the code as an index to an array of
+strings. But this clearly prohobihivetely slow as you would have
+search the entire string table, string by string, when you would want
+the code of a string.
+
+The easiest way to solve this problem is to just use a hash table. The
+string can used to create a key to index the table get the needed
+codes.
+
+Since most modern languages already include some sort of hash table in
+their standard library, this should be very hard to implement. If you
+are using bit more lower level language like \C, you will either have
+to roll your own or use a library. In the sample \C source code of
+this a simple hash table is used to gain much efficeny.
+
+But this solutions is of course not perfect.
 
 \section{Decompression algorithm}
 
@@ -299,7 +323,6 @@ information. It turns out that all the corresponding LZW decompression
 algorithm do is
 
 \subsection{Algorithm}
-
 
 \begin{algorithm}[H]
   \caption{LZW non-working decompression algorithm.}
