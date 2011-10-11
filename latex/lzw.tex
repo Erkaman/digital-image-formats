@@ -305,7 +305,7 @@ Please Inspect line
 \algref{alg:lzw-compression}{algl:hasingcheckintable} and line
 \algref{alg:lzw-compression}{algl:hasgetcode}. Since we are clearly
 using the strings themselves to search for their corresponding codes,
-we need to figure out how to find them \tood{fix this paragraph plz}. One way to implement these
+we need to figure out how to find them \todo{fix this paragraph plz}. One way to implement these
 two functions would be two use the code as an index to an array of
 strings. But this clearly prohibitively slow as you would have
 search the entire string table, string by string, when you would want
@@ -327,27 +327,56 @@ manage the string table.
 \subsection{Description}
 
 Using the compression algorithm LZW we on the string
-\texttt{ababcbababaaaaaaa} we end up with the compressed data
-\texttt{97 98 256 99 257 260 97 262 263 264}. As you may have noticed
-before, in a LZW compressed file the string is not included. Then how
-could you possibly decompress the file without such essential
-information. It turns out that all the corresponding LZW decompression
-algorithm do is
+\texttt{ababcbababaaaaaaa} we end up with the compressed data stream
+\texttt{97 98 256 99 257 260 97 262 263 264 4095}. We were using
+12-bit codes to encode the data, and so the maximum value of an
+unsigned 12-bit number is used to terminate it. This is to make sure
+that the decompressor knows when to stop reading the data.
+
+As you may have noticed, in a LZW compressed file the string table is
+not included. Then how could you possibly decompress the file without
+such essential information? It turns out that all the corresponding
+LZW decompression algorithm do is basically the same as the
+compression aglorithm do; it just constructs the string table as it
+goes read and compresses the file at the same time.
+
+It is actually very simple; So, we wanted to decompress the string
+\texttt{97 98 256 99 257 260 97 262 263 264 4095}. The decompressor
+first reads the first code, $97$, which is just the letter a and the
+letter a is outputted. Then the next code is read in, $98$, or simply
+b. The first characater is the second string is b. And so the former
+character a and the first string of the current string are appended
+together and then added to the table, creating the very first table
+entry, \strpair{97}{98} and it is assigned the code $256$. A new code,
+256 is read and the old \texttt{a} is discarded. $256$ is now to be
+translated. We just assigned the code $256$ the string \texttt{ab}, so
+the translation of $256$ is obvious \texttt{ab}. The first character
+of the string \texttt{ab} is \texttt{a} and thus the old string b and
+the first characer of the new string \texttt{a} are added
+together. And so ths second string table entry was constructed, and
+given the value $257$.
+
+The decompressor jsut keeps working through the data like this while
+deconstructing the string table that was used to compress it. It reads
+until it encounters the maximum value of the current code size $x$,
+$2^{x}-1$; for 12-bit codes this $2^{12} - 1 = 4095$, as can be seen
+from out test data stream, \texttt{97 98 256 99 257 260 97 262 263 264
+  4095}.
 
 \subsection{Algorithm}
+
+And the algorithm we just described can be seen in algorithm
+\ref{alg:lzw-non-working-decompression}.
 
 \begin{algorithm}[H]
   \caption{LZW non-working decompression algorithm.}
   \label{alg:lzw-non-working-decompression}
   \begin{algorithmic}[1]
-    \Let{$oldCode$}{\VoidCall{$ReadByte$}}
+    \Let{$oldCode$}{\VoidCall{$InputCode$}}
     \State \Call{WriteByte}{$oldCode$}
-    \Let{$newCode$}{\VoidCall{$ReadByte$}}
-    \While{\neof}
 
-%      \If{\Call{NotInTable}{newCode}}
-%      \Else
-%      \EndIf
+    \Let{$newCode$}{\VoidCall{$ReadByte$}}
+    \While{$newCode \neq maxValue$}
 
       \Let{$string$}{\Call{translate}{$newCode$}}
       \State \Call{outputString}{$string$}
@@ -356,6 +385,7 @@ algorithm do is
       \State \Call{$AddToStringTable$}{$oldCode, character$}
 
       \Let{$oldCode$}{$newCode$}
+
       \Let{$newCode$}{\VoidCall{$ReadByte$}}
     \EndWhile
   \end{algorithmic}
