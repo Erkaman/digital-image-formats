@@ -34,7 +34,7 @@ Let's we want to compress the string \texttt{ababcbababaaaaaaa}. The
 algorithm start by filling a string table\index{string table} until it
 contains all of the one length symbols in the default character set
 that fit in a byte, from 0 to 255. For this example we will use the
-character set \ascii. Table shows how this table ends up looking like
+character set \ascii \cite{rfc20}. Table shows how this table ends up looking like
 when it is filled \ref{tab:str-tab-ascii}. As can be seen, every entry
 in the table consists of a pair a string it's corresponding number
 value,We will from now on refer to these numbers as codes\index{code}.
@@ -363,10 +363,17 @@ $2^{x}-1$; for 12-bit codes this $2^{12} - 1 = 4095$, as can be seen
 from out test data stream, \texttt{97 98 256 99 257 260 97 262 263 264
   4095}.
 
-\subsection{Algorithm}
+\subsection{Almost working Algorithm}
 
 And the algorithm we just described can be seen in algorithm
-\ref{alg:lzw-non-working-decompression}.
+\ref{alg:lzw-non-working-decompression}. Having discussed the
+compression algorithm very much in depth, you should be able to
+perfectly understand must of this alglorithm. However, there is still
+some more things we need to discuss until we are done with the \lzw
+algorithm. Do notice that I say that algorithm is non-working. I still
+present  to you the non-working algorithm because it works a majority
+of the time and it is much easier to explain. In the next section, we
+will present the working LZW decompression algorithm.
 
 \begin{algorithm}[H]
   \caption{LZW non-working decompression algorithm.}
@@ -380,7 +387,8 @@ And the algorithm we just described can be seen in algorithm
 
       \Let{$string$}{\Call{translate}{$newCode$}}
       \State \Call{outputString}{$string$}
-      \Let{$character$}{$string[0]$}
+      \Let{$character$}{$string[0]$} \Comment{Get the first character
+        of the translated string.}
 
       \State \Call{$AddToStringTable$}{$oldCode, character$}
 
@@ -390,6 +398,82 @@ And the algorithm we just described can be seen in algorithm
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
+
+\subsubsection{Translating string codes}
+
+Figuring out how to translate string codes of the code pair format as we
+previously discussed. See algorithm
+\ref{alg:translate-string-code}. This puts the decoded string of the
+code $code$ \textit{reversed} into the string $decodedString$. The
+stirng ends up being reversed because we are tranlating the code from
+the end of the string to the beginning. As you can see, we are just
+working thourgh character code after character code looking up the
+next code in the table using the string code. For this algorithm, we
+have chosen to put negative one into pairs that represent single
+characters. If we have reached such a pair, we have reached to
+beginning of the string and we are done translating it.
+
+This discussing leads up to another point. \textit{The decompressor
+  has no need of a hash table to store the codes}. This makes sense as
+we are really only using the number codes to look up strings in the
+table to manage the string table. Since the codes are numbers, they
+can be used as indices and hence there is no need for a hash table.
+
+\todo{fix string format}
+\begin{algorithm}[H]
+  \caption{Translating a string code to normal string.}
+  \label{alg:translate-string-code}
+  \begin{algorithmic}[1]
+    \Let{$\strpair{stringCode}{characterCode}$}{$code$}
+    \Let{$decodedString$}{$""$}
+    \While{\True}
+      \Let{$decodedString$}{$decodedString + characterCode$}
+
+      \If{$stringCode = -1$}
+        \Break
+      \Else
+        \Let{$\strpair{stringCode}{characterCode}$}{$stringCode$}
+      \EndIf
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Working algorithm}
+
+\begin{algorithm}[H]
+  \caption{LZW non-working decompression algorithm.}
+  \label{alg:lzw-non-working-decompression}
+  \begin{algorithmic}[1]
+    \Let{$oldCode$}{\VoidCall{$InputCode$}}
+    \State \Call{WriteByte}{$oldCode$}
+    \Let{$character$}{\VoidCall{$oldCode$}}
+
+    \Let{$newCode$}{\VoidCall{$ReadByte$}}
+
+    \While{$newCode \neq maxValue$}
+
+      \If{$\NOT$ \Call{IsInTable}{$newCode$}}
+        \Let{$string$}{\Call{tranlate}{oldCode}}
+        \Let{$string$}{$string + character$}
+      \Else
+        \Let{$string$}{\Call{translate}{$newCode$}}
+      \EndIf
+
+      \State \Call{outputString}{$string$}
+
+      \Let{$character$}{$string[0]$} \Comment{Get the first character
+        of the translated string.}
+
+      \State \Call{$AddToStringTable$}{$oldCode, character$}
+
+      \Let{$oldCode$}{$newCode$}
+
+      \Let{$newCode$}{\VoidCall{$ReadByte$}}
+
+    \EndWhile
+  \end{algorithmic}
+\end{algorithm}
+
 
 \section{Efficiency}
 
