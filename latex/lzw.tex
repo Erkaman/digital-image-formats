@@ -440,9 +440,16 @@ can be used as indices and hence there is no need for a hash table.
 
 \subsection{Working algorithm}
 
+Now we are to discuss the fully working LZW compression
+algortithm. This algortihm is not really much different from the
+non-working one. Because it is only of a very,very rare edge the the
+last algorithm may fail to work. And now, without any further ado, the
+fully working LZW compresson algorithm is presented at algortihm
+\ref{alg:lzw-working-decompression}.
+
 \begin{algorithm}[H]
   \caption{LZW non-working decompression algorithm.}
-  \label{alg:lzw-non-working-decompression}
+  \label{alg:lzw-working-decompression}
   \begin{algorithmic}[1]
     \Let{$oldCode$}{\VoidCall{$InputCode$}}
     \State \Call{WriteByte}{$oldCode$}
@@ -477,9 +484,86 @@ can be used as indices and hence there is no need for a hash table.
 
 \section{Efficiency}
 
-AS you may noticed doing LZW compression on small files is a small
-gain operation. However, doing this on larger files do actully yield a
+\subsection{The Canterbury Corpus}
+
+As you may noticed doing LZW compression on small data is a very small
+gain operation. However, doing this on larger files do actually yield a
 significant decrease in file sizes.
+
+In the chapter we introduce a set of test files we'll be using the
+demonstrate the efficiency of compression algorithm. We'll be using a
+corpus of files for testing new compression algortihms called the
+Canterbury Corpus. These files we're selected out of thousands of
+other files because they the best demonstrate the efficency of
+compression algorithms \cite{arnold:corpus}. We'll also be using the
+Large Corpus \cite{powell:desc-corp}.
+
+Table \ref{tab:corp-files} summaries all the files we'll be using. They can all be
+downloaded from \cite{powell:desc-corp}.
+
+\todo{typesett the file names using typewriter font.}
+\begin{table}
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    File & Category \\
+    \midrule
+    alice29.txt & English text \\
+    asyoulik.txt & Shakespeare \\
+    cp.html & HTML source \\
+    fields.c & C source \\
+    grammar.lsp & LISP source \\
+    kennedy.xls & Excel Spreadsheet \\
+    lcet10.txt & Technical writing \\
+    plrabn12.txt & Poetry \\
+    sum & SPARC Executable \\
+    xargs.1 & GNU manual page \\
+    E.coli & Complete genome of the E. Coli bacterium \\
+    bible.txt & The King James version of the bible \\
+    world192.txt & The CIA world fact book \\
+    \bottomrule
+  \end{tabular}
+  \caption{}
+  \label{tab:corp-files}
+\end{table}
+
+\subsection{The Test}
+
+The test we will be doing in this section as that we will be testing
+how the compression ratio of the LZW algorithm will be on these
+different files. We'll also be testing how the compression ratio
+varies with different sizes of the codes.
+
+\subsection{The Test Results}
+
+In table ? we show the results of the test.
+
+
+\begin{table}
+  \scriptsize
+  \centering
+  \noindent\makebox[\textwidth]{%
+  \begin{tabular}{lllllllll}
+    \toprule
+    File & Original size & 9-bit codes(\%) & 10-bit codes(\%) & 11-bit codes(\%) & 12-bit codes(\%) & 13-bit codes(\%) & 14-bit codes(\%) & 15-bit codes(\%) \\
+alice29.txt & 152089 & 68.9 & 57.9 & 51.1 & 47.6 & 45.0 & 43.4 & 43.3\\
+asyoulik.txt & 125179 & 74.2 & 63.0 & 54.6 & 50.3 & 47.2 & 45.9 & 47.0\\
+bible.txt & 4047392 & 62.2 & 54.7 & 50.2 & 45.7 & 42.7 & 39.7 & 37.6\\
+cp.html & 24603 & 80.2 & 60.3 & 52.5 & 49.7 & 49.4 & 53.2 & 57.0\\
+E.coli & 4638690 & 31.5 & 28.6 & 27.6 & 27.1 & 26.7 & 26.5 & 26.4\\
+fields.c & 11150 & 77.7 & 63.4 & 52.7 & 47.7 & 51.7 & 55.6 & 59.6\\
+grammar.lsp & 3721 & 63.9 & 55.4 & 52.1 & 56.9 & 61.6 & 66.4 & 71.1\\
+kennedy.xls & 1029744 & 74.8 & 82.8 & 67.5 & 40.7 & 33.0 & 33.0 & 33.3\\
+lcet10.txt & 426754 & 74.7 & 66.0 & 57.6 & 52.1 & 45.7 & 42.6 & 40.6\\
+plrabn12.txt & 481861 & 69.8 & 59.2 & 53.7 & 48.8 & 45.8 & 44.0 & 42.6\\
+sum & 38241 & 83.6 & 84.0 & 79.8 & 80.9 & 78.9 & 57.3 & 61.4\\
+world192.txt & 2473400 & 81.3 & 71.0 & 67.0 & 63.4 & 52.5 & 46.2 & 41.5\\
+xargs.1 & 4227 & 75.6 & 61.1 & 58.3 & 63.7 & 69.0 & 74.3 & 79.6\\
+    \bottomrule
+  \end{tabular}}
+  \caption{LZW test results. The different percentages the represent the respective compression ratios of that code size.}
+  \label{tab:corp-files}
+\end{table}
 
 \FloatBarrier
 
