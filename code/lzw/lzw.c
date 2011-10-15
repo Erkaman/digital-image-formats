@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
                 decompress = 1;
             else if(!strcmp("-v",*argv))
                 verbose = 1;
-            else if(!strncmp("-bs=",*argv,4)){
+            else if(!strncmp("-cs=",*argv,4)){
                 (*argv)+= 4;
 
                 codeSize = atoi(*argv);
@@ -154,7 +154,7 @@ void printHelp(void)
     printf("  --help\tDisplay this help message.\n");
     printf("  -d\tPerform decompression.\n");
     printf("  -v\tVerbose output.\n");
-    printf("  -bs=\tSet the outputted code sizes.\n");
+    printf("  -cs=\tSet the outputted code sizes.\n");
 
 }
 
@@ -214,9 +214,9 @@ void lzw_decompress(FILE * in,FILE * out)
     /* max_value should be checked for here but it doesn't work. */
     while (newCode != maxValue){
 
-        /* if it is not in the translation table. */
-        if(!(newCode < dictionaryIndex)){
 
+        /*if it is not in the translation table. */
+        if(!(newCode < dictionaryIndex)){
 	    stringCodeStack[stackp++] = character;
             translateCode(oldCode);
 
@@ -325,6 +325,7 @@ unsigned int inputCode(FILE *input)
     static int inputBitCount=0;
     static unsigned int inputBitBuffer=0;
 
+
     while (inputBitCount <= 24)
     {
         inputBitBuffer |=
@@ -334,6 +335,7 @@ unsigned int inputCode(FILE *input)
     returnValue = inputBitBuffer >> (32-codeSize);
     inputBitBuffer <<= codeSize;
     inputBitCount -= codeSize;
+    verbosePrint("Inputted code: %d=%c\n",returnValue,(char)(returnValue));
     return(returnValue);
 }
 
