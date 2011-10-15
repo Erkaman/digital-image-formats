@@ -22,7 +22,8 @@
 the two compression methods \lzseven and \lzeight. These two
 algorithms became the basis for many other \lz variations including
 \lzma \cite{palov11}, \lzw and \lzss \cite{Salomon:2004:DCC}. But we
-will only discuss \lzw in this chapter.
+will only discuss \lzw in this chapter. And finally, Welch is the guy
+the developed this \lz variation.
 
 \section{The Compression algorithm}
 
@@ -228,13 +229,12 @@ sounds.
 All a \lzw compressed file will consist of after this algorithm has
 been run, is just a long sequence of outputted codes.
 
-Since all the of the actual strings in the string table have codes
-values over $255$, bytes will obviously not be sufficient to store
-these codes. The code sizes\index{code size} used in the \lzw
-algorithm are typically in the ranges $9 \leq codeSize \leq 15$. But
-among all the different code sizes 12-bit codes are probably the most
-frequent ones, which will be the code size we will use in our examples from
-now on.
+Since all the of the actual strings(whose length is greater than one)
+in the string table have codes values over $255$, bytes will obviously
+not be sufficient to store these codes. The code sizes\index{code
+  size} used in the \lzw algorithm are typically in the ranges $9 \leq
+codeSize \leq 15$. But in our examples we will be using 12-bit codes,
+as they are most commonly used.
 
 File I/O Functions for writing data to files are not typically
 designed to write numbers whose bit-count are not multiples of 8, so
@@ -257,19 +257,16 @@ just read and the former string. The concatenation of the characters
 characters \texttt{a} and \texttt{b} could be expressed as the string
 \texttt{ab}. But however, they could also be described by the
 pair\index{pair} \strpair{97}{98}, which consists of the two codes of
-the two characters. Okay, there is no real big difference in size yet,
+the two strings. Okay, there is no real big difference in size yet,
 but now consider \texttt{abcbde} and \texttt{a} and their
 concatenation \texttt{abcbdea}. If \texttt{abcbde} has the code, say,
 289, then surely the pair \strpair{289}{97} is much more space
-efficent than \texttt{abcbdea}?  Yes, it is of course!
+efficent than \texttt{abcbdea}?  Yes it is, of course!
 
 You may think we are just nitpicking here, but also need to consider
-that with huge files this string table could end up becoming very big
-and long. And besides, pair of numbers are often much easier to deal
-with than strings, espically in languages like \C! So there's end much
-smaller chance of making sily mistakes and creating bugs that could
-have been avoided if you hade selected your string storage model more
-wisely.
+that with huge files this string table could end up becoming huge. And
+besides, pair of numbers are often much easier to deal with than
+strings, espically in languages like \C!
 
 Using this new string storage model table \ref{tab:str-tab-str}, is
 translated to table \ref{tab:str-tab-pair}. You also may notice that we end
@@ -305,13 +302,15 @@ find out more about this later when are going to decompress the data.
 Since we are using fixed code sizes there is a limit on how large the
 string table can grow. For example, for 12-bit codes the maximum size
 of the string table will be $2^{11}=4096$. In algorithm
-\ref{alg:lzw-constants} we show how set the size constants for the
-example code size 12. Notice that the maximum value of the final code,
-$maxCode$ is one less than the actual max size of the table. That's
-because at the end of algorithm \ref{alg:lzw-compression} we output
-the final code to always be the maximum value of the current code size
-type. You will see why we do this when discuss the decompression
-algorithm, but for now ignore it.
+\ref{alg:lzw-compression} the constants $maxCode$ and $maxValue$ are
+used to be make sure that the table doesn't grow beyond it's maximum
+size. In algorithm \ref{alg:lzw-constants} we show how set the size
+constants for the example code size 12. Notice that the maximum value
+of the final code, $maxCode$ is one less than the actual max size of
+the table. That's because at the end of algorithm we output the final
+code to always be the maximum value of the current code size. You will
+soon see why we do this when discuss the decompression algorithm, but for
+now ignore it.
 
 \begin{algorithm}[H]
   \caption{Settings the constants for the LZW algorithm for the
@@ -328,24 +327,26 @@ algorithm, but for now ignore it.
 
 Please Inspect line
 \algref{alg:lzw-compression}{algl:hasingcheckintable} and line
-\algref{alg:lzw-compression}{algl:hasgetcode}. Since we are clearly
-using the strings themselves to search for their corresponding codes,
-we need to figure out how to find them \todo{fix this paragraph plz}. One way to implement these
-two functions would be two use the code as an index to an array of
-strings. But this clearly prohibitively slow as you would have
-search the entire string table, string by string, when you would want
-the code of a string.
+\algref{alg:lzw-compression}{algl:hasgetcode} of the compression
+algorithm. Since we are clearly using the strings themselves to search
+for their corresponding codes, we need to figure out how to find their
+respective codes.
+
+One way to implement this would be by using the code as an index to an
+array of strings. But this clearly prohibitively slow as you would
+have search the entire string table, string by string, when you would
+want the code of a specific string.
 
 The easiest way to solve this problem is to just use a hash table. The
-string can used to create a key to index the table to get the needed
+string can used to create a key to index the table to get the searched
 codes.
 
-Since most modern languages already include some sort of hash table in
-their standard library, this should not be very hard to implement. If you
-are using more lower level language like \C, you will either have
-to roll your own or use a library. In the sample \C source code of
-this a simple chapter a simple hand-rolled hash table is used to
-manage the string table.
+Since most modern languages already implement some sort of hash table
+in their standard library, this functionality should not be very hard
+to implement. If you are using more lower level language like \C, you
+will either have to roll your own or use a library. In the sample \C
+source code of this chapter a simple hand-rolled hash table
+is used to manage the string table.
 
 \section{Decompression algorithm}
 
