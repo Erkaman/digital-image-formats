@@ -7,21 +7,24 @@
 
 \begin{refsection}
 
-In this chapter we will discuss the data compression algorithm \lzw\index{LZW} as
-it is described in
-\cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}.
+  In this chapter, we will discuss the data compression algorithm
+  \lzw\index{LZW} as it is described in
+  \cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}. We
+  will first discuss the history behind the algorithm, then
+  compression algorithm\index{compression algorithm}, after this the
+  \textit{de}compression algorithm and in the end we will discuss the
+  efficiency and compression ratio of this algorithm.
 
-\section{A (very) short history}
+\section{(short)History}
 
 \lzw stands for \textbf{L}empel, \textbf{Z}iv and
-\textbf{W}elch. Abraham Lempel and Jacob Ziv are two researches who
-developed the two compression methods \textsc{LZ77} and
-\textsc{LZ78}. These two compression algorithms becamse the first two
-dictionary based compression methods and they became very popular and
-sparked an entire family of \textsc{LZ} methods, and \lzw is in that family.
-\cite{Salomon:2004:DCC}.
+\textbf{W}elch. Lempel and Ziv are the two researches who developed
+the two compression methods \lzseven and \lzeight. These two
+algorithms became the basis for many other \lz variations including
+\lzma \cite{palov11}, \lzw and \lzss \cite{Salomon:2004:DCC}. But we
+will only discuss \lzw in this chapter.
 
-\section{Compression algorithm}
+\section{The Compression algorithm}
 
 \subsection{Description}
 \label{sec:lzw-desc}
@@ -30,14 +33,22 @@ The \lzw compression\index{\lzw compression} algorithm is best
 understood by walking through the LZW algorithm's process of
 compressing some sample data.
 
-Let's we want to compress the string \texttt{ababcbababaaaaaaa}. The
-algorithm start by filling a string table\index{string table} until it
-contains all of the one length symbols in the default character set
-that fit in a byte, from 0 to 255. For this example we will use the
-character set \ascii \cite{rfc20}. Table shows how this table ends up looking like
-when it is filled \ref{tab:str-tab-ascii}. As can be seen, every entry
-in the table consists of a pair a string it's corresponding number
-value,We will from now on refer to these numbers as codes\index{code}.
+The algorithm is going to compress the sample data
+\texttt{ababcbababaaaaaaa}.
+
+Central to entire algorithm's process is a string table. In this
+table, number called \textit{code}\index{code} is assigned to a
+string. The algorithm start by filling the string table with all the
+strings that are possible to fit in a byte. That is, it adds all the
+possible number codes 0-255 to the string table and these number codes
+are assigned a one length string that is the character that it
+represents in the current encoding.. For this example we will use the
+character set \ascii \cite{rfc20}, but really any character set could
+be used. But in fact it is not really necessary that character set is
+used at all, because all these strings are supposed to represent
+
+Table \ref{tab:str-tab-ascii} shows how this table ends up looking
+like when it is filled.
 
 \newcommand{\dotsrow}{\dots & \dots \\}
 \newcommand{\strrow}[2]{$#1$ & #2 \\}
@@ -46,7 +57,7 @@ value,We will from now on refer to these numbers as codes\index{code}.
   \centering
   \begin{tabular}{ll}
     \toprule
-    String & Code \\
+    Code & String\\
     \midrule
 
     \dotsrow
@@ -64,41 +75,54 @@ value,We will from now on refer to these numbers as codes\index{code}.
 
     \bottomrule
   \end{tabular}
-  \caption{The initial LZW string table filled with all the \ascii
+  \caption{The initial LZW string table, filled with all the \ascii
     characters.}
   \label{tab:str-tab-ascii}
 \end{table}
 
-Now the algorithm start going through the sample string. First it
-reads the first character \texttt{a}. In the string table that letter
-has the code$97$, so we just output this code value. Next, the
-character \texttt{b} is read, which has the code $98$. The code of b,
-$98$, is outputted and then the two strings read so far are
-appended together to form the string \texttt{ab}. The string table is
-searched for the string \texttt{ab}, but it cannot be found in the
-string table, so it is \textit{added} to the string table is assigned
-the next available code, $256$.
+%\newcommand*{\newcode}[1]{%
+%  \expandafter\newcommand\csname#1\endcsname c[1][]{\texttt{#1}##1\xspace}}
 
-\texttt{a} is discarded, \texttt{b} is kept and another \texttt{a} is
-read. First \texttt{b} is outputted, and this time the algortihm ends
-with the appended string \texttt{ba}. This string doesn't either exist
-in the table and so it is added the table and assigned the code $257$.
+%\newcode{a}
+\newcommand{\acode}{\texttt{a}\xspace}
+\newcommand{\bcode}{\texttt{b}\xspace}
+\newcommand{\ccode}{\texttt{c}\xspace}
+\newcommand{\abcode}{\texttt{ab}\xspace}
+\newcommand{\bacode}{\texttt{ba}\xspace}
+\newcommand{\abccode}{\texttt{abc}\xspace}
 
-Discard \texttt{b}, output \texttt{a} and read in another
-\texttt{b}. Now something very interesting thing happens; The
-resulting appended string this time is \texttt{ab}. But wait a minute,
-isn't already that string to the string table? Yes, it is, so instead
+Now the algorithm actually start going through the sample
+string. First it reads in the character \acode. In the string table
+that letter has the code $97$, so the code $97$ is outputted. Next,
+the character \bcode is read, which has the code $98$. So $98$ is
+outputted and then the two strings read so far are appended together
+to form the string \abcode. The string table is searched for the
+string \abcode, but it cannot be found in the string table, so it is
+added to the string table and is assigned the next available code, $256$.
+
+\acode is discarded, \bcode is kept and another \acode is
+read. First \bcode is outputted, and the appended string
+\bacode is formed. This string doesn't either exist in the table,
+ so it is added to table and is given the code $257$.
+
+Discard \bcode, output \acode and read in another
+\bcode. Now something very interesting happens; the
+resulting appended string is this time \abcode. But wait a minute,
+isn't already that string in the string table? Yes it is, so instead
 of re-adding that string to table, it is kept for the next step in the
 algorithm.
 
-The code for \texttt{ab} is outputted and the character \texttt{c} is
-read. The string \texttt{abc} doesn't exist in the table, so it is
-added to the string table and given the code $258$. And the algorithm
-just keeps going on like this. Table \ref{tab:str-tab-str} shows the
-codes that were added during the compression of the string. Table
-\ref{tab:lzw-walkthru} gives a detailed walkthrough of the compression
-of the string, do study this table carefully and don't go on reading
-until you fully understand it.
+The code for \abcode is outputted, which is $256$, and the character \ccode is
+read. The string \abccode doesn't exist in the table, so it is
+added to the string table and given the code $258$.
+
+And the algorithm just keeps going like this. Table
+\ref{tab:str-tab-str} shows all the codes that were added during the
+compression of the sample string. Table \ref{tab:lzw-walkthru} gives a
+detailed walkthrough of the compression of the same string. Do study
+both of these tables table carefully and don't continue reading until you
+fully understand what happened during the compression of the
+string.
 
 \begin{table}
   \centering
@@ -119,7 +143,8 @@ until you fully understand it.
     \strrow{264}{aaaa}
     \bottomrule
   \end{tabular}
-  \caption{The string table after the \lzw algorithm has been run.}
+  \caption{The string table after the \lzw algorithm has been run on
+    the string \texttt{ababcbababaaaaaaa}.}
   \label{tab:str-tab-str}
 \end{table}
 
@@ -150,7 +175,7 @@ until you fully understand it.
 
     \bottomrule
   \end{tabular}
-  \caption{LZW control flow.}
+  \caption{Detailed \lzw compression on the string \texttt{ababcbababaaaaaaa}.}
   \label{tab:lzw-walkthru}
 \end{table}
 
@@ -536,8 +561,7 @@ varies with different sizes of the codes.
 
 \subsection{The Test Results}
 
-In table ? we show the results of the test.
-
+In table \ref{tab:corp-files} we show the results of the test.
 
 \begin{table}
   \scriptsize
