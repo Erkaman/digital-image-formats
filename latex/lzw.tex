@@ -507,22 +507,28 @@ fully working LZW compresson algorithm is presented at algortihm
   \end{algorithmic}
 \end{algorithm}
 
-
 \section{Efficiency}
+
+In this section we will be testing how good of a compression ratio the
+\lzw algorithm have on different sorts of files and data with
+different codes sizes.
+
+We will not however be discussing about the \textit{performance} of
+the algorithm. Read a more advanced book on data compression of you
+want such information.
 
 \subsection{The Canterbury Corpus}
 
-As you may noticed doing LZW compression on small data is a very small
+As you may noticed, doing LZW compression on small data is a very small
 gain operation. However, doing this on larger files do actually yield a
 significant decrease in file sizes.
 
-In the chapter we introduce a set of test files we'll be using the
-demonstrate the efficiency of compression algorithm. We'll be using a
-corpus of files for testing new compression algortihms called the
-Canterbury Corpus. These files we're selected out of thousands of
-other files because they the best demonstrate the efficency of
-compression algorithms \cite{arnold:corpus}. We'll also be using the
-Large Corpus \cite{powell:desc-corp}.
+In the chapter, we introduce a set of test files we'll be using the
+demonstrate the efficiency of compression algorithms. A corpus of
+files for designed testing new compression algorithms called the
+Canterbury Corpus is that we will be using. These files we're selected
+out of thousands of other files because they demonstrate the
+efficiency of compression algorithms the best \cite{arnold:corpus}.
 
 Table \ref{tab:corp-files} summaries all the files we'll be using. They can all be
 downloaded from \cite{powell:desc-corp}.
@@ -556,9 +562,10 @@ downloaded from \cite{powell:desc-corp}.
 \subsection{The Test}
 
 The test we will be doing in this section as that we will be testing
-how the compression ratio of the LZW algorithm will be on these
-different files. We'll also be testing how the compression ratio
-varies with different sizes of the codes.
+how the compression ratio vary with different code sizes and different
+kinds of files. We'll running the test on all the files in table and
+we'll doing it for every file with the code sizes in the range $9 \leq
+codeSize \leq 15$
 
 \subsection{The Test Results}
 
@@ -567,28 +574,49 @@ In table \ref{tab:corp-files} we show the results of the test.
 \begin{table}
   \scriptsize
   \centering
-  \noindent\makebox[\textwidth]{%
-  \begin{tabular}{lllllllll}
-    \toprule
-    File & Original size & 9-bit codes(\%) & 10-bit codes(\%) & 11-bit codes(\%) & 12-bit codes(\%) & 13-bit codes(\%) & 14-bit codes(\%) & 15-bit codes(\%) \\
-alice29.txt & 152089 & 68.9 & 57.9 & 51.1 & 47.6 & 45.0 & 43.4 & 43.3\\
-asyoulik.txt & 125179 & 74.2 & 63.0 & 54.6 & 50.3 & 47.2 & 45.9 & 47.0\\
-bible.txt & 4047392 & 62.2 & 54.7 & 50.2 & 45.7 & 42.7 & 39.7 & 37.6\\
-cp.html & 24603 & 80.2 & 60.3 & 52.5 & 49.7 & 49.4 & 53.2 & 57.0\\
-E.coli & 4638690 & 31.5 & 28.6 & 27.6 & 27.1 & 26.7 & 26.5 & 26.4\\
-fields.c & 11150 & 77.7 & 63.4 & 52.7 & 47.7 & 51.7 & 55.6 & 59.6\\
-grammar.lsp & 3721 & 63.9 & 55.4 & 52.1 & 56.9 & 61.6 & 66.4 & 71.1\\
-kennedy.xls & 1029744 & 74.8 & 82.8 & 67.5 & 40.7 & 33.0 & 33.0 & 33.3\\
-lcet10.txt & 426754 & 74.7 & 66.0 & 57.6 & 52.1 & 45.7 & 42.6 & 40.6\\
-plrabn12.txt & 481861 & 69.8 & 59.2 & 53.7 & 48.8 & 45.8 & 44.0 & 42.6\\
-sum & 38241 & 83.6 & 84.0 & 79.8 & 80.9 & 78.9 & 57.3 & 61.4\\
-world192.txt & 2473400 & 81.3 & 71.0 & 67.0 & 63.4 & 52.5 & 46.2 & 41.5\\
-xargs.1 & 4227 & 75.6 & 61.1 & 58.3 & 63.7 & 69.0 & 74.3 & 79.6\\
-    \bottomrule
-  \end{tabular}}
+  \input{../code/lzw/table.tex}
   \caption{LZW test results. The different percentages the represent the respective compression ratios of that code size.}
   \label{tab:corp-files}
 \end{table}
+
+\subsection{Discussion}
+
+And now we are to discuses these test results, and see if they make us
+realist some new things about the \lzw algorithm.
+
+The first thing we notice is that more is not always better. And by
+that I am referring to the code sizes. Bigger code sizes does
+\textit{not} always result in better compression. But what we should
+also realise is the fact that codes with bigger sizes also take up
+more space, than smaller codes. See for example the files
+\verb|fields.c| and \verb|grammar.lsp|, these are source and/or text
+files. What is peculiar about these files is that for highest code
+size, $15$, they do not achieve the highest compression. What is even
+stranger is that these files are program source code, meaning that are
+highly likely chok of redundancies.
+
+But we should also realize that these are not very large, they are
+some of the smallest files. So it highly likely that is because the
+15-bit codes are not really used. 15-bit codes means that the string
+table has a maximum size of $2^{15} = 32768$, which is nowhere near
+the sizes of these files. And thus, the conclusion we reach is that
+these files were compressed poorly using 15-bit codes because the
+extra bit added to 14-bit codes was not even used. The files were just
+to small to even use and the compression of the file was over before
+the string table was even full.
+
+And true enough, if we inspect the larger files, say \verb|bible.txt|
+or \verb|world192.txt|, we see that larger code sizes do indeed mean
+greater compression. But this only because these files were large
+enough to actually make use of the extra bits the larger code sizes
+added.
+
+\section{Sample code}
+
+The sample source code of this chapter can found in the directory
+\path|code/lzw|. Here the program \texttt{lzw} can found, which was
+used in the previous tests. It allows you to perform \lzw compression
+on files and even vary the sizes the codes.
 
 \FloatBarrier
 

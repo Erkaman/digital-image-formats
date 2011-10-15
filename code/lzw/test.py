@@ -12,31 +12,23 @@ out = open('table.tex', 'w')
 newTableLine = """\\\\
 """
 
-tableFirst ="""\\begin{table}
-  \\scriptsize
-  \\centering
-  \\noindent\\makebox[\\textwidth]{%
-  \\begin{tabular}{"""
+tableFirst ="""\\noindent\\makebox[\\textwidth]{%
+\\begin{tabular}{"""
 
 out.write(tableFirst)
 
 out.write('l' * (2 + (15 - 9 + 1)))
 
 out.write("""}
-    \\toprule
-    File & Original size & """)
+\\toprule
+File & Original size & """)
 
 for codeSize in range(9,16):
     out.write(str(codeSize) + \
               ( '-bit codes(\%) & ' if codeSize != 15 else '-bit codes(\%) ' + newTableLine ))
 
-tableEnd = """    \\bottomrule
-  \\end{tabular}}
-  \\caption{LZW test results. The different percentages the represent the respective compression ratios of that code size.}
-  \\label{tab:corp-files}
-\end{table}"""
-
-
+tableEnd = """\\bottomrule
+\\end{tabular}}"""
 
 dirList = os.listdir(testDirectory)
 
