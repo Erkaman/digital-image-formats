@@ -181,6 +181,7 @@ string.
 \end{table}
 
 \subsection{Algorithm}
+\label{sec:lzw-enc-algorithm}
 
 In algorithm \ref{alg:lzw-compression} the complete LZW compression
 algorithm is presented. Try reading through it at least once,
@@ -352,67 +353,143 @@ is used to manage the string table.
 
 \subsection{Description}
 
-Using the compression algorithm LZW we on the string
-\texttt{ababcbababaaaaaaa} we end up with the compressed data stream
-\texttt{97 98 256 99 257 260 97 262 263 264 4095}. We were using
-12-bit codes to encode the data, and so the maximum value of an
-unsigned 12-bit number is used to terminate it. This is to make sure
-that the decompressor knows when to stop reading the data.
+Using the compression algorithm LZW on the string
+\texttt{ababcbababaaaaaaa} produces the compressed data stream
+\texttt{97 98 256 99 257 260 97 262 263 264 4095}. Since we were using
+12-bit codes to encode the data, the maximum value of an unsigned
+12-bit number,$2^{12} - 1 = 4095$, is used to terminate it. This is to
+make sure that the decompressor knows when to stop reading.
 
 As you may have noticed, in a LZW compressed file the string table is
-not included. Then how could you possibly decompress the file without
-such essential information? It turns out that all the corresponding
-LZW decompression algorithm do is basically the same as the
-compression aglorithm do; it just constructs the string table as it
-goes read and compresses the file at the same time.
+not included. How could you possibly decompress the file without such
+essential information? It turns out that all the LZW decompression
+algorithm do is basically the same thing that the compression aglorithm do; it
+just reconstructs the string table as it goes along and  reads and decompresses the
+file at the same time.
 
-It is actually very simple; So, we wanted to decompress the string
-\texttt{97 98 256 99 257 260 97 262 263 264 4095}. The decompressor
-first reads the first code, $97$, which is just the letter a and the
-letter a is outputted. Then the next code is read in, $98$, or simply
-b. The first characater is the second string is b. And so the former
-character a and the first string of the current string are appended
-together and then added to the table, creating the very first table
-entry, \strpair{97}{98} and it is assigned the code $256$. A new code,
-256 is read and the old \texttt{a} is discarded. $256$ is now to be
-translated. We just assigned the code $256$ the string \texttt{ab}, so
-the translation of $256$ is obvious \texttt{ab}. The first character
-of the string \texttt{ab} is \texttt{a} and thus the old string b and
-the first characer of the new string \texttt{a} are added
-together. And so ths second string table entry was constructed, and
-given the value $257$.
+So, we wanted to decompress the data stream \texttt{97 98 256 99 257
+  260 97 262 263 264 4095}. The decompressor first makes the same
+table \ref{tab:str-tab-ascii}  that the \lzw compressing algorithm did at the beginning of
+its process.
 
-The decompressor jsut keeps working through the data like this while
+First the first code is read simply and outputted, which is $98$, or
+simply the letter \texttt{a}. And in the same fashion the next code
+$98$ is read and outputted as \texttt{b}.
+
+Now \texttt{a} and \texttt{b} are appended together to the string
+\texttt{ab}. This string is added to the string table and is given the
+code $256$.
+
+A new code is read, this time it's $256$, and \texttt{a} is
+discarded. $256$ is now to be translated. We just assigned the code
+$256$ the string \texttt{ab}, so the translation of $256$ is obviously
+\texttt{ab} and because of that \texttt{ab} is outputted.
+
+Now we need to form the next string to be added the table,
+\texttt{ba}. To do this, we take the former string \texttt{b} and add
+to the first character of the current string \texttt{ab}, thus forming
+the desired string \texttt{ba}. this string is added to the table with
+the code $257$. And in this way all of the other strings to be added
+to the table.
+
+But we're going to keep doing this for a whole. You will soon see
+why. $99$ is read and then is outputted as \texttt{c}. \texttt{ab} and
+\texttt{c} are appended together to form the string \texttt{abc} and then
+\texttt{abc} is added to the string table with the code $258$.
+
+$257$ is read in. This is the code for \texttt{ba}.Since the former
+code was \texttt{c}, the string to be added to the table is
+\texttt{cb}, and it is given the code $260$.
+
+But now we read in the code $260$ before we have even added it to the
+table! Up to this we have so far uncompressed up to the string
+\texttt{ababcba}. What remains is the string \texttt{babaaaaaaa}. The
+problen here is that the compressor outputted a code before the
+decompressor was able to define it. So we need to handle this as a
+special case. We need to figure out how to construct the table entry
+bab=260 with the information we currently got. We could actually
+pretty easily construct this appending the old code \texttt{ba} to the
+first character of the old code \texttt{b}.
+
+\newcommand{\ko}{\ensuremath{k\omega}\xspace}
+\newcommand{\kok}{\ensuremath{\ko k}\xspace}
+\newcommand{\kokok}{\ensuremath{\kok \omega k}\xspace}
+
+The general problem could described like: If the string \ko is already
+in the string table and if the string \kokok is encountered, then
+compressor will first add \kok the string table and then output
+\ko. After the code for \kok is output before the decompressor is able
+to define it. But this table entry can then be constructed using $\ko
++k$.  So this is really only a special case you need to handle when a
+code is not defined in the string table.
+
+So the decompressor just keeps working through the data like this while
 deconstructing the string table that was used to compress it. It reads
 until it encounters the maximum value of the current code size $x$,
 $2^{x}-1$; for 12-bit codes this $2^{12} - 1 = 4095$, as can be seen
 from out test data stream, \texttt{97 98 256 99 257 260 97 262 263 264
-  4095}.
+  4095}. The entire decompression process is shown in table \ref{tab:lzw-dec-walkthru}.
 
-\subsection{Almost working Algorithm}
+\begin{table}
+  \centering
+  \begin{tabular}{lllll}
+    \toprule
+    Old Code & Newcode Code & Input Code & Output Codes & New table entry \\
+    \midrule
 
-And the algorithm we just described can be seen in algorithm
+    97=a & & 97=a & a=97 & \\
+    97=a & 98=b & 98=b & b=98 & ab=256 \\
+    98=b & 256=ab & 256=ab & a=97,b=98 & ba=257 \\
+    ab=256 & c=99 & c=99 & c=99  & abc=258 \\
+    c=99 & 257=ba & 257=ba & b=98,a=97 & cb=259 \\
+    bab & 260 & 260&b=98,a=97,b=98 &bab=260 \\
+    bab=260 & a=97  & a=97 & a=97 & baba=261\\
+    bab=260 & a=97 & a=97 & a=97 & baba=261\\
+
+    aa & 262 & 262 & a=97,a=97 & aa=262 \\
+
+    aaa & 263 & 263 & a=97,a=97,a=97 & aaa=263 \\
+
+    aaa=263 & a=97 & a=97 & a=97 & aaaa=264  \\
+
+    a=97 & 4095=maxValue & 4095=maxValue & STOP &  \\
+
+    \bottomrule
+  \end{tabular}
+  \caption{Detailed \lzw decompression on the string \texttt{ababcbababaaaaaaa}.}
+  \label{tab:lzw-dec-walkthru}
+\end{table}
+
+\subsection{Algorithm}
+
+And the algorithm we have just described can be seen in algorithm
 \ref{alg:lzw-non-working-decompression}. Having discussed the
 compression algorithm very much in depth, you should be able to
-perfectly understand must of this alglorithm. However, there is still
+perfectly understand most of this alglorithm. However, there are still
 some more things we need to discuss until we are done with the \lzw
-algorithm. Do notice that I say that algorithm is non-working. I still
-present  to you the non-working algorithm because it works a majority
-of the time and it is much easier to explain. In the next section, we
-will present the working LZW decompression algorithm.
+algorithm.
 
 \begin{algorithm}[H]
   \caption{LZW non-working decompression algorithm.}
-  \label{alg:lzw-non-working-decompression}
+  \label{alg:lzw-working-decompression}
   \begin{algorithmic}[1]
     \Let{$oldCode$}{\VoidCall{$InputCode$}}
     \State \Call{WriteByte}{$oldCode$}
+    \Let{$character$}{\VoidCall{$oldCode$}}
 
     \Let{$newCode$}{\VoidCall{$ReadByte$}}
+
     \While{$newCode \neq maxValue$}
 
-      \Let{$string$}{\Call{translate}{$newCode$}}
+      \If{$\NOT$ \Call{IsInTable}{$newCode$}} \Comment{The special case}
+        \Let{$string$}{\Call{tranlate}{oldCode}}
+        \Let{$string$}{$string + character$}
+      \Else
+        \Let{$string$}{\Call{translate}{$newCode$}}
+      \EndIf
+
       \State \Call{outputString}{$string$}
+
       \Let{$character$}{$string[0]$} \Comment{Get the first character
         of the translated string.}
 
@@ -421,29 +498,33 @@ will present the working LZW decompression algorithm.
       \Let{$oldCode$}{$newCode$}
 
       \Let{$newCode$}{\VoidCall{$ReadByte$}}
+
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
 
 \subsubsection{Translating string codes}
 
-Figuring out how to translate string codes of the code pair format as we
-previously discussed. See algorithm
-\ref{alg:translate-string-code}. This puts the decoded string of the
-code $code$ \textit{reversed} into the string $decodedString$. The
-stirng ends up being reversed because we are tranlating the code from
-the end of the string to the beginning. As you can see, we are just
-working thourgh character code after character code looking up the
-next code in the table using the string code. For this algorithm, we
-have chosen to put negative one into pairs that represent single
-characters. If we have reached such a pair, we have reached to
-beginning of the string and we are done translating it.
+First we need to figure out how translate string from the code pair format as we
+discussed in section \ref{sec:lzw-enc-algorithm}.
 
-This discussing leads up to another point. \textit{The decompressor
-  has no need of a hash table to store the codes}. This makes sense as
+Please see algorithm \ref{alg:translate-string-code}. This puts the
+decoded string of the code $code$ \textit{reversed} into the string
+$decodedString$. The string ends up being reversed because we
+basically are translating the code from the end of the string to the
+beginning. As you can see, we are just working through character code
+after character code looking up the next code in the table using the
+string code. For this algorithm, we have chosen to put a negative one
+into the stringCode of pairs that represent single characters. If we
+have reached such a pair, we have reached to beginning of the string
+and we are done translating it.
+
+This discussion leads up to another point. \textit{The decompressor
+  has no need of a hash table to manage the string table}. This makes sense as
 we are really only using the number codes to look up strings in the
 table to manage the string table. Since the codes are numbers, they
-can be used as indices and hence there is no need for a hash table.
+can be used as indices and hence there is no need for a hash table,
+which makes the work for the compressor one heck of a lot easier.
 
 \todo{fix string format}
 \begin{algorithm}[H]
@@ -473,39 +554,6 @@ last algorithm may fail to work. And now, without any further ado, the
 fully working LZW compresson algorithm is presented at algortihm
 \ref{alg:lzw-working-decompression}.
 
-\begin{algorithm}[H]
-  \caption{LZW non-working decompression algorithm.}
-  \label{alg:lzw-working-decompression}
-  \begin{algorithmic}[1]
-    \Let{$oldCode$}{\VoidCall{$InputCode$}}
-    \State \Call{WriteByte}{$oldCode$}
-    \Let{$character$}{\VoidCall{$oldCode$}}
-
-    \Let{$newCode$}{\VoidCall{$ReadByte$}}
-
-    \While{$newCode \neq maxValue$}
-
-      \If{$\NOT$ \Call{IsInTable}{$newCode$}}
-        \Let{$string$}{\Call{tranlate}{oldCode}}
-        \Let{$string$}{$string + character$}
-      \Else
-        \Let{$string$}{\Call{translate}{$newCode$}}
-      \EndIf
-
-      \State \Call{outputString}{$string$}
-
-      \Let{$character$}{$string[0]$} \Comment{Get the first character
-        of the translated string.}
-
-      \State \Call{$AddToStringTable$}{$oldCode, character$}
-
-      \Let{$oldCode$}{$newCode$}
-
-      \Let{$newCode$}{\VoidCall{$ReadByte$}}
-
-    \EndWhile
-  \end{algorithmic}
-\end{algorithm}
 
 \section{Efficiency}
 
