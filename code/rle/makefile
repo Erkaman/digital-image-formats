@@ -1,6 +1,6 @@
-PROG = rle.exe
+PROG = rle
+include ../default
 objects = rle.o ../common.o
-include ../flags
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)

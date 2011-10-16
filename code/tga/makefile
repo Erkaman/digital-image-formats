@@ -1,6 +1,5 @@
 PROG = tga
-CC = gcc
-include ../flags
+include ../default
 objects = tga.o ../common.o util.o
 
 $(PROG) : $(objects)

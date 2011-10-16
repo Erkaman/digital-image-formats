@@ -1,6 +1,5 @@
-PROG = lzw
-CC = gcc
-include ../flags
+ROG = lzw
+include ../default
 objects = lzw.o util.o ../common.o
 
 $(PROG) : $(objects)

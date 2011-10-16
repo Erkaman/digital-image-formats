@@ -141,6 +141,11 @@ int main(int argc, char *argv[])
         fclose(in);
         fclose(out);
 
+
+	free(stringTable);
+        free(codeValues);
+
+
     }
 
     return 0;
