@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include "gif.h"
 
 int main(int argc, char *argv[])
 {
