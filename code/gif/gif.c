@@ -1,10 +1,11 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 #include "gif.h"
 
 /* Used by all images that do not have a local color table */
-int * globalColorTable;
+unsigned long * globalColorTable;
 
 /* used by the graphics that specifies their own local color tables */
 int * localColorTable;
@@ -17,15 +18,23 @@ GIFLogicalScreenDescriptor logicalScreenDescriptor;
 
 void printHelp(void);
 void loadGIF(char * file);
-UNSIGNED readUnsigned(FILE * fp);
 
+UNSIGNED readUnsigned(FILE * fp);
 void readImageInfo(FILE * in);
+
 void printImageInfo(FILE * out);
 void printSignature(FILE * out);
 void printLogicalScreenDescriptor(FILE * out);
+void printGlobalColorTable(FILE * out);
+void printTableColor(int index,unsigned long * colorTable,FILE * out);
 
 void loadHeader(FILE * in);
 void loadLogicalScreenDescriptor(FILE * in);
+void loadGlobalColorTable(FILE * in);
+
+
+/* the color depth of the colors in a GIF is always 24 */
+#define COLOR_DEPTH 24
 
 int main(int argc, char *argv[])
 {
@@ -79,6 +88,9 @@ void loadGIF(char * file)
     fprintf(out,"* Color data:\n");
 
     fclose(in);
+    printf("hello\n");
+
+    /* causes segfault for some reason; fix later */
     fclose(out);
 }
 
@@ -86,6 +98,8 @@ void readImageInfo(FILE * in)
 {
     loadHeader(in);
     loadLogicalScreenDescriptor(in);
+    if(logicalScreenDescriptor.globalColorTableFlag)
+	loadGlobalColorTable(in);
 }
 
 void loadHeader(FILE * in)
@@ -118,6 +132,8 @@ void printImageInfo(FILE * out)
 {
     printSignature(out);
     printLogicalScreenDescriptor(out);
+    if(logicalScreenDescriptor.globalColorTableFlag)
+	printGlobalColorTable(out);
 }
 
 void printSignature(FILE * out)
@@ -151,3 +167,46 @@ void printLogicalScreenDescriptor(FILE * out)
 	    logicalScreenDescriptor.pixelAspectRatio);
 }
 
+void loadGlobalColorTable(FILE * in)
+{
+    unsigned long color;
+    int realGlobalColorTableSize;
+    int i;
+
+    realGlobalColorTableSize = pow(2,1 + logicalScreenDescriptor.globalColorTableSize);
+
+    globalColorTable = (unsigned long *) malloc(realGlobalColorTableSize);
+
+    for(i = 0; i <  realGlobalColorTableSize; ++i){
+        color  = 0;
+        fread(&color, COLOR_DEPTH / 8, 1, in);
+        globalColorTable[i] = color;
+    }
+}
+
+void printGlobalColorTable(FILE * out)
+{
+    int realGlobalColorTableSize;
+    int i;
+
+    realGlobalColorTableSize = pow(2,1 + logicalScreenDescriptor.globalColorTableSize);
+
+    for(i = 0; i <  realGlobalColorTableSize; ++i)
+        printTableColor(i,globalColorTable,out);
+}
+
+void printTableColor(int index,unsigned long * colorTable,FILE * out)
+{
+    unsigned long r,g,b;
+    unsigned long color;
+
+    color = colorTable[index];
+
+    /* because the color is stored least significant bit first. */
+    b = (color & (0xff << 16)) >> 16;
+    g = (color & (0xff << 8)) >> 8;
+    r = color & 0xff;
+
+    out = out;
+    fprintf(out,"%d:(%lu,%lu,%lu)\n",index,r,g,b);
+}
