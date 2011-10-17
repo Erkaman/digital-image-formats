@@ -51,3 +51,8 @@ void writeByte(BYTE b,FILE * fp)
 {
     fwrite(&b,sizeof(unsigned char),1,fp);
 }
+
+void readStr(FILE * fp,size_t length,char * str)
+{
+    fread(str,sizeof(char),length,fp);
+}

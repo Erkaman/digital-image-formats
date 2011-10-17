@@ -7,7 +7,6 @@
 SHORT readShort(FILE * fp);
 LONG readLong(FILE * fp);
 char readChar(FILE * fp);
-void readStr(FILE * fp,size_t length,char * str);
 
 /* getbits:  get n bits from position p */
 unsigned getbits(unsigned x, int p, int n);

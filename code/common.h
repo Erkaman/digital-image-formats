@@ -9,6 +9,7 @@
 
 BYTE readByte(FILE * fp);
 void writeByte(BYTE b,FILE * fp);
+void readStr(FILE * fp,size_t length,char * str);
 
 void assertFile(FILE * fp,char * errorStr);
 void assertFileOpened(FILE * fp);

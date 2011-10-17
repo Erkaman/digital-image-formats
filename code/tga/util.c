@@ -26,7 +26,3 @@ char readChar(FILE * fp)
     return s;
 }
 
- void readStr(FILE * fp,size_t length,char * str)
-{
-    fread(str,sizeof(char),length,fp);
-}
