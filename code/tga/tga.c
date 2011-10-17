@@ -101,6 +101,7 @@ void loadTGA(char * file)
     free(colorMap);
 
     fclose(in);
+    fclose(out);
 }
 
 
