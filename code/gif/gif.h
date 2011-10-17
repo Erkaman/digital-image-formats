@@ -8,12 +8,12 @@
  * "unsigned" for some reason. */
 #define UNSIGNED uint16_t
 
-struct{
+typedef struct{
     char signature[4];
     char version[4];
 } GIFHeader;
 
-struct{
+typedef struct{
     UNSIGNED width;
     UNSIGNED height;
     BYTE packedField;
