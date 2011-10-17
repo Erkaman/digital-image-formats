@@ -72,11 +72,11 @@ void loadGIF(char * file)
     /* read the image info; things like color table and headers */
     readImageInfo(in);
 
-    fprintf(out,"Image info:\n");
+    fprintf(out,"* Image info:\n");
 
     printImageInfo(out);
 
-    fprintf(out,"Color data:\n");
+    fprintf(out,"* Color data:\n");
 
     fclose(in);
     fclose(out);
@@ -109,6 +109,9 @@ void loadLogicalScreenDescriptor(FILE * in)
     logicalScreenDescriptor.colorResolution = (packedFields & (7 << 4)) >> 4;
     logicalScreenDescriptor.sortFlag = (packedFields & (1 << 3)) >> 3;
     logicalScreenDescriptor.globalColorTableSize = (packedFields & 7);
+
+    logicalScreenDescriptor.backgroundColorIndex = readByte(in);
+    logicalScreenDescriptor.pixelAspectRatio = readByte(in);
 }
 
 void printImageInfo(FILE * out)
@@ -119,12 +122,15 @@ void printImageInfo(FILE * out)
 
 void printSignature(FILE * out)
 {
+    fprintf(out,"** Header:\n");
     fprintf(out,"Signature:%s\n",header.signature);
     fprintf(out,"Version:%s\n",header.version);
 }
 
 void printLogicalScreenDescriptor(FILE * out)
 {
+    fprintf(out,"** Logical Screen Descriptor:\n");
+
     fprintf(out,"Logical Screen Width:%d\n",
 	    logicalScreenDescriptor.logicalScreenWidth);
     fprintf(out,"Logical Screen Height:%d\n",
@@ -138,4 +144,10 @@ void printLogicalScreenDescriptor(FILE * out)
 	    logicalScreenDescriptor.sortFlag);
     fprintf(out,"Global Color Table Size:%d\n",
 	    logicalScreenDescriptor.globalColorTableSize);
+
+    fprintf(out,"Background Color Index:%d\n",
+	    logicalScreenDescriptor.backgroundColorIndex);
+    fprintf(out,"Pixel Aspect Ratio:%d\n",
+	    logicalScreenDescriptor.pixelAspectRatio);
 }
+
