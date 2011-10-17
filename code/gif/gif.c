@@ -13,6 +13,7 @@ int * localColorTable;
    else use the global color table */
 
 GIFHeader header;
+GIFLogicalScreenDescriptor logicalScreenDescriptor;
 
 void printHelp(void);
 void loadGIF(char * file);
@@ -20,8 +21,11 @@ UNSIGNED readUnsigned(FILE * fp);
 
 void readImageInfo(FILE * in);
 void printImageInfo(FILE * out);
+void printSignature(FILE * out);
+void printLogicalScreenDescriptor(FILE * out);
 
 void loadHeader(FILE * in);
+void loadLogicalScreenDescriptor(FILE * in);
 
 int main(int argc, char *argv[])
 {
@@ -81,6 +85,7 @@ void loadGIF(char * file)
 void readImageInfo(FILE * in)
 {
     loadHeader(in);
+    loadLogicalScreenDescriptor(in);
 }
 
 void loadHeader(FILE * in)
@@ -92,8 +97,45 @@ void loadHeader(FILE * in)
     header.version[3] = '\0';
 }
 
+void loadLogicalScreenDescriptor(FILE * in)
+{
+    BYTE packedFields;
+
+    logicalScreenDescriptor.logicalScreenWidth = readUnsigned(in);
+    logicalScreenDescriptor.logicalScreenHeight = readUnsigned(in);
+
+    packedFields = readByte(in);
+    logicalScreenDescriptor.globalColorTableFlag = (packedFields & (1 << 7)) >> 7;
+    logicalScreenDescriptor.colorResolution = (packedFields & (7 << 4)) >> 4;
+    logicalScreenDescriptor.sortFlag = (packedFields & (1 << 3)) >> 3;
+    logicalScreenDescriptor.globalColorTableSize = (packedFields & 7);
+}
+
 void printImageInfo(FILE * out)
+{
+    printSignature(out);
+    printLogicalScreenDescriptor(out);
+}
+
+void printSignature(FILE * out)
 {
     fprintf(out,"Signature:%s\n",header.signature);
     fprintf(out,"Version:%s\n",header.version);
+}
+
+void printLogicalScreenDescriptor(FILE * out)
+{
+    fprintf(out,"Logical Screen Width:%d\n",
+	    logicalScreenDescriptor.logicalScreenWidth);
+    fprintf(out,"Logical Screen Height:%d\n",
+	    logicalScreenDescriptor.logicalScreenHeight);
+
+    fprintf(out,"Global Color Table Flag:%d\n",
+	    logicalScreenDescriptor.globalColorTableFlag);
+    fprintf(out,"Color Resolution:%d\n",
+	    logicalScreenDescriptor.colorResolution);
+    fprintf(out,"Sort Flag:%d\n",
+	    logicalScreenDescriptor.sortFlag);
+    fprintf(out,"Global Color Table Size:%d\n",
+	    logicalScreenDescriptor.globalColorTableSize);
 }

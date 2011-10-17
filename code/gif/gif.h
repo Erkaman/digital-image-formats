@@ -8,18 +8,26 @@
  * "unsigned" for some reason. */
 #define UNSIGNED uint16_t
 
+#define FLAG int
+
 typedef struct{
     char signature[4];
     char version[4];
 } GIFHeader;
 
 typedef struct{
-    UNSIGNED width;
-    UNSIGNED height;
-    BYTE packedField;
+    UNSIGNED logicalScreenWidth;
+    UNSIGNED logicalScreenHeight;
+
+    /* packed fields */
+    FLAG globalColorTableFlag;
+    BYTE colorResolution;
+    FLAG sortFlag;
+    BYTE globalColorTableSize;
+
     BYTE backgroundColorIndex;
     BYTE pixelAspectRatio;
 
-}GIFLogicalScreenDescriptor;
+} GIFLogicalScreenDescriptor;
 
 #endif /* _GIF_H_ */
