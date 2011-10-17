@@ -30,4 +30,39 @@ typedef struct{
 
 } GIFLogicalScreenDescriptor;
 
+typedef struct{
+    BYTE imageSeparator;
+
+    UNSIGNED imageLeftPosition;
+    UNSIGNED imageTopPosition;
+
+    UNSIGNED imageWidth;
+    UNSIGNED imageHeight;
+
+    /* packed fields */
+    FLAG localColorTableFlag;
+    FLAG interlaceFlag;
+    FLAG sortFlag;
+    BYTE reserved;
+    BYTE localColorTableSize;
+
+} GIFImageDescriptor;
+
+typedef struct{
+    BYTE extensionIntroducer;
+    BYTE graphicControlLabel;
+    BYTE blockSize;
+
+    /* packed fields */
+    BYTE reserved;
+    BYTE disposalMethod;
+    FLAG userInputFlag;
+    FLAG transparencyFlag;
+
+    UNSIGNED delayTime;
+    BYTE transparencyIndex;
+    BYTE blockTerminator;
+
+} GIFGraphicControl;
+
 #endif /* _GIF_H_ */
