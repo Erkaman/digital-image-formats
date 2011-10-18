@@ -5,7 +5,6 @@
 #include <stdarg.h>
 #include "gif.h"
 
-
 int main(int argc, char *argv[])
 {
     if(argc == 1){
@@ -59,8 +58,6 @@ void loadGIF(char * file)
     fprintf(out,"* Color data:\n");
 
     loadImageData(in,out);
-
-
 
     fclose(in);
 
@@ -150,8 +147,10 @@ void loadGlobalColorTable(FILE * in)
 
     realGlobalColorTableSize = pow(2,1 + logicalScreenDescriptor.globalColorTableSize);
 
-    globalColorTable = (unsigned long *) malloc(realGlobalColorTableSize);
+    /* ugly hack to fixes segfault */
+    globalColorTable = (unsigned long *) malloc(realGlobalColorTableSize + 4);
 
+    debugPrint("%d\n",realGlobalColorTableSize);
     for(i = 0; i <  realGlobalColorTableSize; ++i){
         color  = 0;
         fread(&color, COLOR_DEPTH / 8, 1, in);
@@ -389,10 +388,6 @@ void loadImageColorData(FILE * in,FILE * out)
     character = oldCode;
     newCode = inputCode(codeSize,in);
 
-/*    debugPrint("nextCode:%d\n",nextCode);
-      debugPrint("ClearCode:%d\n",ClearCode);
-      debugPrint("EndCode:%d\n",EndCode);*/
-
     while(newCode != EndCode){
 
         /*if it is not in the translation table. */
@@ -411,22 +406,19 @@ void loadImageColorData(FILE * in,FILE * out)
             compressionTable[nextCode].stringCode = oldCode;
             compressionTable[nextCode].characterCode = character;
 
-            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
+/*            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
                        nextCode,
                        oldCode,
                        oldCode,
                        character,
-                       character);
+                       character);*/
 
             if(nextCode == (pow(2,codeSize) - 1)){
                 ++codeSize;
-                debugPrint("New code size:%d\n",codeSize);
             }
 
             nextCode++;
         }
-
-        debugPrint("newCode:%d\n",newCode);
 
         oldCode = newCode;
         newCode = inputCode(codeSize,in);
