@@ -219,7 +219,6 @@ void lzw_decompress(FILE * in,FILE * out)
     /* max_value should be checked for here but it doesn't work. */
     while (newCode != maxValue){
 
-
         /*if it is not in the translation table. */
         if(!(newCode < dictionaryIndex)){
 	    stringCodeStack[stackp++] = character;
