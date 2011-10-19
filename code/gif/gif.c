@@ -45,7 +45,6 @@ void loadGIF(char * file)
     file = changeExtension(file,"dmp");
     out = fopen(file,"wb");
     assertFileOpened(out);
-    free(file);
 
     /* read the image info; things like color table and headers */
     readImageInfo(in);
@@ -53,7 +52,6 @@ void loadGIF(char * file)
     fprintf(out,"* Image info:\n");
 
     printImageInfo(out);
-
 
     fprintf(out,"* Color data:\n");
 
@@ -63,6 +61,7 @@ void loadGIF(char * file)
 
     /* causes segfault for some reason; fix later */
     fclose(out);
+    free(file);
 }
 
 void readImageInfo(FILE * in)
@@ -140,17 +139,15 @@ void printLogicalScreenDescriptor(FILE * out)
 
 void loadGlobalColorTable(FILE * in)
 {
-
-    unsigned long color;
+    GIFColor color;
     int realGlobalColorTableSize;
     int i;
 
     realGlobalColorTableSize = pow(2,1 + logicalScreenDescriptor.globalColorTableSize);
 
     /* ugly hack to fixes segfault */
-    globalColorTable = (unsigned long *) malloc(realGlobalColorTableSize + 4);
+    globalColorTable = (GIFColor *) malloc(realGlobalColorTableSize);
 
-    debugPrint("%d\n",realGlobalColorTableSize);
     for(i = 0; i <  realGlobalColorTableSize; ++i){
         color  = 0;
         fread(&color, COLOR_DEPTH / 8, 1, in);
@@ -173,7 +170,7 @@ void printGlobalColorTable(FILE * out)
         printTableColor(i,globalColorTable,out);
 }
 
-void printTableColor(int index,unsigned long * colorTable,FILE * out)
+void printTableColor(int index,GIFColor * colorTable,FILE * out)
 {
     unsigned long r,g,b;
     unsigned long color;
@@ -188,7 +185,7 @@ void printTableColor(int index,unsigned long * colorTable,FILE * out)
     fprintf(out,"%d:(%lu,%lu,%lu)\n",index,r,g,b);
 }
 
-void printColor(int index,unsigned long * colorTable,FILE * out)
+void printColor(int index,GIFColor * colorTable,FILE * out)
 {
     static int col = 0;
 
