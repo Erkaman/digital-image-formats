@@ -79,9 +79,27 @@ typedef struct{
 
 } GIFGraphicControl;
 
+typedef struct{
+    BYTE extensionIntroducer;
+    BYTE extensionLabel;
+
+    BYTE blockSize;
+
+    char applicationIdentifier[9];
+
+    BYTE applicationAuthenticationCode[3];
+
+    BYTE * applicationData;
+    unsigned long applicationDataLength;
+
+    BYTE blockTerminator;
+
+} GIFApplicationExtension;
+
 typedef struct {
     unsigned int stringCode;
     unsigned int characterCode;
+
 } tableEntry;
 
 typedef struct {
@@ -128,6 +146,10 @@ unsigned int inputCode(int codeSize);
 void translateCode(unsigned int newCode);
 
 void newSubBlock(FILE * in);
+
+void loadApplicationExtension(FILE * in);
+void printApplicationExtension(FILE * out);
+
 
 #endif /* _GIF_H_ */
 

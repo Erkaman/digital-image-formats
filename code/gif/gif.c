@@ -26,11 +26,17 @@ int stackp;
 unsigned int ClearCode;
 unsigned int EndCode;
 
+void readBytes(FILE * in,size_t length,BYTE * bytes);
+void printBytes(FILE * out,size_t length,BYTE * bytes);
+
 /* structures */
 GIFHeader header;
 GIFLogicalScreenDescriptor logicalScreenDescriptor;
 GIFImageDescriptor imageDescriptor;
 GIFGraphicControl graphicControl;
+GIFApplicationExtension applicationExtension;
+
+BYTE * readDataSubBlocks(FILE * in,unsigned long * subBlockLength);
 
 int main(int argc, char *argv[])
 {
@@ -68,6 +74,7 @@ void loadGIF(char * file)
 
     /* read the image info; things like color table and headers */
     readImageInfo(in);
+
 
     debugPrint("Image Info\n");
     fprintf(out,"* Image info:\n");
@@ -238,6 +245,9 @@ void loadImageData(FILE * in,FILE * out)
 
             debugPrint("Image descriptor loaded\n");
 
+	    fclose(out);
+	    exit(1);
+
             /* perform the decompression of the image data. */
             loadImageColorData(in,out);
             break;
@@ -270,6 +280,8 @@ void loadExtension(FILE * in,FILE * out)
         break;
     case APPLICATION_EXTENSION_LABEL:
         debugPrint("APPLICATION_EXTENSION_LABEL\n");
+        loadApplicationExtension(in);
+        printApplicationExtension(out);
         break;
     case PLAIN_TEXT_LABEL:
         debugPrint("PLAIN_TEXT_LABEL\n");
@@ -387,7 +399,7 @@ void loadImageColorData(FILE * in,FILE * out)
     stackp = 0;
 
     /* do this at the beginning of the program? */
-    compressionTable = (tableEntry *)malloc(pow(2,12));
+    compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
 
     codeSize = readByte(in) + 1;
     debugPrint("codeSize:%d\n",codeSize);
@@ -408,7 +420,7 @@ void loadImageColorData(FILE * in,FILE * out)
     /* TODO: handle clear codes. */
     while(newCode != EndCode){
 
-	/* if reached end of sub block */
+        /* if reached end of sub block */
         if(subBlockIndex == subBlockSize){
             newSubBlock(in);
         }
@@ -495,11 +507,6 @@ unsigned int resetCompressionTable(void)
 
     for(nextCode = 0; nextCode < colorTableSize; ++nextCode){
 
-        debugPrint("%d:(%d,%d,%d)\n",nextCode,
-                   globalColorTable[nextCode].r,
-                   globalColorTable[nextCode].g,
-                   globalColorTable[nextCode].b);
-
         compressionTable[nextCode].characterCode = nextCode;
         compressionTable[nextCode].stringCode = (unsigned int) -1;
     }
@@ -544,5 +551,86 @@ void newSubBlock(FILE * in)
     }
 
     subBlockIndex = 0;
+}
+
+void loadApplicationExtension(FILE * in)
+{
+    applicationExtension.extensionIntroducer = EXTENSION_INTRODUCER;
+    applicationExtension.extensionLabel = APPLICATION_EXTENSION_LABEL;
+
+    applicationExtension.blockSize = readByte(in);
+
+    readStr(in,8,applicationExtension.applicationIdentifier);
+    applicationExtension.applicationIdentifier[8] = '\0';
+
+    readBytes(in,3,applicationExtension.applicationAuthenticationCode);
+
+    applicationExtension.applicationData = readDataSubBlocks(
+	in,
+	&applicationExtension.applicationDataLength);
+
+    applicationExtension.blockTerminator = readByte(in);
+
+}
+
+void printApplicationExtension(FILE * out)
+{
+    fprintf(out,"** Application Extension\n");
+
+    fprintf(out,"Extension Introducer:%d\n",applicationExtension.extensionIntroducer);
+    fprintf(out,"Extension Label:%d\n",applicationExtension.extensionLabel);
+
+    fprintf(out,"Block Size:%d\n",applicationExtension.blockSize);
+
+    fprintf(out,"Application Identifier:%s\n",applicationExtension.applicationIdentifier);
+
+    fprintf(out,"Application Authentication Code:\n");
+    printBytes(out,3,applicationExtension.applicationAuthenticationCode);
+
+    fprintf(out,"Application Data:\n");
+
+    printBytes(
+	out,
+	applicationExtension.applicationDataLength,
+	applicationExtension.applicationData);
+
+    fprintf(out,"Block Terminator:%d\n",applicationExtension.blockTerminator);
+
+    /* TODO put cleanup stuff in a function */
+    free(applicationExtension.applicationData);
+}
+
+void readBytes(FILE * in,size_t length,BYTE * bytes)
+{
+    fread(bytes,sizeof(BYTE),length,in);
+}
+
+void printBytes(FILE * out,size_t length,BYTE * bytes)
+{
+    size_t i;
+
+    for(i = 0; i < length; ++i)
+        if(i < (length - 1))
+            fprintf(out,"%d,",bytes[i]);
+        else
+            fprintf(out,"%d",bytes[i]);
+
+    fprintf(out,"\n");
+}
+
+/* TODO: handle sub-blocks larger than one */
+BYTE * readDataSubBlocks(FILE * in,unsigned long * subBlockLength)
+{
+    BYTE * subBlocksData;
+    BYTE subBlocksSize;
+
+    subBlocksSize = readByte(in);
+
+    subBlocksData = (BYTE *)malloc(sizeof(BYTE) * subBlocksSize);
+
+    readBytes(in,subBlocksSize,subBlocksData);
+
+    *subBlockLength = subBlocksSize;
+    return subBlocksData;
 }
 
