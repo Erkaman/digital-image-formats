@@ -22,6 +22,8 @@
 
 #define DEBUG 1
 
+# define SUB_BLOCKS_MAX_SIZE 0xff
+
 typedef struct{
     char signature[4];
     char version[4];
@@ -88,39 +90,10 @@ typedef struct {
     BYTE b;
 } GIFColor;
 
-tableEntry * compressionTable;
-
-
-/* Used by all images that do not have a local color table */
-GIFColor * globalColorTable;
-
-/* used by the graphics that specifies their own local color tables */
-int * localColorTable;
-
-/* use a flag to specify whether the current image has local color table or not,
-   else use the global color table */
-
-unsigned int nextCode;
-
-char stringCodeStack[40000];
-int stackp;
-
-unsigned int ClearCode;
-unsigned int EndCode;
-
-
-GIFHeader header;
-GIFLogicalScreenDescriptor logicalScreenDescriptor;
-GIFImageDescriptor imageDescriptor;
-
-GIFGraphicControl graphicControl;
-
-void debugPrint(const char * format, ...);
 
 void printHelp(void);
 void loadGIF(char * file);
 
-UNSIGNED readUnsigned(FILE * fp);
 void readImageInfo(FILE * in);
 
 void loadImageData(FILE * in,FILE * out);
@@ -148,11 +121,14 @@ void printGraphicControl(FILE * out);
 
 void loadImageColorData(FILE * in,FILE * out);
 
-void resetCompressionTable(void);
+unsigned int resetCompressionTable(void);
 
 unsigned int inputCode(int codeSize);
 
 void translateCode(unsigned int newCode);
 
+void newSubBlock(FILE * in);
 
 #endif /* _GIF_H_ */
+
+

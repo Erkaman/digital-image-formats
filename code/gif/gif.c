@@ -2,15 +2,35 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include <stdarg.h>
 #include "gif.h"
+#include "util.h"
 
 BYTE * subBlockBytes;
 int subBlockSize;
 int subBlockIndex;
 
-void newSubBlock(FILE * in);
-unsigned int firstNBits(unsigned int num,unsigned int n);
+tableEntry * compressionTable;
+
+/* Used by all images that do not have a local color table */
+GIFColor * globalColorTable;
+
+/* used by the graphics that specifies their own local color tables */
+int * localColorTable;
+
+/* use a flag to specify whether the current image has local color table or not,
+   else use the global color table */
+
+char stringCodeStack[40000];
+int stackp;
+
+unsigned int ClearCode;
+unsigned int EndCode;
+
+/* structures */
+GIFHeader header;
+GIFLogicalScreenDescriptor logicalScreenDescriptor;
+GIFImageDescriptor imageDescriptor;
+GIFGraphicControl graphicControl;
 
 int main(int argc, char *argv[])
 {
@@ -24,13 +44,6 @@ int main(int argc, char *argv[])
     loadGIF(argv[1]);
 
     return 0;
-}
-
-UNSIGNED readUnsigned(FILE * fp)
-{
-    UNSIGNED s;
-    fread(&s,sizeof(UNSIGNED),1,fp);
-    return s;
 }
 
 void printHelp(void)
@@ -153,8 +166,7 @@ void loadGlobalColorTable(FILE * in)
 
     realGlobalColorTableSize = pow(2,1 + logicalScreenDescriptor.globalColorTableSize);
 
-    /* ugly hack to fixes segfault */
-    globalColorTable = (GIFColor *) malloc(realGlobalColorTableSize);
+    globalColorTable = (GIFColor *) malloc(sizeof(GIFColor) * realGlobalColorTableSize);
 
     for(i = 0; i <  realGlobalColorTableSize; ++i){
 
@@ -162,12 +174,6 @@ void loadGlobalColorTable(FILE * in)
         globalColorTable[i].r = readByte(in);
         globalColorTable[i].g = readByte(in);
         globalColorTable[i].b = readByte(in);
-
-	/* global color table gets corrupt without this line for some reason. */
-        debugPrint("%d:(%d,%d,%d)\n",i,
-                   globalColorTable[i].r,
-                   globalColorTable[i].g,
-                   globalColorTable[i].b);
     }
 }
 
@@ -373,6 +379,11 @@ void loadImageColorData(FILE * in,FILE * out)
     unsigned int newCode;
     char character;
 
+    unsigned int nextCode;
+
+    /* allocate an array big enough for all sub blocks.  */
+    subBlockBytes = (BYTE *) malloc(sizeof(BYTE) * SUB_BLOCKS_MAX_SIZE);
+
     stackp = 0;
 
     /* do this at the beginning of the program? */
@@ -385,7 +396,7 @@ void loadImageColorData(FILE * in,FILE * out)
 
     /* Skip the clear code. */
     inputCode(codeSize);
-    resetCompressionTable();
+    nextCode = resetCompressionTable();
 
     oldCode = inputCode(codeSize);
 
@@ -397,6 +408,7 @@ void loadImageColorData(FILE * in,FILE * out)
     /* TODO: handle clear codes. */
     while(newCode != EndCode){
 
+	/* if reached end of sub block */
         if(subBlockIndex == subBlockSize){
             newSubBlock(in);
         }
@@ -435,6 +447,7 @@ void loadImageColorData(FILE * in,FILE * out)
         newCode = inputCode(codeSize);
     }
 
+    free(subBlockBytes);
     free(compressionTable);
 }
 
@@ -445,17 +458,10 @@ unsigned int inputCode(int codeSize)
     int shift;
 
     returnValue = 0;
-
-/*    debugPrint("inputCode\n");
-      debugPrint("remainingBits:%d\n",remainingBits);
-      debugPrint("codeSize:%d\n",codeSize); */
-
     shift = 0;
 
     while(codeSize > 0){
         if(remainingBits < codeSize){
-
-/*          debugPrint("BRANCH 1\n"); */
 
             /* read in what's left of the byte */
             returnValue |= (firstNBits(subBlockBytes[subBlockIndex],remainingBits) << shift);
@@ -465,15 +471,7 @@ unsigned int inputCode(int codeSize)
             subBlockIndex++;
             remainingBits = 8;
 
-/*          debugPrint("returnValue:%d\n",returnValue);
-            debugPrint("shift:%d\n",shift);
-            debugPrint("codeSize:%d\n",codeSize);
-            debugPrint("subBlockIndex:%d\n",subBlockIndex);
-            debugPrint("remainingBits:%d\n",remainingBits); */
-
         }else{
-
-/*          debugPrint("BRANCH 2\n"); */
 
             /* if remainingBits > codeSize */
             returnValue |= (firstNBits(subBlockBytes[subBlockIndex],codeSize) << shift);
@@ -488,9 +486,10 @@ unsigned int inputCode(int codeSize)
     return returnValue;
 }
 
-void resetCompressionTable(void)
+unsigned int resetCompressionTable(void)
 {
     unsigned int colorTableSize;
+    unsigned int nextCode;
 
     colorTableSize = pow(2,(logicalScreenDescriptor.globalColorTableSize + 1));
 
@@ -507,18 +506,9 @@ void resetCompressionTable(void)
 
     ClearCode = nextCode++;
     EndCode = nextCode++;
+    return nextCode;
 }
 
-void debugPrint(const char * format, ...)
-{
-    va_list vl;
-
-    if(DEBUG){
-        va_start(vl, format);
-        vprintf(format, vl);
-        va_end(vl);
-    }
-}
 
 char printString(FILE * out)
 {
@@ -544,7 +534,6 @@ void newSubBlock(FILE * in)
     debugPrint("subBlockSize:%d\n",subBlockSize);
 
     /* todo: properly free memory */
-    subBlockBytes = (BYTE *) malloc(subBlockSize);
 
     b = readByte(in);
 
@@ -557,7 +546,3 @@ void newSubBlock(FILE * in)
     subBlockIndex = 0;
 }
 
-unsigned int firstNBits(unsigned int num,unsigned int n)
-{
-    return num &  (~(~0 << (n)));
-}

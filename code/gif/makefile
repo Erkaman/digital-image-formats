@@ -1,11 +1,12 @@
 PROG = gif
 include ../default
-objects = gif.o ../common.o
+objects = gif.o ../common.o util.o
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
-gif.o : gif.h
+gif.o : gif.h util.h
+util.o : util.h
 ../common.o : ../common.h
 
 clean :
