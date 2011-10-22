@@ -5,6 +5,13 @@
 #include <stdarg.h>
 #include "gif.h"
 
+BYTE * subBlockBytes;
+int subBlockSize;
+int subBlockIndex;
+
+void newSubBlock(FILE * in);
+unsigned int firstNBits(unsigned int num,unsigned int n);
+
 int main(int argc, char *argv[])
 {
     if(argc == 1){
@@ -49,10 +56,12 @@ void loadGIF(char * file)
     /* read the image info; things like color table and headers */
     readImageInfo(in);
 
+    debugPrint("Image Info\n");
     fprintf(out,"* Image info:\n");
 
     printImageInfo(out);
 
+    debugPrint("Color Data\n");
     fprintf(out,"* Color data:\n");
 
     loadImageData(in,out);
@@ -139,7 +148,6 @@ void printLogicalScreenDescriptor(FILE * out)
 
 void loadGlobalColorTable(FILE * in)
 {
-    GIFColor color;
     int realGlobalColorTableSize;
     int i;
 
@@ -149,11 +157,17 @@ void loadGlobalColorTable(FILE * in)
     globalColorTable = (GIFColor *) malloc(realGlobalColorTableSize);
 
     for(i = 0; i <  realGlobalColorTableSize; ++i){
-        color  = 0;
-        fread(&color, COLOR_DEPTH / 8, 1, in);
 
         /* This line for some weird causes a segfault at flose(out). */
-        globalColorTable[i] = color;
+        globalColorTable[i].r = readByte(in);
+        globalColorTable[i].g = readByte(in);
+        globalColorTable[i].b = readByte(in);
+
+	/* global color table gets corrupt without this line for some reason. */
+        debugPrint("%d:(%d,%d,%d)\n",i,
+                   globalColorTable[i].r,
+                   globalColorTable[i].g,
+                   globalColorTable[i].b);
     }
 }
 
@@ -172,40 +186,26 @@ void printGlobalColorTable(FILE * out)
 
 void printTableColor(int index,GIFColor * colorTable,FILE * out)
 {
-    unsigned long r,g,b;
-    unsigned long color;
+    GIFColor color = colorTable[index];
 
-    color = colorTable[index];
-
-    /* because the color is stored least significant bit first. */
-    b = (color & (0xff << 16)) >> 16;
-    g = (color & (0xff << 8)) >> 8;
-    r = color & 0xff;
-
-    fprintf(out,"%d:(%lu,%lu,%lu)\n",index,r,g,b);
+    fprintf(out,"%d:(%d,%d,%d)\n",index,color.r,color.g,color.b);
 }
 
 void printColor(int index,GIFColor * colorTable,FILE * out)
 {
     static int col = 0;
 
-    unsigned long r,g,b;
-    unsigned long color;
+    GIFColor color;
 
     color = colorTable[index];
 
-    /* because the color is stored least significant bit first. */
-    b = (color & (0xff << 16)) >> 16;
-    g = (color & (0xff << 8)) >> 8;
-    r = color & 0xff;
-
-    fprintf(out,"(%lu,%lu,%lu)",r,g,b);
+    fprintf(out,"(%d,%d,%d)",color.r,color.g,color.b);
 
     ++col;
 
     if(col == logicalScreenDescriptor.logicalScreenWidth){
-	fprintf(out,"\n");
-	col = 0;
+        fprintf(out,"\n");
+        col = 0;
     }
 }
 
@@ -220,13 +220,17 @@ void loadImageData(FILE * in,FILE * out)
 
         switch(introducer){
         case EXTENSION_INTRODUCER:
+            debugPrint("EXTENSION_INTRODUCER\n");
             loadExtension(in,out);
             break;
         case IMAGE_SEPARATOR:
+            debugPrint("IMAGE_SEPARATOR\n");
 
             /* if local color table size > 0 load local color table */
             loadImageDescriptor(in);
             printImageDescriptor(out);
+
+            debugPrint("Image descriptor loaded\n");
 
             /* perform the decompression of the image data. */
             loadImageColorData(in,out);
@@ -248,15 +252,21 @@ void loadExtension(FILE * in,FILE * out)
 
     switch(extensionLabel){
     case GRAPHIC_CONTROL_LABEL:
+        debugPrint("GRAPHIC_CONTROL_LABEL\n");
+
         loadGraphicControl(in);
         printGraphicControl(out);
         /* load image(same thing as when finding the image separator) */
         break;
     case COMMENT_LABEL:
+
+        debugPrint("COMMENT_LABEL\n");
         break;
     case APPLICATION_EXTENSION_LABEL:
+        debugPrint("APPLICATION_EXTENSION_LABEL\n");
         break;
     case PLAIN_TEXT_LABEL:
+        debugPrint("PLAIN_TEXT_LABEL\n");
         break;
     }
 }
@@ -358,7 +368,6 @@ void translateCode(unsigned int newCode)
 void loadImageColorData(FILE * in,FILE * out)
 {
     int codeSize;
-    int subBlockSize;
 
     unsigned int oldCode;
     unsigned int newCode;
@@ -370,22 +379,27 @@ void loadImageColorData(FILE * in,FILE * out)
     compressionTable = (tableEntry *)malloc(pow(2,12));
 
     codeSize = readByte(in) + 1;
+    debugPrint("codeSize:%d\n",codeSize);
 
-    /* figure out how to use this value later */
-    subBlockSize = readByte(in);
+    newSubBlock(in);
 
     /* Skip the clear code. */
-    inputCode(codeSize,in);
+    inputCode(codeSize);
     resetCompressionTable();
 
-    oldCode = inputCode(codeSize,in);
+    oldCode = inputCode(codeSize);
 
     printColor(oldCode,globalColorTable,out);
 
     character = oldCode;
-    newCode = inputCode(codeSize,in);
+    newCode = inputCode(codeSize);
 
+    /* TODO: handle clear codes. */
     while(newCode != EndCode){
+
+        if(subBlockIndex == subBlockSize){
+            newSubBlock(in);
+        }
 
         /*if it is not in the translation table. */
         if(!(newCode < nextCode)){
@@ -403,75 +417,75 @@ void loadImageColorData(FILE * in,FILE * out)
             compressionTable[nextCode].stringCode = oldCode;
             compressionTable[nextCode].characterCode = character;
 
-/*            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
+            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
                        nextCode,
                        oldCode,
                        oldCode,
                        character,
-                       character);*/
+                       character);
 
             if(nextCode == (pow(2,codeSize) - 1)){
                 ++codeSize;
+                debugPrint("New code size:%d\n",codeSize);
             }
 
             nextCode++;
         }
-
         oldCode = newCode;
-        newCode = inputCode(codeSize,in);
+        newCode = inputCode(codeSize);
     }
-
-    /* read and throw away the block terminator. */
-    readByte(in);
 
     free(compressionTable);
 }
 
-unsigned int inputCode(int codeSize,FILE *input)
+unsigned int inputCode(int codeSize)
 {
     unsigned int returnValue;
-    static int inputBitCount=0;
-    int inputt;
-    static unsigned int inputBitBuffer=0;
+    static int remainingBits = 8;
+    int shift;
 
+    returnValue = 0;
 
-    if(inputBitCount < codeSize){
+/*    debugPrint("inputCode\n");
+      debugPrint("remainingBits:%d\n",remainingBits);
+      debugPrint("codeSize:%d\n",codeSize); */
 
-        inputt = getc(input);
-/*      debugPrint("hai:%d\n",inputt);
-        debugPrint("hai2:%d\n",(inputt << (inputBitCount == 0 ? 0 : codeSize)));*/
+    shift = 0;
 
-        inputBitBuffer = (inputBitBuffer) | (inputt << (inputBitCount));
-        inputBitCount += 8;
+    while(codeSize > 0){
+        if(remainingBits < codeSize){
+
+/*          debugPrint("BRANCH 1\n"); */
+
+            /* read in what's left of the byte */
+            returnValue |= (firstNBits(subBlockBytes[subBlockIndex],remainingBits) << shift);
+            /* increase the shift */
+            shift += remainingBits;
+            codeSize -= remainingBits;
+            subBlockIndex++;
+            remainingBits = 8;
+
+/*          debugPrint("returnValue:%d\n",returnValue);
+            debugPrint("shift:%d\n",shift);
+            debugPrint("codeSize:%d\n",codeSize);
+            debugPrint("subBlockIndex:%d\n",subBlockIndex);
+            debugPrint("remainingBits:%d\n",remainingBits); */
+
+        }else{
+
+/*          debugPrint("BRANCH 2\n"); */
+
+            /* if remainingBits > codeSize */
+            returnValue |= (firstNBits(subBlockBytes[subBlockIndex],codeSize) << shift);
+            subBlockBytes[subBlockIndex] >>= codeSize;
+            remainingBits -= codeSize;
+            codeSize = 0;
+
+        }
     }
 
-/*    debugPrint("BEFORE inputBitCount:%d\n",inputBitCount);
-      debugPrint("BEFORE inputBitBuffer:%d\n",inputBitBuffer);*/
-
-    returnValue = inputBitBuffer & (~(~0 << codeSize));
-
-    inputBitBuffer >>= codeSize;
-    inputBitCount -= codeSize;
-
-/*    debugPrint("AFTER inputBitCount:%d\n",inputBitCount);
-      debugPrint("AFTER inputBitBuffer:%d\n",inputBitBuffer);*/
-
-
+    debugPrint("END:returnValue:%d\n",returnValue);
     return returnValue;
-
-/*    inputBitBuffer = inputBitBuffer << (24 - inputBitCount); */
-
-/*    while (inputBitCount <= 24)
-      {
-      inputBitBuffer |=
-      (unsigned int) getc(input) << (inputBitCount);
-      inputBitCount += 8;
-      }*/
-
-/*    returnValue = inputBitBuffer & ~(~0 << codeSize)
-      inputBitBuffer <<= codeSize;
-      inputBitCount -= codeSize;*/
-
 }
 
 void resetCompressionTable(void)
@@ -481,6 +495,12 @@ void resetCompressionTable(void)
     colorTableSize = pow(2,(logicalScreenDescriptor.globalColorTableSize + 1));
 
     for(nextCode = 0; nextCode < colorTableSize; ++nextCode){
+
+        debugPrint("%d:(%d,%d,%d)\n",nextCode,
+                   globalColorTable[nextCode].r,
+                   globalColorTable[nextCode].g,
+                   globalColorTable[nextCode].b);
+
         compressionTable[nextCode].characterCode = nextCode;
         compressionTable[nextCode].stringCode = (unsigned int) -1;
     }
@@ -510,4 +530,34 @@ char printString(FILE * out)
         printColor(stringCodeStack[--stackp],globalColorTable,out);
 
     return returnValue;
+}
+
+void newSubBlock(FILE * in)
+{
+    BYTE i;
+    BYTE b;
+
+    debugPrint("newSubBlock\n");
+
+    subBlockSize = readByte(in);
+
+    debugPrint("subBlockSize:%d\n",subBlockSize);
+
+    /* todo: properly free memory */
+    subBlockBytes = (BYTE *) malloc(subBlockSize);
+
+    b = readByte(in);
+
+    for(i = 0; i < subBlockSize; ++i){
+        debugPrint("read new byte:%d\n",b);
+        subBlockBytes[i] = b;
+        b = readByte(in);
+    }
+
+    subBlockIndex = 0;
+}
+
+unsigned int firstNBits(unsigned int num,unsigned int n)
+{
+    return num &  (~(~0 << (n)));
 }

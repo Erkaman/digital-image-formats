@@ -407,5 +407,16 @@ programmet med andra ord helt och hållet analysera och tolka väldigt
 enkla GIF filer. Jag har inte testat detta så väl än, så det finns
 förmodligen ett flertal buggas som jag kommer att behöva fixa.
 
+\dayheading{19}{10}{2011}
+
+Majoriteten av dagen spenderades med att lösa ett riktigt klurigt
+problem. I en GIF fil lagras färg datan i så kallade koder, dvs binära
+tal som tex 01101. Dessa koder varierar dessutom ofta i sin längd och
+därför är det lite lurigt att läsa in dem en efter en. Implementation
+jag gjorde för detta igår fungerade inte för alla sorts koder av olika
+länger. Därför fick jag skriva om denna implemenation idag, vilket var
+mycket svårt. Det retsamma är att den fungerande lösningen jag fick
+fram bara var runt 20 rader kod.
+
 \end{document}
 

@@ -22,8 +22,6 @@
 
 #define DEBUG 1
 
-#define GIFColor uint32_t
-
 typedef struct{
     char signature[4];
     char version[4];
@@ -84,11 +82,17 @@ typedef struct {
     unsigned int characterCode;
 } tableEntry;
 
+typedef struct {
+    BYTE r;
+    BYTE g;
+    BYTE b;
+} GIFColor;
+
 tableEntry * compressionTable;
 
 
 /* Used by all images that do not have a local color table */
-uint32_t * globalColorTable;
+GIFColor * globalColorTable;
 
 /* used by the graphics that specifies their own local color tables */
 int * localColorTable;
@@ -146,7 +150,7 @@ void loadImageColorData(FILE * in,FILE * out);
 
 void resetCompressionTable(void);
 
-unsigned int inputCode(int codeSize,FILE *input);
+unsigned int inputCode(int codeSize);
 
 void translateCode(unsigned int newCode);
 
