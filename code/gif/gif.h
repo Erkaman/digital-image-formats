@@ -14,20 +14,25 @@
 #define COLOR_DEPTH 24
 #define TRAILER 0x3b
 #define EXTENSION_INTRODUCER 0x21
+
 #define GRAPHIC_CONTROL_LABEL 0xf9
 #define COMMENT_LABEL 0xfe
 #define APPLICATION_EXTENSION_LABEL 0xff
+
 #define PLAIN_TEXT_LABEL 0x01
 #define IMAGE_SEPARATOR 0x2c
 
 #define DEBUG 1
 
-# define SUB_BLOCKS_MAX_SIZE 0xff
-
 typedef struct{
     char signature[4];
     char version[4];
 } GIFHeader;
+
+typedef struct {
+    BYTE * data;
+    unsigned long size;
+} GIFDataSubBlocks;
 
 typedef struct{
     UNSIGNED logicalScreenWidth;
@@ -89,8 +94,10 @@ typedef struct{
 
     BYTE applicationAuthenticationCode[3];
 
-    BYTE * applicationData;
-    unsigned long applicationDataLength;
+/*    BYTE * applicationData;
+    unsigned long applicationDataLength;*/
+
+    GIFDataSubBlocks applicationData;
 
     BYTE blockTerminator;
 
@@ -107,6 +114,9 @@ typedef struct {
     BYTE g;
     BYTE b;
 } GIFColor;
+
+
+
 
 
 void printHelp(void);
@@ -134,8 +144,8 @@ void loadGlobalColorTable(FILE * in);
 void loadImageDescriptor(FILE * in);
 void printImageDescriptor(FILE * out);
 
-void loadGraphicControl(FILE * in);
-void printGraphicControl(FILE * out);
+GIFGraphicControl loadGraphicControl(FILE * in);
+void printGraphicControl(GIFGraphicControl graphicControl,FILE * out);
 
 void loadImageColorData(FILE * in,FILE * out);
 
@@ -147,10 +157,21 @@ void translateCode(unsigned int newCode);
 
 void newSubBlock(FILE * in);
 
-void loadApplicationExtension(FILE * in);
-void printApplicationExtension(FILE * out);
+GIFApplicationExtension loadApplicationExtension(FILE * in);
+
+void printApplicationExtension(
+    GIFApplicationExtension applicationExtension,
+    FILE * out);
+
+void readBytes(FILE * in,size_t length,BYTE * bytes);
+
+GIFDataSubBlocks readDataSubBlocks(FILE * in);
+
+void printDataSubBlocks(FILE * out,GIFDataSubBlocks subBlocks);
+void printBytes(FILE * out,size_t size,BYTE * bytes);
+
+void freeDataSubBlocks(GIFDataSubBlocks dataSubBlocks);
 
 
 #endif /* _GIF_H_ */
-
 
