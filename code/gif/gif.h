@@ -125,9 +125,10 @@ void loadGIF(char * file);
 void readImageInfo(FILE * in);
 
 void loadImageData(FILE * in,FILE * out);
+
 void loadExtension(FILE * in,FILE * out);
 
-char printString(FILE * out);
+char printString(void);
 
 void printImageInfo(FILE * out);
 void printSignature(FILE * out);
@@ -147,7 +148,8 @@ void printImageDescriptor(FILE * out);
 GIFGraphicControl loadGraphicControl(FILE * in);
 void printGraphicControl(GIFGraphicControl graphicControl,FILE * out);
 
-void loadImageColorData(FILE * in,FILE * out);
+void loadImageColorData(FILE * in);
+void printImageColorData(FILE * out);
 
 unsigned int resetCompressionTable(void);
 

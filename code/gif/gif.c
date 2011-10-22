@@ -20,6 +20,8 @@ int * localColorTable;
 /* use a flag to specify whether the current image has local color table or not,
    else use the global color table */
 
+unsigned int currentColorIndex;
+
 char stringCodeStack[40000];
 int stackp;
 
@@ -28,6 +30,7 @@ int remainingBits;
 unsigned int ClearCode;
 unsigned int EndCode;
 
+unsigned int * colorIndexTable;
 
 /* structures */
 GIFHeader header;
@@ -200,30 +203,6 @@ void printTableColor(int index,GIFColor * colorTable,FILE * out)
     fprintf(out,"%d:(%d,%d,%d)\n",index,color.r,color.g,color.b);
 }
 
-void printColor(int index,GIFColor * colorTable,FILE * out)
-{
-    static int col = 0;
-    static int row = 0;
-
-    GIFColor color;
-
-    color = colorTable[index];
-
-    if(col == 0){
-        fprintf(out,"Row %d:\n",row);
-    }
-
-    fprintf(out,"(%d,%d,%d)",color.r,color.g,color.b);
-
-    ++col;
-
-    if(col == logicalScreenDescriptor.logicalScreenWidth){
-        fprintf(out,"\n\n");
-        debugPrint("ROW: %d\n",row);
-        col = 0;
-        ++row;
-    }
-}
 
 void loadImageData(FILE * in,FILE * out)
 {
@@ -249,7 +228,13 @@ void loadImageData(FILE * in,FILE * out)
             debugPrint("Image descriptor loaded\n");
 
             /* perform the decompression of the image data. */
-            loadImageColorData(in,out);
+            /* allocate index table */
+            colorIndexTable = (unsigned int *)malloc(sizeof(unsigned int) *
+                                                     imageDescriptor.imageWidth
+                                                     * imageDescriptor.imageHeight);
+            loadImageColorData(in);
+            printImageColorData(out);
+
             break;
         }
 
@@ -392,7 +377,7 @@ void translateCode(unsigned int newCode)
     }
 }
 
-void loadImageColorData(FILE * in,FILE * out)
+void loadImageColorData(FILE * in)
 {
     int codeSize;
 
@@ -407,6 +392,7 @@ void loadImageColorData(FILE * in,FILE * out)
 
     /* for the inputCode function */
     remainingBits = 8;
+    currentColorIndex = 0;
 
     /* do this at the beginning of the program? */
     compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
@@ -424,7 +410,7 @@ void loadImageColorData(FILE * in,FILE * out)
 
     oldCode = inputCode(codeSize);
 
-    printColor(oldCode,globalColorTable,out);
+    colorIndexTable[currentColorIndex++] = oldCode;
 
     character = oldCode;
     newCode = inputCode(codeSize);
@@ -434,13 +420,6 @@ void loadImageColorData(FILE * in,FILE * out)
 
         debugPrint("blocks:%d\n",i);
 
-        /* if reached end of sub block */
-/*        if(subBlockIndex == subBlockSize){
-            i++;
-
-            newSubBlock(in);
-        }*/
-
         /*if it is not in the translation table. */
         if(!(newCode < nextCode)){
             stringCodeStack[stackp++] = character;
@@ -449,7 +428,7 @@ void loadImageColorData(FILE * in,FILE * out)
         } else
             translateCode(newCode);
 
-        character = printString(out);
+        character = printString();
 
         /* add it the table */
         if(nextCode <= (pow(2,12) - 1)){
@@ -544,7 +523,8 @@ unsigned int resetCompressionTable(void)
 }
 
 
-char printString(FILE * out)
+/* TODO: rename to outputString */
+char printString(void)
 {
     char returnValue;
 
@@ -553,7 +533,7 @@ char printString(FILE * out)
     returnValue = stringCodeStack[stackp - 1];
 
     while(stackp > 0){
-        printColor(stringCodeStack[--stackp],globalColorTable,out);
+        colorIndexTable[currentColorIndex++] = stringCodeStack[--stackp];
 
         debugPrint("Printed:%d\n",stringCodeStack[stackp]);
 
@@ -562,27 +542,6 @@ char printString(FILE * out)
     return returnValue;
 }
 
-/*void newSubBlock(FILE * in)
-{
-    BYTE i;
-    BYTE b;
-
-    debugPrint("newSubBlock\n");
-
-    subBlockSize = readByte(in);
-
-    debugPrint("subBlockSize:%d\n",subBlockSize);
-
-    b = readByte(in);
-
-    for(i = 0; i < subBlockSize; ++i){
-        debugPrint("read new byte:%d\n",b);
-        subBlockBytes[i] = b;
-        b = readByte(in);
-    }
-
-    subBlockIndex = 0;
-}*/
 
 GIFApplicationExtension loadApplicationExtension(FILE * in)
 {
@@ -676,9 +635,9 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
     currentBlocksize = readByte(in);
 
     do{
-	subBlocks.size += currentBlocksize;
+        subBlocks.size += currentBlocksize;
         fseek(in,currentBlocksize,SEEK_CUR);
-	currentBlocksize = readByte(in);
+        currentBlocksize = readByte(in);
 
     }while(currentBlocksize != 0);
 
@@ -690,9 +649,46 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
     /* read the data */
     currentBlocksize = readByte(in);
     do{
-	readBytes(in,currentBlocksize,subBlocks.data);
-	currentBlocksize = readByte(in);
+        readBytes(in,currentBlocksize,subBlocks.data);
+        currentBlocksize = readByte(in);
     }while(currentBlocksize != 0);
 
     return subBlocks;
 }
+
+/* pass the table used? */
+void printImageColorData(FILE * out)
+{
+    UNSIGNED width;
+    UNSIGNED height;
+    unsigned long size;
+    GIFColor color;
+    unsigned int i;
+    UNSIGNED col;
+    UNSIGNED row;
+
+    width = imageDescriptor.imageWidth;
+    height = imageDescriptor.imageHeight;
+    size = width * height;
+    col = 0;
+    row = 0;
+
+    for(i = 0;i < size; ++i){
+        color = globalColorTable[colorIndexTable[i]];
+
+        if(col == 0)
+            fprintf(out,"Row %d:\n",row);
+
+        fprintf(out,"(%d,%d,%d)",color.r,color.g,color.b);
+
+        ++col;
+
+        if(col == width){
+            fprintf(out,"\n\n");
+            col = 0;
+            ++row;
+        }
+    }
+
+}
+
