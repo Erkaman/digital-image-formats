@@ -172,7 +172,6 @@ void loadImageData(FILE * in,FILE * out)
                                                      imageDescriptor.imageWidth
                                                      * imageDescriptor.imageHeight);
 
-            debugPrint("size:%d\n",imageDescriptor.imageWidth * imageDescriptor.imageHeight);
             loadImageColorData(in);
 
             fprintf(out,"* Image Color Data:\n");
@@ -212,7 +211,6 @@ void loadExtension(FILE * in,FILE * out)
     case COMMENT_LABEL:
         debugPrint("COMMENT_LABEL\n");
         comment = loadCommentExtension(in);
-        debugPrint("COMMENT_LABEL\n");
 
         printCommentExtension(comment,out);
 
@@ -329,19 +327,19 @@ void loadImageColorData(FILE * in)
             compressionTable[nextCode].stringCode = oldCode;
             compressionTable[nextCode].characterCode = character;
 
-            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
+/*            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
                        nextCode,
                        oldCode,
                        oldCode,
                        character,
-                       character);
+                       character);*/
 
             if(nextCode == (pow(2,codeSize) - 1) &&
                nextCode != (pow(2,12) - 1) ){
 
 /*            if(nextCode == (pow(2,codeSize) - 1)){*/
                 ++codeSize;
-                debugPrint("New code size:%d\n",codeSize);
+/*                debugPrint("New code size:%d\n",codeSize);*/
             }
 
             nextCode++;
@@ -384,7 +382,7 @@ int printString(void)
 
     while(stackp > 0){
         colorIndexTable[currentColorIndex++] = stringCodeStack[--stackp];
-        debugPrint("outputted color:%d\n",stringCodeStack[stackp]);
+/*        debugPrint("outputted color:%d\n",stringCodeStack[stackp]); */
     }
 
     return returnValue;
@@ -421,7 +419,7 @@ unsigned int inputCode(int codeSize)
         }
     }
 
-    debugPrint("END:returnValue:%d\n",returnValue);
+/*    debugPrint("END:returnValue:%d\n",returnValue); */
     return returnValue;
 }
 
@@ -498,7 +496,7 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
     do{
         for(r = currentBlocksize; r > 0; r--){
             subBlocks.data[i++] = readByte(in);
-            debugPrint("%d:%X\n",subBlocks.data[i-1],subBlocks.data[i-1]);
+/*            debugPrint("%d:%X\n",subBlocks.data[i-1],subBlocks.data[i-1]); */
         }
 
         currentBlocksize = readByte(in);
@@ -826,7 +824,7 @@ char * subBlocksDataToString(GIFDataSubBlocks subBlocks)
     str = (char *)malloc(sizeof(char) * (subBlocks.size + 1));
 
     for(i = 0; i < subBlocks.size; ++i){
-        debugPrint("%c\n",(char)subBlocks.data[i]);
+/*        debugPrint("%c\n",(char)subBlocks.data[i]);*/
         str[i] = (char)subBlocks.data[i];
     }
 

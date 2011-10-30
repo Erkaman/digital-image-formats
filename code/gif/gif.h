@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "../common.h"
 
-#define DEBUG 0
+#define DEBUG 1
 
 /* The GIF standard refers to an unsigned 16-bit number as an
  * "unsigned" for some reason. */
