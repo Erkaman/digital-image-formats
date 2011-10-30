@@ -6,13 +6,6 @@
 #include "gif.h"
 #include <stdarg.h>
 
-/*
-  TODODODODODODODODDO
-
-  fix loading the untitled.gif image from paint. Test different sizes of pure white images from paint.
-
-*/
-
 int subBlockIndex;
 
 GIFDataSubBlocks imageDataSubBlocks;
@@ -250,9 +243,11 @@ void loadImageData(FILE * in,FILE * out)
                                                      * imageDescriptor.imageHeight);
             loadImageColorData(in);
 
-	    fprintf(out,"* Image Color Data:\n");
+            fprintf(out,"* Image Color Data:\n");
 
             printImageColorData(out);
+
+
 
             free(colorIndexTable);
             break;
@@ -428,11 +423,21 @@ void loadImageColorData(FILE * in)
 
     colorIndexTable[currentColorIndex++] = oldCode;
 
+    /* needed? */
     character = oldCode;
     newCode = inputCode(codeSize);
 
-    /* TOO: handle clear codes. */
     while(newCode != EndCode){
+
+	/* TOO: handle clear codes. */
+	if(newCode == ClearCode){
+	    nextCode = resetCompressionTable();
+
+	    oldCode = inputCode(codeSize);
+	    colorIndexTable[currentColorIndex++] = oldCode;
+
+	    newCode = inputCode(codeSize);
+	}
 
         /*if it is not in the translation table. */
         if(!(newCode < nextCode)){
@@ -466,6 +471,8 @@ void loadImageColorData(FILE * in)
         oldCode = newCode;
         newCode = inputCode(codeSize);
     }
+
+
 
     debugPrint("STOP\n\n");
 
@@ -725,3 +732,4 @@ void debugPrint(const char * format, ...)
         va_end(vl);
     }
 }
+
