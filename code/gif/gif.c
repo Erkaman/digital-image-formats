@@ -10,7 +10,7 @@
 
   fix loading the untitled.gif image from paint. Test different sizes of pure white images from paint.
 
-  */
+*/
 
 int subBlockIndex;
 
@@ -39,8 +39,10 @@ unsigned int EndCode;
 
 unsigned int * colorIndexTable;
 
+BYTE globalColorTableSize;
+
 /* structures */
-GIFLogicalScreenDescriptor logicalScreenDescriptor;
+
 GIFImageDescriptor imageDescriptor;
 
 int main(int argc, char *argv[])
@@ -67,6 +69,7 @@ void printHelp(void)
 void loadGIF(char * file)
 {
     GIFHeader header;
+    GIFLogicalScreenDescriptor logicalScreenDescriptor;
     FILE * in;
     FILE * out;
 
@@ -80,12 +83,13 @@ void loadGIF(char * file)
     /* load and print the beginning blocks of the GIF format */
 
     header = loadHeader(in);
-    loadLogicalScreenDescriptor(in);
+    logicalScreenDescriptor = loadLogicalScreenDescriptor(in);
+    globalColorTableSize = logicalScreenDescriptor.globalColorTableSize;
     if(logicalScreenDescriptor.globalColorTableFlag)
         loadGlobalColorTable(in);
 
     printHeader(header,out);
-    printLogicalScreenDescriptor(out);
+    printLogicalScreenDescriptor(logicalScreenDescriptor,out);
     if(logicalScreenDescriptor.globalColorTableFlag)
         printGlobalColorTable(out);
 
@@ -111,8 +115,9 @@ GIFHeader loadHeader(FILE * in)
     return header;
 }
 
-void loadLogicalScreenDescriptor(FILE * in)
+GIFLogicalScreenDescriptor loadLogicalScreenDescriptor(FILE * in)
 {
+    GIFLogicalScreenDescriptor logicalScreenDescriptor;
     BYTE packedFields;
 
     logicalScreenDescriptor.logicalScreenWidth = readUnsigned(in);
@@ -126,6 +131,8 @@ void loadLogicalScreenDescriptor(FILE * in)
 
     logicalScreenDescriptor.backgroundColorIndex = readByte(in);
     logicalScreenDescriptor.pixelAspectRatio = readByte(in);
+
+    return logicalScreenDescriptor;
 }
 
 void printHeader(GIFHeader header,FILE * out)
@@ -135,7 +142,10 @@ void printHeader(GIFHeader header,FILE * out)
     fprintf(out,"Version:%s\n",header.version);
 }
 
-void printLogicalScreenDescriptor(FILE * out)
+void printLogicalScreenDescriptor(
+    GIFLogicalScreenDescriptor logicalScreenDescriptor,
+    FILE * out)
+
 {
     fprintf(out,"* Logical Screen Descriptor:\n");
 
@@ -164,13 +174,11 @@ void loadGlobalColorTable(FILE * in)
     int realGlobalColorTableSize;
     int i;
 
-    realGlobalColorTableSize = pow(2,1 + logicalScreenDescriptor.globalColorTableSize);
+    realGlobalColorTableSize = pow(2,1 + globalColorTableSize);
 
     globalColorTable = (GIFColor *) malloc(sizeof(GIFColor) * realGlobalColorTableSize);
 
     for(i = 0; i <  realGlobalColorTableSize; ++i){
-
-        /* This line for some weird causes a segfault at flose(out). */
         globalColorTable[i].r = readByte(in);
         globalColorTable[i].g = readByte(in);
         globalColorTable[i].b = readByte(in);
@@ -182,9 +190,9 @@ void printGlobalColorTable(FILE * out)
     int realGlobalColorTableSize;
     int i;
 
-    fprintf(out,"** Global Color Table:\n");
+    fprintf(out,"* Global Color Table:\n");
 
-    realGlobalColorTableSize = pow(2,1 + logicalScreenDescriptor.globalColorTableSize);
+    realGlobalColorTableSize = pow(2,1 + globalColorTableSize);
 
     for(i = 0; i <  realGlobalColorTableSize; ++i)
         printTableColor(i,globalColorTable,out);
@@ -196,7 +204,6 @@ void printTableColor(int index,GIFColor * colorTable,FILE * out)
 
     fprintf(out,"%d:(%d,%d,%d)\n",index,color.r,color.g,color.b);
 }
-
 
 void loadImageData(FILE * in,FILE * out)
 {
@@ -229,7 +236,7 @@ void loadImageData(FILE * in,FILE * out)
             loadImageColorData(in);
             printImageColorData(out);
 
-	    free(colorIndexTable);
+            free(colorIndexTable);
 
             break;
         }
@@ -354,10 +361,10 @@ void translateCode(unsigned int newCode)
     entry = compressionTable[newCode];
 
 /*    debugPrint("TRANSLATECODE\n");
-    debugPrint("BEG: newCode:%d\n",newCode);
+      debugPrint("BEG: newCode:%d\n",newCode);
 
-    debugPrint("BEG: stringCode:%d\n",entry.stringCode);
-    debugPrint("BEG: characterCode:%d\n",entry.characterCode);*/
+      debugPrint("BEG: stringCode:%d\n",entry.stringCode);
+      debugPrint("BEG: characterCode:%d\n",entry.characterCode);*/
 
     while(1){
 
@@ -401,7 +408,7 @@ void loadImageColorData(FILE * in)
     imageDataSubBlocks = readDataSubBlocks(in);
 
     for(i = 0;i < imageDataSubBlocks.size; ++i){
-	debugPrint("%d\n",imageDataSubBlocks.data[i]);
+        debugPrint("%d\n",imageDataSubBlocks.data[i]);
     }
 
     /* Skip the clear code. */
@@ -418,9 +425,9 @@ void loadImageColorData(FILE * in)
     /* TOO: handle clear codes. */
     while(newCode != EndCode){
 
-/*	if(nextCode == 30){
-	    exit(0);
-	}*/
+/*      if(nextCode == 30){
+        exit(0);
+        }*/
 
         /*if it is not in the translation table. */
         if(!(newCode < nextCode)){
@@ -473,7 +480,7 @@ unsigned int inputCode(int codeSize)
 
             /* read in what's left of the byte */
             returnValue |=
-		(firstNBits(imageDataSubBlocks.data[subBlockIndex],remainingBits) << shift);
+                (firstNBits(imageDataSubBlocks.data[subBlockIndex],remainingBits) << shift);
             /* increase the shift */
             shift += remainingBits;
             codeSize -= remainingBits;
@@ -500,7 +507,7 @@ unsigned int resetCompressionTable(void)
     unsigned int colorTableSize;
     unsigned int nextCode;
 
-    colorTableSize = pow(2,(logicalScreenDescriptor.globalColorTableSize + 1));
+    colorTableSize = pow(2,globalColorTableSize + 1);
 
     for(nextCode = 0; nextCode < colorTableSize; ++nextCode){
 
@@ -628,7 +635,7 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
 
     do{
 
-	debugPrint("current size:%d\n",currentBlocksize);
+        debugPrint("current size:%d\n",currentBlocksize);
 
         subBlocks.size += currentBlocksize;
         fseek(in,currentBlocksize,SEEK_CUR);
@@ -648,10 +655,10 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
     /* read the data */
     currentBlocksize = readByte(in);
     do{
-	for(r = currentBlocksize; r > 0; r--)
-	    subBlocks.data[i++] = readByte(in);
+        for(r = currentBlocksize; r > 0; r--)
+            subBlocks.data[i++] = readByte(in);
 /*        readBytes(in,currentBlocksize,subBlocks.data);
-	subBlocks.data += currentBlocksize;*/
+          subBlocks.data += currentBlocksize;*/
         currentBlocksize = readByte(in);
     }while(currentBlocksize != 0);
 
