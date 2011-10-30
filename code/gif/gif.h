@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include "../common.h"
 
+#define DEBUG 0
+
 /* The GIF standard refers to an unsigned 16-bit number as an
  * "unsigned" for some reason. */
 #define UNSIGNED uint16_t
@@ -90,7 +92,7 @@ typedef struct{
 
     char applicationIdentifier[9];
 
-    BYTE applicationAuthenticationCode[3];
+    char applicationAuthenticationCode[4];
 
 /*    BYTE * applicationData;
     unsigned long applicationDataLength;*/
@@ -114,6 +116,7 @@ typedef struct {
 } GIFColor;
 
 void printHelp(void);
+
 void loadGIF(char * file);
 
 void loadImageData(FILE * in,FILE * out);
@@ -122,21 +125,15 @@ void loadExtension(FILE * in,FILE * out);
 
 char printString(void);
 
+GIFHeader loadHeader(FILE * in);
 void printHeader(GIFHeader header,FILE * out);
 
+GIFLogicalScreenDescriptor loadLogicalScreenDescriptor(FILE * in);
 void printLogicalScreenDescriptor(
     GIFLogicalScreenDescriptor logicalScreenDescriptor,
     FILE * out);
 
 void printGlobalColorTable(FILE * out);
-void printTableColor(int index,GIFColor * colorTable,FILE * out);
-
-void printColor(int index,GIFColor * colorTable,FILE * out);
-
-GIFHeader loadHeader(FILE * in);
-
-GIFLogicalScreenDescriptor loadLogicalScreenDescriptor(FILE * in);
-
 void loadGlobalColorTable(FILE * in);
 
 void loadImageDescriptor(FILE * in);
@@ -148,29 +145,29 @@ void printGraphicControl(GIFGraphicControl graphicControl,FILE * out);
 void loadImageColorData(FILE * in);
 void printImageColorData(FILE * out);
 
+void printTableColor(int index,GIFColor * colorTable,FILE * out);
+void printColor(int index,GIFColor * colorTable,FILE * out);
+
+GIFApplicationExtension loadApplicationExtension(FILE * in);
+void printApplicationExtension(
+    GIFApplicationExtension applicationExtension,
+    FILE * out);
+
 unsigned int resetCompressionTable(void);
 
 unsigned int inputCode(int codeSize);
 
 void translateCode(unsigned int newCode);
 
-void newSubBlock(FILE * in);
-
-GIFApplicationExtension loadApplicationExtension(FILE * in);
-
-void printApplicationExtension(
-    GIFApplicationExtension applicationExtension,
-    FILE * out);
-
-void readBytes(FILE * in,size_t length,BYTE * bytes);
-
 GIFDataSubBlocks readDataSubBlocks(FILE * in);
 
 void printDataSubBlocks(FILE * out,GIFDataSubBlocks subBlocks);
 void printBytes(FILE * out,size_t size,BYTE * bytes);
 
+void debugPrint(const char * format, ...);
+
 void freeDataSubBlocks(GIFDataSubBlocks dataSubBlocks);
 
-
+void printDisposalMethod(GIFGraphicControl graphicControl,FILE * out);
 #endif /* _GIF_H_ */
 

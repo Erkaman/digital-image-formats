@@ -4,6 +4,7 @@
 #include <math.h>
 #include "util.h"
 #include "gif.h"
+#include <stdarg.h>
 
 /*
   TODODODODODODODODDO
@@ -296,9 +297,9 @@ void loadImageDescriptor(FILE * in)
 
 void printImageDescriptor(FILE * out)
 {
-    fprintf(out,"** Image Descriptor:\n");
+    fprintf(out,"* Image Descriptor:\n");
 
-    fprintf(out,"Image Separator:%d\n",imageDescriptor.imageSeparator);
+    fprintf(out,"Image Separator:%X\n",imageDescriptor.imageSeparator);
 
     fprintf(out,"Image Left Position:%d\n",imageDescriptor.imageLeftPosition);
     fprintf(out,"Image Top Position:%d\n",imageDescriptor.imageTopPosition);
@@ -338,20 +339,46 @@ GIFGraphicControl loadGraphicControl(FILE * in)
 
 void printGraphicControl(GIFGraphicControl graphicControl,FILE * out)
 {
-    fprintf(out,"** Graphic Control\n");
+    fprintf(out,"* Graphic Control\n");
 
-    fprintf(out,"Extension Introducer: %d\n",graphicControl.extensionIntroducer);
-    fprintf(out,"Graphics Control Label: %d\n",graphicControl.graphicControlLabel);
+    fprintf(out,"Extension Introducer: %X\n",graphicControl.extensionIntroducer);
+    fprintf(out,"Graphics Control Label: %X\n",graphicControl.graphicControlLabel);
     fprintf(out,"Block Size: %d\n",graphicControl.blockSize);
 
     fprintf(out,"Reserved: %d\n",graphicControl.reserved);
-    fprintf(out,"Disposal Method: %d\n",graphicControl.disposalMethod);
+
+
+    printDisposalMethod(graphicControl,out);
+
     fprintf(out,"User Input Flag: %d\n",graphicControl.userInputFlag);
     fprintf(out,"Transparency Flag: %d\n",graphicControl.transparencyFlag);
 
     fprintf(out,"Delay Time: %d\n",graphicControl.delayTime);
     fprintf(out,"Transparency Index: %d\n",graphicControl.transparencyIndex);
     fprintf(out,"Block Terminator: %d\n",graphicControl.blockTerminator);
+}
+
+void printDisposalMethod(GIFGraphicControl graphicControl,FILE * out)
+{
+    fprintf(out,"Disposal Method: %d(",graphicControl.disposalMethod);
+    switch(graphicControl.disposalMethod){
+    case 0:
+	fprintf(out,"No disposal specified");
+	break;
+    case 1:
+	fprintf(out,"Do not dispose");
+	break;
+    case 2:
+	fprintf(out,"Restore to background color");
+	break;
+    case 3:
+	fprintf(out,"Restore to previous");
+	break;
+    default:
+	fprintf(out,"Undefined.");
+    }
+
+    fprintf(out,")\n");
 }
 
 void translateCode(unsigned int newCode)
@@ -551,7 +578,8 @@ GIFApplicationExtension loadApplicationExtension(FILE * in)
     readStr(in,8,applicationExtension.applicationIdentifier);
     applicationExtension.applicationIdentifier[8] = '\0';
 
-    readBytes(in,3,applicationExtension.applicationAuthenticationCode);
+    readStr(in,3,applicationExtension.applicationAuthenticationCode);
+    applicationExtension.applicationAuthenticationCode[3] = '\0';
 
     applicationExtension.applicationData = readDataSubBlocks(in);
 
@@ -564,17 +592,19 @@ void printApplicationExtension(
     GIFApplicationExtension applicationExtension,
     FILE * out)
 {
-    fprintf(out,"** Application Extension\n");
+    fprintf(out,"* Application Extension\n");
 
-    fprintf(out,"Extension Introducer:%d\n",applicationExtension.extensionIntroducer);
-    fprintf(out,"Extension Label:%d\n",applicationExtension.extensionLabel);
+    fprintf(out,"Extension Introducer:%X\n",applicationExtension.extensionIntroducer);
+    fprintf(out,"Extension Label:%X\n",applicationExtension.extensionLabel);
 
     fprintf(out,"Block Size:%d\n",applicationExtension.blockSize);
 
     fprintf(out,"Application Identifier:%s\n",applicationExtension.applicationIdentifier);
 
-    fprintf(out,"Application Authentication Code:\n");
-    printBytes(out,3,applicationExtension.applicationAuthenticationCode);
+    fprintf(
+	out,
+	"Application Authentication Code:%s\n",
+	applicationExtension.applicationAuthenticationCode);
 
     fprintf(out,"Application Data:\n");
 
@@ -590,11 +620,6 @@ void printApplicationExtension(
 void freeDataSubBlocks(GIFDataSubBlocks dataSubBlocks)
 {
     free(dataSubBlocks.data);
-}
-
-void readBytes(FILE * in,size_t length,BYTE * bytes)
-{
-    fread(bytes,sizeof(BYTE),length,in);
 }
 
 void printDataSubBlocks(FILE * out,GIFDataSubBlocks subBlocks)
@@ -630,11 +655,9 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
     fgetpos(in,&startPos);
 
     /* Calculate the length of the data*/
-
     currentBlocksize = readByte(in);
 
     do{
-
         debugPrint("current size:%d\n",currentBlocksize);
 
         subBlocks.size += currentBlocksize;
@@ -657,8 +680,7 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
     do{
         for(r = currentBlocksize; r > 0; r--)
             subBlocks.data[i++] = readByte(in);
-/*        readBytes(in,currentBlocksize,subBlocks.data);
-          subBlocks.data += currentBlocksize;*/
+
         currentBlocksize = readByte(in);
     }while(currentBlocksize != 0);
 
@@ -697,5 +719,16 @@ void printImageColorData(FILE * out)
             col = 0;
             ++row;
         }
+    }
+}
+
+void debugPrint(const char * format, ...)
+{
+    va_list vl;
+
+    if(DEBUG){
+        va_start(vl, format);
+        vprintf(format, vl);
+        va_end(vl);
     }
 }
