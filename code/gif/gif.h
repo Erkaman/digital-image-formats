@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "../common.h"
 
-#define DEBUG 1
+#define DEBUG 0
 
 /* The GIF standard refers to an unsigned 16-bit number as an
  * "unsigned" for some reason. */
@@ -103,6 +103,17 @@ typedef struct{
 
 } GIFApplicationExtension;
 
+typedef struct{
+    BYTE extensionIntroducer;
+    BYTE commentLabel;
+
+    /* TODO: proper memory handling of comments */
+    char commentData[255];
+
+    BYTE blockTerminator;
+
+} GIFCommentExtension;
+
 typedef struct {
     long stringCode;
     long characterCode;
@@ -133,9 +144,6 @@ void printLogicalScreenDescriptor(
     GIFLogicalScreenDescriptor logicalScreenDescriptor,
     FILE * out);
 
-/*void printGlobalColorTable(FILE * out);
-  void loadGlobalColorTable(FILE * in);*/
-
 GIFColor * loadColorTable(int colorTableSize,FILE * in);
 void printColorTable(GIFColor * colorTable,int colorTableSize,FILE * out);
 
@@ -147,6 +155,9 @@ void printGraphicControl(GIFGraphicControl graphicControl,FILE * out);
 
 void loadImageColorData(FILE * in);
 void printImageColorData(FILE * out);
+
+GIFCommentExtension loadCommentExtension(FILE * in);
+void printCommentExtension(GIFCommentExtension comment,FILE * out);
 
 void printTableColor(int index,GIFColor * colorTable,FILE * out);
 void printColor(int index,GIFColor * colorTable,FILE * out);
@@ -168,8 +179,6 @@ void printDataSubBlocks(FILE * out,GIFDataSubBlocks subBlocks);
 void printBytes(FILE * out,size_t size,BYTE * bytes);
 
 void debugPrint(const char * format, ...);
-
-void freeDataSubBlocks(GIFDataSubBlocks dataSubBlocks);
 
 void printDisposalMethod(GIFGraphicControl graphicControl,FILE * out);
 #endif /* _GIF_H_ */

@@ -18,22 +18,19 @@ GIFColor * globalColorTable;
 /* used by the graphics that specifies their own local color tables */
 GIFColor * localColorTable;
 
-/* use a flag to specify whether the current image has local color table or not,
-   else use the global color table */
-
-unsigned int currentColorIndex;
+unsigned long currentColorIndex;
 
 int stringCodeStack[40000];
 int stackp;
 
 int remainingBits;
 
-unsigned int ClearCode;
-unsigned int EndCode;
+long ClearCode;
+long EndCode;
 
 unsigned int * colorIndexTable;
 
-BYTE globalColorTableSize;
+int globalColorTableSize;
 
 /* structures */
 
@@ -76,13 +73,11 @@ void loadGIF(char * file)
 
     /* load and print the beginning blocks of the GIF format */
 
-
     header = loadHeader(in);
     logicalScreenDescriptor = loadLogicalScreenDescriptor(in);
     globalColorTableSize = logicalScreenDescriptor.globalColorTableSize;
     if(logicalScreenDescriptor.globalColorTableFlag)
         globalColorTable = loadColorTable(globalColorTableSize,in);
-
 
     printHeader(header,out);
     printLogicalScreenDescriptor(logicalScreenDescriptor,out);
@@ -92,80 +87,17 @@ void loadGIF(char * file)
         printColorTable(globalColorTable,globalColorTableSize,out);
     }
 
-
     /* load and print the image data of a GIF image. */
     loadImageData(in,out);
+
+    if(logicalScreenDescriptor.globalColorTableFlag){
+        free(globalColorTable);
+    }
 
     fclose(in);
     fclose(out);
     free(file);
-}
-
-GIFHeader loadHeader(FILE * in)
-{
-    GIFHeader header;
-
-    readStr(in,3,header.signature);
-    header.signature[3] = '\0';
-
-    readStr(in,3,header.version);
-    header.version[3] = '\0';
-
-    return header;
-}
-
-GIFLogicalScreenDescriptor loadLogicalScreenDescriptor(FILE * in)
-{
-    GIFLogicalScreenDescriptor logicalScreenDescriptor;
-    BYTE packedFields;
-
-    logicalScreenDescriptor.logicalScreenWidth = readUnsigned(in);
-    logicalScreenDescriptor.logicalScreenHeight = readUnsigned(in);
-
-    packedFields = readByte(in);
-    logicalScreenDescriptor.globalColorTableFlag = (packedFields & (1 << 7)) >> 7;
-    logicalScreenDescriptor.colorResolution = (packedFields & (7 << 4)) >> 4;
-    logicalScreenDescriptor.sortFlag = (packedFields & (1 << 3)) >> 3;
-    logicalScreenDescriptor.globalColorTableSize = (packedFields & 7);
-
-    logicalScreenDescriptor.backgroundColorIndex = readByte(in);
-    logicalScreenDescriptor.pixelAspectRatio = readByte(in);
-
-    return logicalScreenDescriptor;
-}
-
-void printHeader(GIFHeader header,FILE * out)
-{
-    fprintf(out,"* Header:\n");
-    fprintf(out,"Signature:%s\n",header.signature);
-    fprintf(out,"Version:%s\n",header.version);
-}
-
-void printLogicalScreenDescriptor(
-    GIFLogicalScreenDescriptor logicalScreenDescriptor,
-    FILE * out)
-
-{
-    fprintf(out,"* Logical Screen Descriptor:\n");
-
-    fprintf(out,"Logical Screen Width:%d\n",
-            logicalScreenDescriptor.logicalScreenWidth);
-    fprintf(out,"Logical Screen Height:%d\n",
-            logicalScreenDescriptor.logicalScreenHeight);
-
-    fprintf(out,"Global Color Table Flag:%d\n",
-            logicalScreenDescriptor.globalColorTableFlag);
-    fprintf(out,"Color Resolution:%d\n",
-            logicalScreenDescriptor.colorResolution);
-    fprintf(out,"Sort Flag:%d\n",
-            logicalScreenDescriptor.sortFlag);
-    fprintf(out,"Global Color Table Size:%d\n",
-            logicalScreenDescriptor.globalColorTableSize);
-
-    fprintf(out,"Background Color Index:%d\n",
-            logicalScreenDescriptor.backgroundColorIndex);
-    fprintf(out,"Pixel Aspect Ratio:%d\n",
-            logicalScreenDescriptor.pixelAspectRatio);
+    file = NULL;
 }
 
 GIFColor * loadColorTable(int colorTableSize,FILE * in)
@@ -222,7 +154,6 @@ void loadImageData(FILE * in,FILE * out)
         case IMAGE_SEPARATOR:
             debugPrint("IMAGE_SEPARATOR\n");
 
-            /* if local color table size > 0 load local color table */
             loadImageDescriptor(in);
             printImageDescriptor(out);
 
@@ -235,19 +166,24 @@ void loadImageData(FILE * in,FILE * out)
                 printColorTable(localColorTable,imageDescriptor.localColorTableSize,out);
             }
 
-
             /* perform the decompression of the image data. */
             /* allocate index table */
             colorIndexTable = (unsigned int *)malloc(sizeof(unsigned int) *
                                                      imageDescriptor.imageWidth
                                                      * imageDescriptor.imageHeight);
+
+            debugPrint("size:%d\n",imageDescriptor.imageWidth * imageDescriptor.imageHeight);
             loadImageColorData(in);
 
             fprintf(out,"* Image Color Data:\n");
 
             printImageColorData(out);
 
+            if(imageDescriptor.localColorTableFlag)
+                free(localColorTable);
 
+            localColorTable = NULL;
+            colorIndexTable = NULL;
 
             free(colorIndexTable);
             break;
@@ -263,6 +199,7 @@ void loadExtension(FILE * in,FILE * out)
     BYTE extensionLabel;
     GIFApplicationExtension applicationExtension;
     GIFGraphicControl graphicControl;
+    GIFCommentExtension comment;
 
     extensionLabel = readByte(in);
 
@@ -274,6 +211,10 @@ void loadExtension(FILE * in,FILE * out)
         break;
     case COMMENT_LABEL:
         debugPrint("COMMENT_LABEL\n");
+	comment = loadCommentExtension(in);
+        debugPrint("COMMENT_LABEL\n");
+
+	printCommentExtension(comment,out);
         break;
     case APPLICATION_EXTENSION_LABEL:
         debugPrint("APPLICATION_EXTENSION_LABEL\n");
@@ -285,6 +226,417 @@ void loadExtension(FILE * in,FILE * out)
         break;
     }
 }
+
+void loadImageColorData(FILE * in)
+{
+    long codeSize;
+    long oldCode;
+    long newCode;
+    long character;
+    long nextCode;
+
+    stackp = 0;
+
+    /* for the inputCode function */
+
+    remainingBits = 8;
+    currentColorIndex = 0;
+    subBlockIndex = 0;
+
+    /* do this at the beginning of the program? */
+    compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
+
+    codeSize = readByte(in) + 1;
+
+    imageDataSubBlocks = readDataSubBlocks(in);
+
+    /* Skip the clear code. */
+    inputCode(codeSize);
+    nextCode = resetCompressionTable();
+
+    /*
+
+      oldCode = inputCode(codeSize);
+
+      newCode = inputCode(codeSize);
+
+      while(newCode != EndCode){
+
+      if(nextCode <= (pow(2,12) - 1)){
+
+      debugPrint(
+      "Added new dictionary entry:%d\n",
+      nextCode);
+
+      if(nextCode == (pow(2,codeSize) - 1) &&
+      nextCode != (pow(2,12) - 1) ){
+      ++codeSize;
+      debugPrint("New code size:%d\n",codeSize);
+      }
+
+      nextCode++;
+      }
+      oldCode = newCode;
+      newCode = inputCode(codeSize);
+      }
+
+      exit(0);
+
+    */
+
+
+    oldCode = inputCode(codeSize);
+
+    colorIndexTable[currentColorIndex++] = oldCode;
+
+    /* needed? */
+    character = oldCode;
+    newCode = inputCode(codeSize);
+
+    while(newCode != EndCode){
+
+        /* TOO: handle clear codes. */
+        if(newCode == ClearCode){
+            nextCode = resetCompressionTable();
+
+            oldCode = inputCode(codeSize);
+            colorIndexTable[currentColorIndex++] = oldCode;
+
+            newCode = inputCode(codeSize);
+        }
+
+        /*if it is not in the translation table. */
+        if(!(newCode < nextCode)){
+            stringCodeStack[stackp++] = character;
+            translateCode(oldCode);
+        } else
+            translateCode(newCode);
+
+        character = printString();
+
+        /* add it the table */
+        if(nextCode <= (pow(2,12) - 1)){
+
+            compressionTable[nextCode].stringCode = oldCode;
+            compressionTable[nextCode].characterCode = character;
+
+            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
+                       nextCode,
+                       oldCode,
+                       oldCode,
+                       character,
+                       character);
+
+            if(nextCode == (pow(2,codeSize) - 1) &&
+               nextCode != (pow(2,12) - 1) ){
+
+/*            if(nextCode == (pow(2,codeSize) - 1)){*/
+                ++codeSize;
+                debugPrint("New code size:%d\n",codeSize);
+            }
+
+            nextCode++;
+        }
+        oldCode = newCode;
+        newCode = inputCode(codeSize);
+    }
+
+    debugPrint("STOP\n\n");
+
+    free(imageDataSubBlocks.data);
+    imageDataSubBlocks.data = NULL;
+
+    free(compressionTable);
+    compressionTable = NULL;
+}
+
+void translateCode(unsigned int newCode)
+{
+    tableEntry entry;
+
+    entry = compressionTable[newCode];
+
+    while(1){
+        stringCodeStack[stackp++] = entry.characterCode;
+
+        if(entry.stringCode == -1)
+            break;
+        else
+            entry = compressionTable[entry.stringCode];
+    }
+}
+
+/* TODO: rename to outputString */
+int printString(void)
+{
+    int returnValue;
+
+    returnValue = stringCodeStack[stackp - 1];
+
+    while(stackp > 0){
+        colorIndexTable[currentColorIndex++] = stringCodeStack[--stackp];
+        debugPrint("outputted color:%d\n",stringCodeStack[stackp]);
+    }
+
+    return returnValue;
+}
+
+
+unsigned int inputCode(int codeSize)
+{
+    unsigned int returnValue;
+    int shift;
+
+    returnValue = 0;
+    shift = 0;
+
+    while(codeSize > 0){
+        if(remainingBits < codeSize){
+
+            /* read in what's left of the byte */
+            returnValue |=
+                (firstNBits(imageDataSubBlocks.data[subBlockIndex],remainingBits) << shift);
+            /* increase the shift */
+            shift += remainingBits;
+            codeSize -= remainingBits;
+            subBlockIndex++;
+            remainingBits = 8;
+
+        }else{
+            /* if remainingBits > codeSize */
+            returnValue |= (firstNBits(imageDataSubBlocks.data[subBlockIndex],codeSize) << shift);
+            imageDataSubBlocks.data[subBlockIndex] >>= codeSize;
+            remainingBits -= codeSize;
+            codeSize = 0;
+
+        }
+    }
+
+    debugPrint("END:returnValue:%d\n",returnValue);
+    return returnValue;
+}
+
+unsigned int resetCompressionTable(void)
+{
+    unsigned int colorTableSize;
+    unsigned int nextCode;
+
+    if(imageDescriptor.localColorTableFlag)
+        colorTableSize = pow(2,imageDescriptor.localColorTableSize + 1);
+    else
+        colorTableSize = pow(2,globalColorTableSize + 1);
+
+    for(nextCode = 0; nextCode < colorTableSize; ++nextCode){
+        compressionTable[nextCode].characterCode = nextCode;
+        compressionTable[nextCode].stringCode = -1;
+    }
+
+    ClearCode = nextCode++;
+    EndCode = nextCode++;
+    return nextCode;
+}
+
+void printDataSubBlocks(FILE * out,GIFDataSubBlocks subBlocks)
+{
+    printBytes(out,subBlocks.size,subBlocks.data);
+}
+
+void printBytes(FILE * out,size_t size,BYTE * bytes)
+{
+    size_t i;
+
+    for(i = 0; i < size; ++i)
+        if(i < (size - 1))
+            fprintf(out,"%d,",bytes[i]);
+        else
+            fprintf(out,"%d",bytes[i]);
+
+    fprintf(out,"\n");
+}
+
+/* TODO: handle sub-blocks larger than one */
+GIFDataSubBlocks readDataSubBlocks(FILE * in)
+{
+    GIFDataSubBlocks subBlocks;
+    BYTE currentBlocksize;
+    fpos_t startPos;
+    unsigned long i;
+    BYTE r;
+
+    subBlocks.size = 0;
+
+    fgetpos(in,&startPos);
+
+    /* Calculate the length of the data*/
+    currentBlocksize = readByte(in);
+
+    do{
+        subBlocks.size += currentBlocksize;
+        fseek(in,currentBlocksize,SEEK_CUR);
+        currentBlocksize = readByte(in);
+
+    }while(currentBlocksize != 0);
+
+    /* Allocate enough memory to hold all the data */
+    subBlocks.data = (BYTE *) malloc(sizeof(BYTE) * subBlocks.size);
+
+    fsetpos(in,&startPos);
+
+    i = 0;
+
+    /* read the data */
+    currentBlocksize = readByte(in);
+    do{
+        for(r = currentBlocksize; r > 0; r--){
+            subBlocks.data[i++] = readByte(in);
+            debugPrint("%d:%X\n",subBlocks.data[i-1],subBlocks.data[i-1]);
+        }
+
+        currentBlocksize = readByte(in);
+    }while(currentBlocksize != 0);
+
+    return subBlocks;
+}
+
+/* pass the table used? */
+void printImageColorData(FILE * out)
+{
+    UNSIGNED width;
+    UNSIGNED height;
+    unsigned long size;
+    GIFColor color;
+    unsigned int i;
+    UNSIGNED col;
+    UNSIGNED row;
+    GIFColor * colorTable;
+
+    if(imageDescriptor.localColorTableFlag){
+        colorTable = localColorTable;
+    } else{
+        colorTable = globalColorTable;
+    }
+
+    width = imageDescriptor.imageWidth;
+    height = imageDescriptor.imageHeight;
+    size = width * height;
+    col = 0;
+    row = 0;
+
+    for(i = 0;i < size; ++i){
+        color = colorTable[colorIndexTable[i]];
+
+        if(col == 0)
+            fprintf(out,"Row %d:\n",row);
+
+        fprintf(out,"(%d,%d,%d)",color.r,color.g,color.b);
+
+        ++col;
+
+        if(col == width){
+            fprintf(out,"\n\n");
+            col = 0;
+            ++row;
+        }
+    }
+}
+
+void debugPrint(const char * format, ...)
+{
+    va_list vl;
+
+    if(DEBUG){
+        va_start(vl, format);
+        vprintf(format, vl);
+        va_end(vl);
+    }
+}
+
+GIFApplicationExtension loadApplicationExtension(FILE * in)
+{
+    GIFApplicationExtension applicationExtension;
+
+    applicationExtension.extensionIntroducer = EXTENSION_INTRODUCER;
+    applicationExtension.extensionLabel = APPLICATION_EXTENSION_LABEL;
+
+    applicationExtension.blockSize = readByte(in);
+
+    readStr(in,8,applicationExtension.applicationIdentifier);
+    applicationExtension.applicationIdentifier[8] = '\0';
+
+    readStr(in,3,applicationExtension.applicationAuthenticationCode);
+    applicationExtension.applicationAuthenticationCode[3] = '\0';
+
+    applicationExtension.applicationData = readDataSubBlocks(in);
+
+    applicationExtension.blockTerminator = readByte(in);
+
+    return applicationExtension;
+}
+
+void printApplicationExtension(
+    GIFApplicationExtension applicationExtension,
+    FILE * out)
+{
+    fprintf(out,"* Application Extension\n");
+
+    fprintf(out,"Extension Introducer:%X\n",applicationExtension.extensionIntroducer);
+    fprintf(out,"Extension Label:%X\n",applicationExtension.extensionLabel);
+
+    fprintf(out,"Block Size:%d\n",applicationExtension.blockSize);
+
+    fprintf(out,"Application Identifier:%s\n",applicationExtension.applicationIdentifier);
+
+    fprintf(
+        out,
+        "Application Authentication Code:%s\n",
+        applicationExtension.applicationAuthenticationCode);
+
+    fprintf(out,"Application Data:\n");
+
+    printDataSubBlocks(
+        out,
+        applicationExtension.applicationData);
+
+    fprintf(out,"Block Terminator:%d\n",applicationExtension.blockTerminator);
+
+    free(applicationExtension.applicationData.data);
+    applicationExtension.applicationData.data = NULL;
+}
+
+void printHeader(GIFHeader header,FILE * out)
+{
+    fprintf(out,"* Header:\n");
+    fprintf(out,"Signature:%s\n",header.signature);
+    fprintf(out,"Version:%s\n",header.version);
+}
+
+void printLogicalScreenDescriptor(
+    GIFLogicalScreenDescriptor logicalScreenDescriptor,
+    FILE * out)
+
+{
+    fprintf(out,"* Logical Screen Descriptor:\n");
+
+    fprintf(out,"Logical Screen Width:%d\n",
+            logicalScreenDescriptor.logicalScreenWidth);
+    fprintf(out,"Logical Screen Height:%d\n",
+            logicalScreenDescriptor.logicalScreenHeight);
+
+    fprintf(out,"Global Color Table Flag:%d\n",
+            logicalScreenDescriptor.globalColorTableFlag);
+    fprintf(out,"Color Resolution:%d\n",
+            logicalScreenDescriptor.colorResolution);
+    fprintf(out,"Sort Flag:%d\n",
+            logicalScreenDescriptor.sortFlag);
+    fprintf(out,"Global Color Table Size:%d\n",
+            logicalScreenDescriptor.globalColorTableSize);
+
+    fprintf(out,"Background Color Index:%d\n",
+            logicalScreenDescriptor.backgroundColorIndex);
+    fprintf(out,"Pixel Aspect Ratio:%d\n",
+            logicalScreenDescriptor.pixelAspectRatio);
+}
+
 
 void loadImageDescriptor(FILE * in)
 {
@@ -392,344 +744,63 @@ void printDisposalMethod(GIFGraphicControl graphicControl,FILE * out)
     fprintf(out,")\n");
 }
 
-
-void loadImageColorData(FILE * in)
+GIFLogicalScreenDescriptor loadLogicalScreenDescriptor(FILE * in)
 {
-    int codeSize;
-    unsigned int oldCode;
-    unsigned int newCode;
-    int character;
-    unsigned int nextCode;
+    GIFLogicalScreenDescriptor logicalScreenDescriptor;
+    BYTE packedFields;
 
-    stackp = 0;
+    logicalScreenDescriptor.logicalScreenWidth = readUnsigned(in);
+    logicalScreenDescriptor.logicalScreenHeight = readUnsigned(in);
 
-    /* for the inputCode function */
-    remainingBits = 8;
-    currentColorIndex = 0;
-    subBlockIndex = 0;
+    packedFields = readByte(in);
+    logicalScreenDescriptor.globalColorTableFlag = (packedFields & (1 << 7)) >> 7;
+    logicalScreenDescriptor.colorResolution = (packedFields & (7 << 4)) >> 4;
+    logicalScreenDescriptor.sortFlag = (packedFields & (1 << 3)) >> 3;
+    logicalScreenDescriptor.globalColorTableSize = (packedFields & 7);
 
-    /* do this at the beginning of the program? */
-    compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
+    logicalScreenDescriptor.backgroundColorIndex = readByte(in);
+    logicalScreenDescriptor.pixelAspectRatio = readByte(in);
 
-    codeSize = readByte(in) + 1;
-
-    imageDataSubBlocks = readDataSubBlocks(in);
-
-    /* Skip the clear code. */
-    inputCode(codeSize);
-    nextCode = resetCompressionTable();
-
-    oldCode = inputCode(codeSize);
-
-    colorIndexTable[currentColorIndex++] = oldCode;
-
-    /* needed? */
-    character = oldCode;
-    newCode = inputCode(codeSize);
-
-    while(newCode != EndCode){
-
-	/* TOO: handle clear codes. */
-	if(newCode == ClearCode){
-	    nextCode = resetCompressionTable();
-
-	    oldCode = inputCode(codeSize);
-	    colorIndexTable[currentColorIndex++] = oldCode;
-
-	    newCode = inputCode(codeSize);
-	}
-
-        /*if it is not in the translation table. */
-        if(!(newCode < nextCode)){
-            stringCodeStack[stackp++] = character;
-            translateCode(oldCode);
-        } else
-            translateCode(newCode);
-
-        character = printString();
-
-        /* add it the table */
-        if(nextCode <= (pow(2,12) - 1)){
-
-            compressionTable[nextCode].stringCode = oldCode;
-            compressionTable[nextCode].characterCode = character;
-
-            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
-                       nextCode,
-                       oldCode,
-                       oldCode,
-                       character,
-                       character);
-
-            if(nextCode == (pow(2,codeSize) - 1)){
-                ++codeSize;
-                debugPrint("New code size:%d\n",codeSize);
-            }
-
-            nextCode++;
-        }
-        oldCode = newCode;
-        newCode = inputCode(codeSize);
-    }
-
-
-
-    debugPrint("STOP\n\n");
-
-    freeDataSubBlocks(imageDataSubBlocks);
-    free(compressionTable);
+    return logicalScreenDescriptor;
 }
 
-void translateCode(unsigned int newCode)
+GIFHeader loadHeader(FILE * in)
 {
-    tableEntry entry;
+    GIFHeader header;
 
-    entry = compressionTable[newCode];
+    readStr(in,3,header.signature);
+    header.signature[3] = '\0';
 
-    while(1){
-        stringCodeStack[stackp++] = entry.characterCode;
+    readStr(in,3,header.version);
+    header.version[3] = '\0';
 
-        if(entry.stringCode == -1)
-            break;
-        else
-            entry = compressionTable[entry.stringCode];
-    }
+    return header;
 }
 
-/* TODO: rename to outputString */
-int printString(void)
+GIFCommentExtension loadCommentExtension(FILE * in)
 {
-    int returnValue;
+    GIFCommentExtension comment;
+    BYTE size;
 
-    returnValue = stringCodeStack[stackp - 1];
+    comment.extensionIntroducer = EXTENSION_INTRODUCER;
+    comment.commentLabel = COMMENT_LABEL;
 
-    while(stackp > 0)
-        colorIndexTable[currentColorIndex++] = stringCodeStack[--stackp];
+    size = readByte(in);
+    readStr(in,size,comment.commentData);
+    comment.commentData[size] = '\0';
+    comment.blockTerminator = readByte(in);
 
-    return returnValue;
+    return comment;
 }
 
-
-unsigned int inputCode(int codeSize)
+void printCommentExtension(GIFCommentExtension comment,FILE * out)
 {
-    unsigned int returnValue;
-    int shift;
+    fprintf(out,"* Comment Extension\n");
 
-    returnValue = 0;
-    shift = 0;
+    fprintf(out,"Extension Introducer: %X\n",comment.extensionIntroducer);
+    fprintf(out,"Comment Label: %X\n",comment.commentLabel);
 
-    while(codeSize > 0){
-        if(remainingBits < codeSize){
+    fprintf(out,"Comment Data: %s\n",comment.commentData);
 
-            /* read in what's left of the byte */
-            returnValue |=
-                (firstNBits(imageDataSubBlocks.data[subBlockIndex],remainingBits) << shift);
-            /* increase the shift */
-            shift += remainingBits;
-            codeSize -= remainingBits;
-            subBlockIndex++;
-            remainingBits = 8;
-
-        }else{
-            /* if remainingBits > codeSize */
-            returnValue |= (firstNBits(imageDataSubBlocks.data[subBlockIndex],codeSize) << shift);
-            imageDataSubBlocks.data[subBlockIndex] >>= codeSize;
-            remainingBits -= codeSize;
-            codeSize = 0;
-
-        }
-    }
-
-    debugPrint("END:returnValue:%d\n",returnValue);
-    return returnValue;
+    fprintf(out,"Block Terminator: %d\n",comment.blockTerminator);
 }
-
-unsigned int resetCompressionTable(void)
-{
-    unsigned int colorTableSize;
-    unsigned int nextCode;
-
-    if(imageDescriptor.localColorTableFlag)
-        colorTableSize = pow(2,imageDescriptor.localColorTableSize + 1);
-    else
-        colorTableSize = pow(2,globalColorTableSize + 1);
-
-    for(nextCode = 0; nextCode < colorTableSize; ++nextCode){
-        compressionTable[nextCode].characterCode = nextCode;
-        compressionTable[nextCode].stringCode = -1;
-    }
-
-    ClearCode = nextCode++;
-    EndCode = nextCode++;
-    return nextCode;
-}
-
-GIFApplicationExtension loadApplicationExtension(FILE * in)
-{
-    GIFApplicationExtension applicationExtension;
-
-    applicationExtension.extensionIntroducer = EXTENSION_INTRODUCER;
-    applicationExtension.extensionLabel = APPLICATION_EXTENSION_LABEL;
-
-    applicationExtension.blockSize = readByte(in);
-
-    readStr(in,8,applicationExtension.applicationIdentifier);
-    applicationExtension.applicationIdentifier[8] = '\0';
-
-    readStr(in,3,applicationExtension.applicationAuthenticationCode);
-    applicationExtension.applicationAuthenticationCode[3] = '\0';
-
-    applicationExtension.applicationData = readDataSubBlocks(in);
-
-    applicationExtension.blockTerminator = readByte(in);
-
-    return applicationExtension;
-}
-
-void printApplicationExtension(
-    GIFApplicationExtension applicationExtension,
-    FILE * out)
-{
-    fprintf(out,"* Application Extension\n");
-
-    fprintf(out,"Extension Introducer:%X\n",applicationExtension.extensionIntroducer);
-    fprintf(out,"Extension Label:%X\n",applicationExtension.extensionLabel);
-
-    fprintf(out,"Block Size:%d\n",applicationExtension.blockSize);
-
-    fprintf(out,"Application Identifier:%s\n",applicationExtension.applicationIdentifier);
-
-    fprintf(
-        out,
-        "Application Authentication Code:%s\n",
-        applicationExtension.applicationAuthenticationCode);
-
-    fprintf(out,"Application Data:\n");
-
-    printDataSubBlocks(
-        out,
-        applicationExtension.applicationData);
-
-    fprintf(out,"Block Terminator:%d\n",applicationExtension.blockTerminator);
-
-    freeDataSubBlocks(applicationExtension.applicationData);
-}
-
-void freeDataSubBlocks(GIFDataSubBlocks dataSubBlocks)
-{
-    free(dataSubBlocks.data);
-}
-
-void printDataSubBlocks(FILE * out,GIFDataSubBlocks subBlocks)
-{
-    printBytes(out,subBlocks.size,subBlocks.data);
-}
-
-void printBytes(FILE * out,size_t size,BYTE * bytes)
-{
-    size_t i;
-
-    for(i = 0; i < size; ++i)
-        if(i < (size - 1))
-            fprintf(out,"%d,",bytes[i]);
-        else
-            fprintf(out,"%d",bytes[i]);
-
-    fprintf(out,"\n");
-}
-
-/* TODO: handle sub-blocks larger than one */
-GIFDataSubBlocks readDataSubBlocks(FILE * in)
-{
-    GIFDataSubBlocks subBlocks;
-    BYTE currentBlocksize;
-    fpos_t startPos;
-    unsigned long i;
-    BYTE r;
-
-    subBlocks.size = 0;
-
-    fgetpos(in,&startPos);
-
-    /* Calculate the length of the data*/
-    currentBlocksize = readByte(in);
-
-    do{
-        subBlocks.size += currentBlocksize;
-        fseek(in,currentBlocksize,SEEK_CUR);
-        currentBlocksize = readByte(in);
-
-    }while(currentBlocksize != 0);
-
-    /* Allocate enough memory to hold all the data */
-    subBlocks.data = (BYTE *) malloc(sizeof(BYTE) * subBlocks.size);
-
-    fsetpos(in,&startPos);
-
-    i = 0;
-
-    /* read the data */
-    currentBlocksize = readByte(in);
-    do{
-        for(r = currentBlocksize; r > 0; r--)
-            subBlocks.data[i++] = readByte(in);
-
-        currentBlocksize = readByte(in);
-    }while(currentBlocksize != 0);
-
-    return subBlocks;
-}
-
-/* pass the table used? */
-void printImageColorData(FILE * out)
-{
-    UNSIGNED width;
-    UNSIGNED height;
-    unsigned long size;
-    GIFColor color;
-    unsigned int i;
-    UNSIGNED col;
-    UNSIGNED row;
-    GIFColor * colorTable;
-
-    if(imageDescriptor.localColorTableFlag){
-        colorTable = localColorTable;
-    } else{
-        colorTable = globalColorTable;
-    }
-
-    width = imageDescriptor.imageWidth;
-    height = imageDescriptor.imageHeight;
-    size = width * height;
-    col = 0;
-    row = 0;
-
-    for(i = 0;i < size; ++i){
-        color = colorTable[colorIndexTable[i]];
-
-        if(col == 0)
-            fprintf(out,"Row %d:\n",row);
-
-        fprintf(out,"(%d,%d,%d)",color.r,color.g,color.b);
-
-        ++col;
-
-        if(col == width){
-            fprintf(out,"\n\n");
-            col = 0;
-            ++row;
-        }
-    }
-}
-
-void debugPrint(const char * format, ...)
-{
-    va_list vl;
-
-    if(DEBUG){
-        va_start(vl, format);
-        vprintf(format, vl);
-        va_end(vl);
-    }
-}
-
