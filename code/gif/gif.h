@@ -16,6 +16,7 @@
 #define COLOR_DEPTH 24
 #define TRAILER 0x3b
 #define EXTENSION_INTRODUCER 0x21
+#define BLOCK_TERMINATOR 0x00
 
 #define GRAPHIC_CONTROL_LABEL 0xf9
 #define COMMENT_LABEL 0xfe
@@ -108,7 +109,7 @@ typedef struct{
     BYTE commentLabel;
 
     /* TODO: proper memory handling of comments */
-    char commentData[255];
+    char * commentData;
 
     BYTE blockTerminator;
 
@@ -181,5 +182,7 @@ void printBytes(FILE * out,size_t size,BYTE * bytes);
 void debugPrint(const char * format, ...);
 
 void printDisposalMethod(GIFGraphicControl graphicControl,FILE * out);
+
+char * subBlocksDataToString(GIFDataSubBlocks subBlocks);
 #endif /* _GIF_H_ */
 

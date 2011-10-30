@@ -211,10 +211,11 @@ void loadExtension(FILE * in,FILE * out)
         break;
     case COMMENT_LABEL:
         debugPrint("COMMENT_LABEL\n");
-	comment = loadCommentExtension(in);
+        comment = loadCommentExtension(in);
         debugPrint("COMMENT_LABEL\n");
 
-	printCommentExtension(comment,out);
+        printCommentExtension(comment,out);
+
         break;
     case APPLICATION_EXTENSION_LABEL:
         debugPrint("APPLICATION_EXTENSION_LABEL\n");
@@ -234,6 +235,7 @@ void loadImageColorData(FILE * in)
     long newCode;
     long character;
     long nextCode;
+    int InitialCodeSize;
 
     stackp = 0;
 
@@ -246,7 +248,8 @@ void loadImageColorData(FILE * in)
     /* do this at the beginning of the program? */
     compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
 
-    codeSize = readByte(in) + 1;
+    InitialCodeSize = readByte(in) + 1;
+    codeSize = InitialCodeSize;
 
     imageDataSubBlocks = readDataSubBlocks(in);
 
@@ -293,12 +296,18 @@ void loadImageColorData(FILE * in)
     character = oldCode;
     newCode = inputCode(codeSize);
 
+
     while(newCode != EndCode){
 
         /* TOO: handle clear codes. */
         if(newCode == ClearCode){
-            nextCode = resetCompressionTable();
 
+            free(compressionTable);
+            compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
+            debugPrint("Clear Code\n");
+
+            nextCode = resetCompressionTable();
+            codeSize = InitialCodeSize;
             oldCode = inputCode(codeSize);
             colorIndexTable[currentColorIndex++] = oldCode;
 
@@ -780,15 +789,17 @@ GIFHeader loadHeader(FILE * in)
 GIFCommentExtension loadCommentExtension(FILE * in)
 {
     GIFCommentExtension comment;
-    BYTE size;
+    GIFDataSubBlocks commentData;
 
     comment.extensionIntroducer = EXTENSION_INTRODUCER;
     comment.commentLabel = COMMENT_LABEL;
 
-    size = readByte(in);
-    readStr(in,size,comment.commentData);
-    comment.commentData[size] = '\0';
-    comment.blockTerminator = readByte(in);
+    commentData = readDataSubBlocks(in);
+    comment.commentData = subBlocksDataToString(commentData);
+
+    free(commentData.data);
+
+    comment.blockTerminator = BLOCK_TERMINATOR;
 
     return comment;
 }
@@ -803,4 +814,22 @@ void printCommentExtension(GIFCommentExtension comment,FILE * out)
     fprintf(out,"Comment Data: %s\n",comment.commentData);
 
     fprintf(out,"Block Terminator: %d\n",comment.blockTerminator);
+
+    free(comment.commentData);
+}
+
+char * subBlocksDataToString(GIFDataSubBlocks subBlocks)
+{
+    char * str;
+    unsigned int i;
+
+    str = (char *)malloc(sizeof(char) * (subBlocks.size + 1));
+
+    for(i = 0; i < subBlocks.size; ++i){
+        debugPrint("%c\n",(char)subBlocks.data[i]);
+        str[i] = (char)subBlocks.data[i];
+    }
+
+    str[i] = '\0';
+    return str;
 }
