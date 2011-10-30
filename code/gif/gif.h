@@ -104,8 +104,8 @@ typedef struct{
 } GIFApplicationExtension;
 
 typedef struct {
-    unsigned int stringCode;
-    unsigned int characterCode;
+    long stringCode;
+    long characterCode;
 
 } tableEntry;
 
@@ -123,7 +123,7 @@ void loadImageData(FILE * in,FILE * out);
 
 void loadExtension(FILE * in,FILE * out);
 
-char printString(void);
+int printString(void);
 
 GIFHeader loadHeader(FILE * in);
 void printHeader(GIFHeader header,FILE * out);
@@ -133,8 +133,11 @@ void printLogicalScreenDescriptor(
     GIFLogicalScreenDescriptor logicalScreenDescriptor,
     FILE * out);
 
-void printGlobalColorTable(FILE * out);
-void loadGlobalColorTable(FILE * in);
+/*void printGlobalColorTable(FILE * out);
+  void loadGlobalColorTable(FILE * in);*/
+
+GIFColor * loadColorTable(int colorTableSize,FILE * in);
+void printColorTable(GIFColor * colorTable,int colorTableSize,FILE * out);
 
 void loadImageDescriptor(FILE * in);
 void printImageDescriptor(FILE * out);
