@@ -22,7 +22,6 @@
 #define PLAIN_TEXT_LABEL 0x01
 #define IMAGE_SEPARATOR 0x2c
 
-#define DEBUG 1
 
 typedef struct{
     char signature[4];
@@ -115,14 +114,8 @@ typedef struct {
     BYTE b;
 } GIFColor;
 
-
-
-
-
 void printHelp(void);
 void loadGIF(char * file);
-
-void readImageInfo(FILE * in);
 
 void loadImageData(FILE * in,FILE * out);
 
@@ -130,15 +123,17 @@ void loadExtension(FILE * in,FILE * out);
 
 char printString(void);
 
-void printImageInfo(FILE * out);
-void printSignature(FILE * out);
+
+void printHeader(GIFHeader header,FILE * out);
+
 void printLogicalScreenDescriptor(FILE * out);
 void printGlobalColorTable(FILE * out);
 void printTableColor(int index,GIFColor * colorTable,FILE * out);
 
 void printColor(int index,GIFColor * colorTable,FILE * out);
 
-void loadHeader(FILE * in);
+GIFHeader loadHeader(FILE * in);
+
 void loadLogicalScreenDescriptor(FILE * in);
 void loadGlobalColorTable(FILE * in);
 

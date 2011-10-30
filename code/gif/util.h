@@ -3,6 +3,8 @@
 
 #include "gif.h"
 
+#define DEBUG 1
+
 unsigned int firstNBits(unsigned int num,unsigned int n);
 
 void debugPrint(const char * format, ...);
