@@ -95,9 +95,6 @@ typedef struct{
 
     char applicationAuthenticationCode[4];
 
-/*    BYTE * applicationData;
-    unsigned long applicationDataLength;*/
-
     GIFDataSubBlocks applicationData;
 
     BYTE blockTerminator;
@@ -108,12 +105,37 @@ typedef struct{
     BYTE extensionIntroducer;
     BYTE commentLabel;
 
-    /* TODO: proper memory handling of comments */
     char * commentData;
 
     BYTE blockTerminator;
 
 } GIFCommentExtension;
+
+typedef struct{
+
+    BYTE extensionIntroducer;
+    BYTE plainTextLabel;
+
+    BYTE blockSize;
+
+    UNSIGNED textGridLeftPosition;
+    UNSIGNED textGridTopPosition;
+
+    UNSIGNED textGridWidth;
+    UNSIGNED textGridHeight;
+
+    BYTE characterCellWidth;
+    BYTE characterCellHeight;
+
+    BYTE textForegroundColorIndex;
+    BYTE textBackgroundColorIndex;
+
+    char * plainTextData;
+
+    BYTE blockTerminator;
+
+} GIFPlainTextExtension;
+
 
 typedef struct {
     long stringCode;
@@ -159,6 +181,10 @@ void printImageColorData(FILE * out);
 
 GIFCommentExtension loadCommentExtension(FILE * in);
 void printCommentExtension(GIFCommentExtension comment,FILE * out);
+
+GIFPlainTextExtension loadPlainTextExtension(FILE * in);
+void printPlainTextExtension(GIFPlainTextExtension plainText,FILE * out);
+
 
 void printTableColor(int index,GIFColor * colorTable,FILE * out);
 void printColor(int index,GIFColor * colorTable,FILE * out);

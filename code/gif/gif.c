@@ -199,6 +199,7 @@ void loadExtension(FILE * in,FILE * out)
     GIFApplicationExtension applicationExtension;
     GIFGraphicControl graphicControl;
     GIFCommentExtension comment;
+    GIFPlainTextExtension plainText;
 
     extensionLabel = readByte(in);
 
@@ -222,6 +223,11 @@ void loadExtension(FILE * in,FILE * out)
         break;
     case PLAIN_TEXT_LABEL:
         debugPrint("PLAIN_TEXT_LABEL\n");
+
+        plainText = loadPlainTextExtension(in);
+
+        printPlainTextExtension(plainText,out);
+
         break;
     }
 }
@@ -809,7 +815,7 @@ void printCommentExtension(GIFCommentExtension comment,FILE * out)
     fprintf(out,"Extension Introducer: %X\n",comment.extensionIntroducer);
     fprintf(out,"Comment Label: %X\n",comment.commentLabel);
 
-    fprintf(out,"Comment Data: %s\n",comment.commentData);
+    fprintf(out,"Comment Data:\n %s\n",comment.commentData);
 
     fprintf(out,"Block Terminator: %d\n",comment.blockTerminator);
 
@@ -823,11 +829,69 @@ char * subBlocksDataToString(GIFDataSubBlocks subBlocks)
 
     str = (char *)malloc(sizeof(char) * (subBlocks.size + 1));
 
-    for(i = 0; i < subBlocks.size; ++i){
-/*        debugPrint("%c\n",(char)subBlocks.data[i]);*/
+    for(i = 0; i < subBlocks.size; ++i)
         str[i] = (char)subBlocks.data[i];
-    }
 
     str[i] = '\0';
     return str;
+}
+
+GIFPlainTextExtension loadPlainTextExtension(FILE * in)
+{
+    GIFPlainTextExtension plainText;
+    GIFDataSubBlocks plainTextData;
+
+    plainText.extensionIntroducer = EXTENSION_INTRODUCER;
+    plainText.plainTextLabel = PLAIN_TEXT_LABEL;
+
+    plainText.blockSize = readByte(in);
+
+    plainText.textGridLeftPosition = readUnsigned(in);
+    plainText.textGridTopPosition = readUnsigned(in);
+
+    plainText.textGridWidth = readUnsigned(in);
+    plainText.textGridHeight = readUnsigned(in);
+
+    plainText.characterCellWidth = readByte(in);
+    plainText.characterCellHeight = readByte(in);
+
+    plainText.textForegroundColorIndex = readByte(in);
+    plainText.textBackgroundColorIndex = readByte(in);
+
+    plainTextData = readDataSubBlocks(in);
+    plainText.plainTextData = subBlocksDataToString(plainTextData);
+
+    free(plainTextData.data);
+
+    plainText.blockTerminator = BLOCK_TERMINATOR;
+
+    return plainText;
+}
+
+void printPlainTextExtension(GIFPlainTextExtension plainText,FILE * out)
+{
+    fprintf(out,"* Plain Text Extension\n");
+
+    fprintf(out,"Extension Introducer: %X\n",plainText.extensionIntroducer);
+    fprintf(out,"Plain Text Label: %X\n",plainText.plainTextLabel);
+
+    fprintf(out,"Block size: %d\n",plainText.blockSize);
+
+    fprintf(out,"Text Grid Left Position: %d\n",plainText.textGridLeftPosition);
+    fprintf(out,"Text Grid Top Position: %d\n",plainText.textGridTopPosition);
+
+    fprintf(out,"Text Grid Width: %d\n",plainText.textGridWidth);
+    fprintf(out,"Text Grid Height: %d\n",plainText.textGridHeight);
+
+    fprintf(out,"Character Cell Width: %d\n",plainText.characterCellWidth);
+    fprintf(out,"Character Cell Height: %d\n",plainText.characterCellHeight);
+
+    fprintf(out,"Text Foreground Color Index: %d\n",plainText.textForegroundColorIndex);
+    fprintf(out,"Text Background Color Index: %d\n",plainText.textBackgroundColorIndex);
+
+    fprintf(out,"Plain Text Data:\n %s\n",plainText.plainTextData);
+
+    fprintf(out,"Block Terminator: %d\n",plainText.blockTerminator);
+
+    free(plainText.plainTextData);
 }
