@@ -73,11 +73,20 @@ void loadGIF(char * file)
 
     /* load and print the beginning blocks of the GIF format */
 
+
+    debugPrint("HEADER\n");
+
     header = loadHeader(in);
+
+    debugPrint("LOGICAL SCREEN DESCRIPTOR\n");
+
     logicalScreenDescriptor = loadLogicalScreenDescriptor(in);
     globalColorTableSize = logicalScreenDescriptor.globalColorTableSize;
-    if(logicalScreenDescriptor.globalColorTableFlag)
+    if(logicalScreenDescriptor.globalColorTableFlag){
+
+	debugPrint("GLOBAL COLOR TABLE\n");
         globalColorTable = loadColorTable(globalColorTableSize,in);
+    }
 
     printHeader(header,out);
     printLogicalScreenDescriptor(logicalScreenDescriptor,out);
@@ -148,16 +157,20 @@ void loadImageData(FILE * in,FILE * out)
 
         switch(introducer){
         case EXTENSION_INTRODUCER:
-            debugPrint("EXTENSION_INTRODUCER\n");
+            debugPrint("EXTENSION INTRODUCER\n");
             loadExtension(in,out);
             break;
         case IMAGE_SEPARATOR:
-            debugPrint("IMAGE_SEPARATOR\n");
+            debugPrint("IMAGE SEPARATOR\n");
 
+
+	    debugPrint("IMAGE DESCRIPTOR\n");
             loadImageDescriptor(in);
             printImageDescriptor(out);
 
             if(imageDescriptor.localColorTableFlag){
+
+		debugPrint("LOCAL COLOR TABLE\n");
 
                 localColorTable = loadColorTable(imageDescriptor.localColorTableSize,in);
 
@@ -171,6 +184,10 @@ void loadImageData(FILE * in,FILE * out)
             colorIndexTable = (unsigned int *)malloc(sizeof(unsigned int) *
                                                      imageDescriptor.imageWidth
                                                      * imageDescriptor.imageHeight);
+
+
+
+	    debugPrint("IMAGE COLOR DATA\n");
 
             loadImageColorData(in);
 
@@ -205,24 +222,24 @@ void loadExtension(FILE * in,FILE * out)
 
     switch(extensionLabel){
     case GRAPHIC_CONTROL_LABEL:
-        debugPrint("GRAPHIC_CONTROL_LABEL\n");
+        debugPrint("GRAPHIC CONTROL LABEL\n");
         graphicControl = loadGraphicControl(in);
         printGraphicControl(graphicControl,out);
         break;
     case COMMENT_LABEL:
-        debugPrint("COMMENT_LABEL\n");
+        debugPrint("COMMENT LABEL\n");
         comment = loadCommentExtension(in);
 
         printCommentExtension(comment,out);
 
         break;
     case APPLICATION_EXTENSION_LABEL:
-        debugPrint("APPLICATION_EXTENSION_LABEL\n");
+        debugPrint("APPLICATION EXTENSION LABEL\n");
         applicationExtension = loadApplicationExtension(in);
         printApplicationExtension(applicationExtension,out);
         break;
     case PLAIN_TEXT_LABEL:
-        debugPrint("PLAIN_TEXT_LABEL\n");
+        debugPrint("PLAIN TEXT LABEL\n");
 
         plainText = loadPlainTextExtension(in);
 
@@ -353,8 +370,6 @@ void loadImageColorData(FILE * in)
         oldCode = newCode;
         newCode = inputCode(codeSize);
     }
-
-    debugPrint("STOP\n\n");
 
     free(imageDataSubBlocks.data);
     imageDataSubBlocks.data = NULL;
