@@ -9,6 +9,8 @@
 
   \section{History}
 
+  % http://netghost.narod.ru/gff/graphics/book.htm
+
   \subsection{Troublesome Patents}
 
   AS you may rememerber from the last chapter, the \lzw was
@@ -55,17 +57,131 @@
 
   \section{Introduction to the \gif format}
 
-  So, in this chapter we'll the discussing the inner workings of \gif
+  So, in this chapter we'll be discussing the inner workings of \gif
   images. Because the \gif format also supports animation, it is
   slightly more advanced than the \tga format we discussed in chapter
   \ref{cha:tga}. Understanding the general structure of the image
   format is actually the easiest part, the hardest part of the format
   is the compression algorithm that it uses, which is a small
-  variation of the \lzw algorithm. But since already discussed the \lzw
+  variation of the \lzw algorithm. But since we have already discussed the \lzw
   algorithm in chapter \ref{cha:lzw}, this will only be marginally
   difficult.
 
-  \cite{incorporated:_graph_inter_format}.
+  There are actually two version of the \gif format: version 87a and
+  89a. Version 89a is obviously the newer of these two versions and
+  was released in 1989. \gif images that are of version 87a don't
+  support all of the features of version 89a and they are nowadays
+  very rare. And since 89a is backwards compatible with 87a, we'll
+  only be focusing on version 89a \cite{gif89a,gif87a}.
+
+  The entire version 89a of the \gif format is specified in this
+  document: \cite{gif89a}.
+
+
+  \subsection{\gif  Blocks}
+
+  The \gif format is organized into blocks. There are three kinds of
+  blocks:
+
+  \begin{enumerate}
+  \item  control blocks
+  \item graphic-rendering blocks
+  \item special purpose blocks
+  \end{enumerate}
+
+  Controls blocks are used to specify how an image should be
+  displayed to and how to image data should be read.
+
+  Graphic rendering blocks are used to actually render, display, an
+  image on the screen. They tend to contain the color data of the
+  image. Controls blocks affect how graphics rendering blocks are to
+  be displayed. Control blocks always occur before graphics rendering
+  blocks and they often have a limited \textit{scope}, meaning that
+  they almost always only affect the graphics rendering block that
+  follow them. You'll understand better what this means later.
+
+  And miscellaneous things that aren't handled by the two former
+  block types are done by the special purpose blocks.
+
+  \subsection{Data types}
+
+  The data that blocks consists of is specified in two kinds number of
+  types called \textit{byte} and \textit{unsigned} respectively. They
+  are defined like this:
+
+  \begin{description}
+  \item[byte] An 8-bit unsigned integer.
+  \item[unsigned] A 16-bit unsigned integer.
+  \end{description}
+
+  \subsection{Data Sub-blocks}
+
+  Sub-blocks are used to store data in \gif images that definition is
+  sequential. Example of such data is the color data. They are really
+  just a long sequence of bytes. Let's go through the parts of a sub-block one after one:
+
+  \subsection*{Block Size(Byte)}
+
+  At the beginning of every sub-block is its size. This value is fit
+  into a byte, meaning that the maximum size of sub-block is only
+  255.
+
+  \subsection*{Block Data Values(Bytes)}
+
+  Following the block size is sequence of bytes. These bytes are the
+  value of the sub-block. The number of bytes in the sub-block is of
+  course the block size that was specified by the block size.
+
+  So the maximum size of sub-block is only $255$ bytes. And data
+  sub-blocks is just sequence of sub-blocks such as this. A sub-block
+  is read one by one in such a sequence until the block terminator is found:
+
+  \subsection*{Block Terminator}
+
+  If after reading a sub-block the next byte is 0, that means that you
+  have found the emmpty sub-block. This sub-block is also known as the
+  block-terminator. Should such a block be discovered you have reached
+  the end of the sequence.
+
+  Figure \ref{fig:gif-data-sub-blocks} demonstrates how the string
+  ``ERICA'' would be stored using data sub-blocks. As can be seen, it
+  is perfectly acceptable that the data is split over several
+  sub-blocks. But this example may seem a bit silly, because the
+  string ``ERICA'' easily be fit into a single block instead o
+  splitting it into. But this was only done for demonstrative purposes
+  and more efficent way of storing the string would be putting it all
+  into one block of length $5$.
+
+  Because the data is split up over several sub-blocks, reading it may
+  be a bit tricky. Algorithm \ref{alg:gif-sub-blocks} demonstrates one way of reading all the
+  data of a sequence of sub-blocks into one array.
+
+  \begin{algorithm}[H]
+    \caption{Reading all the data of sequence of sub-blocks into one array.}
+    \label{alg:gif-sub-blocks}
+    \begin{algorithmic}[1]
+      \Let{$blockSize$}{\VoidCall{ReadByte}}
+      \Let{$i$}{$0$}
+      \Repeat
+        \Repeatn{$blockSize$}
+            \Let{$data[i]$}{\VoidCall{ReadByte}}
+            \Inc{$i$}{$1$}
+        \EndRepeatn
+
+        \Let{$blockSize$}{\VoidCall{ReadByte}}
+
+      \Until{$blockSize == 0$}
+    \end{algorithmic}
+  \end{algorithm}
+
+  \begin{figure}
+    \centering
+    \inputtikz{gif_subblocks}
+    \caption{\gif Data Sub-Blocks}
+    \label{fig:gif-data-sub-blocks}
+  \end{figure}
+
+  \section{Header}
 
   \section{Color Data}
 
