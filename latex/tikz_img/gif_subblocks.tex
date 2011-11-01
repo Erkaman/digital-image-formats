@@ -1,0 +1,29 @@
+\begin{tikzpicture}
+  [minimum width=2cm,minimum height=3mm,
+  blocksize/.style={rectangle,draw=black,fill=black!20,thick},
+  blockdata/.style={rectangle,draw=black,fill=black!10,thick},
+  blockterminator/.style={rectangle,draw=black,fill=black!50,thick}
+  ]
+  \newcommand{\subblock}[3]{\filldraw[fill=#1] (#2,#3) rectangle +(1,0.5);}
+
+  \node at (0,0) [blocksize] {3};
+  \node at (0,-4.5mm) [blockdata] {E};
+  \node at (0,-9.0mm) [blockdata] {R};
+  \node at (0,-13.5mm) [blockdata] {I};
+  \node at (0,-18.0mm) [blocksize] {2};
+  \node at (0,-22.5mm) [blockdata] {C};
+  \node at (0,-27.0mm) [blockdata] {A};
+  \node at (0,-31.5mm) [blockterminator] {0};
+
+  \node (blocksize) at (4,0)[blocksize] {3};
+  \node (blockdata) at (4,-6mm)[blockdata] {E};
+
+  \node (blockterminator) at (4,-12mm)[blockterminator] {0};
+
+  \node [right] at (blocksize.east) {Block size};
+
+  \node [right] at (blockdata.east) {Block data value};
+
+  \node [right] at (blockterminator.east) {Block Terminator};
+
+\end{tikzpicture}
