@@ -77,8 +77,9 @@
   The entire version 89a of the \gif format is specified in this
   document: \cite{gif89a}.
 
+  \section{The building blocks of the \gif format}
 
-  \subsection{\gif  Blocks}
+  \subsection{Blocks}
 
   The \gif format is organized into blocks. There are three kinds of
   blocks:
@@ -103,8 +104,6 @@
   And miscellaneous things that aren't handled by the two former
   block types are done by the special purpose blocks.
 
-  \subsection{Data types}
-
   The data that blocks consists of is specified in two kinds number of
   types called \textit{byte} and \textit{unsigned} respectively. They
   are defined like this:
@@ -120,13 +119,13 @@
   sequential. Example of such data is the color data. They are really
   just a long sequence of bytes. Let's go through the parts of a sub-block one after one:
 
-  \subsection*{Block Size(Byte)}
+  \subsubsection*{Block Size(Byte)}
 
   At the beginning of every sub-block is its size. This value is fit
   into a byte, meaning that the maximum size of sub-block is only
   255.
 
-  \subsection*{Block Data Values(Bytes)}
+  \subsubsection*{Block Data Values(Bytes)}
 
   Following the block size is sequence of bytes. These bytes are the
   value of the sub-block. The number of bytes in the sub-block is of
@@ -136,7 +135,7 @@
   sub-blocks is just sequence of sub-blocks such as this. A sub-block
   is read one by one in such a sequence until the block terminator is found:
 
-  \subsection*{Block Terminator}
+  \subsubsection*{Block Terminator}
 
   If after reading a sub-block the next byte is 0, that means that you
   have found the emmpty sub-block. This sub-block is also known as the
@@ -181,10 +180,44 @@
     \label{fig:gif-data-sub-blocks}
   \end{figure}
 
-  \section{Header}
+  \section{Header Blocks}
 
-  \section{Color Data}
+  \subsection{Header}
 
-  \printbibliography[heading=  subbibliography]
+  \subsection{Logical Screen Descriptor}
+
+  \section{Color Tables}
+
+  \subsection{Global Color Tables}
+
+  \subsection{Local Color Tables}
+
+  \section{Image Modifiers}
+
+  \subsection{Image Descriptor}
+
+  \subsection{Graphic Control Extension}
+
+  \section{Rendering blocks}
+
+  \subsection{Table Based Image Data}
+
+  \subsection{Plain Text Extension}
+
+  \section{Ending}
+
+  \subsection{Trailer}
+
+  \section{Miscellaneous Blocks}
+
+  \subsection{Comment Extension}
+
+  \subsection{Application Extension}
+
+  \section{Wrapping it up}
+
+  % show syntax of gif file.
+
+  \printbibliography[heading=subbibliography]
 
 \end{refsection}
