@@ -7,6 +7,66 @@
 
 \begin{refsection}
 
-  \printbibliography[heading=subbibliography]
+  \section{History}
+
+  \subsection{Troublesome Patents}
+
+  AS you may rememerber from the last chapter, the \lzw was
+  inventented by Terry Welch. However, he also filed a software patent
+  for the algorithm. This patent was U.S. Patent 4,558,302
+  \cite{welch85:_u,roelofs09:_histor_portab_networ_graph_png_format}.
+
+  \newcommand{\compus}{CompuServe\xspace}
+
+  And in 1987, \compus started designing a new \textit{portable and
+    compressed} image format called \textit{Graphics Interchange
+    Format}, abbreviated \gif. To perform the compression in this new
+  format, \compus chose a small variation of the compression algorithm
+  \lzw. The next thing that \compus did, was that they released this fresh
+  image format to the general public.
+
+  But when they released it, they and the rest of the world had no idea
+  that Unisys where pursuing a patent for the \lzw compression
+  algorithm. And once Unisys had gained the patent and informed the rest
+  of the world of this, the GIF format had already been released!
+
+  But it wasn't until 1993 that Unisys actually started pursuing
+  companies that were selling software using the \lzw algorithm. And one
+  of those companies that Unisys started attacking because of this was
+  of course \compus. And at christmas day 1994 Unisys and \compus
+  finally came to an agreement: all programmers writing software that
+  creates or reads images will have to have a license from Unisys.
+
+  This of course causes an uproar in the graphics developer community
+  at the time. Some of these developers formed that would develop a new
+  \textit{free} graphics format that would replace \gif, because
+  \gif was very popular at the time
+  . This
+  new graphisc format was \png, which we will discuss in chapter
+  \ref{cha:png} \cite{roelofs09:_histor_portab_networ_graph_png_format,caie:_sad}.
+
+  \subsection{Freedom at last}
+
+  But since 2006 all \lzw related patents have expired. Software
+  developers are in other words finally free to use the \lzw algorithm
+  just as they please. And this also means that the \gif format is
+  finally free from the shackles of Unisys. So programmers are free to
+  write and develop software that deals with \gif images \cite{caie:_sad}.
+
+  \section{Introduction to the \gif format}
+
+  So, in this chapter we'll the discussing the inner workings of \gif
+  images. Because the \gif format also supports animation, it is
+  slightly more advanced than the \tga format we discussed in chapter
+  \ref{cha:tga}. Understanding the general structure of the image
+  format is actually the easiest part, the hardest part of the format
+  is the compression algorithm that it uses, which is a small
+  variation of the \lzw algorithm. But since already discussed the \lzw
+  algorithm in chapter \ref{cha:lzw}, this will only be marginally
+  difficult. 
+  
+  \section{Color Data}
+
+  \printbibliography[heading=  subbibliography]
 
 \end{refsection}
