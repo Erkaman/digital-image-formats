@@ -716,8 +716,10 @@ GIFGraphicControl loadGraphicControl(FILE * in)
 
     packedFields = readByte(in);
 
-    graphicControl.reserved = (packedFields & (7 << 5) >> 5);
-    graphicControl.disposalMethod = (packedFields & (7 << 2) >> 2);
+    debugPrint("%d:%x",packedFields,packedFields);
+
+    graphicControl.reserved = ((packedFields & (5 << 7)) >> 5);
+    graphicControl.disposalMethod = ((packedFields & (3 << 2)) >> 2);
     graphicControl.userInputFlag = ((packedFields & (1 << 1)) >> 1);
     graphicControl.transparencyFlag = (packedFields & 1);
 
