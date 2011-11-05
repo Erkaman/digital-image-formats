@@ -155,24 +155,6 @@
   be a bit tricky. Algorithm \ref{alg:gif-sub-blocks} demonstrates one way of reading all the
   data of a sequence of sub-blocks into one array.
 
-  \begin{algorithm}[H]
-    \caption{Reading all the data of sequence of sub-blocks into one array.}
-    \label{alg:gif-sub-blocks}
-    \begin{algorithmic}[1]
-      \Let{$blockSize$}{\VoidCall{ReadByte}}
-      \Let{$i$}{$0$}
-      \Repeat
-        \Repeatn{$blockSize$}
-            \Let{$data[i]$}{\VoidCall{ReadByte}}
-            \Inc{$i$}{$1$}
-        \EndRepeatn
-
-        \Let{$blockSize$}{\VoidCall{ReadByte}}
-
-      \Until{$blockSize == 0$}
-    \end{algorithmic}
-  \end{algorithm}
-
   \begin{figure}
     \centering
     \inputtikz{gif_subblocks}
@@ -180,11 +162,89 @@
     \label{fig:gif-data-sub-blocks}
   \end{figure}
 
+
+  \begin{algorithm}[H]
+    \caption{Reading all the data of sequence of sub-blocks into one array.}
+    \label{alg:gif-sub-blocks}
+    \begin{algorithmic}[1]
+      \Let{$blockSize$}{\VoidCall{ReadByte}}
+      \Let{$i$}{$0$}
+      \Repeat
+      \Repeatn{$blockSize$}
+      \Let{$data[i]$}{\VoidCall{ReadByte}}
+      \Inc{$i$}{$1$}
+      \EndRepeatn
+
+      \Let{$blockSize$}{\VoidCall{ReadByte}}
+
+      \Until{$blockSize == 0$}
+    \end{algorithmic}
+  \end{algorithm}
+
+
+  \subsection{Packet Fields}
+
+  Another kind of data storage mechanism are packed fields. In packed
+  fields the fields values are stored bits in a byte. To make things
+  easier we'll be calling the top bit, the one usually called bit 7 or
+  8, bit 1, and we'll call the lowest bit, that is usually called bit
+  1 or 0, bit 8. See also figure \ref{fig:gif-packed-fields} for a
+  more detailed byte bit-layout.
+
+  \begin{figure}
+    \centering
+    \inputtikz{gif_packed_fields}
+    \caption{The order of the bits we'll be describing in packed fields.}
+    \label{fig:gif-packed-fields}
+  \end{figure}
+
+
+  \subsection{Notation}
+
+  Now we will be describing all the possible kinds of sub-blocks that
+  can occur in a GIF file. We'll be describing them in the order they
+  usually appear. I will also be telling which blocks are required and
+  which blocks are optional.
+
   \section{Header Blocks}
 
-  \subsection{Header}
+  Coming first in the GIF file format are the header blocks.
 
-  \subsection{Logical Screen Descriptor}
+  \subsection{Header(Required)}
+
+  The header contains the mag numbers of the GIF format and is always
+  first in a proper \gif.
+
+  \subsubsection*{Signature(3 bytes)}
+
+  Identifies the file as \gif-file. It always contains the
+  value ``GIF''.
+
+  \subsubsection{Version(3 bytes)}
+
+  Contains the value of the version of the \gif-file. Remember, there
+  are two version of the \gif format: ``87a'' and ``89a'', and these
+  two are the two only possible values of this field.
+
+  \subsection{Logical Screen Descriptor(Required)}
+
+  Following the header block is always the logical screen descriptor
+  block. This block contains information about the global color
+  table(we'll discuss this block very soon) and about the image
+  measurements.
+
+  \subsubsection{Logical Screen Width(Unsigned)}
+
+  Width of the logical screen where the image will be rendered. So
+  this fields is basically the image width. However, do note that the
+  \gif format allows several images to be stored in a \gif-file to
+  allow for such things as animation. These images can measurements
+  that are smaller than, but not greater than the logical screen
+  measurements.
+
+  \subsubsection{Logical Screen Height(Unsigned)}
+
+  Gives the height of the logical where the image will be rendered.
 
   \section{Color Tables}
 
@@ -215,6 +275,14 @@
   \subsection{Application Extension}
 
   \section{Wrapping it up}
+
+  % netscape application extension
+  % http://www.etsimo.uniovi.es/gifanim/gifabout.htm#net-extension
+
+  % more gif
+  % http://netghost.narod.ru/gff/graphics/summary/gif.htm#GIF-DMYID.1
+
+  % file:///C:/Users/Eric/Downloads/WEBSSW/CH7.HTM#AnimatedGIFs
 
   % show syntax of gif file.
 
