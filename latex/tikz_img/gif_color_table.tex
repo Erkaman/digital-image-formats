@@ -1,0 +1,22 @@
+\begin{tikzpicture}
+  [minimum width=2cm,minimum height=3mm,
+  palettecolor/.style={rectangle,draw=black,thick}
+  ]
+  \newcommand{\subblock}[3]{\filldraw[fill=#1] (#2,#3) rectangle +(1,0.5);}
+
+  \node at (0,0) [palettecolor,fill=red] {255};
+  \node at (0,-4.5mm) [palettecolor,fill=green] {255};
+  \node at (0,-9.0mm) [palettecolor,fill=blue] {255};
+
+  \node at (0,-13.5mm) [palettecolor,fill=black] {\textcolor{white}{0}};
+  \node at (0,-18.0mm) [palettecolor,fill=green] {255};
+  \node at (0,-22.5mm) [palettecolor,fill=blue] {255};
+
+  \draw[yshift=-35mm] node [right,text width=6cm]
+    {
+      A global color table consisting of the two
+    colors \rgbtrip{255}{255}{255} \rgbtrip{0}{255}{255}, that is: the
+  colors white and purple.
+    };
+
+\end{tikzpicture}
