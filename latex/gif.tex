@@ -345,7 +345,7 @@
 
   \section{Color Tables}
 
-  \subsection{Global Color Tables}
+  \subsection{Global Color Table(Optional)}
 
   After the logical screen descriptor comes the global color
   table. However, if the Global Color Table flag is set to
@@ -375,7 +375,7 @@
     3 \cdot 2^{0 +1} = 3 \cdot 2^1 = 3 \cdot 2 = 6
   \end{equation*}
 
-  \subsection{Local Color Tables}
+  \subsection{Local Color Tables(Optional)}
 
   If there is a not a global color table in the \gif image, a local
   color table is instead used. the local color table is always right
@@ -383,11 +383,84 @@
   refer to it. This laid out just like the global color table. It's
   size is however given by a block we will discuses later.
 
-  \section{Image Modifiers}
+  \section{Preimage data blocks}
 
-  \subsection{Image Descriptor}
+  The preimage data blocks always occur before the color data and help
+  the decoder in loading data and tells how the image is to be
+  rendered.
+
+  \subsection{Image Descriptor(Required)}
+
+  Before the image there will \textit{always} be a Image
+  Descriptor. It contains the data you need to know to properly render
+  and process the image data.
+
+  \subsubsection{Image Separator(Byte)}
+
+  This identifies the field as an image descriptor. It always has the
+  value \hex{2C}. As you will soon see, this field is very useful for
+  when loading a \gif image.
+
+  \subsubsection{Image Left Position(Unsigned)}
+  \subsubsection{Image Top Position(Unsigned)}
+
+  The position of the image on the screen in respect to the logical
+  screen descriptor specified in the logical screen descriptor.
+
+  \subsubsection{Image Width(Unsigned)}
+  \subsubsection{Image Height(Unsigned)}
+
+  These fields allows you to specify the size of the image.
+
+  Do note that these 4 fields allow you to move around the image on
+  the logical screen pretty much freely. This turns out the be very
+  useful when making animated images. More on this later \dots
+
+  \subsubsection{Packed Fields(Byte)}
+
+  \paragraph{Bit 1 -- Local Color Table Flag}
+
+  This flag tells whether a local color table is found after this
+  block. 
+
+  An image in a \gif image can have a specific color table, local to
+  only itself. An image \textit{needs} to have a local color table if
+  no global color table is in the image. If no global table is in the
+  image \textit{every} image in the \gif must have a local color
+  table.
+
+  However, if an image do have a global color table, but the existence
+  of a global color table is indicated by this, that means that the
+  local color table will be used instead of the global color table.
+
+  \paragraph{Bit 2 -- Interlace Flag}
+
+  This flag indicates whether the image is interlaced.
+
+  \paragraph{Bit 3 -- Sort Flag}
+
+  This indicates whether the color data in the local color table is
+  sorted. This works in the exactly same as it does in global color
+  table.
+
+  \paragraph{Bit 4-5 -- Reserved}
+
+  These bits are reserved, meaning that their both values are set to
+  $1$ and that they are \textit{unused}.
+
+  \paragraph{Bit 5-8 -- Size of Local Color Table}
+
+  The size of the local color table. The actual size of the local
+  color table is calculated in the same way it is in the global color
+  table:
+
+  \begin{equation*}
+    \textrm{Local Color Table Size} = 2^{n + 1}
+  \end{equation*}
 
   \subsection{Graphic Control Extension}
+
+  
 
   \section{Rendering blocks}
 
