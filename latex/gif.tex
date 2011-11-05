@@ -198,7 +198,6 @@
     \label{fig:gif-packed-fields}
   \end{figure}
 
-
   \subsection{Notation}
 
   Now we will be describing all the possible kinds of sub-blocks that
@@ -245,6 +244,103 @@
   \subsubsection{Logical Screen Height(Unsigned)}
 
   Gives the height of the logical where the image will be rendered.
+
+  \subsubsection{Packed Fields}
+
+  This packed field contains data about the global color table. Even
+  if there's not a global color table it will still occur in the
+  logical screen descriptor.
+
+  \paragraph{Bit 1 --  Global Color Table Flag}
+
+  This flag indicates whether there is a global color table in the
+  image. The global color table always comes after the logical screen
+  descriptor, so we'll be describing that field pretty soon. This
+  field works like many other flags like a simple boolean value; if it
+  is \textbf{1} it is \textbf{true}, otherwise it must be zero and is
+  therefore \textbf{false}.
+
+  \paragraph{Bit 2-4 -- Color resolution}
+
+  Now, this field has a very misleading name. You may think this field
+  is simply used to indicate the color depth of the image, but it is
+  not. This field indicates the color resolution of the
+  \textit{original image}! You see, the \gif has a very limited range
+  of colors. It only permits for a palette of maximum length 256,
+  where every color has color depth of 24 bits. You can however also
+  vary the size of this palette, making the resulting image smaller,
+  but also resulting in a image of lower quality.
+
+  Let's we have an image some other forein format and we wan't to
+  convert it to a \gif. We first note that the color depth of this
+  example is 24. This means that the number of bits reserved to each
+  primary color is 8. So, when converting this image to a \gif the
+  value of this field will 7, which is $8-1$, because remember; the
+  maximum value of a 3-bit number is $2^3 - 1 = 7$.
+
+  In other words: the value of this field is number of bits er primary
+  in the original image minus.
+
+  But isn't this field really useful to reading the color data? Why
+  yes, you are right. The only real usage I can see to this, is to how
+  much image quality this image has compared to the original image,
+  but it is very rarely you would want to do that, and you tend to get
+  much better result by comparing the converted \gif image with the
+  original image.
+
+  \paragraph{Bit 5 -- Sort Flag}
+
+  If this flag is true, the colors in the global color table are
+  sorted in the order decreading importance. This typically means that
+  the most frequently used colors are sorted first. According to
+  \cite{gif89a} this is to, and I quote:
+
+  \begin{quote}
+    This assists a decoder, with fewer available colors, in choosing
+    the best subset of colors; the decoder may use an initial segment
+    of the table to render the graphic.
+  \end{quote}
+
+  What this basically means, is that the decoder can get a away with
+  only loading the first few colors of the color table and still get a
+  decently we'll rendered image with some few rarely used color not
+  rendered. This is done to make the loading and rendering process
+  quicker, I suspect.
+
+  But this fields is as good never used nowadays. You can perfectly
+  safely ignore of it without harming the loading process.
+
+  \paragraph{Bit 6-8 -- Color Table Size}
+
+  This field is used to calculate the size of the global color
+  table. If we let the variable $n$ signify the value of this field,
+  then the \textit{real} size of the global color table can be
+  calculated by the formula:
+
+  \begin{equation*}
+    \textrm{Global Color Table Size} = 2^{n + 1}
+  \end{equation*}
+
+  \subsubsection{Background Color Index(Byte)}
+
+  This field's value is the index if the color table that should be
+  considered fully transparent. That is: this field gives the value of
+  the color table index that transparent.
+
+  So as you can see from this field, the \gif format supports a very
+  simple form of transparency. But it doesn't support any form of the
+  alpha color channel. Either a pixel is color or it is not, there is
+  no state in between.
+
+  \subsubsection{Pixel Aspect Ratio(Byte)}
+
+  The pixel aspect is ratio is defined as
+
+  \begin{equation*}
+    \textrm{Pixel Aspect Ratio} = \frac{\text{Pixel Width}}{\text{Pixel Height}}.
+  \end{equation*}
+
+  todo: fix
 
   \section{Color Tables}
 
