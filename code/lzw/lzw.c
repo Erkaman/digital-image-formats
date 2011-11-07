@@ -57,6 +57,22 @@ int main(int argc, char *argv[])
     char * inFile;
     char extension[5];
 
+/*    codeSize = 9;
+    out = fopen("out","wb");
+
+    outputCode(4,out);
+    outputCode(3,out);
+    outputCode(0,out);
+
+    fclose(out);
+
+    in = fopen("out","rb");
+
+    printf("%d\n",inputCode(in));
+    printf("%d\n",inputCode(in));
+
+    exit(0);*/
+
     codeSize = 12;
     verbose = 0;
 
@@ -66,8 +82,9 @@ int main(int argc, char *argv[])
     } else{
 
         ++argv;
+        --argc;
 
-        while(--argc != 1){
+        while(1){
 
             if(!strcmp("--help",*argv)){
                 printHelp();
@@ -87,8 +104,11 @@ int main(int argc, char *argv[])
                     codeSize = 12;
 
                 }
+            } else if(argc == 1){
+                break;
             }
             ++argv;
+            --argc;
         }
 
         if(codeSize == 15)
@@ -141,11 +161,8 @@ int main(int argc, char *argv[])
         fclose(in);
         fclose(out);
 
-
-	free(stringTable);
+        free(stringTable);
         free(codeValues);
-
-
     }
 
     return 0;
@@ -200,6 +217,7 @@ void lzw_decompress(FILE * in,FILE * out)
     unsigned int newCode;
     char character;
 
+
     for(dictionaryIndex = 0; dictionaryIndex < 256; ++dictionaryIndex){
         stringTable[dictionaryIndex].characterCode = dictionaryIndex;
         stringTable[dictionaryIndex].stringCode = (unsigned int) -1;
@@ -221,7 +239,7 @@ void lzw_decompress(FILE * in,FILE * out)
 
         /*if it is not in the translation table. */
         if(!(newCode < dictionaryIndex)){
-	    stringCodeStack[stackp++] = character;
+            stringCodeStack[stackp++] = character;
             translateCode(oldCode);
 
         } else
@@ -248,6 +266,8 @@ void lzw_decompress(FILE * in,FILE * out)
 
         oldCode = newCode;
         newCode = inputCode(in);
+
+/*        getchar(); */
     }
 }
 
@@ -308,39 +328,136 @@ void lzw_compress(FILE * in,FILE * out)
 
 void outputCode(unsigned int code,FILE * out)
 {
-    static int output_bit_count=0;
-    static unsigned int output_bit_buffer=0L;
+/*    The number of remaining bits to be written before a whole new byte is outputted. */
+    static int remainingBits = 8;
+    static BYTE currentByte = 0;
 
-    verbosePrint("Outputted code: %d=%c\n",code,(char)(code));
+/*    the number of remaing bits in the current code. */
+    int remainingCodeSize;
 
-    output_bit_buffer |= (unsigned int) code << (32 - codeSize- output_bit_count);
-    output_bit_count += codeSize;
-    while (output_bit_count >= 8)
-    {
-        putc(output_bit_buffer >> 24,out);
-        output_bit_buffer <<= 8;
-        output_bit_count -= 8;
+    static int shift = 0;
+
+    remainingCodeSize = codeSize;
+
+    verbosePrint("code:%d\n",code);
+    verbosePrint("remainingBits:%d\n",remainingBits);
+    verbosePrint("currentByte:%d\n",currentByte);
+    verbosePrint("shift:%d\n",shift);
+    verbosePrint("StART\n");
+
+    while(remainingCodeSize > 0){
+
+        if(remainingBits <= remainingCodeSize){
+            /* write what can be written*/
+            verbosePrint("BRANCH 1\n");
+            verbosePrint("remainingBits:%d\n",remainingBits);
+            verbosePrint("currentByte:%d\n",currentByte);
+            verbosePrint("shift:%d\n",shift);
+
+            currentByte |=
+                (firstNBits(code,remainingBits) << shift);
+
+            verbosePrint("currentByte After:%d\n",currentByte);
+
+            putc(currentByte,out);
+
+            remainingCodeSize -= remainingBits;
+
+            code >>= remainingBits;
+
+	    /* reset the buffer */
+	    remainingBits = 8;
+	    currentByte = 0;
+            shift = 0;
+
+            verbosePrint("code After:%d\n",code);
+        }else{
+            /* remainingBits >= remainingCodeSize */
+
+            verbosePrint("BRANCH 2\n");
+
+            verbosePrint("Before currentByte:%d\n",currentByte);
+
+            currentByte |=
+                (firstNBits(code,remainingCodeSize) << shift);
+
+            verbosePrint("After currentByte:%d\n",currentByte);
+
+            shift += remainingCodeSize;
+            remainingBits -=  remainingCodeSize;
+
+            remainingCodeSize = 0;
+        }
+
     }
 }
 
-unsigned int inputCode(FILE *input)
+unsigned int inputCode(FILE * input)
 {
     unsigned int returnValue;
-    static int inputBitCount=0;
-    static unsigned int inputBitBuffer=0;
+    int remainingCodeSize;
+    int shift;
+
+    static int readFirstCharacter = 0;
+    static int inputValue;
+    static int remainingBits = 8;
+
+    verbosePrint("START\n");
+
+    remainingCodeSize = codeSize;
+    returnValue = 0;
+    shift = 0;
 
 
-    while (inputBitCount <= 24)
-    {
-        inputBitBuffer |=
-            (unsigned int) getc(input) << (24 - inputBitCount);
-        inputBitCount += 8;
+    if(!readFirstCharacter){
+        inputValue = (BYTE)getc(input);
+        readFirstCharacter = 1;
     }
-    returnValue = inputBitBuffer >> (32-codeSize);
-    inputBitBuffer <<= codeSize;
-    inputBitCount -= codeSize;
+
+    verbosePrint("remainingBits:%d\n",remainingBits);
+    verbosePrint("inputValue:%d\n",inputValue);
+
+    while(remainingCodeSize > 0){
+        if(remainingBits < remainingCodeSize){
+
+
+	    verbosePrint("BRANCH 1\n");
+
+            returnValue |=
+                (firstNBits(inputValue,remainingBits) << shift);
+
+	    verbosePrint("after: returnValue:%d\n",returnValue);
+            shift += remainingBits;
+
+            remainingCodeSize -= remainingBits;
+            inputValue = (BYTE)getc(input);
+
+	    verbosePrint("inputValue after read:%d\n",inputValue);
+
+            remainingBits = 8;
+
+        }else{
+
+	    verbosePrint("BRANCH 2\n");
+
+            returnValue |=
+                (firstNBits(inputValue,remainingCodeSize) << shift);
+
+	    verbosePrint("after: returnValue:%d\n",returnValue);
+
+            inputValue >>= remainingCodeSize;
+
+            remainingBits -= remainingCodeSize;
+
+            verbosePrint("BREAK\n");
+            remainingCodeSize = 0;
+
+        }
+    }
+
     verbosePrint("Inputted code: %d=%c\n",returnValue,(char)(returnValue));
-    return(returnValue);
+
+    return returnValue;
 }
 
 int findMatch(unsigned int stringCode,unsigned int charCode)
