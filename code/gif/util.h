@@ -4,7 +4,6 @@
 #include "gif.h"
 
 
-unsigned int firstNBits(unsigned int num,unsigned int n);
 
 
 UNSIGNED readUnsigned(FILE * fp);

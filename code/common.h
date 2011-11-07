@@ -14,6 +14,9 @@ void readStr(FILE * fp,size_t length,char * str);
 void assertFile(FILE * fp,char * errorStr);
 void assertFileOpened(FILE * fp);
 
+BYTE firstNBits(BYTE num,unsigned int n);
+BYTE lastNBits(BYTE num,unsigned int n);
+
 /* change the file extension of a file name.
    If it didn't have a extension to begin with it is added.
    Do remember to the free allocated for the returned string.*/
