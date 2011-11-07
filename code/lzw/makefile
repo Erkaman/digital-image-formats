@@ -1,4 +1,4 @@
-ROG = lzw
+PROG = lzw
 include ../default
 objects = lzw.o util.o ../common.o
 
