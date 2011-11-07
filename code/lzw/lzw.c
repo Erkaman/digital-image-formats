@@ -339,25 +339,13 @@ void outputCode(unsigned int code,FILE * out)
 
     remainingCodeSize = codeSize;
 
-    verbosePrint("code:%d\n",code);
-    verbosePrint("remainingBits:%d\n",remainingBits);
-    verbosePrint("currentByte:%d\n",currentByte);
-    verbosePrint("shift:%d\n",shift);
-    verbosePrint("StART\n");
-
     while(remainingCodeSize > 0){
 
         if(remainingBits <= remainingCodeSize){
             /* write what can be written*/
-            verbosePrint("BRANCH 1\n");
-            verbosePrint("remainingBits:%d\n",remainingBits);
-            verbosePrint("currentByte:%d\n",currentByte);
-            verbosePrint("shift:%d\n",shift);
 
             currentByte |=
                 (firstNBits(code,remainingBits) << shift);
-
-            verbosePrint("currentByte After:%d\n",currentByte);
 
             putc(currentByte,out);
 
@@ -370,18 +358,11 @@ void outputCode(unsigned int code,FILE * out)
 	    currentByte = 0;
             shift = 0;
 
-            verbosePrint("code After:%d\n",code);
         }else{
             /* remainingBits >= remainingCodeSize */
 
-            verbosePrint("BRANCH 2\n");
-
-            verbosePrint("Before currentByte:%d\n",currentByte);
-
             currentByte |=
                 (firstNBits(code,remainingCodeSize) << shift);
-
-            verbosePrint("After currentByte:%d\n",currentByte);
 
             shift += remainingCodeSize;
             remainingBits -=  remainingCodeSize;
@@ -408,50 +389,31 @@ unsigned int inputCode(FILE * input)
     returnValue = 0;
     shift = 0;
 
-
+    /* read the first character */
     if(!readFirstCharacter){
         inputValue = (BYTE)getc(input);
         readFirstCharacter = 1;
     }
 
-    verbosePrint("remainingBits:%d\n",remainingBits);
-    verbosePrint("inputValue:%d\n",inputValue);
-
     while(remainingCodeSize > 0){
         if(remainingBits < remainingCodeSize){
-
-
-	    verbosePrint("BRANCH 1\n");
-
             returnValue |=
                 (firstNBits(inputValue,remainingBits) << shift);
 
-	    verbosePrint("after: returnValue:%d\n",returnValue);
             shift += remainingBits;
 
             remainingCodeSize -= remainingBits;
+
+	    /* read in a new byte */
             inputValue = (BYTE)getc(input);
 
-	    verbosePrint("inputValue after read:%d\n",inputValue);
-
             remainingBits = 8;
-
         }else{
-
-	    verbosePrint("BRANCH 2\n");
-
             returnValue |=
                 (firstNBits(inputValue,remainingCodeSize) << shift);
-
-	    verbosePrint("after: returnValue:%d\n",returnValue);
-
             inputValue >>= remainingCodeSize;
-
             remainingBits -= remainingCodeSize;
-
-            verbosePrint("BREAK\n");
             remainingCodeSize = 0;
-
         }
     }
 
