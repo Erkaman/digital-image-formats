@@ -262,6 +262,7 @@ void loadImageColorData(FILE * in)
 
     /* for the inputCode function */
 
+    /* Reset these values for the current sub-image. */
     remainingBits = 8;
     currentColorIndex = 0;
     subBlockIndex = 0;
@@ -278,37 +279,6 @@ void loadImageColorData(FILE * in)
     inputCode(codeSize);
     nextCode = resetCompressionTable();
 
-    /*
-
-      oldCode = inputCode(codeSize);
-
-      newCode = inputCode(codeSize);
-
-      while(newCode != EndCode){
-
-      if(nextCode <= (pow(2,12) - 1)){
-
-      debugPrint(
-      "Added new dictionary entry:%d\n",
-      nextCode);
-
-      if(nextCode == (pow(2,codeSize) - 1) &&
-      nextCode != (pow(2,12) - 1) ){
-      ++codeSize;
-      debugPrint("New code size:%d\n",codeSize);
-      }
-
-      nextCode++;
-      }
-      oldCode = newCode;
-      newCode = inputCode(codeSize);
-      }
-
-      exit(0);
-
-    */
-
-
     oldCode = inputCode(codeSize);
 
     colorIndexTable[currentColorIndex++] = oldCode;
@@ -317,10 +287,9 @@ void loadImageColorData(FILE * in)
     character = oldCode;
     newCode = inputCode(codeSize);
 
-
     while(newCode != EndCode){
 
-        /* TOO: handle clear codes. */
+        /* handle clear codes. */
         if(newCode == ClearCode){
 
             free(compressionTable);
@@ -360,7 +329,6 @@ void loadImageColorData(FILE * in)
             if(nextCode == (pow(2,codeSize) - 1) &&
                nextCode != (pow(2,12) - 1) ){
 
-/*            if(nextCode == (pow(2,codeSize) - 1)){*/
                 ++codeSize;
 /*                debugPrint("New code size:%d\n",codeSize);*/
             }
@@ -409,7 +377,6 @@ int printString(void)
     return returnValue;
 }
 
-
 unsigned int inputCode(int codeSize)
 {
     unsigned int returnValue;
@@ -421,7 +388,10 @@ unsigned int inputCode(int codeSize)
     while(codeSize > 0){
         if(remainingBits < codeSize){
 
-            /* read in what's left of the byte */
+	    /* the data in the current byte are not enough bits of data. Reads in what's
+	     remaining and read a new byte. */
+
+            /* read in what's left of the current byte */
             returnValue |=
                 (firstNBits(imageDataSubBlocks.data[subBlockIndex],remainingBits) << shift);
             /* increase the shift */
@@ -432,11 +402,19 @@ unsigned int inputCode(int codeSize)
 
         }else{
             /* if remainingBits > codeSize */
-            returnValue |= (firstNBits(imageDataSubBlocks.data[subBlockIndex],codeSize) << shift);
+	    /* Enough bits of data can be read from the current byte.
+	       Read in enough data and bitwise shift the data to the right to
+	       get rid of the bytes read in. */
+
+            returnValue |=
+		(firstNBits(imageDataSubBlocks.data[subBlockIndex],codeSize) << shift);
+
             imageDataSubBlocks.data[subBlockIndex] >>= codeSize;
             remainingBits -= codeSize;
-            codeSize = 0;
 
+	    /* enough bits of data has been read in. This line thus causes the loop to terminate
+	       and causes the functions to return. */
+            codeSize = 0;
         }
     }
 
