@@ -1,3 +1,4 @@
+
 #include "util.h"
 #include <string.h>
 
@@ -25,12 +26,3 @@ char * strncpyBack( char * destination, const char * source, size_t num )
     return destination;
 }
 
-unsigned int lastNBits(unsigned int num,unsigned int n,unsigned int bits)
-{
-    return (num & (~0 << (bits - n))) >> (bits - n);
-}
-
-unsigned int firstNBits(unsigned int num,unsigned int n)
-{
-    return (num & ~(~0 << n));
-}
