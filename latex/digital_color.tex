@@ -78,10 +78,11 @@
 
   Take a good look at figure \ref{fig:alpha}. This figure demonstrates
   how a the color blue gets a lower and lower value of its alpha
-  channel until it turns transparent. In the leftmost part, the color
-  has its maximum possible alpha channel value, meaning that it's
-  fully visible. On the other hand, the leftmost color has its lowest
-  possible alpha value, $0$, and as a result is fully transparent.
+  channel until it turns fully transparent. In the leftmost part of
+  the image, the color fully has its maximum possible alpha channel
+  value, meaning that it's fully visible. On the other hand, the
+  leftmost color has its lowest possible alpha value, $0$, and as a
+  result is fully transparent.
 
   \begin{figure}
     \centering
@@ -94,20 +95,20 @@
   \label{sec:color-depth}
 
   But up until now, I have said nothing about how the computer
-  represents these color models. Let us start with:
+  represents these color models.
 
   \subsection{24-bit Color}
   \label{sec:24-bit-color}
 
   In the RGB color model, each color is just a combination red,green
-  and blue channels. So let us represent colors as a triple of three
+  and blue channels. So, let us represent colors as a triple of three
   numbers, like this: \rgbtrip{123}{21}{91}, which is
   \textcolor[RGB]{123,21,91}{this color}.
 
   An 8-bit number has, as you should be familiar with, only $2^8 =
   256$ possible values. If we assign an 8-bit number to each color
   channel, the total size of a single color will be 24-bits. This way
-  of representing color is called 24-bit color. Sometimes you refer to
+  of representing color is called 24-bit color. You also refer to
   24-bit colors as having a color depth\index{color depth} of
   24-bits. This is also called the pixel depth\index{pixel depth} of
   the color.
@@ -147,7 +148,7 @@
 
   But of course, not all colors can be represented using just
   24 bits. The number of \textit{all} possible colors is infinite. But you can still
-  represent an awful not colors with only 24-bits. How many? Well, every
+  represent an awful lot colors with only 24-bits. How many? Well, every
   color channel can have $256$ different values. There are $3$
   channels. Hence, there are $256^3 = 16777216$ different colors that
   can represented using only 24-bits!
@@ -201,9 +202,9 @@
   \section{Parsing Color Data}
   \label{sec:parsing-color-data}
 
-  A random 8-bit number, for example, could be written as a string of
+  The number $26$ as a 8-bit number could be written as a string of
   ones and zeroes, 00011010. From now on we will refer to such a
-  string as a bit pattern.
+  string as a bit pattern\index{bit pattern}.
 
   Color is specified by bit ranges in numbers of certain
   sizes. So how do we extract these bits? That is what are going to
@@ -223,9 +224,6 @@
   and RGBA color. There are several bit depths possible for RGB
   color but we'll only be covering some of the most common ones.
 
-  In all of these algorithms we'll be using the variable $data$ to
-  represent the color value we want to parse.
-
   \subsubsection{24-bit color}
 
   \begin{figure}
@@ -236,55 +234,25 @@
     \label{fig:24-bit-colors-bits}
   \end{figure}
 
-  Inspect figure \ref{fig:24-bit-colors-bits}. It shows how the
-  different color channel's values are stored in 24-bit RGB
-  color. Algorithm \ref{alg:read-24-bit-rgb} demonstrates how to read
-  all the separate color channels. It basically works like this:
+  The number 24-bit \textcolor{red}{1000 1011}\textcolor{green}{0101
+    0010}\textcolor{blue}{\fullbyte} represents a purplish color. The
+  separate values of the color channels of this number can trivivally
+  be pased by reading them byte for byte. Because, remember, the each
+  color channel in 24-bit number is stored in a separate
+  byte. Algorithm \ref{alg:read-24-bit-rgb} demonstrates how to read
+  all the separate color channels.
+
+  \todo{discuss endianess}
 
   \begin{algorithm}[H]
     \caption{Reading the color channels of RGB 24-bit number.}
     \label{alg:read-24-bit-rgb}
     \begin{algorithmic}[1]
-      \Let{$B$}{$data \BitAnd 255$}
-      \Let{$G$}{$(data \BitAnd (255 \ShiftLeft 8)) \ShiftRight 8$}
-      \Let{$R$}{$(data \BitAnd (255 \ShiftLeft 16)) \ShiftRight 16$}
+      \Let{$R$}{\VoidCall{ReadByte}}
+      \Let{$G$}{\VoidCall{ReadByte}}
+      \Let{$B$}{\VoidCall{ReadByte}}
     \end{algorithmic}
   \end{algorithm}
-
-  $255$'s binary pattern is binary \fullbyte. That means we can get
-  the value of the blue color channel like this:
-
-  \begin{center}
-    \begin{tabular}{*{4}{c}}
-
-      & 10001011  & 01010010  & \fullbyte  \\
-      $\BitAnd$ &    \emptybyte&  \emptybyte  & \fullbyte \\
-      \hline
-      & \emptybyte & \emptybyte & \fullbyte \\
-    \end{tabular}
-  \end{center}
-
-  For getting the value of the next color channel we'll need a new
-  value. The operations $255 \ShiftLeft 8$ results in the formerly
-  used byte pattern being shifted 8 bits forwards. This pattern we can
-  used for matching the green color channel.
-
-  \begin{center}
-    \begin{tabular}{*{4}{c}}
-
-      & 10001011  & 01010010  & \fullbyte  \\
-      $\BitAnd$ &    \emptybyte&  \fullbyte  & \emptybyte \\
-      \hline
-      & \emptybyte & 01010010 & \emptybyte \\
-    \end{tabular}
-  \end{center}
-
-  But the resulting value will have to have right shifted back 8 bits,
-  otherwise it'd be $2^8$ times big as its actual value! And
-  therefore, the operation to get the value of the green color channel
-  is $(data \BitAnd (255 \ShiftLeft 8)) \ShiftRight 8$. And in same
-  way the operation for getting the value of the red channel can be
-  derived: $(data \BitAnd (255 \ShiftLeft 16)) \ShiftRight 16$.
 
   \subsubsection{32-bit color}
 
@@ -292,9 +260,9 @@
   can either come before the RGB color values, ARGB\index{ARGB}, or
   they can occur after the RGB color values, RGBA\index{RGBA}. Figure
   \ref{fig:32-bit-colors-bits} shows both the variants. The first one
-  is ARGB och the second one RGBA. In algorithm
-  \ref{alg:read-32-bit-rgb} we show how to parse the first variant,
-  ARGB, but do keep in mind that both variants occur out in the wild.
+  is ARGB och the second one RGBA. The separate alpha channel can be
+  parsed in the same way the separate color channels are parsed in
+  algorithm \ref{alg:read-24-bit-rgb}.
 
   \begin{figure}
     \centering
@@ -310,40 +278,37 @@
       \textcolor{gray}{11110000}%
     }
 
-    \caption{The ARGB and RGBA color depths.}
+    \caption{The ARGB and RGBA variants of 24-bit color depth. The
+      gray color represents the alpha channel }
     \label{fig:32-bit-colors-bits}
   \end{figure}
 
-  \begin{algorithm}[H]
-    \caption{Reading the color channels of ARGB 32-bit number.}
-    \label{alg:read-32-bit-rgb}
-    \begin{algorithmic}[1]
-      \Let{$B$}{$data \BitAnd 255$}
-      \Let{$G$}{$(data \BitAnd (255 \ShiftLeft 8)) \ShiftRight 8$}
-      \Let{$R$}{$(data \BitAnd (255 \ShiftLeft 16)) \ShiftRight 16$}
-      \Let{$A$}{$(data \BitAnd (255 \ShiftLeft 24)) \ShiftRight 24$}
-    \end{algorithmic}
-  \end{algorithm}
-
   \subsubsection{16-bit color}
+
+  Colors can also be stored in 16 bits, but it is relatively
+  rare. There are several variants of 16-bit color storage, so we'll
+  be covering some of them here.
 
   \paragraph{TGA version}
 
-  The kind of 16-bit color available in the TGA format is shown in
-  figure \ref{fig:tga-16-bit-colors-bits}. And it can be trivially
-  parsed with algorithm \ref{alg:read-32-bit-rgb}. What is unsual here is that the values of the
-  color channel's are stored in 5-bit number, meaning that the bit
-  pattern $2^5 - 1 =$  11111 is used. The last bit a basically boolean
-  flag that specifies whether or not the color is visible.
+  The kind of 16-bit color used in the TGA format is shown in figure
+  \ref{fig:tga-16-bit-colors-bits}. It can be trivially parsed as is
+  shown in algorithm \ref{alg:read-16-bit-rgb}. What is unsual here is
+  that the values of the color channel's are stored in 5-bit number,
+  meaning that the maximum value of a color channel in this case is
+  $2^5 - 1 = 31$. However, here only one bit is reserved for the alpha
+  channel. A better name for this bit would a flag. And what this flag
+  is specify whether a color is visible or not.
 
   \begin{figure}
     \centering
     {\huge\textcolor{gray}{0}%
       \textcolor{red}{10101}\textcolor{green}{11100}\textcolor{blue}{01010}}
-
-    \label{fig:tga-16-bit-colors-bits}
     \caption{Sample 16-bit color.}
+    \label{fig:tga-16-bit-colors-bits}
   \end{figure}
+
+  \todo{discuss the bit patterns}
 
   \begin{algorithm}[H]
     \caption{Reading TGA 16-bit number.}
