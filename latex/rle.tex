@@ -2,11 +2,51 @@
   \bibliography{project.bib}
 \end{comment}
 
-
 \chapter{Run Length Encoding}
-\label{sec:rle}
+\label{cha:rle}
 
 \begin{refsection}
+
+\section{Some Terminology}
+
+In this chapter we'll discuss the first compression algorithm if this
+book. First we will need to introduce you to some terminology related
+to data compression, though, which is what the discussion subject in this
+section is going to be.
+
+\subsection{Encoding And Decoding}
+
+Coding data into another form is often referred to as
+\textbf{encoding}\index{encoding}. Converting that encoded data back
+to its original form is called
+\textbf{decoding}\index{decoding}. \todo{Need sources on these two
+  terms.} In the circumstances of compression techniques, encoding and
+decoding are also often referred to as
+\textbf{compression}\index{compression} and
+\textbf{decompression}\index{decompression}.
+
+\subsection{Compression Ratio}
+
+The compression ratio\index{compression ratio} is a very useful concept when talking about a
+compression algorithms efficiency. The compression ratio of an
+algorithm is calculated like this:
+
+\begin{equation}
+  \label{eq:compress-ratio}
+  {\rm Compression\;Ratio} = \frac{\rm Compressed\;Size}{\rm Uncompressed\;Size}
+\end{equation}
+
+So the compression ratio basically tells how much data was
+compressed. Of course, the lower compression ratio the better. But
+there are ratios to take in heed, like performance and complexity of
+the algorithm, but we will ignore these concepts in this book to book
+to keep things simple. We will for the rest of the book specify the
+compression ratio in percentages, $\%$\cite{Salomon:2004:DCC}.
+
+Although we will be dealing mostly with bytes in these algorithms, they could
+easily by generalized to compression or decompressing other integer
+types likes \texttt{long} or \texttt{short}.
+
 
 \section{Naive Version}
 \label{sec:naive-version}
@@ -213,7 +253,8 @@ figure \ref{fig:packbits-header}.
 
 \begin{figure}
   \centering
-  $\mbox{\fontsize{30}{0} $\underbrace{0}_\text{Flag bit}\overbrace{0000000}^\text{Length bits}$}$
+  (insert header here)
+%  $\mbox{\fontsize{30}{0} $\underbrace{0}_\text{Flag bit}\overbrace{0000000}^\text{Length bits}$}$
   \caption{PackBits header}
   \label{fig:packbits-header}
 \end{figure}
@@ -534,3 +575,4 @@ the directory \path|code/rle|.
 \printbibliography[heading=subbibliography]
 
 \end{refsection}
+

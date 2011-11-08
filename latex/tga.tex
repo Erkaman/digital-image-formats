@@ -17,36 +17,36 @@
   that knowledge to good use.
 
   That's right, we are finally going to explore our first \textit{real} image format:
-  \tga\index{TGA}. But why \tga of all image formats? Because the
+  TGA\index{TGA}. But why TGA of all image formats? Because the
   format is an extremely simple one at that, yet it is actually widely
   used in certain areas, like games and video processing. It has all
   the parts common to all image formats and features a very simple
   compression algorithm: PackBits RLE, which was one of the algorithms
-  we covered in chapter \ref{cha:compress-techn}.
+  we covered in chapter \ref{cha:rle}.
 
-  But the \tga format is also has its share of complexity. To make the
+  But the TGA format is also has its share of complexity. To make the
   format more easily extensible by programmers, several features were
   added in the second version of the format, which is the version we
   are going to cover. But we will only mention and not explain these
   features, as they are not really needed to load the color data
-  stored in \tga images.
+  stored in TGA images.
 
-  The source code accompanying this chapter is a \tga dumper. All this
-  program really do is load the color right out of a \tga file and
+  The source code accompanying this chapter is a TGA dumper. All this
+  program really do is load the color right out of a TGA file and
   dump it is as raw ASCII strings on the form \verb|(R,G,B)|. It will
   also dump information about the image, like color depth and image
   width.  This dumper will cover several of the features \textit{not}
   covered in this chapter, so please have a peek at the source code of
-  this program if you hunger for more information about the \tga
+  this program if you hunger for more information about the TGA
   format.
 
   And if you want to know very detailed information about the TGA
-  format, then you should most definitely read the \tga specification:
+  format, then you should most definitely read the TGA specification:
   \cite{91:_truev_tga_file_format_specif}.
 
   \section{Some Terminology}
 
-  The \tga format consists things called fields\index{field}. A field
+  The TGA format consists things called fields\index{field}. A field
   gives information about the image you're trying to open. It could
   give information like the name of the image, color depth, all the
   color data of the image and so on. It could really contain any sort
@@ -101,7 +101,7 @@
 
   \imgfield{Color Map Type\index{Color Map Type}}{1}
 
-  The \tga format supports color palettes. An alternative term for a
+  The TGA format supports color palettes. An alternative term for a
   palette is Color map\index{color map}. This field could simply be
   seen as a boolean value indicating whether or not the image has a
   color map. So if it the value of this field is $1$, the image uses a
@@ -109,14 +109,14 @@
 
   \imgfield{Image Type\index{Image Type}}{1}
 
-  The \tga format allows three different ways of storing color:
+  The TGA format allows three different ways of storing color:
   grayscale\index{grayscale}, color-mapped\index{color-mapped} and
   true-color\index{true-color}.
 
   Grayscale should be familiar to you by now. Color-mapped color
   obviously means that the color uses a color-map. But what on earth
   could true-color be? This simply means that it uses the RGB or RGBA
-  color models. The color depths supported by the \tga format are
+  color models. The color depths supported by the TGA format are
   16,24 and 32.
 
   Since the color data can also be compressed, this all amounts to $6$
@@ -147,7 +147,7 @@
   compressed.
 
   \begin{algorithm}[H]
-    \caption{Determining if a \tga image is compressed or not.}
+    \caption{Determining if a TGA image is compressed or not.}
     \label{alg:tga-compressed}
     \begin{algorithmic}[1]
       \Let{$compressed$}{$imageType = 9 \OR imageType = 10 \OR
@@ -261,7 +261,7 @@
   algorithm. I promise I won't be as condescending in the future.
 
   \begin{algorithm}
-    \caption{Loading the file header of a \tga image.}
+    \caption{Loading the file header of a TGA image.}
     \label{alg:load-file-header}
     \newcommand{\loadfield}[2]{\Let{$#1$}{\Call{Read}{$#2$}}}
     \begin{algorithmic}[1]
@@ -332,10 +332,10 @@
 
   Loading the color map is easy, as shown in algorithm
   \ref{alg:read-colormap}. The pixel depth is like all other the size
-  fields in the \tga format is measured in bits, and \textit{not bytes}.
+  fields in the TGA format is measured in bits, and \textit{not bytes}.
 
   \begin{algorithm}[H]
-    \caption{Reading the color map of a \tga file.}
+    \caption{Reading the color map of a TGA file.}
     \label{alg:read-colormap}
     \begin{algorithmic}[1]
       \State \Call{$Seek$}{$colorMapStart,CURRENT$}
@@ -348,13 +348,13 @@
 
   \imgfield{Color Data\index{Color Data}}{0}
 
-  Here we have true ``meat and blood'' of the \tga format. In this
+  Here we have true ``meat and blood'' of the TGA format. In this
   field, the color data of the image is stored. The way this data is
   stored depends on the image type. If the variable $compressed$ seems
   unfamiliar to you, please reread algorithm \ref{alg:tga-compressed}.
 
   \begin{algorithm}[H]
-    \caption{Reading the color data of a \tga file.}
+    \caption{Reading the color data of a TGA file.}
     \label{alg:TGA-read-colordata}
     \newcommand{\process}{\State Process the color $data$ \dots}
     \begin{algorithmic}[1]
@@ -432,11 +432,11 @@
   \section{Developer Area\index{Developer Area}}
 
   The extension area is really only useful to programmers. It allows
-  programmers to add information to the \tga format that is specific
+  programmers to add information to the TGA format that is specific
   to their applications. But this information is useless if you're
-  only trying to load the color data from the \tga image, hence why we
+  only trying to load the color data from the TGA image, hence why we
   are no talking in more detail about this section. If you have
-  actually found a \tga image out in the wild that uses this
+  actually found a TGA image out in the wild that uses this
   section, you can only really guess how you are supposed to use this
   data, as this is entirely dependent on the source program of the image.
 
@@ -445,19 +445,19 @@
   The extension area is a huge section containing many different
   fields that gives a lot of miscellaneous information about an
   image. As they are all essentially trivial to load, we will not be
-  covering them here, but the sample \tga dumper does indeed load this
+  covering them here, but the sample TGA dumper does indeed load this
   section and all of it's fields. See the source code to that program and
-  the \tga specification for more information on this area.
+  the TGA specification for more information on this area.
 
   \section{File Footer\index{File Footer}}
 
-  The file footer of a \tga image always occurs at the end of it. But
-  not all \tga images have a file footer, however. Images made before
-  the version 2 of the \tga format do \textit{not} have one, and
+  The file footer of a TGA image always occurs at the end of it. But
+  not all TGA images have a file footer, however. Images made before
+  the version 2 of the TGA format do \textit{not} have one, and
   neither do they have an extension area nor a developer area. Because
   all information that the file footer really includes is the
   \textit{location} of the developer and extension area. These are two
-  fields that can occur anywhere in a \tga image, except for in the
+  fields that can occur anywhere in a TGA image, except for in the
   beginning and the end of the image, that is why this location
   information is included with the file footer.
 

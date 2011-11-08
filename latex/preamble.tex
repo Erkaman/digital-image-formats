@@ -10,6 +10,9 @@
 
 \makeindex
 
+
+\usepackage[nottoc]{tocbibind}
+
 % miscellaneous packages
 \usepackage{xcolor}
 \usepackage{float}
@@ -38,6 +41,7 @@
 % references
 \usepackage[backend=biber,sorting=none]{biblatex}
 \addbibresource{project.bib}
+
 
 % tikz
 \usepackage{tikz}
@@ -74,8 +78,6 @@
 \algnewcommand\algorithmicforeach{\textbf{for each}}
 
 \newcommand{\algto}{\textbf{to}}
-
-
 
 \algblockdefx[FOREACH]
 {ForEach}
@@ -128,7 +130,6 @@
 \tocfile{List of Algorithms}{loa}
 \endgroup}
 
-\usepackage[nottoc]{tocbibind}
 
 \newcommand*{\tikzname}{Ti\emph{k}Z\xspace}
 
@@ -146,13 +147,13 @@
   \let\do\newacronym
   \docsvlist
 }
-\newacronyms{tga,png,gif,C,pgf,lzw,ascii,lz,lzma,lzss}
+\newacronyms{C,pgf}
 
 \newcommand{\eof}{\ensuremath{\VoidCall{EndOfFileReached}}}
 \newcommand{\neof}{\ensuremath{\NOT \VoidCall{EndOfFileReached}}}
 
-\newcommand{\lzseven}{{\acronymstyle lz77}\xspace}
-\newcommand{\lzeight}{{\acronymstyle lz78}\xspace}
+\newcommand{\lzseven}{lz77\xspace}
+\newcommand{\lzeight}{lz78\xspace}
 
 
 \newcommand{\rgbtrip}[3]{\mbox{(

@@ -1,4 +1,4 @@
-begin{comment}
+\begin{comment}
   \bibliography{project.bib}
 \end{comment}
 
@@ -8,7 +8,7 @@ begin{comment}
 \begin{refsection}
 
   In this chapter, we will discuss the data compression algorithm
-  \lzw\index{LZW} as it is described in
+  LZW\index{LZW} as it is described in
   \cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}. We
   will first discuss the history behind the algorithm, then
   compression algorithm\index{compression algorithm}, after this the
@@ -17,20 +17,20 @@ begin{comment}
 
 \section{(short)History}
 
-\lzw stands for \textbf{L}empel, \textbf{Z}iv and
+LZW stands for \textbf{L}empel, \textbf{Z}iv and
 \textbf{W}elch. Lempel and Ziv are the two researches who developed
 the two compression methods \lzseven and \lzeight. These two
-algorithms became the basis for many other \lz variations including
-\lzma \cite{palov11}, \lzw and \lzss \cite{Salomon:2004:DCC}. But we
-will only discuss \lzw in this chapter. And finally, Welch is the guy
-the developed this \lz variation.
+algorithms became the basis for many other LZ variations including
+LZMA \cite{palov11}, LZW and LZSS \cite{Salomon:2004:DCC}. But we
+will only discuss LZW in this chapter. And finally, Welch is the guy
+the developed this LZ variation.
 
 \section{The Compression algorithm}
 
 \subsection{Description}
 \label{sec:lzw-desc}
 
-The \lzw compression\index{\lzw compression} algorithm is best
+The LZW compression\index{LZW compression} algorithm is best
 understood by walking through the LZW algorithm's process of
 compressing some sample data.
 
@@ -44,7 +44,7 @@ strings that are possible to fit in a byte. That is, it adds all the
 possible number codes 0-255 to the string table and these number codes
 are assigned a one length string that is the character that it
 represents in the current encoding.. For this example we will use the
-character set \ascii \cite{rfc20}, but really any character set could
+character set ASCII \cite{rfc20}, but really any character set could
 be used. But in fact it is not really necessary that character set is
 used at all, because all these strings are supposed to represent
 
@@ -76,7 +76,7 @@ like when it is filled.
 
     \bottomrule
   \end{tabular}
-  \caption{The initial LZW string table, filled with all the \ascii
+  \caption{The initial LZW string table, filled with all the ASCII
     characters.}
   \label{tab:str-tab-ascii}
 \end{table}
@@ -143,7 +143,7 @@ string.
     \strrow{264}{aaaa}
     \bottomrule
   \end{tabular}
-  \caption{The string table after the \lzw algorithm has been run on
+  \caption{The string table after the LZW algorithm has been run on
     the string \texttt{ababcbababaaaaaaa}.}
   \label{tab:str-tab-str}
 \end{table}
@@ -175,7 +175,7 @@ string.
 
     \bottomrule
   \end{tabular}
-  \caption{Detailed \lzw compression on the string \texttt{ababcbababaaaaaaa}.}
+  \caption{Detailed LZW compression on the string \texttt{ababcbababaaaaaaa}.}
   \label{tab:lzw-walkthru}
 \end{table}
 
@@ -226,13 +226,13 @@ sounds.
 
 \subsubsection{Codes sizes}
 
-All a \lzw compressed file will consist of after this algorithm has
+All a LZW compressed file will consist of after this algorithm has
 been run, is just a long sequence of outputted codes.
 
 Since all the of the actual strings(whose length is greater than one)
 in the string table have codes values over $255$, bytes will obviously
 not be sufficient to store these codes. The code sizes\index{code
-  size} used in the \lzw algorithm are typically in the ranges $9 \leq
+  size} used in the LZW algorithm are typically in the ranges $9 \leq
 codeSize \leq 15$. But in our examples we will be using 12-bit codes,
 as they are most commonly used.
 
@@ -286,7 +286,7 @@ find out more about this later when are going to decompress the data.
     \pairrow{264}{263}{a}
     \bottomrule
   \end{tabular}
-  \caption{The string table after the \lzw algorithm has been run.}
+  \caption{The string table after the LZW algorithm has been run.}
   \label{tab:str-tab-pair}
 \end{table}
 
@@ -376,7 +376,7 @@ LSBF\index{MSBF}, which of course stands for \textbf{L}east
 \paragraph{The Algorithm}
 
 The order we'll be using in the algorithm we'll be describing is LSBF,
-because that is the packing order used in the \lzw compression of \gif
+because that is the packing order used in the LZW compression of GIF
 files \cite{gif89a}.
 
 So remember, the codes that wanted to write was 0101, 0101, 1011 and
@@ -485,7 +485,7 @@ file at the same time.
 
 So, we wanted to decompress the data stream \texttt{97 98 256 99 257
   260 97 262 263 264 4095}. The decompressor first makes the same
-table \ref{tab:str-tab-ascii}  that the \lzw compressing algorithm did at the beginning of
+table \ref{tab:str-tab-ascii}  that the LZW compressing algorithm did at the beginning of
 its process.
 
 First the first code is read simply and outputted, which is $98$, or
@@ -548,6 +548,7 @@ from out test data stream, \texttt{97 98 256 99 257 260 97 262 263 264
 
 \begin{table}
   \centering
+  \noindent\makebox[\textwidth]{%
   \begin{tabular}{lllll}
     \toprule
     Old Code & Newcode Code & Input Code & Output Codes & New table entry \\
@@ -571,18 +572,18 @@ from out test data stream, \texttt{97 98 256 99 257 260 97 262 263 264
     a=97 & 4095=maxValue & 4095=maxValue & STOP &  \\
 
     \bottomrule
-  \end{tabular}
-  \caption{Detailed \lzw decompression on the string \texttt{ababcbababaaaaaaa}.}
+  \end{tabular}}
+  \caption{Detailed LZW decompression on the string \texttt{ababcbababaaaaaaa}.}
   \label{tab:lzw-dec-walkthru}
 \end{table}
 
 \subsection{Algorithm}
 
 And the algorithm we have just described can be seen in algorithm
-\ref{alg:lzw-non-working-decompression}. Having discussed the
+\ref{alg:lzw-working-decompression}. Having discussed the
 compression algorithm very much in depth, you should be able to
 perfectly understand most of this alglorithm. However, there are still
-some more things we need to discuss until we are done with the \lzw
+some more things we need to discuss until we are done with the LZW
 algorithm.
 
 \begin{algorithm}[H]
@@ -664,7 +665,7 @@ which makes the work for the compressor one heck of a lot easier.
 \section{Efficiency}
 
 In this section we will be testing how good of a compression ratio the
-\lzw algorithm have on different sorts of files and data with
+LZW algorithm have on different sorts of files and data with
 different codes sizes.
 
 We will not however be discussing about the \textit{performance} of
@@ -723,20 +724,20 @@ codeSize \leq 15$
 
 \subsection{The Test Results}
 
-In table \ref{tab:corp-files} we show the results of the test.
+In table \ref{tab:lzw-test-results} we show the results of the test.
 
 \begin{table}
   \scriptsize
   \centering
   \input{../code/lzw/table.tex}
-  \caption{LZW test results. The different percentages the represent the respective compression ratios of that code size.}
-  \label{tab:corp-files}
+  \caption{LZW test results. The different percentages the represent the respective compression <ratios of that code size.}
+  \label{tab:lzw-test-results}
 \end{table}
 
 \subsection{Discussion}
 
 And now we are to discuses these test results, and see if they make us
-realist some new things about the \lzw algorithm.
+realist some new things about the LZW algorithm.
 
 The first thing we notice is that more is not always better. And by
 that I am referring to the code sizes. Bigger code sizes does
@@ -769,7 +770,7 @@ added.
 
 The sample source code of this chapter can found in the directory
 \path|code/lzw|. Here the program \texttt{lzw} can found, which was
-used in the previous tests. It allows you to perform \lzw compression
+used in the previous tests. It allows you to perform LZW compression
 on files and even vary the sizes the codes.
 
 \FloatBarrier
