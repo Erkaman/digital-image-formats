@@ -11,24 +11,22 @@
   as it is described in
   \cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}. We
   will first discuss the history behind the algorithm, then
-  compression algorithm\index{compression algorithm}, after this the
-  \textit{de}compression algorithm and in the end we will discuss the
-  efficiency and compression ratio of this algorithm.
+  compression algorithm, after this we will describe the decompression
+  algorithm and in the end we will discuss the efficiency and
+  compression ratio of this algorithm.
 
-\section{(short)History}
+\section{The History Behind}
 
-LZW stands for \textbf{L}empel, \textbf{Z}iv and
-\textbf{W}elch. Lempel and Ziv are the two researches who developed
-the two compression methods \lzseven and \lzeight. These two
-algorithms became the basis for many other LZ variations including
-LZMA \cite{palov11}, LZW and LZSS \cite{Salomon:2004:DCC}. But we
-will only discuss LZW in this chapter. And finally, Welch is the guy
-the developed this LZ variation.
+LZW stands for \textbf{L}empel, \textbf{Z}iv, \textbf{W}elch. Lempel
+and Ziv are the two researches who developed the two compression
+methods \lzseven and \lzeight. These two algorithms became the basis
+for many other LZ variations, including LZMA \cite{palov11}, LZW and
+LZSS \cite{Salomon:2004:DCC}. LZW is the variation that we will
+discuss in this chapter. And finally, Welch is the guy the developed
+this LZ variation.
 
-\section{The Compression algorithm}
-
-\subsection{Description}
-\label{sec:lzw-desc}
+\section{Description of the Compression algorithm}
+\label{sec:lzw-comp-desc}
 
 The LZW compression\index{LZW compression} algorithm is best
 understood by walking through the LZW algorithm's process of
@@ -38,15 +36,14 @@ The algorithm is going to compress the sample data
 \texttt{ababcbababaaaaaaa}.
 
 Central to entire algorithm's process is a string table. In this
-table, number called \textit{code}\index{code} is assigned to a
-string. The algorithm start by filling the string table with all the
+table, numbers called \textit{codes}\index{code} are assigned to a
+strings. The algorithm start by filling the string table with all the
 strings that are possible to fit in a byte. That is, it adds all the
 possible number codes 0-255 to the string table and these number codes
 are assigned a one length string that is the character that it
-represents in the current encoding.. For this example we will use the
+represents in the current encoding. For this example we will use the
 character set ASCII \cite{rfc20}, but really any character set could
-be used. But in fact it is not really necessary that character set is
-used at all, because all these strings are supposed to represent
+be used.
 
 Table \ref{tab:str-tab-ascii} shows how this table ends up looking
 like when it is filled.
@@ -179,7 +176,7 @@ string.
   \label{tab:lzw-walkthru}
 \end{table}
 
-\subsection{Algorithm}
+\section{Technical Implementation the Algorithm}
 \label{sec:lzw-enc-algorithm}
 
 In algorithm \ref{alg:lzw-compression} the complete LZW compression
@@ -224,7 +221,7 @@ sounds.
   \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Codes sizes}
+\subsection{Codes sizes}
 
 All a LZW compressed file will consist of after this algorithm has
 been run, is just a long sequence of outputted codes.
@@ -236,7 +233,7 @@ not be sufficient to store these codes. The code sizes\index{code
 codeSize \leq 15$. But in our examples we will be using 12-bit codes,
 as they are most commonly used.
 
-\subsubsection{String Storage Model}
+\subsection{String Storage Model}
 
 \newcommand{\strpair}[2]{(#1,#2)}
 
@@ -244,7 +241,7 @@ You could of course just store all the strings in the string table as
 real strings. However, these strings are going to end up
 taking way more space than they really need to.
 
-As you probably remember from section \ref{sec:lzw-desc}, the string
+As you probably remember from section \ref{sec:lzw-comp-desc}, the string
 to be added to the table is just the concatenation of the character
 just read and the former string. The concatenation of the characters
 characters \texttt{a} and \texttt{b} could be expressed as the string
@@ -290,7 +287,7 @@ find out more about this later when are going to decompress the data.
   \label{tab:str-tab-pair}
 \end{table}
 
-\subsubsection{Table size}
+\subsection{Table size}
 
 Since we are using fixed code sizes there is a limit on how large the
 string table can grow. For example, for 12-bit codes the maximum size
@@ -316,7 +313,7 @@ now ignore it.
   \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Managing The String Table}
+\subsection{Managing The String Table}
 
 Please Inspect line
 \algref{alg:lzw-compression}{algl:hasingcheckintable} and line
@@ -341,7 +338,7 @@ will either have to roll your own or use a library. In the sample \C
 source code of this chapter a simple hand-rolled hash table
 is used to manage the string table.
 
-\subsubsection{Outputting variable sized codes}
+\subsection{Outputting variable sized codes}
 
 A last thing we'll have to consider is how to actually output the
 codes. The file I/O functions of most programming languages do not
@@ -356,7 +353,7 @@ Now, the thing that the want to do with these bytes is this: we want
 to pack these variably sized codes into packs of 8-bits integers, or
 bytes as we usually call them
 
-\paragraph{Packing order}
+\subsubsection{Packing order}
 
 But we first need to make a decision: when, for example, when the
 codes 1011 and after 1100 are to be packed, there can be
@@ -373,7 +370,7 @@ MSBF\index{MSBF} which stands for \textbf{M}ost \textbf{S}ignificant
 LSBF\index{MSBF}, which of course stands for \textbf{L}east
 \textbf{S}ignificant \textbf{B}its \textbf{F}irst
 
-\paragraph{The Algorithm}
+\subsubsection{The Algorithm}
 
 The order we'll be using in the algorithm we'll be describing is LSBF,
 because that is the packing order used in the LZW compression of GIF
@@ -447,8 +444,11 @@ the next packet is filled with the bits of the current, modified,
 code.
 
 In algorithm ? the complete variable sized codes output algorithm is
-given. While it may seem very daunting at first sight,
-
+given. In this algorithm we introduce a new function
+\Call{FirstNBits}{$n,bits$}\index{FirstNBits}. What this function
+does, is that gets the value the first $bits$ least significant bits
+of the number $n$. So the call \Call{FirstNBits}{$001101,3$}, for
+example, would result in the value $010$.
 
 \begin{algorithm}[H]
   \caption{Function for outputting variably sized codes.}
@@ -456,18 +456,58 @@ given. While it may seem very daunting at first sight,
   \begin{algorithmic}[1]
     \Let{$remainingPacketBits$}{8}
     \Let{$packet$}{0}
-
     \Let{$shift$}{0}
 
-    \Let{$remainingCodeBits$}{0}
+    \Function{OutputCode}{$codeSize$}
 
+      \Let{$remainingCodeBits$}{0}
+
+      \Let{$remainingCodeBits$}{$codeSize$}
+
+      \linecomment{While the entire code hasn't yet been processed}
+      \While{$remainingCodeBits > 0$} \Comment{If the packet will get filled in this packing.}
+        \If{$remainingPacketBits \leq remainingCodeBits$}
+
+          \linecomment{Read as many bytes necessary the fill up the packet.}
+          \Let{$packet$}{$packet \BitOr ($
+            \Call{FirstNBits{code,remainingPacketBits}} $\ShiftLeft
+            shift)$}
+
+          \linecomment{Write the packet}
+          \Call{WriteByte}{$packet$}
+
+          \linecomment{Throw away the bits of the code that has been
+            packed in the now filled packet.}
+          \Dec{$remainingCodeBits$}{$remainingPacketBits$}
+          \Let{$code$}{$code \ShiftRight remainingPacketBits$}
+
+          \linecomment{Reset the packet}
+          \Let{$remainingPacketBits$}{$8$}
+          \Let{$packet$}{$0$}
+          \Let{$shift$}{$0$}
+
+        \Else \Comment{If the rest of the code fit in the entire
+          packet.}
+
+          \linecomment{Read in the entire code to the packet.}
+          \Let{$packet$}{$packet \BitOr ($
+            \Call{FirstNBits{code,remainingCodeBits}} $\ShiftLeft
+            shift)$}
+
+          \linecomment{Handle the number shifting of the packet.}
+          \Inc{shift}{remainingCodeBits}
+          \Dec{$remainingPacketBits$}{$remainingCodeBits$}
+
+          \linecomment{The entire code has been processed, so
+            terminate the loop}
+          \Let{$remainingCodeBits$}{$0$}
+        \EndIf
+      \EndWhile
+    \EndFunction
   \end{algorithmic}
 \end{algorithm}
 
-
-\section{Decompression algorithm}
-
-\subsection{Description}
+\section{Description of the Decompression algorithm}
 
 Using the compression algorithm LZW on the string
 \texttt{ababcbababaaaaaaa} produces the compressed data stream
@@ -577,7 +617,7 @@ from out test data stream, \texttt{97 98 256 99 257 260 97 262 263 264
   \label{tab:lzw-dec-walkthru}
 \end{table}
 
-\subsection{Algorithm}
+\section{Technical Implementation of the Decompression Algorithm}
 
 And the algorithm we have just described can be seen in algorithm
 \ref{alg:lzw-working-decompression}. Having discussed the
@@ -620,7 +660,7 @@ algorithm.
   \end{algorithmic}
 \end{algorithm}
 
-\subsubsection{Translating string codes}
+\subsection{Translating string codes}
 
 First we need to figure out how translate string from the code pair format as we
 discussed in section \ref{sec:lzw-enc-algorithm}.
@@ -771,3 +811,4 @@ added.
 \printbibliography[heading=subbibliography]
 
 \end{refsection}
+
