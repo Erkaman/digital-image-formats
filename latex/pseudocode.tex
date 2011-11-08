@@ -6,10 +6,6 @@ we'll be using pseudocode to explain the algorithms in this book. This
 will keep things as general as possible, and not force the reader into
 knowing a specific programming language before reading this book.
 
-But on the other hand, sample code in the programming language \C{} is
-provided. It can be found in the \path|/code| directory. But the code
-that we will discuss and analyze in the book is the pseudocode and not
-the \C{}-code.
 
 The pseudocode will be kept as traditional as possible, but we'll
 still need to establish several conventions for it, which is what
@@ -17,14 +13,16 @@ we're going to do for the rest of the chapter.
 
 \section{Typographical Conventions}
 
-This is how we'll use fonts in the pseudocode:
+\begin{description}
+\item[Keywords] will use \textbf{bold} font.
+\item[functions] will be signified by \textbf{uppercase}.
+\item[variables] can noticed by their $cursive$ style.
+\end{description}
 
-\textbf{keywords}, \textproc{functions}, and $variables$!
-
-\section{Boolean Algebra}
+\section{Boolean Operators}
 \label{sec:boolean-operators}
 
-For the boolean operators, we'll be using the following
+To signify the boolean operators we'll be using the following
 symbols:
 
 \begin{description}
@@ -40,12 +38,11 @@ Boolean truth is represented by \True{}, and falseness is represented by
 \label{sec:bitwise-operators}
 
 It is very rare that bitwise operators are ever used in
-pseudocode. However, digital image och compression algorithms are
-areas where they are almost mandatory to understand the algorithms. If
-you are not familiar with bitwise operators, look up them and study
-them on your own, as I assumed from the beginning of this book that such
-knowledge should be obvious to you. We will be using the notation used
-in \C{} to represent them in pseudocode:
+pseudocode. However, digital image and compression algorithms are
+areas where they are almost mandatory to use. If you are not familiar
+with bitwise operators, I highly recommend you to look up them and
+study them on your own. We will be using the notation used in \C to
+represent them in pseudocode:
 
 \begin{description}
 \item[$\BitNeg$] Bitwise \textit{NOT}
@@ -57,14 +54,14 @@ in \C{} to represent them in pseudocode:
 \end{description}
 
 Notice that we are using $\BitXor$ for representing bitwise
-\textit{XOR} rather than the traditional \C{} notation. This is due to
+\textit{XOR} rather than the traditional \C notation. This is due to
 the fact that we'd otherwise confuse it with logical and, $\AND$.
 
 \section{Functions}
 \label{sec:pseudocode}
 
 We'll be dealing with files in many of these algorithms, so we'll need
-to introduce several functions for file handling operations.
+to introduce several functions for handling file operations.
 
 \begin{description}[font=\normalfont]
 \item[\textproc{ReadByte}] It is assumed from the beginning of the
@@ -94,26 +91,24 @@ to introduce several functions for file handling operations.
 \end{description}
 
 \section{Syntax}
-\label{sec:other-conventions}
 
 As a decently competent programmer, you should be familiar with most
-of the control structures we'll be using. One control structure that
-is probably unfamiliar to you is the custom control structure called
-\algorithmicrepeat, which is demonstrated in algorithm \ref{alg:repeat}.
-
-\todo{Cover all the control structures?}
+of the control structures we'll be using. But one control structure
+that will be used that is probably unfamiliar to you is the custom
+control structure called \algorithmicrepeat, which is demonstrated in
+algorithm \ref{alg:repeat}.
 
 \begin{algorithm}[H]
   \caption{The repeat control structure.}
   \label{alg:repeat}
   \begin{algorithmic}[1]
     \Repeatn{$n$}
-      \State $actions\ldots$ \Comment{Repeats $actions\ldots n$ times}
+      \State $actions$ \Comment{$actions$ are repeated $n$ times.}
     \EndRepeatn
   \end{algorithmic}
 \end{algorithm}
 
-The start of a comment is indicated by the symbol \commentsymbol.
+and by the way, The start of a comment is indicated by the symbol \commentsymbol.
 
 To assign the value $n$ to the variable $var$, the notation shown in
 algorithm \ref{alg:assign} is used.
@@ -123,30 +118,5 @@ algorithm \ref{alg:assign} is used.
   \label{alg:assign}
   \begin{algorithmic}[1]
     \Let{$var$}{$n$}
-  \end{algorithmic}
-\end{algorithm}
-
-\section{An example}
-
-In this brief section, we'll be showing how all of the algorithms will
-be typeset in this book. We will use binary search as an example
-algorithm. It is shown in algorithm \ref{alg:binary-search}.
-
-\begin{algorithm}[H]
-  \caption{Binary Search.}
-  \label{alg:binary-search}
-  \begin{algorithmic}[1]
-    \Function{BinarySearch}{$list,length,x$}
-      \Let{$min$}{$1$}
-      \Let{$max$}{$length$}
-      \Repeat
-        \Let{$min$}{$\frac{min + max}{2}$}
-        \If{$x > list[mid]$}
-          \Let{$min$}{$mid + 1$}
-        \Else
-          \Let{$max$}{$mid - 1$}
-        \EndIf
-      \Until{$list[mid] = x \OR min > max$}
-    \EndFunction
   \end{algorithmic}
 \end{algorithm}
