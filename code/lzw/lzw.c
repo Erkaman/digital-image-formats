@@ -266,8 +266,6 @@ void lzw_decompress(FILE * in,FILE * out)
 
         oldCode = newCode;
         newCode = inputCode(in);
-
-/*        getchar(); */
     }
 }
 
@@ -329,45 +327,49 @@ void lzw_compress(FILE * in,FILE * out)
 void outputCode(unsigned int code,FILE * out)
 {
 /*    The number of remaining bits to be written before a whole new byte is outputted. */
-    static int remainingBits = 8;
-    static BYTE currentByte = 0;
+    static int remainingPacketBits = 8;
+    static BYTE packet = 0;
 
 /*    the number of remaing bits in the current code. */
-    int remainingCodeSize;
+    int remainingCodeBits;
 
     static int shift = 0;
 
-    remainingCodeSize = codeSize;
+    remainingCodeBits = codeSize;
 
-    while(remainingCodeSize > 0){
+    /* while all bits haven't yet been read. */
+    while(remainingCodeBits > 0){
 
-        if(remainingBits <= remainingCodeSize){
+	/* if the number of bits to be read is less than the current input value */
+        if(remainingPacketBits <= remainingCodeBits){
             /* write what can be written*/
 
-            currentByte |=
-                (firstNBits(code,remainingBits) << shift);
+            packet |=
+                (firstNBits(code,remainingPacketBits) << shift);
 
-            putc(currentByte,out);
+            putc(packet,out);
 
-            remainingCodeSize -= remainingBits;
+            remainingCodeBits -= remainingPacketBits;
 
-            code >>= remainingBits;
+            code >>= remainingPacketBits;
 
 	    /* reset the buffer */
-	    remainingBits = 8;
-	    currentByte = 0;
+	    remainingPacketBits = 8;
+	    packet = 0;
             shift = 0;
-
         }else{
-            /* remainingBits >= remainingCodeSize */
+	    /* if the number of bits remaining to be read is less than the
+	     bits in the current input value. */
 
-            currentByte |=
-                (firstNBits(code,remainingCodeSize) << shift);
+            /* remainingPacketBits >= remainingCodeBits */
 
-            shift += remainingCodeSize;
-            remainingBits -=  remainingCodeSize;
+            packet |=
+                (firstNBits(code,remainingCodeBits) << shift);
 
-            remainingCodeSize = 0;
+            shift += remainingCodeBits;
+            remainingPacketBits -=  remainingCodeBits;
+
+            remainingCodeBits = 0;
         }
 
     }
