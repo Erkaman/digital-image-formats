@@ -1,4 +1,4 @@
-\begin{comment}
+begin{comment}
   \bibliography{project.bib}
 \end{comment}
 
@@ -131,7 +131,6 @@ string.
     \toprule
     String & Code \\
     \midrule
-
     \dotsrow
     \strrow{256}{ab}
     \strrow{257}{ba}
@@ -237,13 +236,6 @@ not be sufficient to store these codes. The code sizes\index{code
 codeSize \leq 15$. But in our examples we will be using 12-bit codes,
 as they are most commonly used.
 
-File I/O Functions for writing data to files are not typically
-designed to write numbers whose bit-count are not multiples of 8, so
-we will need to construct a function, an algorithm, for doing this. It
-should at least support writing numbers in the ranges  $9 \leq x \leq 15$.
-
-\todo{discuss the function outputCode here?}
-
 \subsubsection{String Storage Model}
 
 \newcommand{\strpair}[2]{(#1,#2)}
@@ -348,6 +340,130 @@ to implement. If you are using more lower level language like \C, you
 will either have to roll your own or use a library. In the sample \C
 source code of this chapter a simple hand-rolled hash table
 is used to manage the string table.
+
+\subsubsection{Outputting variable sized codes}
+
+A last thing we'll have to consider is how to actually output the
+codes. The file I/O functions of most programming languages do not
+support variably sized output, so we'll have devise a routine for doing
+this on our own.
+
+Let us consider how to output the codes $5$, $5$, $11$ and $12$. The
+binary equivalents of these numbers are 0101, 0101,
+1011 and 1100, so we'll be outputting codes of size 4.
+
+Now, the thing that the want to do with these bytes is this: we want
+to pack these variably sized codes into packs of 8-bits integers, or
+bytes as we usually call them
+
+\paragraph{Packing order}
+
+But we first need to make a decision: when, for example, when the
+codes 1011 and after 1100 are to be packed, there can be
+two different resulting byte packets : 10111100,
+11001011. In the first case the bits of the codes start to get
+packed at the \textit{most significant bits} of the resulting packet.
+The most significant bits are the bits whose values are the greatest
+when toggled. In the second case the bits from the codes start to get
+written at the \textit{least significant bits}.
+
+The first of these packing order we'll from now on call
+MSBF\index{MSBF} which stands for \textbf{M}ost \textbf{S}ignificant
+\textbf{B}its \textbf{F}irst. And the second order we'll refer to as
+LSBF\index{MSBF}, which of course stands for \textbf{L}east
+\textbf{S}ignificant \textbf{B}its \textbf{F}irst
+
+\paragraph{The Algorithm}
+
+The order we'll be using in the algorithm we'll be describing is LSBF,
+because that is the packing order used in the \lzw compression of \gif
+files \cite{gif89a}.
+
+So remember, the codes that wanted to write was 0101, 0101, 1011 and
+1100. We'll first request an empty byte packet and set it's value to
+zero: $0000 0000$. Now we'll set the bits of the first four least
+significant bits of the packet to the bits of the first code:
+0101. This can trivially be done using the bitwise-OR operation:
+
+\begin{center}
+  \begin{tabular}{lr}
+    & 0000 0000  \\
+    $\BitOr$ & 0101 \\
+    \hline
+    & 0000 0101 \\
+  \end{tabular}
+\end{center}
+
+After this operation, only half of the byte packet has been filled, so
+we won't write packet, but we wait for the next one. The next packet
+0101 has now arrived. The set the four most significant bits of the
+current package to the bits of this packet. So we'll have to use a
+bitwise OR operation, but also use a bitwise shift before we bitwise
+the or the current with the packet. The number of bits remainining to
+be set in the current package is $4$. And that is how we bitwise left
+shift the current code value: $4 \ShiftLeft 0101 = 0101 0000$. And
+the bitwise OR operation is performed:
+
+\begin{center}
+  \begin{tabular}{lr}
+    & 0000 0101  \\
+    $\BitOr$ & 0101 0000 \\
+    \hline
+    & 0101 0101 \\
+  \end{tabular}
+\end{center}
+
+Now we have filled the entire packet; the packet is thus outputted and
+we request a new empty packet. We'll full this packet with the two
+remaining values 1011 and 1100, and we end up making the package $1100
+1011$.
+
+but this sort of reasoning doesn't work for codes of sizes greater
+than $8$. If the codes are greater than $8$, the codes will always
+contain enough data to fill a byte packet, but we'll also have to save
+small chunks of the codes that are to be used for the next packet.
+
+Let's say we want to output the two codes $0000 1101 0111$ and $0010
+1100 0100$. These codes both have the codes size $12$.
+
+Our first code is $0000 1101 0111$. We'll start by filling the packet
+with the 8 least significant bits of this code. The packet then has
+the value $1101 0111$. And already the packet is filled. So it is
+outputted and new empty packet is requested. But we cannot yet throw
+away to code we are processing; we haven't yet dealt with 4
+most-significant bits! What we'll do is that we'll bitwise right shift
+the code 8 times: $0000 1101 0111 \ShiftLeft 8 = 0000$. The number $8$ is used
+because that is the number of bits that fit in a full packet. Good,
+now these four bits are then set to be the 4 least significant bits of
+the new packet. So after dealing with the first code the value of the
+packet is $0000$.
+
+In the same manner, the next code $0010 1100 0100$ is handled: the
+four most significant bytes of the packet are set to $0100$, the code
+is right shifted 4 steps ; because that is the number bits that was
+remaining to be added to the package at the beginning of the
+processing of the code ; the newly filled packet is then outputted and
+the next packet is filled with the bits of the current, modified,
+code.
+
+In algorithm ? the complete variable sized codes output algorithm is
+given. While it may seem very daunting at first sight,
+
+
+\begin{algorithm}[H]
+  \caption{Function for outputting variably sized codes.}
+  \label{alg:variable-codes-output}
+  \begin{algorithmic}[1]
+    \Let{$remainingPacketBits$}{8}
+    \Let{$packet$}{0}
+
+    \Let{$shift$}{0}
+
+    \Let{$remainingCodeBits$}{0}
+
+  \end{algorithmic}
+\end{algorithm}
+
 
 \section{Decompression algorithm}
 
@@ -474,7 +590,7 @@ algorithm.
   \label{alg:lzw-working-decompression}
   \begin{algorithmic}[1]
     \Let{$oldCode$}{\VoidCall{$InputCode$}}
-    \State \Call{WriteByte}{$oldCode$}
+    \State \Call{OutputByte}{$oldCode$}
     \Let{$character$}{\VoidCall{$oldCode$}}
 
     \Let{$newCode$}{\VoidCall{$ReadByte$}}
@@ -544,16 +660,6 @@ which makes the work for the compressor one heck of a lot easier.
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
-
-\subsection{Working algorithm}
-
-Now we are to discuss the fully working LZW compression
-algortithm. This algortihm is not really much different from the
-non-working one. Because it is only of a very,very rare edge the the
-last algorithm may fail to work. And now, without any further ado, the
-fully working LZW compresson algorithm is presented at algortihm
-\ref{alg:lzw-working-decompression}.
-
 
 \section{Efficiency}
 
