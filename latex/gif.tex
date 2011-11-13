@@ -840,7 +840,36 @@
   So, to make an animated GIF, all you really do is specify a sequence
   of smaller images within a GIF file. But in which order should all
   the blocks of a GIF image occur for the GIF file to be considered
-  well formed.
+  well formed?
+
+  For a GIF image to be considered well-formed it should be structured
+  as is shown in figure \ref{fig:gif-grammar}. Algorithm shows how the
+  image should be loaded if we assume that all GIFs follow this
+  structure.
+
+  % http://www.matthewflickinger.com/lab/whatsinagif/bits_and_bytes.asp#plain_text_extension_block
+
+  \begin{figure}
+    \centering
+
+    \begin{tikzpicture}
+      [headertrailer/.style={
+        rectangle,
+        minimum size=6mm,
+        very thick,
+        draw=red!50!black!50,
+        top color=white,
+        bottom color=red!50!black!20,
+        font=\itshape
+      }]
+
+      \node [headertrailer] {Header};
+
+    \end{tikzpicture}
+
+    \caption{The ``grammar'' of a GIF-file.}
+    \label{fig:gif-grammar}
+  \end{figure}
 
   \printbibliography[heading=subbibliography]
 
