@@ -32,18 +32,18 @@ The LZW compression\index{LZW compression} algorithm is best
 understood by walking through the LZW algorithm's process of
 compressing some sample data.
 
-The algorithm is going to compress the sample data
+In this example the algorithm is going to compress the sample data
 \texttt{ababcbababaaaaaaa}.
 
-Central to entire algorithm's process is a string table. In this
-table, numbers called \textit{codes}\index{code} are assigned to a
-strings. The algorithm start by filling the string table with all the
+Central to the entire algorithm's process is a string table. In this
+table numbers called \textit{codes}\index{code} are assigned to
+strings. The algorithm start by filling this string table with all the
 strings that are possible to fit in a byte. That is, it adds all the
-possible number codes 0-255 to the string table and these number codes
-are assigned a one length string that is the character that it
-represents in the current encoding. For this example we will use the
-character set ASCII \cite{rfc20}, but really any character set could
-be used.
+number codes 0-255 to the string table and these number codes are
+assigned a one length string and this one length string consists of
+the character that the number code represents in the current
+encoding. For this example, we will use the character set ASCII
+\cite{rfc20}, but really any character set could be used.
 
 Table \ref{tab:str-tab-ascii} shows how this table ends up looking
 like when it is filled.
@@ -103,18 +103,17 @@ read. First \bcode is outputted, and the appended string
 \bacode is formed. This string doesn't either exist in the table,
  so it is added to table and is given the code $257$.
 
-Discard \bcode, output \acode and read in another
-\bcode. Now something very interesting happens; the
-resulting appended string is this time \abcode. But wait a minute,
-isn't already that string in the string table? Yes it is, so instead
-of re-adding that string to table, it is kept for the next step in the
-algorithm.
+ Discard \bcode, output \acode and read in another \bcode. The
+ resulting appended string is this time \abcode. But wait a minute,
+ isn't already that string in the string table? Yes it is, so instead
+ of re-adding that string to table, it is kept for the next step in
+ the algorithm.
 
 The code for \abcode is outputted, which is $256$, and the character \ccode is
 read. The string \abccode doesn't exist in the table, so it is
 added to the string table and given the code $258$.
 
-And the algorithm just keeps going like this. Table
+And the algorithm just keeps going on like this. Table
 \ref{tab:str-tab-str} shows all the codes that were added during the
 compression of the sample string. Table \ref{tab:lzw-walkthru} gives a
 detailed walkthrough of the compression of the same string. Do study
@@ -128,6 +127,9 @@ string.
     \toprule
     String & Code \\
     \midrule
+    \strrow{97}{a}
+    \strrow{98}{b}
+    \strrow{99}{c}
     \dotsrow
     \strrow{256}{ab}
     \strrow{257}{ba}
@@ -189,6 +191,8 @@ sounds.
   \caption{The LZW compression algorithm.}
   \label{alg:lzw-compression}
   \begin{algorithmic}[1]
+
+    \State \VoidCall{FillInitialStringTable}
     \Let{$nextCode$}{$256$}
     \Let{$stringCode$}{\VoidCall{$ReadByte$}}
     \Let{$charCode$}{\VoidCall{$ReadByte$}}
@@ -203,7 +207,7 @@ sounds.
         \If{$nextCode \leq maxCode$}
 
           \State \Call{AddToStringTable}{$nextCode, stringCode, charCode$}\label{algl:hashadd}
-          \Let{$nextCode$}{$nextCode + 1$}
+          \Inc{nextCode}{1}
 
         \EndIf
 
@@ -217,7 +221,8 @@ sounds.
 
     \State \Call{outputCode}{$stringCode$}
     \State \Call{outputCode}{$maxValue$}
-
+    \State \Call{outputCode}{$0$} \Comment{Cause the last packet to be
+      written } \label{algl:flush}
   \end{algorithmic}
 \end{algorithm}
 
@@ -259,7 +264,11 @@ besides, pair of numbers are often much easier to deal with than
 strings, especially in languages like \C!
 
 Using this new string storage model table \ref{tab:str-tab-str}, is
-translated to table \ref{tab:str-tab-pair}.
+translated to table \ref{tab:str-tab-pair}. Notice that the string
+codes of the single character strings whose codes values are less than
+$256$ are given the value $-1$  in order to differentiate them from
+ordinary strings. You will why need to this when we discuss the
+decompression algorithm.
 
 \newcommand{\pairrow}[3]{$#1$ & \strpair{#2}{#3} \\}
 
@@ -269,6 +278,9 @@ translated to table \ref{tab:str-tab-pair}.
     \toprule
     String & Code \\
     \midrule
+    \pairrow{97}{-1}{a}
+    \pairrow{98}{-1}{b}
+    \pairrow{99}{-1}{c}
     \dotsrow
     \pairrow{256}{97}{b}
     \pairrow{257}{98}{a}
@@ -470,8 +482,9 @@ $010$.
     \Let{$remainingPacketBits$}{8}
     \Let{$packet$}{0}
     \Let{$shift$}{0}
+    \Let{$codeSize$}{12}
 
-    \Function{OutputCode}{$codeSize,code$}
+    \Function{OutputCode}{$code$}
 
       \Let{$remainingCodeBits$}{$codeSize$}
 
@@ -522,21 +535,39 @@ $010$.
   \end{algorithmic}
 \end{algorithm}
 
+\subsubsection{Flushing The Packets}
+
+Let's say we want to write the two codes $11000$ and $11011$. To do
+this we perform two calls to the function explained in algorithm
+\ref{alg:variable-codes-output}. However, this only results in the
+packet $0111 \ 1000$ being outputted, and the rest of two bits $11$ in
+the last packet $11011$ ends up being put on hold for the next
+code. But we have already written the two codes we want to output, so
+how may we force the last two bits being written?  This turns out to
+be very easy to do, as all we have to do is write an empty extra code
+$0000 \ 0000$. This results in the last two bits being written out in
+the form of the packet $0000 \ 0011$.
+
+And all of this is why line \algref{alg:lzw-compression}{algl:flush}
+even exists. Otherwise, the last few bits of the max value would not
+get outputted, and this would cause huge problems for the
+decompressor.
+
 \section{Description of the Decompression algorithm}
 
 Using the compression algorithm LZW on the string
 \texttt{ababcbababaaaaaaa} produces the compressed data stream
 \texttt{97 98 256 99 257 260 97 262 263 264 4095}. Since we were using
 12-bit codes to encode the data, the maximum value of an unsigned
-12-bit number,$2^{12} - 1 = 4095$, is used to terminate it. This is to
+12-bit number, $2^{12} - 1 = 4095$, is used to terminate it. This is to
 make sure that the decompressor knows when to stop reading.
 
 As you may have noticed, in a LZW compressed file the string table is
-not included. How could you possibly decompress the file without such
-essential information? It turns out that all the LZW decompression
-algorithm do is basically the same thing that the compression aglorithm do; it
-just reconstructs the string table as it goes along and  reads and decompresses the
-file at the same time.
+not included. Then how could you possibly decompress the file without
+such essential information? It turns out that all the LZW
+decompression algorithm do is basically the same thing that the
+compression algorithm does; it just reconstructs the string table as
+it goes along and reads and decompresses the file at the same time.
 
 So, we wanted to decompress the data stream \texttt{97 98 256 99 257
   260 97 262 263 264 4095}. The decompressor first makes the same
@@ -635,29 +666,34 @@ from out test data stream, \texttt{97 98 256 99 257 260 97 262 263 264
 \section{Technical Implementation of the Decompression Algorithm}
 
 And the algorithm we have just described can be seen in algorithm
-\ref{alg:lzw-working-decompression}. Having discussed the
-compression algorithm very much in depth, you should be able to
-perfectly understand most of this alglorithm. However, there are still
-some more things we need to discuss until we are done with the LZW
-algorithm.
+\ref{alg:lzw-working-decompression}. Having discussed the compression
+algorithm very much in depth, you should be able to perfectly
+understand most of this alglorithm. However, there are still some more
+things we need to discuss in the implementation of this algorithm
+until we completely are done with discussing the LZW algorithm.
 
 \begin{algorithm}[H]
   \caption{LZW working decompression algorithm.}
   \label{alg:lzw-working-decompression}
   \begin{algorithmic}[1]
-    \Let{$oldCode$}{\VoidCall{$InputCode$}}
-    \State \Call{OutputByte}{$oldCode$}
-    \Let{$character$}{\VoidCall{$oldCode$}}
 
-    \Let{$newCode$}{\VoidCall{$ReadByte$}}
+    \State \VoidCall{FillInitialStringTable}
+    \Let{$nextCode$}{$256$}
+
+    \Let{$oldCode$}{\VoidCall{$InputCode$}}
+    \State \Call{writeByte}{$oldCode$}
+
+    \Let{$character$}{$oldCode$}
+
+    \Let{$newCode$}{\VoidCall{$InputCode$}}
 
     \While{$newCode \neq maxValue$}
 
       \If{$\NOT$ \Call{IsInTable}{$newCode$}} \Comment{The special case}
-        \Let{$string$}{\Call{tranlate}{oldCode}}
+        \Let{$string$}{\Call{Translate}{oldCode}}
         \Let{$string$}{$string + character$}
       \Else
-        \Let{$string$}{\Call{translate}{$newCode$}}
+        \Let{$string$}{\Call{Translate}{$newCode$}}
       \EndIf
 
       \State \Call{outputString}{$string$}
@@ -665,7 +701,11 @@ algorithm.
       \Let{$character$}{$string[0]$} \Comment{Get the first character
         of the translated string.}
 
-      \State \Call{$AddToStringTable$}{$oldCode, character$}
+      \If{$nextCode \leq maxCode$}
+        \State \Call{$AddToStringTable$}{$nextCode,oldCode, character$}
+
+        \Inc{nextCode}{1}
+      \EndIf
 
       \Let{$oldCode$}{$newCode$}
 
@@ -698,26 +738,24 @@ table to manage the string table. Since the codes are numbers, they
 can be used as indices and hence there is no need for a hash table,
 which makes the work for the compressor one heck of a lot easier.
 
-\todo{fix string format}
 \begin{algorithm}[H]
-  \caption{Translating a string code to normal string.}
+  \caption{Translating a string code to normal string. Where code is
+    the code we want to translate. }
   \label{alg:translate-string-code}
   \begin{algorithmic}[1]
-    \Let{$\strpair{stringCode}{characterCode}$}{$code$}
-    \Let{$decodedString$}{$""$}
+    \Let{$\strpair{stringCode}{characterCode}$}{$stringTable[code]$}
     \While{\True}
       \Let{$decodedString$}{$decodedString + characterCode$}
-
       \If{$stringCode = -1$}
         \Break
       \Else
-        \Let{$\strpair{stringCode}{characterCode}$}{$stringCode$}
+        \Let{$\strpair{stringCode}{characterCode}$}{$stringTable[stringCode]$}
       \EndIf
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{Inputting variably sized codes}
+\subsection{Inputting Variably Sized Codes}
 
 We also need to construct an algorithm for inputting the variably
 sized codes output by the compression algorithm. This algorithm is

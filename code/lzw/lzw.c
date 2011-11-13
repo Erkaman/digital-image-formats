@@ -46,7 +46,6 @@ unsigned int  hashingShift;
 unsigned int maxValue;
 unsigned int maxCode;
 
-unsigned int dictionaryIndex;
 
 int main(int argc, char *argv[])
 {
@@ -216,14 +215,15 @@ void lzw_decompress(FILE * in,FILE * out)
     unsigned int oldCode;
     unsigned int newCode;
     char character;
+    unsigned int nextCode;
 
 
-    for(dictionaryIndex = 0; dictionaryIndex < 256; ++dictionaryIndex){
-        stringTable[dictionaryIndex].characterCode = dictionaryIndex;
-        stringTable[dictionaryIndex].stringCode = (unsigned int) -1;
+    for(nextCode = 0; nextCode < 256; ++nextCode){
+        stringTable[nextCode].characterCode = nextCode;
+        stringTable[nextCode].stringCode = (unsigned int) -1;
     }
 
-    dictionaryIndex = 256;
+    nextCode = 256;
 
     oldCode = inputCode(in);
 
@@ -234,11 +234,10 @@ void lzw_decompress(FILE * in,FILE * out)
 
     newCode = inputCode(in);
 
-    /* max_value should be checked for here but it doesn't work. */
     while (newCode != maxValue){
 
         /*if it is not in the translation table. */
-        if(!(newCode < dictionaryIndex)){
+        if(!(newCode < nextCode)){
             stringCodeStack[stackp++] = character;
             translateCode(oldCode);
 
@@ -248,20 +247,20 @@ void lzw_decompress(FILE * in,FILE * out)
         character = printString(out);
 
         /* add it the table */
-        if(dictionaryIndex <= maxCode){
+        if(nextCode <= maxCode){
 
-            stringTable[dictionaryIndex].stringCode = oldCode;
-            stringTable[dictionaryIndex].characterCode = character;
+            stringTable[nextCode].stringCode = oldCode;
+            stringTable[nextCode].characterCode = character;
 
             verbosePrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
-                         dictionaryIndex,
+                         nextCode,
                          oldCode,
                          oldCode,
                          character,
                          character);
 
 
-            dictionaryIndex++;
+            nextCode++;
         }
 
         oldCode = newCode;
@@ -341,7 +340,7 @@ void outputCode(unsigned int code,FILE * out)
     while(remainingCodeBits > 0){
 
 	/* if the number of bits to be read is less than the current input value */
-        if(remainingPacketBits <= remainingCodeBits){
+        if(remainingPacketBits < remainingCodeBits){
             /* write what can be written*/
 
             packet |=
@@ -353,7 +352,7 @@ void outputCode(unsigned int code,FILE * out)
 
             code >>= remainingPacketBits;
 
-	    /* reset the buffer */
+	    /* reset the packet */
 	    remainingPacketBits = 8;
 	    packet = 0;
             shift = 0;
@@ -362,9 +361,8 @@ void outputCode(unsigned int code,FILE * out)
 	     bits in the current input value. */
 
             /* remainingPacketBits >= remainingCodeBits */
-
-            packet |=
-                (firstNBits(code,remainingCodeBits) << shift);
+	    code = firstNBits(code,remainingCodeBits);
+            packet |= code << shift;
 
             shift += remainingCodeBits;
             remainingPacketBits -=  remainingCodeBits;
@@ -377,51 +375,60 @@ void outputCode(unsigned int code,FILE * out)
 
 unsigned int inputCode(FILE * input)
 {
-    unsigned int returnValue;
-    int remainingCodeSize;
+    unsigned int code;
+    int remainingCodeBits;
     int shift;
 
     static int readFirstCharacter = 0;
-    static int inputValue;
-    static int remainingBits = 8;
+    static int packet;
+    static int remainingPacketBits = 8;
 
-    verbosePrint("START\n");
-
-    remainingCodeSize = codeSize;
-    returnValue = 0;
+    remainingCodeBits = codeSize;
+    code = 0;
     shift = 0;
 
     /* read the first character */
     if(!readFirstCharacter){
-        inputValue = (BYTE)getc(input);
+        packet = (BYTE)getc(input);
         readFirstCharacter = 1;
     }
 
-    while(remainingCodeSize > 0){
-        if(remainingBits < remainingCodeSize){
-            returnValue |=
-                (firstNBits(inputValue,remainingBits) << shift);
+    /* While an entire code hasn't yet been read.  */
+    while(remainingCodeBits > 0){
+	/* If the current packet doesn't contain enough bits
+          to fill the current code. */
+        if(remainingPacketBits < remainingCodeBits){
 
-            shift += remainingBits;
+            code |=
+                (firstNBits(packet,remainingPacketBits) << shift);
 
-            remainingCodeSize -= remainingBits;
+            shift += remainingPacketBits;
+            remainingCodeBits -= remainingPacketBits;
 
-	    /* read in a new byte */
-            inputValue = (BYTE)getc(input);
-
-            remainingBits = 8;
+	    /* read in a new packet */
+            packet = (BYTE)getc(input);
+            remainingPacketBits = 8;
         }else{
-            returnValue |=
-                (firstNBits(inputValue,remainingCodeSize) << shift);
-            inputValue >>= remainingCodeSize;
-            remainingBits -= remainingCodeSize;
-            remainingCodeSize = 0;
+	    /* If the number of bits remaining to be read in the code
+	     * is less than or equal to the number of bits in the
+	     * current packet. */
+
+	    /* read as many bits needed from the packet. */
+            code |=
+                (firstNBits(packet,remainingCodeBits) << shift);
+
+	    /* Right shift away the bits that were written to the code.*/
+            packet >>= remainingCodeBits;
+            remainingPacketBits -= remainingCodeBits;
+
+	    /* The entire code has been read, stop the loop. */
+            remainingCodeBits = 0;
         }
     }
 
-    verbosePrint("Inputted code: %d=%c\n",returnValue,(char)(returnValue));
+    verbosePrint("Inputted code: %d=%c\n",code,(char)(code));
 
-    return returnValue;
+    return code;
 }
 
 int findMatch(unsigned int stringCode,unsigned int charCode)
