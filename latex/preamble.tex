@@ -89,8 +89,8 @@
 \newcommand{\VoidCall}[1]{ \Call{#1}{\ensuremath{}}}
 \newcommand{\ForTo}[3]{\For{ #1 $\gets$ #2 \algto\  #3}}
 
-\newcommand{\Inc}[2]{\Let{#1}{#1 + #2}}
-\newcommand{\Dec}[2]{\Let{#1}{#1 - #2}}
+\newcommand{\Dec}[2]{\State \Call{Dec}{\ensuremath{#1,#2}}}
+\newcommand{\Inc}[2]{\State \Call{Inc}{\ensuremath{#1,#2}}}
 
 % miscellaneous configurations
 %\pagestyle{headings}

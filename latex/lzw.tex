@@ -10,10 +10,10 @@
   In this chapter, we will discuss the data compression algorithm LZW
   as it is described in
   \cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}. We
-  will first discuss the history behind the algorithm, then
-  compression algorithm, after this we will describe the decompression
-  algorithm and in the end we will discuss the efficiency and
-  compression ratio of this algorithm.
+  will first discuss the history behind the algorithm, then the
+  compression algorithm itself, after this we will describe the
+  decompression algorithm and in the end we will discuss the
+  efficiency and compression ratio of this algorithm.
 
 \section{The History Behind}
 
@@ -250,18 +250,16 @@ pair\index{pair} \strpair{97}{98}, which consists of the two codes of
 the two strings. Okay, there is no real big difference in size yet,
 but now consider \texttt{abcbde} and \texttt{a} and their
 concatenation \texttt{abcbdea}. If \texttt{abcbde} has the code, say,
-289, then surely the pair \strpair{289}{97} is much more space
-efficent than \texttt{abcbdea}?  Yes it is, of course!
+289, then obviously the pair \strpair{289}{97} is much more space
+efficent than \texttt{abcbdea}.
 
 You may think we are just nitpicking here, but also need to consider
 that with huge files this string table could end up becoming huge. And
 besides, pair of numbers are often much easier to deal with than
-strings, espically in languages like \C!
+strings, especially in languages like \C!
 
 Using this new string storage model table \ref{tab:str-tab-str}, is
-translated to table \ref{tab:str-tab-pair}. You also may notice that we end
-creating this beautiful recursive structure using this model. We will
-find out more about this later when are going to decompress the data.
+translated to table \ref{tab:str-tab-pair}.
 
 \newcommand{\pairrow}[3]{$#1$ & \strpair{#2}{#3} \\}
 
@@ -342,27 +340,29 @@ is used to manage the string table.
 
 A last thing we'll have to consider is how to actually output the
 codes. The file I/O functions of most programming languages do not
-support variably sized output, so we'll have devise a routine for doing
-this on our own.
+support outputting numbers whose sizes are not multiples of 8, so
+we'll have to devise a routine of our own for doing this.
 
 Let us consider how to output the codes $5$, $5$, $11$ and $12$. The
-binary equivalents of these numbers are 0101, 0101,
-1011 and 1100, so we'll be outputting codes of size 4.
+binary equivalents of these numbers are 0101, 0101, 1011 and
+1100. Since the maximum number of bits needed to store these numbers
+is $4$ we'll be outputting codes of size 4.
 
 Now, the thing that the want to do with these bytes is this: we want
-to pack these variably sized codes into packs of 8-bits integers, or
-bytes as we usually call them
+to \textit{pack} these variably sized codes into
+\textit{packets}\index{packets} of 8-bits integers, or bytes as we
+usually call them.
 
 \subsubsection{Packing order}
 
-But we first need to make a decision: when, for example, when the
-codes 1011 and after 1100 are to be packed, there can be
-two different resulting byte packets : 10111100,
-11001011. In the first case the bits of the codes start to get
-packed at the \textit{most significant bits} of the resulting packet.
-The most significant bits are the bits whose values are the greatest
-when toggled. In the second case the bits from the codes start to get
-written at the \textit{least significant bits}.
+But we first need to make a decision: when, for example, the codes
+1011 and after 1100 are to be packed in order, there can actually be two
+different resulting byte packets: 10111100 or 11001011. In the first
+case the bits of the codes start to get packed at the \textit{most
+  significant bits} of the resulting packet.  The most significant
+bits are the bits whose values are the greatest when toggled. In the
+second case the bits from the codes start to get written at the
+\textit{least significant bits}.
 
 The first of these packing order we'll from now on call
 MSBF\index{MSBF} which stands for \textbf{M}ost \textbf{S}ignificant
@@ -372,13 +372,15 @@ LSBF\index{MSBF}, which of course stands for \textbf{L}east
 
 \subsubsection{The Algorithm}
 
-The order we'll be using in the algorithm we'll be describing is LSBF,
+\paragraph{Smaller Codes}
+
+The packing order we'll be using in the algorithm we'll be describing is LSBF,
 because that is the packing order used in the LZW compression of GIF
 files \cite{gif89a}.
 
 So remember, the codes that wanted to write was 0101, 0101, 1011 and
-1100. We'll first request an empty byte packet and set it's value to
-zero: $0000 0000$. Now we'll set the bits of the first four least
+1100. We'll first request an empty byte packet and make it empty:
+0000 0000. Now we'll set the bits of the first four least
 significant bits of the packet to the bits of the first code:
 0101. This can trivially be done using the bitwise-OR operation:
 
@@ -392,14 +394,19 @@ significant bits of the packet to the bits of the first code:
 \end{center}
 
 After this operation, only half of the byte packet has been filled, so
-we won't write packet, but we wait for the next one. The next packet
-0101 has now arrived. The set the four most significant bits of the
-current package to the bits of this packet. So we'll have to use a
-bitwise OR operation, but also use a bitwise shift before we bitwise
-the or the current with the packet. The number of bits remainining to
-be set in the current package is $4$. And that is how we bitwise left
-shift the current code value: $4 \ShiftLeft 0101 = 0101 0000$. And
-the bitwise OR operation is performed:
+we won't write packet quite yet. We'll put the writing operation on
+hold until we've read the next code.
+
+The next code 0101 has now arrived. We now set the four most
+significant bits of the current package to the bits of this packet. So
+we'll have to use a bitwise OR operation. But we cannot do this in the
+same fashion that we wrote the last packet. We first have to left
+bitwise shift the bits of the current code, to make sure that we only
+write to the four most significant bits of the current packet. The
+number of bits remaining to be set in the current package is $4$. And
+that is how many bits we'll bitwise left shift the current code value:
+$4 \ShiftLeft 0101 = 0101\ 0000$. And after this the bitwise OR
+operation is finally performed:
 
 \begin{center}
   \begin{tabular}{lr}
@@ -411,74 +418,80 @@ the bitwise OR operation is performed:
 \end{center}
 
 Now we have filled the entire packet; the packet is thus outputted and
-we request a new empty packet. We'll full this packet with the two
-remaining values 1011 and 1100, and we end up making the package $1100
-1011$.
+we request a new empty packet. We'll fill this packet with the two
+remaining codes 1011 and 1100 in the same way we filled the last
+packet, and we end up making the packet  1100 1011.
 
-but this sort of reasoning doesn't work for codes of sizes greater
-than $8$. If the codes are greater than $8$, the codes will always
-contain enough data to fill a byte packet, but we'll also have to save
-small chunks of the codes that are to be used for the next packet.
+\paragraph{Larger Codes}
 
-Let's say we want to output the two codes $0000 1101 0111$ and $0010
-1100 0100$. These codes both have the codes size $12$.
+But this sort of reasoning doesn't work for codes of sizes greater
+than $8$. If the codes have sizes that are greater than $8$, the codes
+will always contain enough data to fill a byte packet, but we'll also
+have to save small unused chunks of the codes that are to be used for
+the next packet.
 
-Our first code is $0000 1101 0111$. We'll start by filling the packet
+Let's say we want to output the two codes 0110 1101 0111 and 0010 1100
+0100 and let's also say that these codes both have the code size
+$12$.
+
+Our first code is $0110\ 1101\ 0111$. We'll start by filling the packet
 with the 8 least significant bits of this code. The packet then has
-the value $1101 0111$. And already the packet is filled. So it is
+the value 1101 0111. And already the packet is filled. So it is
 outputted and new empty packet is requested. But we cannot yet throw
-away to code we are processing; we haven't yet dealt with 4
-most-significant bits! What we'll do is that we'll bitwise right shift
-the code 8 times: $0000 1101 0111 \ShiftLeft 8 = 0000$. The number $8$ is used
-because that is the number of bits that fit in a full packet. Good,
-now these four bits are then set to be the 4 least significant bits of
-the new packet. So after dealing with the first code the value of the
-packet is $0000$.
+away the code we are processing; we haven't yet dealt with 4
+most-significant bits of it! So what we'll do is that we'll bitwise
+right shift the code 8 times: $0110\ 1101\ 0111 \ShiftRight 8 =
+0110$. The number $8$ is used because that is the number of bits that
+fit in a full packet. Good, now these four bits are then set to be the
+4 least significant bits of the new packet. And so after dealing with
+the first code we have outputted a packet with the value 1101 0111 and
+the value of the new packet is 0000 0000 0110.
 
-In the same manner, the next code $0010 1100 0100$ is handled: the
-four most significant bytes of the packet are set to $0100$, the code
-is right shifted 4 steps ; because that is the number bits that was
-remaining to be added to the package at the beginning of the
-processing of the code ; the newly filled packet is then outputted and
-the next packet is filled with the bits of the current, modified,
-code.
+In the  same manner, the  next code $0010\  1100\ 0100$ is  handled: the
+four most significant  bytes of the new packet are  set to $0100$, the
+code is  right shifted 4 steps;  because that is the  number bits that
+was  remaining to  be added  to the  package at  the beginning  of the
+processing of the code; the  newly filled packet is then outputted and
+the  next packet is  filled with  the remaining  bits of  the current,
+modified, code.
 
-In algorithm ? the complete variable sized codes output algorithm is
-given. In this algorithm we introduce a new function
-\Call{FirstNBits}{$n,bits$}\index{FirstNBits}. What this function
-does, is that gets the value the first $bits$ least significant bits
-of the number $n$. So the call \Call{FirstNBits}{$001101,3$}, for
-example, would result in the value $010$.
+In algorithm \ref{alg:variable-codes-output} the complete variable
+sized codes output algorithm is given. In this algorithm we introduce
+a new function \Call{FirstNBits}{$n,bits$}\index{FirstNBits}. What
+this function does, is that gets the value the first $bits$ least
+significant bits of the number $n$. So the call
+\Call{FirstNBits}{$001101,3$}, for example, would result in the value
+$010$.
 
 \begin{algorithm}[H]
-  \caption{Function for outputting variably sized codes.}
+  \caption{Algorithm for outputting variably sized codes.}
   \label{alg:variable-codes-output}
   \begin{algorithmic}[1]
     \Let{$remainingPacketBits$}{8}
     \Let{$packet$}{0}
     \Let{$shift$}{0}
 
-    \Function{OutputCode}{$codeSize$}
-
-      \Let{$remainingCodeBits$}{0}
+    \Function{OutputCode}{$codeSize,code$}
 
       \Let{$remainingCodeBits$}{$codeSize$}
 
       \linecomment{While the entire code hasn't yet been processed}
-      \While{$remainingCodeBits > 0$} \Comment{If the packet will get filled in this packing.}
-        \If{$remainingPacketBits \leq remainingCodeBits$}
+      \While{$remainingCodeBits > 0$}
 
-          \linecomment{Read as many bytes necessary the fill up the packet.}
-          \Let{$packet$}{$packet \BitOr ($
-            \Call{FirstNBits{code,remainingPacketBits}} $\ShiftLeft
-            shift)$}
+        \linecomment{If the packet will get filled in this packing.}
+        \If{$remainingPacketBits < remainingCodeBits$}
+
+          \linecomment{Read as many bits necessary the fill up the
+            packet.}
+          \Let{$firstNBits$}{\Call{FirstNBits}{$code,remainingPacketBits$}}
+          \Let{$packet$}{$packet \BitOr (firstNBits \ShiftLeft shift)$}
 
           \linecomment{Write the packet}
-          \Call{WriteByte}{$packet$}
+          \State \Call{WriteByte}{$packet$}
 
-          \linecomment{Throw away the bits of the code that has been
-            packed in the now filled packet.}
-          \Dec{$remainingCodeBits$}{$remainingPacketBits$}
+          \linecomment{Throw away the bits of the code that have been
+            read to the packet.}
+          \Dec{remainingCodeBits}{remainingPacketBits}
           \Let{$code$}{$code \ShiftRight remainingPacketBits$}
 
           \linecomment{Reset the packet}
@@ -486,20 +499,22 @@ example, would result in the value $010$.
           \Let{$packet$}{$0$}
           \Let{$shift$}{$0$}
 
-        \Else \Comment{If the rest of the code fit in the entire
+        \Else
+
+        \linecomment{If the rest of the code fit in the entire
           packet.}
 
           \linecomment{Read in the entire code to the packet.}
-          \Let{$packet$}{$packet \BitOr ($
-            \Call{FirstNBits{code,remainingCodeBits}} $\ShiftLeft
-            shift)$}
+          \Let{$code$}{\Call{FirstNBits}{$code,remainingCodeBits$}}
+          \Let{$packet$}{$packet \BitOr(
+             code \ShiftLeft shift)$}
 
           \linecomment{Handle the number shifting of the packet.}
-          \Inc{shift}{remainingCodeBits}
-          \Dec{$remainingPacketBits$}{$remainingCodeBits$}
 
-          \linecomment{The entire code has been processed, so
-            terminate the loop}
+          \Inc{shift}{remainingCodeBits}
+          \Dec{remainingPacketBits}{remainingCodeBits}
+
+          \linecomment{The entire code has been processed, so terminate the loop}
           \Let{$remainingCodeBits$}{$0$}
         \EndIf
       \EndWhile
@@ -627,7 +642,7 @@ some more things we need to discuss until we are done with the LZW
 algorithm.
 
 \begin{algorithm}[H]
-  \caption{LZW non-working decompression algorithm.}
+  \caption{LZW working decompression algorithm.}
   \label{alg:lzw-working-decompression}
   \begin{algorithmic}[1]
     \Let{$oldCode$}{\VoidCall{$InputCode$}}
@@ -701,6 +716,70 @@ which makes the work for the compressor one heck of a lot easier.
     \EndWhile
   \end{algorithmic}
 \end{algorithm}
+
+\subsection{Inputting variably sized codes}
+
+We also need to construct an algorithm for inputting the variably
+sized codes output by the compression algorithm. This algorithm is
+algorithm \ref{alg:variable-codes-input}. Because the way this algorithm operates is extremely
+similar to the outputting algorithm, I will not offer an in depth
+discussion of it. Just read and study the comments carefully and you
+should be fine.
+
+\begin{algorithm}[H]
+  \caption{Algorithm for inputting variably sized codes.}
+  \label{alg:variable-codes-input}
+  \begin{algorithmic}[1]
+    \Let{$remainingPacketBits$}{8}
+    \Let{$packet$}{\VoidCall{ReadByte}}
+
+    \Function{OutputCode}{$codeSize$}
+
+      \Let{$remainingCodeBits$}{$codeSize$}
+      \Let{$code$}{$0$}
+      \Let{$shift$}{$0$}
+
+      \linecomment{While an entire code hasn't yet been read.}
+      \While{$remainingCodeBits > 0$}
+
+        \linecomment{If the current packet doesn't contain enough bits
+          to fill the current code.}
+        \If{$remainingPacketBits < remainingCodeBits$}
+
+          \linecomment{Read the remaining bits of the packet.}
+          \Let{$firstNBits$}{\Call{FirstNBits}{$packet,remainingPacketBits$}}
+          \Let{$code$}{$code \BitOr (firstNBits \ShiftLeft shift)$}
+
+          \linecomment{Read in a new packet. }
+          \Let{$packet$}{\VoidCall{ReadByte}}
+
+          \linecomment{Handle the left shifting of bits.}
+          \Inc{shift}{remainingPacketBits}
+          \Dec{remainingCodeBits}{remainingPacketBits}
+
+        \Else
+
+        \linecomment{If there are enough bits in the current packet to
+          fill the entire code.}
+
+          \linecomment{Read in the entire code to the packet.}
+          \Let{$highestCodeBits$}{\Call{FirstNBits}{$packet,remainingCodeBits$}}
+          \Let{$code$}{$code \BitOr(highestCodeBits \ShiftLeft shift)$}
+
+          \linecomment{Discard the bits from the packet that were
+            written to the code.}
+
+          \Let{$packet$}{$packet \ShiftRight remainingCodeBits$}
+          \Dec{remainingPacketBits}{remainingCodeBits}
+
+          \linecomment{The entire code has been processed, so terminate the loop}
+          \Let{$remainingCodeBits$}{$0$}
+        \EndIf
+      \EndWhile
+    \EndFunction
+  \end{algorithmic}
+\end{algorithm}
+
 
 \section{Efficiency}
 
