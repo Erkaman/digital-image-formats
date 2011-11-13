@@ -3,9 +3,6 @@
 * File Formats and Compression
 http://www.jiscdigitalmedia.ac.uk/crossmedia/advice/file-formats-and-compression/
 
-* How does JPEG actually work?
-http://blogs.msdn.com/b/devdev/archive/2006/04/12/575384.aspx
-
 * Understand Compositing and Color extensions in SVG 1.2 in 30 minutes!
 http://www.svgopen.org/2005/papers/abstractsvgopen/
 
