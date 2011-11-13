@@ -2,7 +2,7 @@
   \bibliography{project.bib}
 \end{comment}
 
-\chapter{\gif -- Graphics Interchange Format}
+\chapter{Graphics Interchange Format}
 \label{cha:gif}
 
 \begin{refsection}
@@ -13,93 +13,96 @@
 
   \subsection{Troublesome Patents}
 
-  AS you may rememerber from the last chapter, the \lzw was
-  inventented by Terry Welch. However, he also filed a software patent
-  for the algorithm. This patent was U.S. Patent 4,558,302
+  As you may remember from chapter \ref{cha:lzw}, the LZW algorithm
+  was invented by Terry Welch. He also filed a software patent for the
+  algorithm. This patent was U.S. Patent 4,558,302
   \cite{welch85:_u,roelofs09:_histor_portab_networ_graph_png_format}.
 
   \newcommand{\compus}{CompuServe\xspace}
 
-  And in 1987, \compus started designing a new \textit{portable and
+  In 1987 \compus started designing a new \textit{portable and
     compressed} image format called \textit{Graphics Interchange
-    Format}, abbreviated \gif. To perform the compression in this new
-  format, \compus chose a small variation of the compression algorithm
-  \lzw. The next thing that \compus did, was that they released this fresh
-  image format to the general public.
+    Format}, abbreviated GIF. To do all the data-compression in this
+  new format, \compus chose to use a small variation of the
+  compression algorithm LZW. Then \compus released this fresh image
+  format to the general public
+  \cite{roelofs09:_histor_portab_networ_graph_png_format}.
 
-  But when they released it, they and the rest of the world had no idea
-  that Unisys where pursuing a patent for the \lzw compression
-  algorithm. And once Unisys had gained the patent and informed the rest
-  of the world of this, the GIF format had already been released!
+  But at the time they released it, they and the rest of the world had
+  no idea that Unisys was pursuing a patent for the LZW compression
+  algorithm. And once Unisys had gained the patent and informed the
+  rest of the world of this, the GIF format had already been released
+  \cite{roelofs09:_histor_portab_networ_graph_png_format}!
 
-  But it wasn't until 1993 that Unisys actually started pursuing
-  companies that were selling software using the \lzw algorithm. And one
-  of those companies that Unisys started attacking because of this was
-  of course \compus. And at christmas day 1994 Unisys and \compus
-  finally came to an agreement: all programmers writing software that
-  creates or reads images will have to have a license from Unisys.
+  But it wasn't until 1993 that Unisys seriously started pursuing
+  companies that were selling software using the LZW algorithm. And
+  one of those companies that Unisys started attacking because of this
+  was, of course, \compus. And at 28 December 1994, Unisys and \compus
+  finally came to an agreement: all companies writing software that
+  creates or reads GIF images will have to purchase a license from
+  Unisys for using the LZW algorithm
+  \cite{roelofs09:_histor_portab_networ_graph_png_format,caie:_sad}.
 
-  This of course causes an uproar in the graphics developer community
-  at the time. Some of these developers formed that would develop a new
-  \textit{free} graphics format that would replace \gif, because
-  \gif was very popular at the time
-  . This
-  new graphisc format was \png, which we will discuss in chapter
-  \ref{cha:png} \cite{roelofs09:_histor_portab_networ_graph_png_format,caie:_sad}.
+  This of course caused an uproar in the graphics developer community
+  at the time. Some of these upset developers formed a group that
+  would develop a new, \textit{free} graphics format that would replace
+  GIF. This new graphics format was PNG, which we shall discuss in
+  chapter \ref{cha:png}
+  \cite{roelofs09:_histor_portab_networ_graph_png_format,caie:_sad}.
 
-  \subsection{Freedom at last}
+  \subsection{Freedom at last!}
 
-  But since 2006 all \lzw related patents have expired. Software
-  developers are in other words finally free to use the \lzw algorithm
-  just as they please. And this also means that the \gif format is
-  finally free from the shackles of Unisys. So programmers are free to
-  write and develop software that deals with \gif images \cite{caie:_sad}.
+  But since 2006 all LZW related patents have expired. Software
+  developers are in other words finally free to use the LZW algorithm
+  just as they please without having to request a license for doing so
+  from Unisys. And this also means that the GIF format is finally free
+  from the shackles of Unisys. \cite{caie:_sad}.
 
-  \section{Introduction to the \gif format}
+  \section{Introduction to the GIF format}
 
-  So, in this chapter we'll be discussing the inner workings of \gif
-  images. Because the \gif format also supports animation, it is
-  slightly more advanced than the \tga format we discussed in chapter
+  So in this chapter we'll be discussing the inner workings of GIF
+  images. Because the GIF format also supports animation, it is
+  slightly more advanced than the TGA format we discussed in chapter
   \ref{cha:tga}. Understanding the general structure of the image
   format is actually the easiest part, the hardest part of the format
   is the compression algorithm that it uses, which is a small
-  variation of the \lzw algorithm. But since we have already discussed the \lzw
-  algorithm in chapter \ref{cha:lzw}, this will only be marginally
-  difficult.
+  variation of the LZW algorithm. But since we have already discussed
+  the LZW algorithm in chapter \ref{cha:lzw}, this will only be
+  marginally difficult.
 
-  There are actually two version of the \gif format: version 87a and
+  There are actually two version of the GIF format: version 87a and
   89a. Version 89a is obviously the newer of these two versions and
-  was released in 1989. \gif images that are of version 87a don't
+  was released in 1989. GIF images that are of version 87a don't
   support all of the features of version 89a and they are nowadays
-  very rare. And since 89a is backwards compatible with 87a, we'll
-  only be focusing on version 89a \cite{gif89a,gif87a}.
+  very rare. And since version 89a is backwards compatible with
+  version 87a, we'll only be discussing version 89a in this chapter
+  \cite{gif89a,gif87a}.
 
-  The entire version 89a of the \gif format is specified in this
+  The entire version 89a of the GIF format is specified in this
   document: \cite{gif89a}.
 
-  \section{The building blocks of the \gif format}
+  \section{The building blocks of the GIF format}
 
   \subsection{Blocks}
 
-  The \gif format is organized into blocks. There are three kinds of
+  The GIF format is organized into so called blocks blocks. There are three kinds of
   blocks:
 
   \begin{enumerate}
-  \item  control blocks
+  \item control blocks
   \item graphic-rendering blocks
   \item special purpose blocks
   \end{enumerate}
 
-  Controls blocks are used to specify how an image should be
-  displayed to and how to image data should be read.
+  Controls blocks are used to specify how an image should be displayed
+  and gives information about how the image data should be read.
 
-  Graphic rendering blocks are used to actually render, display, an
-  image on the screen. They tend to contain the color data of the
-  image. Controls blocks affect how graphics rendering blocks are to
-  be displayed. Control blocks always occur before graphics rendering
-  blocks and they often have a limited \textit{scope}, meaning that
-  they almost always only affect the graphics rendering block that
-  follow them. You'll understand better what this means later.
+  Graphic rendering blocks are used to contain the color data that
+  should be rendered, displayed, on the screen. Control blocks always
+  occur before graphics rendering blocks and they often have a limited
+  \textit{scope}, meaning that they almost always only affect the
+  graphics rendering block that follow them. You'll understand better
+  what this means later.
 
   And miscellaneous things that aren't handled by the two former
   block types are done by the special purpose blocks.
@@ -114,42 +117,45 @@
   \end{description}
 
   \subsection{Data Sub-blocks}
+  \label{sec:gif-data-sub-blocks}
 
-  Sub-blocks are used to store data in \gif images that definition is
-  sequential. Example of such data is the color data. They are really
-  just a long sequence of bytes. Let's go through the parts of a sub-block one after one:
+  Sub-blocks are used to store data in GIF images that by definition
+  is sequential. An example of such data is the compressed color data,
+  which is just long sequence codes that were outputted in the GIF
+  variation of the LZW algorithm. Sub-blocks is just sequence of
+  smaller blocks so let's go through the parts of such a sub-block:
 
   \subsubsection*{Block Size(Byte)}
 
-  At the beginning of every sub-block is its size. This value is fit
-  into a byte, meaning that the maximum size of sub-block is only
-  255.
+  At the beginning of every sub-block is its size. This value is put
+  into a single byte, meaning that the maximum possible size of a
+  sub-block is 255.
 
   \subsubsection*{Block Data Values(Bytes)}
 
   Following the block size is sequence of bytes. These bytes are the
-  value of the sub-block. The number of bytes in the sub-block is of
-  course the block size that was specified by the block size.
+  data of the sub-block. The number of bytes in the sub-block is the
+  size of the block size field that was specified earlier.
 
-  So the maximum size of sub-block is only $255$ bytes. And data
-  sub-blocks is just sequence of sub-blocks such as this. A sub-block
-  is read one by one in such a sequence until the block terminator is found:
+  The the sub-blocks are read one by one until the block terminator is
+  found:
 
-  \subsubsection*{Block Terminator}
+  \subsubsection*{Block Terminator(Byte)}
 
-  If after reading a sub-block the next byte is 0, that means that you
-  have found the emmpty sub-block. This sub-block is also known as the
-  block-terminator. Should such a block be discovered you have reached
-  the end of the sequence.
+  If after reading a sub-block the next byte found is 0, that means
+  that you have found the empty sub-block. This sub-block is also
+  known as the block-terminator. Should such a block be discovered, you
+  have reached the end of a sub-blocks sequence.
 
   Figure \ref{fig:gif-data-sub-blocks} demonstrates how the string
-  ``ERICA'' would be stored using data sub-blocks. As can be seen, it
+  ``ERICA'' could be stored using data sub-blocks. As can be seen, it
   is perfectly acceptable that the data is split over several
-  sub-blocks. But this example may seem a bit silly, because the
-  string ``ERICA'' easily be fit into a single block instead o
-  splitting it into. But this was only done for demonstrative purposes
-  and more efficent way of storing the string would be putting it all
-  into one block of length $5$.
+  sub-blocks, because when reading the sub-blocks all of this data is
+  concatenated into one large string. But this example may seem a bit
+  silly, because the string ``ERICA'' can easily be fit into a single
+  block instead of splitting it into two. But this was only done for
+  demonstrative purposes and a more efficent way of storing the string
+  would be putting it all into one sub-block of length $5$.
 
   Because the data is split up over several sub-blocks, reading it may
   be a bit tricky. Algorithm \ref{alg:gif-sub-blocks} demonstrates one way of reading all the
@@ -158,10 +164,9 @@
   \begin{figure}
     \centering
     \inputtikz{gif_subblocks}
-    \caption{\gif Data Sub-Blocks}
+    \caption{GIF Data Sub-Blocks storing the string ``ERICA''}
     \label{fig:gif-data-sub-blocks}
   \end{figure}
-
 
   \begin{algorithm}[H]
     \caption{Reading all the data of sequence of sub-blocks into one array.}
@@ -172,7 +177,7 @@
       \Repeat
       \Repeatn{$blockSize$}
       \Let{$data[i]$}{\VoidCall{ReadByte}}
-      \Inc{$i$}{$1$}
+      \Inc{i}{1}
       \EndRepeatn
 
       \Let{$blockSize$}{\VoidCall{ReadByte}}
@@ -181,15 +186,14 @@
     \end{algorithmic}
   \end{algorithm}
 
-
-  \subsection{Packet Fields}
+  \subsection{Packed Fields}
 
   Another kind of data storage mechanism are packed fields. In packed
-  fields the fields values are stored bits in a byte. To make things
-  easier we'll be calling the top bit, the one usually called bit 7 or
-  8, bit 1, and we'll call the lowest bit, that is usually called bit
-  1 or 0, bit 8. See also figure \ref{fig:gif-packed-fields} for a
-  more detailed byte bit-layout.
+  fields the fields values are stored in the bits of a single byte. To
+  make things easier we'll be calling the top bit, the one usually
+  called bit 7 or 8, bit 1, and we'll call the lowest bit, the bit
+  that is usually called bit 1 or 0, bit 8. See also figure
+  \ref{fig:gif-packed-fields}.
 
   \begin{figure}
     \centering
@@ -198,102 +202,92 @@
     \label{fig:gif-packed-fields}
   \end{figure}
 
-  \subsection{Notation}
+  \subsection{Extensions}
 
-  Now we will be describing all the possible kinds of sub-blocks that
+  Extension block are used to modify the behavior of other blocks. You
+  can say that they \textit{extend} their behavior. To make them
+  easier to identify, the extension blocks always begin with the value
+  \hex{21}. This value is also known as the extension
+  introducer\index{extension introducer}. Following the extension introducer is the extension
+  label. This field identifies the kind of an extension.
+
+  After these two labels you can find a sequence of sub-blocks
+  containing all of the data of the extension block. The data is
+  stored like this to make it easier to skip over the extension block,
+  because the data of some extension blocks is not at all necessary to
+  properly render the file.
+
+  \section{Header Blocks}
+
+  Now we will be describing all the possible kinds of blocks that
   can occur in a GIF file. We'll be describing them in the order they
   usually appear. I will also be telling which blocks are required and
   which blocks are optional.
-
-  \section{Header Blocks}
 
   Coming first in the GIF file format are the header blocks.
 
   \subsection{Header(Required)}
 
-  The header contains the mag numbers of the GIF format and is always
-  first in a proper \gif.
+  The header contains the magic numbers\index{magic number} of the GIF format and is always
+  first in a GIF-file.
 
   \subsubsection*{Signature(3 bytes)}
 
-  Identifies the file as \gif-file. It always contains the
-  value ``GIF''.
+  Identifies the file as a GIF-file. This field always has the value
+  ``GIF''.
 
   \subsubsection{Version(3 bytes)}
 
-  Contains the value of the version of the \gif-file. Remember, there
-  are two version of the \gif format: ``87a'' and ``89a'', and these
-  two are the two only possible values of this field.
+  Gives the version of the GIF-file. Remember, there are two version
+  of the GIF format: ``87a'' and ``89a'', and these two are the two
+  only possible values of this field.
 
   \subsection{Logical Screen Descriptor(Required)}
 
   Following the header block is always the logical screen descriptor
   block. This block contains information about the global color
-  table(we'll discuss this block very soon) and about the image
-  measurements.
+  table(we'll discuss this block very soon) and the sizes of the
+  screen the image will be rendered on.
 
   \subsubsection{Logical Screen Width(Unsigned)}
-
-  Width of the logical screen where the image will be rendered. So
-  this fields is basically the image width. However, do note that the
-  \gif format allows several images to be stored in a \gif-file to
-  allow for such things as animation. These images can measurements
-  that are smaller than, but not greater than the logical screen
-  measurements.
-
   \subsubsection{Logical Screen Height(Unsigned)}
 
-  Gives the height of the logical where the image will be rendered.
+  These give the size of the logical screen where the image will be
+  rendered. So these fields are basically the image
+  measurements. However, do note that the GIF format allows several
+  images to be stored in a GIF-file to allow for such things as
+  animation. These images can have measurements that are smaller than
+  but not greater than the logical screen measurements.
 
   \subsubsection{Packed Fields}
 
-  This packed field contains data about the global color table. Even
-  if there's not a global color table it will still occur in the
-  logical screen descriptor.
+  This packed field contains data about the global color table of the
+  file. This field will always be found here, even if there is no
+  global color table in the image to be found.
 
   \paragraph{Bit 1 --  Global Color Table Flag}
 
   This flag indicates whether there is a global color table in the
-  image. The global color table always comes after the logical screen
-  descriptor, so we'll be describing that field pretty soon. This
-  field works like many other flags like a simple boolean value; if it
-  is \textbf{1} it is \textbf{true}, otherwise it must be zero and is
-  therefore \textbf{false}.
+  image.
 
   \paragraph{Bit 2-4 -- Color resolution}
 
   Now, this field has a very misleading name. You may think this field
   is simply used to indicate the color depth of the image, but it is
   not. This field indicates the color resolution of the
-  \textit{original image}! You see, the \gif has a very limited range
+  \textit{original image}! You see, the GIF has a very limited range
   of colors. It only permits for a palette of maximum length 256,
-  where every color has color depth of 24 bits. You can however also
-  vary the size of this palette, making the resulting image smaller,
-  but also resulting in a image of lower quality.
+  where every color has color depth of 24 bits.
 
-  Let's we have an image some other forein format and we wan't to
-  convert it to a \gif. We first note that the color depth of this
-  example is 24. This means that the number of bits reserved to each
-  primary color is 8. So, when converting this image to a \gif the
-  value of this field will 7, which is $8-1$, because remember; the
-  maximum value of a 3-bit number is $2^3 - 1 = 7$.
-
-  In other words: the value of this field is number of bits er primary
-  in the original image minus.
-
-  But isn't this field really useful to reading the color data? Why
-  yes, you are right. The only real usage I can see to this, is to how
-  much image quality this image has compared to the original image,
-  but it is very rarely you would want to do that, and you tend to get
-  much better result by comparing the converted \gif image with the
-  original image.
+  Since this field gives no rendering information about the image,
+  this field is pretty much useless and you can safely ignore it.
 
   \paragraph{Bit 5 -- Sort Flag}
 
   If this flag is true, the colors in the global color table are
-  sorted in the order decreading importance. This typically means that
-  the most frequently used colors are sorted first. According to
-  \cite{gif89a} this is to, and I quote:
+  sorted in the order decreading importance. This means that the most
+  frequently used colors are sorted first in the color
+  table. According to \cite{gif89a}:
 
   \begin{quote}
     This assists a decoder, with fewer available colors, in choosing
@@ -301,21 +295,24 @@
     of the table to render the graphic.
   \end{quote}
 
-  What this basically means, is that the decoder can get a away with
+  What this basically means is that the decoder can get a away with
   only loading the first few colors of the color table and still get a
-  decently we'll rendered image with some few rarely used color not
-  rendered. This is done to make the loading and rendering process
-  quicker, I suspect.
+  decently well-rendered image. if this is done there will be some
+  gaps in the rendered image, because certain rarely used colors will
+  not be rendered at all. the reason that you would want to do this is
+  that it would make the loading and rendering process quicker, i
+  think.
 
-  But this fields is as good never used nowadays. You can perfectly
-  safely ignore of it without harming the loading process.
+  but because of how powerful the computers of today are, this field
+  is as good never used nowadays and you can safely ignore of it
+  without harming the loading process.
 
   \paragraph{Bit 6-8 -- Color Table Size}
 
   This field is used to calculate the size of the global color
   table. If we let the variable $n$ signify the value of this field,
   then the \textit{real} size of the global color table can be
-  calculated by the formula:
+  calculated with the formula:
 
   \begin{equation}
     \label{eq:calc-global-color-table-size}
@@ -324,14 +321,11 @@
 
   \subsubsection{Background Color Index(Byte)}
 
-  This field's value is the index if the color table that should be
-  considered fully transparent. That is: this field gives the value of
-  the color table index that transparent.
+  This field's value is the index of the color table that should not
+  be rendered at all. You see, in the GIF format images may be
+  rendered in sequende after each other. Pixel that have this index
+  render pixels of the image ``below'', or before the current image.
 
-  So as you can see from this field, the \gif format supports a very
-  simple form of transparency. But it doesn't support any form of the
-  alpha color channel. Either a pixel is color or it is not, there is
-  no state in between.
 
   \subsubsection{Pixel Aspect Ratio(Byte)}
 
@@ -349,25 +343,28 @@
 
   After the logical screen descriptor comes the global color
   table. However, if the Global Color Table flag is set to
-  \textbf{false}, the global color table will not occur at all within
+  \textbf{false} the global color table will not occur at all within
   the image!
 
-  The global color table is just as in any other format a just long
-  array of color. Every color is given 24 bits and every primary color
-  is given 8-bits. So the length of this field is $3 \cdot
+  The global color table is just as in any other image format long
+  array of colors. Every color is given 24 bits and every primary
+  color is given 8-bits. So the length of this field is $3 \cdot
   \textrm{Global Color Table Size}$. In which $\textrm{Global Color
-    Table Size}$ is calculated in equation
-  (\ref{eq:calc-global-color-table-size}). Figure
-  \ref{fig:gif-color-table} shows an example of a global color table
-  in your typical \gif image. The size of the global table size given
-  in the packed field of the logical screen descriptor will in the
-  case of this color table have the value $0$. The number of bytes in
-  this color table can then be calculated like so:
+    Table Size}$ is calculated according to equation
+  (\ref{eq:calc-global-color-table-size}).
+
+  Figure \ref{fig:gif-color-table} shows an example of a global color
+  table in your typical GIF image. The size of the global table size
+  given in the packed field of the logical screen descriptor will in
+  the case of this color table have the value $0$. The number of bytes
+  in this color table can then be calculated like so:
+
+  \todo{fix this explanation }
 
   \begin{figure}
     \centering
     \inputtikz{gif_color_table}
-    \caption{Example of \gif color table }
+    \caption{Example of GIF color table }
     \label{fig:gif-color-table}
   \end{figure}
 
@@ -377,65 +374,67 @@
 
   \subsection{Local Color Tables(Optional)}
 
-  If there is a not a global color table in the \gif image, a local
-  color table is instead used. the local color table is always right
-  before the image data, or the table based image data as we also
-  refer to it. This laid out just like the global color table. It's
-  size is however given by a block we will discuses later.
+  If there is a not a global color table in the GIF image, a local
+  color table is instead used. The local color table is always right
+  before the image data. This block laid out just like the global
+  color table block. It's size is however given by a block we will discuses
+  later.
 
-  \section{Preimage data blocks}
+  \section{Preimage Data Blocks}
 
   The preimage data blocks always occur before the color data and help
-  the decoder in loading data and tells how the image is to be
+  the decoder in loading the data and described how the image is to be
   rendered.
 
   \subsection{Image Descriptor(Required)}
 
-  Before the image there will \textit{always} be a Image
+  Before the image data there will \textit{always} be a Image
   Descriptor. It contains the data you need to know to properly render
   and process the image data.
 
   \subsubsection{Image Separator(Byte)}
 
-  This identifies the field as an image descriptor. It always has the
-  value \hex{2C}. As you will soon see, this field is very useful for
-  when loading a \gif image.
+  This field identifies the block as an image descriptor and it always
+  has the value \hex{2C}.
 
   \subsubsection{Image Left Position(Unsigned)}
   \subsubsection{Image Top Position(Unsigned)}
 
-  The position of the image on the screen in respect to the logical
-  screen descriptor specified in the logical screen descriptor.
+  These fields give the position of the image on the screen in respect
+  to the logical screen descriptor specified in the logical screen
+  descriptor. If these two fields both have the value zero, the image
+  is rendered in the top-left of the logical screen. If the values are
+  for instance 4 and 2, the image is shifted 4 pixels to the right and
+  2 pixels down before being rendered.
 
   \subsubsection{Image Width(Unsigned)}
   \subsubsection{Image Height(Unsigned)}
 
   These fields allows you to specify the size of the image.
 
-  Do note that these 4 fields allow you to move around the image on
-  the logical screen pretty much freely. This turns out the be very
-  useful when making animated images. More on this later \dots
-
   \subsubsection{Packed Fields(Byte)}
 
   \paragraph{Bit 1 -- Local Color Table Flag}
 
   This flag tells whether a local color table is found after this
-  block. 
+  block.
 
-  An image in a \gif image can have a specific color table, local to
-  only itself. An image \textit{needs} to have a local color table if
-  no global color table is in the image. If no global table is in the
-  image \textit{every} image in the \gif must have a local color
-  table.
+  A separate image in a GIF-file can have a specific color table,
+  local to only itself. An image \textit{needs} to have a local color
+  table if no global color table is in the image. If no global table
+  can be found in the file \textit{every} image in the GIF-file must
+  have a local color table.
 
   However, if an image do have a global color table, but the existence
-  of a global color table is indicated by this, that means that the
-  local color table will be used instead of the global color table.
+  of a local color table is indicated by this field, that means that
+  the local color table will be used instead of the global color
+  table.
 
   \paragraph{Bit 2 -- Interlace Flag}
 
   This flag indicates whether the image is interlaced.
+
+  \todo{explain interlacing}
 
   \paragraph{Bit 3 -- Sort Flag}
 
@@ -446,49 +445,402 @@
   \paragraph{Bit 4-5 -- Reserved}
 
   These bits are reserved, meaning that their both values are set to
-  $1$ and that they are \textit{unused}.
+  $0$ and that they are \textit{unused}.
 
   \paragraph{Bit 5-8 -- Size of Local Color Table}
 
-  The size of the local color table. The actual size of the local
-  color table is calculated in the same way it is in the global color
-  table:
+  Helps calculate the size of the local color table. The actual size
+  of the local color table is calculated in the same way as it is in
+  the global color table:
 
   \begin{equation*}
     \textrm{Local Color Table Size} = 2^{n + 1}
   \end{equation*}
 
-  \subsection{Graphic Control Extension}
+  \subsection{Graphic Control Extension(Optional)}
 
-  
+  The Graphic Control block is an extension block that mostly controls
+  how the animation is done in an animated GIF image.
+
+  \subsubsection{Extension Introducer}
+
+  This field Identifies the block as an extension block and it always
+  contains the value \hex{21}.
+
+  \subsubsection{Graphic Control Label}
+
+  Identifier the extension block as a graphic control extension
+  block. Contains the fixed value \hex{F9}.
+
+  \subsubsection{Block Size}
+
+  The data in the graphic control extension block is contained in one
+  single sub-block. This is the size of that one sub-block, which is
+  \textit{always} $4$.
+
+  \subsubsection{Bits 1-3 -- Reserved}
+
+  \textit{Unused}.
+
+  \subsubsection{Bits 4-6 -- Disposal Method}
+
+  Now this is one interesting field. When a GIF image is animated the
+  file essentially contains a sequence images. In the animation these
+  images are displayed one after one. After each image has been
+  displayed, you can do different things to dispose of the previous
+  image when current image is to be displayed. The action that will be
+  performed in order to dispose of the former image is specified by
+  this field. The different possible actions are:
+
+  \begin{description}
+
+  \item[0] No disposal is specified. This basically means that
+    the decoder doesn't need to do anything at all.
+
+  \item[1] Do not dispose the previous image. The current image is
+    rendered over the previous one. This is very useful for when you
+    in an animation only want change small parts of an image.
+
+  \item[2] After the former image has been displayed the area used by
+    it must be restored to the background color when the next image is
+    to be rendered. The background color was, as you should know,
+    specified by the Background Color Index field of the logical
+    screen descriptor.
+
+  \item[3] Restore to previous. Meaning that the decoder must restore
+    the area taken up by the former and replace it with what was
+    rendered there before the former image. \todo{explain this one a
+      bit better.}
+
+  \item[4-7] These actions are undefined and they should never ever be
+    found in a valid GIF-file.
+  \end{description}
+
+  \subsubsection{Bit 7  -- User Input Flag}
+
+  If this flag is true, the loading of the next field will continue
+  only after user has entered some input determined by the application
+  loading the image.
+
+  But in practice this field is never used and practically no applications
+  in existence support it.
+
+  \subsubsection{Bit 8 -- Transparency Flag }
+
+  This flag whether the Transparency Index field should be used, if
+  the value of this is \textit{false} then the value in that field must be
+  ignored.
+
+  \subsection{Delay Time(Unsigned)}
+
+  This specifies the number of centiseconds the decoder should wait after
+  having rendered the image. This is very useful for when making
+  animated GIFs. A centisecond is a hundredth of a
+  second:
+
+  \begin{equation*}
+    \SI{1}{\centi\second} = \frac{1}{100}\si{\second}
+  \end{equation*}
+
+  \subsection{Transparency Index(Byte)}
+
+  If this field is to be used(as is specified in the Transparency
+  Flag.), it contains the color index that should not be rendered at
+  all when encountered.
+
+  So as you can see from this field, the GIF format supports a very
+  simple form of transparency. But it doesn't support any form of the
+  alpha color channel. Either a pixel is colored or it is not, there is
+  no state in between.
+
+  \subsection{Block Terminator(Byte)}
+
+  This field terminates the sub-block that this extension block
+  consists of.
 
   \section{Rendering blocks}
 
+  For storing the data to be rendered from a GIF image these blocks
+  are used.
+
   \subsection{Table Based Image Data}
+
+  Now we have finally reached the most important kind of block that
+  you can find in a GIF file: the table based image data block. Since this
+  block is rather complex we'll explain it in two steps: first we'll
+  explain the fields of this blocks, and we'll explain how to extract
+  the image data from the data given in the fields of this block.
+
+  \subsubsection{LZW Minimum Code Size(Byte)}
+
+  The GIF format uses a variation of the LZW compression algorithm
+  for storing it's color data. The huge difference between the
+  original LZW algorithm and the version used in GIF is that the
+  code sizes of the individual codes increase as bigger codes are
+  needed in the image data. We'll explain this a lot more in depth
+  soon.
+
+  \subsubsection{Compressed Image Data(Sub-blocks)}
+
+  The compressed image data is stored in a sequence of sub-blocks. If
+  you want to extract the full sequence of data values of these
+  sub-blocks I refer you to algorithm \ref{alg:gif-sub-blocks}.
+
+  \subsubsection{The Compression Algorithm}
+
+  Now we are to discuss how to decompress the color using the
+  information given in the two previous fields. The full decompression
+  algorithm is given in algorithm \ref{alg:gif-decompression}. As you
+  can see, it is extremely to the original LZW algorithm. Let us now
+  go through the most important differences.
+
+  At the beginning the algorithm a table is filled all of the colors
+  of the color table local to the data. However, two additional codes
+  are added to the color table: the clear and the end codes. If for
+  example of our color table consisted of the colors black and white,
+  the resulting color that would be used in the decompression
+  algorithm is then given in table
+  \ref{tab:example-gif-color-table}. These codes only occur in the GIF
+  version of the LZW algorithm. If the clear code is found the color
+  table is reset and restored to it's initial state. And if the End
+  Code is found that means that the end of the compressed data has
+  been reached and that the algorithm thus should terminate.
+
+\begin{table}
+    \centering
+    \begin{tabular}{ll}
+      \toprule
+      Color & Code \\
+      \midrule
+      Black & 0 \\
+      White & 1 \\
+      Clear Code & 2 \\
+      End Code & 3 \\
+      \bottomrule
+    \end{tabular}
+    \caption{Example of an initial GIF color table.}
+    \label{tab:example-gif-color-table}
+  \end{table}
+
+  And the second huge difference in the GIF version of the LZW
+  algorithm, is code sizes used increases. The minimum code size given
+  at the beginning of this block is used to specify the number that is
+  one less than the code size we should be starting with. So this is
+  one less than the size of the codes that we should be inputting.
+
+  Every time a new code is added to the table we check if the size of
+  the current code is also equal to the max value of the current code
+  size. If so, and the code is not equal to it's maximum allowable
+  value in the GIF format -- $12$ -- then the value of the code size
+  is increased by one.
+
+  And these are the greatest differences between the original LZW
+  algorithm and the GIF version.
+
+  \begin{algorithm}[H]
+    \caption{GIF Decompression algorithm}
+    \label{alg:gif-decompression}
+
+    \newcommand{\InputCodeSize}{\Call{inputCode}{$codeSize$}}
+
+    \begin{algorithmic}[1]
+
+      \Let{$ClearCode$}{$colorTableSize$}
+      \Let{$EndCode$}{$colorTableSize + 1$}
+
+      \Let{$IntitalCodeSize$}{\VoidCall{ReadByte} $+ 1$} \Comment{
+        Read the initial code size}
+      \Let{$codeSize$}{$IntitalCodeSize$}
+
+      \State \InputCodeSize \Comment{Skip the first
+        clear code}
+
+      \State \VoidCall{resetCompressionTable}
+      \Let{$nextCode$}{$colorTableSize + 2$}
+
+      \Let{$oldCode$}{\InputCodeSize}
+      \State \Call{outputCode}{oldCode}
+
+      \Let{$character$}{$oldCode$}
+      \Let{$newCode$}{\InputCodeSize}
+
+      \While{$newCode != EndCode$}
+
+        \If{$newCode = ClearCode$}
+
+        \linecomment{Reset the compression table if a clear code is
+          found}
+
+          \State \VoidCall{resetCompressionTable}
+          \Let{$nextCode$}{$colorTableSize + 2$}
+          \Let{$codeSize$}{$IntitalCodeSize$}
+
+          \Let{$oldCode$}{\InputCodeSize}
+          \Call{outputCode}{oldCode}
+
+          \Let{$newCode$}{\InputCodeSize}
+
+        \EndIf
+
+        \If{$\NOT$ \Call{IsInTable}{$newCode$}}
+          \Let{$string$}{\Call{translate}{oldCode}}
+          \Let{$string$}{$string + character$}
+        \Else
+          \Let{$string$}{\Call{translate}{$newCode$}}
+        \EndIf
+
+        \State \Call{outputString}{$string$}
+
+        \Let{$character$}{$string[0]$}
+
+       \If{$nextCode \leq (2^{12} - 1)$}
+
+          \State \Call{$AddToStringTable$}{$nextCode, oldCode, character$}
+
+          \If{$nextCode == 2^{codeSize} - 1 \And nextCode \ne 2^{12} -
+            1$}
+            \Inc{codeSize}{1}
+          \EndIf
+          \Inc{nextCode}{1}
+      \EndIf
+
+      \Let{$oldCode$}{$newCode$}
+
+      \Let{$newCode$}{\VoidCall{$ReadByte$}}
+
+      \EndWhile
+
+    \end{algorithmic}
+  \end{algorithm}
 
   \subsection{Plain Text Extension}
 
-  \section{Ending}
-
-  \subsection{Trailer}
+  The second way of storing rendering data is through the plain text
+  extension. This extension basically allows you to render text as
+  graphic in a GIF image. While this might have been seen as a good
+  idea at the time it was thought up, nowadays practically no programs
+  implement support for this block. In writing a GIF decoder you may
+  very safely assume that you will never ever find this block, but if
+  you do indeed find it just ignore it.
 
   \section{Miscellaneous Blocks}
 
-  \subsection{Comment Extension}
+  \subsection{Trailer(Required)}
+
+  Once we have reached the trailer we have also reached the end of the
+  image file. Once the trailer block has been reached, the decoder's
+  job is done. It is a single field block containing only one value:
+
+  \subsubsection{GIF trailer(Byte)}
+
+  Identifies the block as the trailer block. Always has the value
+  \hex{3B}.
+
+  \subsection{Comment Extension(Optional)}
+
+  The comment extension blocks allows you to embed a comment into a
+  GIF-file. This block is very rare in GIF files nowadays and if you
+  only want to load the image data you can safely ignore it.
+
+  \subsubsection{Extension Introducer(Byte)}
+
+  Identifies the block as an extension block. Always contains the
+  value \hex{21}.
+
+  \subsubsection{Comment Label(Byte)}
+
+  This label identifies this extension block as a comment extension
+  block. Contains the constant value \hex{FE}.
+
+  \subsubsection{Comment Data(Data Sub-block)}
+
+  Containg the comment data is just a long sequence of data
+  sub-blocks. I refer you back to section \ref{sec:gif-data-sub-blocks} if
+  you want to know how load of these sub-blocks.
+
+  \subsubsection{Block Terminator(Byte)}
+
+  And this zero-length data block terminates the data sub-blocks and hence
+  the comment data.
 
   \subsection{Application Extension}
 
+  The application extension block allows you to give information to a
+  specific application about a GIF file. Because this block is
+  entirely application specific, it may seem pointless to give a
+  thourough disscussion of this block. But since it is this block that
+  allows an animated GIF image to be infinitely looped, this is indeed
+  a very intesting block.
+
+  \subsubsection{Extension Introducer(Byte)}
+
+  Identifies the block as an extension block. Always has the value
+  \hex{21}.
+
+  \subsubsection{Extension Label(Byte)}
+
+  Identifier the extension block as an application extension
+  block. Always has the value \hex{FF}.
+
+  \subsubsection{Block Size}
+
+  The block size of the application extension block. Has the constant
+  value $11$.
+
+  \subsubsection{Application Identifier(8 Bytes)}
+
+  This identifies the application that this block is supposed to
+  affect.
+
+  \subsubsection{Application Authentication Code(3 Bytes)}
+
+  These values are used to show the that Application Identifier is
+  authenticated to the application given in the application
+  identifier.
+
+  \subsubsection{Application Data(Sub-blocks)}
+
+  This sequence of data sub-blocks contains the actual data that
+  passed to the application. Different data given in this sequence of
+  data sub-blocks often results in the application reacting
+  differently to this block.
+
+  \subsection{Infinite GIFs}
+
+  Using the application extension we can make an animated GIF repeat
+  it's animation infinitely long.
+
+  This is done using the Netscape Application Extension. The
+  Application Identifier is given the value ``Netscape'' and the
+  Application Authentication Code is given the code ``2.0''. The
+  application data always consists of a single sub-block of length
+  3. Let us go through the values of this single sub-block:
+  \cite{frazier97:_all_about_gif89}
+
+  \subsubsection{Constant(Byte)}
+
+  This is field doens't really have a formal name, so I named it
+  constant, because it always has the constant value $1$.
+
+  \subsubsection{Iterations(Unsigned)}
+
+  This number indicates the number of times the animation should be
+  repeated. If this value is $0$ the animation will loop infinitely.
+
+  The Netscape application extension block was first used by the web
+  browser Netscape. Other software developpers then saw that the block
+  was a good idea and started implementing support for the block in
+  their programs, and that is how the use of this block spread. The
+  name Netscape Application Extension has stuck ever since because you
+  didn't want to break old GIFs just because you wanted to make a
+  silly name change \cite{walte96:_web_scrip_secret_weapon}.
+
   \section{Wrapping it up}
 
-  % netscape application extension
-  % http://www.etsimo.uniovi.es/gifanim/gifabout.htm#net-extension
-
-  % more gif
-  % http://netghost.narod.ru/gff/graphics/summary/gif.htm#GIF-DMYID.1
-
-  % file:///C:/Users/Eric/Downloads/WEBSSW/CH7.HTM#AnimatedGIFs
-
-  % show syntax of gif file.
+  So, to make an animated GIF, all you really do is specify a sequence
+  of smaller images within a GIF file. But in which order should all
+  the blocks of a GIF image occur for the GIF file to be considered
+  well formed.
 
   \printbibliography[heading=subbibliography]
 

@@ -327,7 +327,7 @@ void loadImageColorData(FILE * in)
                        character);*/
 
             if(nextCode == (pow(2,codeSize) - 1) &&
-               nextCode != (pow(2,12) - 1) ){
+               codeSize != 12 ){
 
                 ++codeSize;
 /*                debugPrint("New code size:%d\n",codeSize);*/

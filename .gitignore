@@ -9,6 +9,7 @@
 *.unc
 
 auto/
+WEBSSW/
 
 # outputted by latex and its various helper programs.
 *.aux
