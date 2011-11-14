@@ -56,22 +56,6 @@ int main(int argc, char *argv[])
     char * inFile;
     char extension[5];
 
-/*    codeSize = 9;
-    out = fopen("out","wb");
-
-    outputCode(4,out);
-    outputCode(3,out);
-    outputCode(0,out);
-
-    fclose(out);
-
-    in = fopen("out","rb");
-
-    printf("%d\n",inputCode(in));
-    printf("%d\n",inputCode(in));
-
-    exit(0);*/
-
     codeSize = 12;
     verbose = 0;
 
