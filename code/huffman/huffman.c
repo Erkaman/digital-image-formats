@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
+#include <ctype.h>
 #include "../common.h"
 
 int verbose;
@@ -9,6 +11,25 @@ void printHelp(void);
 
 void huffmanCompress(FILE * in,FILE * out);
 void huffmanDecompress(FILE * in,FILE * out);
+void verbosePrint(const char * format, ...);
+
+typedef struct{
+    BYTE symbol;
+    unsigned long frequency;
+}  alphabetSymbol;
+
+typedef struct{
+    alphabetSymbol frequencies[255];
+    BYTE length;
+} frequencyTable;
+
+int alphabetSymbolCompare(const void * a, const void * b);
+
+frequencyTable buildFrequencyTable(FILE * in);
+
+void printFrequencyTable(frequencyTable freqTable);
+
+frequencyTable makeNewFrequencyTable(void);
 
 int main(int argc, char *argv[])
 {
@@ -19,7 +40,9 @@ int main(int argc, char *argv[])
     int decompress = 0;
     char extension[5];
 
-    verbose = 0;
+    verbose = 1;
+
+
 
     if(argc == 1){
         printf("No file was specified.\n");
@@ -28,7 +51,7 @@ int main(int argc, char *argv[])
 
         /* do the command line parsing */
 
-        ++argv;
+        /*++argv;
         --argc;
         while(1){
 
@@ -43,7 +66,9 @@ int main(int argc, char *argv[])
 
             ++argv;
             --argc;
-        }
+        }*/
+
+	++argv;
 
         inName = *argv;
         in = fopen(inName,"rb");
@@ -96,6 +121,13 @@ void printHelp(void)
 
 void huffmanCompress(FILE * in,FILE * out)
 {
+    frequencyTable freqTable;
+
+    /* build the frequency table */
+    freqTable = buildFrequencyTable(in);
+
+    printFrequencyTable(freqTable);
+
     in = in;
     out = out;
 }
@@ -104,4 +136,100 @@ void huffmanDecompress(FILE * in,FILE * out)
 {
     in = in;
     out = out;
+}
+
+frequencyTable buildFrequencyTable(FILE * in)
+{
+    frequencyTable freqTable;
+    unsigned long frequencies[255];
+    int symbol;
+    int i;
+    int freqTablei;
+    /* Start at the beginning of the file. */
+
+    fseek(in,0,SEEK_SET);
+
+    for(i = 0;i < 255; ++i)
+	frequencies[i] = 0;
+
+    /* find the freqencies of all the possible values a byte can have.
+     In other words; find the frequency of all the symbols in the file.*/
+
+    symbol = getc(in);
+    while(symbol != EOF){
+
+	++frequencies[symbol];
+
+	symbol = getc(in);
+    }
+
+    /* Organize all the frequencies into a neat frequency table. */
+
+    freqTable.length = 0;
+    freqTablei = 0;
+
+    for(i = 0;i < 255; ++i){
+	/* If the symbol occurred at all in the file*/
+	if(frequencies[i] != 0){
+
+	    /* Put the symbol and its information into the frequency table */
+
+	    freqTable.frequencies[freqTablei].symbol = i;
+	    freqTable.frequencies[freqTablei].frequency = frequencies[i];
+
+	    ++freqTablei;
+	    ++freqTable.length;
+	}
+    }
+
+    /* return to the beginning of the file once the frequency table has been
+       build */
+    fseek(in,0,SEEK_SET);
+
+    /* Sort the frequency table in ascending order. */
+
+    qsort(
+	freqTable.frequencies,
+	freqTable.length,
+	sizeof(alphabetSymbol),
+	alphabetSymbolCompare);
+
+    return freqTable;
+}
+
+int alphabetSymbolCompare(const void * a, const void * b)
+{
+    const alphabetSymbol * aSymbol = a;
+    const alphabetSymbol * bSymbol = b;
+
+    return (aSymbol->frequency - bSymbol->frequency);
+}
+
+void verbosePrint(const char * format, ...)
+{
+    va_list vl;
+
+    if(verbose){
+        va_start(vl, format);
+        vprintf(format, vl);
+        va_end(vl);
+    }
+}
+
+void printFrequencyTable(frequencyTable freqTable)
+{
+    int i;
+
+    verbosePrint("Printing Frequency Table:\n");
+
+    for(i = 0;i < freqTable.length; ++i){
+	if(isprint(freqTable.frequencies[i].symbol))
+	    verbosePrint("printable:%c:%d\n",
+			 freqTable.frequencies[i].symbol,
+			 freqTable.frequencies[i].frequency);
+	else
+	    verbosePrint("non-printable:%c:%d\n",
+			 freqTable.frequencies[i].symbol,
+			 freqTable.frequencies[i].frequency);
+    }
 }
