@@ -22,4 +22,8 @@ BYTE lastNBits(BYTE num,unsigned int n);
    Do remember to the free allocated for the returned string.*/
 char * changeExtension(char * fileName,char * newExtension);
 
+char * strAppend ( char * str, const char * appendee );
+char * strncpyBack( char * destination, const char * source, size_t num );
+
+
 #endif /* _COMMON_H_ */

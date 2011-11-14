@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "../common.h"
-#include "util.h"
 
 /* FIX THE DAMN COMMAD LINE PARSER: THE LINE ./lzw --help doesn't work!!!! */
 
@@ -115,6 +114,7 @@ int main(int argc, char *argv[])
         assertFileOpened(in);
 
         if(decompress){
+	    /* TODO: change argv to inFile */
             strncpyBack(extension,*argv,4);
 
             if(!strcmp(extension,".lzw")){
@@ -133,6 +133,7 @@ int main(int argc, char *argv[])
 
             lzw_decompress(in,out);
         }else{
+	    /* TODO: change argv to inFile */
             outFile = strAppend(*argv,".lzw");
             out = fopen(outFile,"wb");
             free(outFile);
@@ -160,7 +161,6 @@ void printHelp(void)
     printf("  -d\tPerform decompression.\n");
     printf("  -v\tVerbose output.\n");
     printf("  -cs=\tSet the outputted code sizes.\n");
-
 }
 
 void translateCode(unsigned int newCode)

@@ -1,11 +1,11 @@
-PROG = lzw
+PROG = huffman
 include ../default
-objects = lzw.o ../common.o
+objects = huffman.o ../common.o
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
-lzw.o : lzw.c ../common.h
+huffman.o : huffman.c ../common.h
 ../common.o : ../common.h
 
 clean :
