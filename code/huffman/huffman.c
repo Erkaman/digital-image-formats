@@ -4,32 +4,9 @@
 #include <stdarg.h>
 #include <ctype.h>
 #include "../common.h"
+#include "huffman.h"
 
 int verbose;
-
-void printHelp(void);
-
-void huffmanCompress(FILE * in,FILE * out);
-void huffmanDecompress(FILE * in,FILE * out);
-void verbosePrint(const char * format, ...);
-
-typedef struct{
-    BYTE symbol;
-    unsigned long frequency;
-}  alphabetSymbol;
-
-typedef struct{
-    alphabetSymbol frequencies[255];
-    BYTE length;
-} frequencyTable;
-
-int alphabetSymbolCompare(const void * a, const void * b);
-
-frequencyTable buildFrequencyTable(FILE * in);
-
-void printFrequencyTable(frequencyTable freqTable);
-
-frequencyTable makeNewFrequencyTable(void);
 
 int main(int argc, char *argv[])
 {
@@ -52,23 +29,23 @@ int main(int argc, char *argv[])
         /* do the command line parsing */
 
         /*++argv;
-        --argc;
-        while(1){
+          --argc;
+          while(1){
 
-            if(!strcmp("--help",*argv)){
-                printHelp();
-                return 0;
-            }
-            else if(!strcmp("-d",*argv))
-                decompress = 1;
-            else if(!strcmp("-v",*argv))
-                verbose = 1;
+          if(!strcmp("--help",*argv)){
+          printHelp();
+          return 0;
+          }
+          else if(!strcmp("-d",*argv))
+          decompress = 1;
+          else if(!strcmp("-v",*argv))
+          verbose = 1;
 
-            ++argv;
-            --argc;
-        }*/
+          ++argv;
+          --argc;
+          }*/
 
-	++argv;
+        ++argv;
 
         inName = *argv;
         in = fopen(inName,"rb");
@@ -150,17 +127,17 @@ frequencyTable buildFrequencyTable(FILE * in)
     fseek(in,0,SEEK_SET);
 
     for(i = 0;i < 255; ++i)
-	frequencies[i] = 0;
+        frequencies[i] = 0;
 
     /* find the freqencies of all the possible values a byte can have.
-     In other words; find the frequency of all the symbols in the file.*/
+       In other words; find the frequency of all the symbols in the file.*/
 
     symbol = getc(in);
     while(symbol != EOF){
 
-	++frequencies[symbol];
+        ++frequencies[symbol];
 
-	symbol = getc(in);
+        symbol = getc(in);
     }
 
     /* Organize all the frequencies into a neat frequency table. */
@@ -169,17 +146,17 @@ frequencyTable buildFrequencyTable(FILE * in)
     freqTablei = 0;
 
     for(i = 0;i < 255; ++i){
-	/* If the symbol occurred at all in the file*/
-	if(frequencies[i] != 0){
+        /* If the symbol occurred at all in the file*/
+        if(frequencies[i] != 0){
 
-	    /* Put the symbol and its information into the frequency table */
+            /* Put the symbol and its information into the frequency table */
 
-	    freqTable.frequencies[freqTablei].symbol = i;
-	    freqTable.frequencies[freqTablei].frequency = frequencies[i];
+            freqTable.frequencies[freqTablei].symbol = i;
+            freqTable.frequencies[freqTablei].frequency = frequencies[i];
 
-	    ++freqTablei;
-	    ++freqTable.length;
-	}
+            ++freqTablei;
+            ++freqTable.length;
+        }
     }
 
     /* return to the beginning of the file once the frequency table has been
@@ -189,10 +166,10 @@ frequencyTable buildFrequencyTable(FILE * in)
     /* Sort the frequency table in ascending order. */
 
     qsort(
-	freqTable.frequencies,
-	freqTable.length,
-	sizeof(alphabetSymbol),
-	alphabetSymbolCompare);
+        freqTable.frequencies,
+        freqTable.length,
+        sizeof(alphabetSymbol),
+        alphabetSymbolCompare);
 
     return freqTable;
 }
@@ -223,13 +200,13 @@ void printFrequencyTable(frequencyTable freqTable)
     verbosePrint("Printing Frequency Table:\n");
 
     for(i = 0;i < freqTable.length; ++i){
-	if(isprint(freqTable.frequencies[i].symbol))
-	    verbosePrint("printable:%c:%d\n",
-			 freqTable.frequencies[i].symbol,
-			 freqTable.frequencies[i].frequency);
-	else
-	    verbosePrint("non-printable:%c:%d\n",
-			 freqTable.frequencies[i].symbol,
-			 freqTable.frequencies[i].frequency);
+        if(isprint(freqTable.frequencies[i].symbol))
+            verbosePrint("printable:%c:%d\n",
+                         freqTable.frequencies[i].symbol,
+                         freqTable.frequencies[i].frequency);
+        else
+            verbosePrint("non-printable:%c:%d\n",
+                         freqTable.frequencies[i].symbol,
+                         freqTable.frequencies[i].frequency);
     }
 }

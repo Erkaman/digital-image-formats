@@ -5,7 +5,7 @@ objects = huffman.o ../common.o
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
-huffman.o : huffman.c ../common.h
+huffman.o : huffman.h ../common.h
 ../common.o : ../common.h
 
 clean :
