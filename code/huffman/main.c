@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "../common.h"
-#include "huffman.h"
+#include "main.h"
 
 int main(int argc, char *argv[])
 {

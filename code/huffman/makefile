@@ -1,12 +1,12 @@
 PROG = huffman
 include ../default
-objects = huffman.o ../common.o freq_table.o
+objects = main.o ../common.o freq_table.o
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
-huffman.o : huffman.h ../common.h freq_table.h
-freq_table.o : freq_table.h huffman.h
+main.o : main.h ../common.h freq_table.h
+freq_table.o : freq_table.h main.h
 ../common.o : ../common.h
 
 clean :
