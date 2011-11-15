@@ -1,12 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <stdarg.h>
-#include <ctype.h>
 #include "../common.h"
 #include "huffman.h"
-
-int verbose;
 
 int main(int argc, char *argv[])
 {
@@ -18,8 +14,6 @@ int main(int argc, char *argv[])
     char extension[5];
 
     verbose = 1;
-
-
 
     if(argc == 1){
         printf("No file was specified.\n");
@@ -99,14 +93,130 @@ void printHelp(void)
 void huffmanCompress(FILE * in,FILE * out)
 {
     frequencyTable freqTable;
+    struct node * huffmanTable;
 
     /* build the frequency table */
     freqTable = buildFrequencyTable(in);
 
     printFrequencyTable(freqTable);
 
-    in = in;
+    huffmanTable = constructHuffmanTree(freqTable);
+
     out = out;
+}
+
+struct node * constructHuffmanTree(frequencyTable freqTable)
+{
+    struct node * tree;
+    struct node *  candidateTrees[255];
+    struct node * newTree;
+    int i;
+    int numberOfTrees;
+
+    int tree1;
+    int tree2;
+
+    for(i = 0; i < 255; ++i){
+        candidateTrees[i] = NULL;
+    }
+
+    for(i = 0;i < freqTable.length; ++i){
+        candidateTrees[i] = makeTree(
+            freqTable.frequencies[i].symbol,
+            freqTable.frequencies[i].frequency);
+
+	verbosePrint("Tree %d:\n",i);
+	printTree(candidateTrees[i]);
+    }
+
+    numberOfTrees = i;
+
+    verbosePrint("numberOfTrees:%d\n",numberOfTrees);
+
+    /* While the full Huffman tree hasn't yet been built. */
+    while(numberOfTrees > 1){
+
+	/* Find and remove the two notes with the lowest probability in the tree*/
+
+	findTwoMinValues(candidateTrees,freqTable.length,&tree1,&tree2);
+
+	verbosePrint("tree1:%d\n",tree1);
+	verbosePrint("tree2:%d\n",tree2);
+
+	newTree = (makeTreeFromTrees(candidateTrees[tree1],candidateTrees[tree2]));
+
+	/* Remove these two trees */
+/*	free(candidateTrees[tree1]);
+	free(candidateTrees[tree2]);*/
+
+	verbosePrint("NEW TREE:\n");
+	printTree(newTree);
+
+	candidateTrees[tree2] = newTree;
+	candidateTrees[tree1] = NULL;
+
+	/* Two of the trees were desotryed and of these two trees got replaced
+	   by a new tree */
+	--numberOfTrees;
+
+        /* find the two trees with the lowest probabilities. */
+    }
+
+    /* Do Remember to free the memory taken up by the trees! */
+
+    verbosePrint("The huffman tree:\n");
+
+    for(i = 0; i < freqTable.length; ++i){
+	if(candidateTrees[i] != NULL){
+	    tree = candidateTrees[i];
+	    break;
+	}
+    }
+
+    printTree(tree);
+
+    return tree;
+}
+
+struct node * makeTreeFromTrees(struct node * tree1, struct node * tree2)
+{
+    struct node * tree;
+
+    tree = malloc(sizeof(struct node));
+    tree->symbol.frequency = tree1->symbol.frequency + tree2->symbol.frequency;
+
+    /* this is not a deep copy but a shallow copy. this causes a memory corruption in
+     lines 158-160*/
+    tree->left = tree1;
+    tree->right = tree2;
+
+    return tree;
+}
+
+void findTwoMinValues(struct node ** trees,int length,int * tree1, int * tree2)
+{
+    int min1;
+    int min2;
+    int i,j;
+
+    min1 = 0;
+    min2 = 1;
+
+#define freq(i) trees[i]->symbol.frequency
+
+    for(i = 0; i < length; ++i){
+	for(j = i+1; j < length; ++j){
+	    if((freq(i) + freq(j)) < (freq(min1) + freq(min2))){
+		min1 = i;
+		min2 = j;
+	    }
+	}
+    }
+
+#undef freq
+
+    *tree1 = min1;
+    *tree2 = min2;
 }
 
 void huffmanDecompress(FILE * in,FILE * out)
@@ -115,98 +225,24 @@ void huffmanDecompress(FILE * in,FILE * out)
     out = out;
 }
 
-frequencyTable buildFrequencyTable(FILE * in)
+struct node * makeTree(BYTE symbol, unsigned long frequency)
 {
-    frequencyTable freqTable;
-    unsigned long frequencies[255];
-    int symbol;
-    int i;
-    int freqTablei;
-    /* Start at the beginning of the file. */
+    struct node * n;
 
-    fseek(in,0,SEEK_SET);
+    n = malloc(sizeof(struct node));
+    n->symbol.symbol = symbol;
+    n->symbol.frequency = frequency;
 
-    for(i = 0;i < 255; ++i)
-        frequencies[i] = 0;
-
-    /* find the freqencies of all the possible values a byte can have.
-       In other words; find the frequency of all the symbols in the file.*/
-
-    symbol = getc(in);
-    while(symbol != EOF){
-
-        ++frequencies[symbol];
-
-        symbol = getc(in);
-    }
-
-    /* Organize all the frequencies into a neat frequency table. */
-
-    freqTable.length = 0;
-    freqTablei = 0;
-
-    for(i = 0;i < 255; ++i){
-        /* If the symbol occurred at all in the file*/
-        if(frequencies[i] != 0){
-
-            /* Put the symbol and its information into the frequency table */
-
-            freqTable.frequencies[freqTablei].symbol = i;
-            freqTable.frequencies[freqTablei].frequency = frequencies[i];
-
-            ++freqTablei;
-            ++freqTable.length;
-        }
-    }
-
-    /* return to the beginning of the file once the frequency table has been
-       build */
-    fseek(in,0,SEEK_SET);
-
-    /* Sort the frequency table in ascending order. */
-
-    qsort(
-        freqTable.frequencies,
-        freqTable.length,
-        sizeof(alphabetSymbol),
-        alphabetSymbolCompare);
-
-    return freqTable;
+    return n;
 }
 
-int alphabetSymbolCompare(const void * a, const void * b)
+
+void printTree(struct node * node)
 {
-    const alphabetSymbol * aSymbol = a;
-    const alphabetSymbol * bSymbol = b;
+    if(node == NULL)
+	return;
 
-    return (aSymbol->frequency - bSymbol->frequency);
-}
-
-void verbosePrint(const char * format, ...)
-{
-    va_list vl;
-
-    if(verbose){
-        va_start(vl, format);
-        vprintf(format, vl);
-        va_end(vl);
-    }
-}
-
-void printFrequencyTable(frequencyTable freqTable)
-{
-    int i;
-
-    verbosePrint("Printing Frequency Table:\n");
-
-    for(i = 0;i < freqTable.length; ++i){
-        if(isprint(freqTable.frequencies[i].symbol))
-            verbosePrint("printable:%c:%d\n",
-                         freqTable.frequencies[i].symbol,
-                         freqTable.frequencies[i].frequency);
-        else
-            verbosePrint("non-printable:%c:%d\n",
-                         freqTable.frequencies[i].symbol,
-                         freqTable.frequencies[i].frequency);
-    }
+    printTree(node->left);
+    printAlphabetSymbol(node->symbol);
+    printTree(node->right);
 }

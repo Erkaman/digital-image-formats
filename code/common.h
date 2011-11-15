@@ -25,5 +25,8 @@ char * changeExtension(char * fileName,char * newExtension);
 char * strAppend ( char * str, const char * appendee );
 char * strncpyBack( char * destination, const char * source, size_t num );
 
+int verbose;
+
+void verbosePrint(const char * format, ...);
 
 #endif /* _COMMON_H_ */

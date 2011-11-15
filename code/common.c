@@ -1,6 +1,8 @@
 #include "common.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <stdio.h>
 
 void assertFile(FILE * fp,char * errorStr)
 {
@@ -91,3 +93,14 @@ char * strncpyBack( char * destination, const char * source, size_t num )
     return destination;
 }
 
+void verbosePrint(const char * format, ...)
+{
+    va_list vl;
+
+    if(verbose){
+        va_start(vl, format);
+	printf("verbose:%d\n",verbose);
+        vprintf(format, vl);
+        va_end(vl);
+    }
+}

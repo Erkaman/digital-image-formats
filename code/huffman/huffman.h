@@ -1,35 +1,30 @@
 #ifndef _HUFFMAN_H_
 #define _HUFFMAN_H_
 
+#include "freq_table.h"
+
 void printHelp(void);
 
 void huffmanCompress(FILE * in,FILE * out);
 void huffmanDecompress(FILE * in,FILE * out);
-void verbosePrint(const char * format, ...);
 
-typedef struct{
-    BYTE symbol;
-    unsigned long frequency;
-}  alphabetSymbol;
 
-typedef struct{
-    alphabetSymbol frequencies[255];
-    BYTE length;
-} frequencyTable;
 
-int alphabetSymbolCompare(const void * a, const void * b);
+/* A node of the Huffman tree. */
+struct node {
+    alphabetSymbol symbol;
+    struct node * left;
+    struct node * right;
+};
 
-frequencyTable buildFrequencyTable(FILE * in);
+struct node * makeTree(BYTE symbol, unsigned long frequency);
 
-void printFrequencyTable(frequencyTable freqTable);
+struct node * makeTreeFromTrees(struct node * tree1, struct node * tree2);
 
-frequencyTable makeNewFrequencyTable(void);
+void printTree(struct node * node);
 
-/* binary tree */
-typedef struct {
-    unsigned long data;
-    struct node* left;
-    struct node* right;
-} node;
+struct node * constructHuffmanTree(frequencyTable freqTable);
+
+void findTwoMinValues(struct node ** trees,int length,int * tree1, int * tree2);
 
 #endif /* _HUFFMAN_H_ */
