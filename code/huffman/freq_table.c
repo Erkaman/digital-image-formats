@@ -1,7 +1,7 @@
 #include "freq_table.h"
 #include <stdlib.h>
 #include <ctype.h>
-#include "debug.h"
+#include "../common.h"
 
 frequencyTable buildFrequencyTable(FILE * in)
 {
