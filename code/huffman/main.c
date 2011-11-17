@@ -51,27 +51,28 @@ int main(int argc, char *argv[])
             strncpyBack(extension,inName,4);
 
             if(!strcmp(extension,".hfm")){
-                outName = changeExtension(inName,"unc");
-
+                outName = changeExtension(inName,".unc");
                 out = fopen(outName,"wb");
-                free(outName);
                 assertFileOpened(out);
             }else{
 
                 outName = strAppend(*argv,".unc");
                 out = fopen(outName,"wb");
-                free(outName);
                 assertFileOpened(out);
             }
 
             huffmanDecompress(in,out);
+
+	    /* TODO: */
+	    free(outName);
+
         }else{
             outName = strAppend(inName,".lzw");
             out = fopen(outName,"wb");
-            free(outName);
             assertFileOpened(out);
 
             huffmanCompress(in,out);
+            free(outName);
         }
 
         fclose(in);
@@ -99,6 +100,32 @@ void huffmanCompress(FILE * in,FILE * out)
     /* build the frequency table */
     freqTable = buildFrequencyTable(in);
 
+/*    freqTable.length = 8;
+
+    freqTable.frequencies[0].symbol = 'r';
+    freqTable.frequencies[0].frequency = 1;
+
+    freqTable.frequencies[1].symbol = 'p';
+    freqTable.frequencies[1].frequency = 1;
+
+    freqTable.frequencies[2].symbol = 'h';
+    freqTable.frequencies[2].frequency = 1;
+
+    freqTable.frequencies[3].symbol = 's';
+    freqTable.frequencies[3].frequency = 1;
+
+    freqTable.frequencies[4].symbol = 'e';
+    freqTable.frequencies[4].frequency = 1;
+
+    freqTable.frequencies[5].symbol = ' ';
+    freqTable.frequencies[5].frequency = 2;
+
+    freqTable.frequencies[6].symbol = 'o';
+    freqTable.frequencies[6].frequency = 3;
+
+    freqTable.frequencies[7].symbol = 'g';
+    freqTable.frequencies[7].frequency = 3; */
+
     printFrequencyTable(freqTable);
 
     huffmanTable = constructHuffmanTree(freqTable);
@@ -108,8 +135,8 @@ void huffmanCompress(FILE * in,FILE * out)
 
 struct node * constructHuffmanTree(frequencyTable freqTable)
 {
-    struct node * tree;
-    struct node *  candidateTrees[255];
+    struct node * huffmanTree;
+    struct node *  trees[256];
     struct node * newTree;
     int i;
     int numberOfTrees;
@@ -117,68 +144,66 @@ struct node * constructHuffmanTree(frequencyTable freqTable)
     int tree1;
     int tree2;
 
-    verbosePrint("CONSTRUCTHUFFMANTREE");
+    verbosePrint("CONSTRUCTHUFFMANTREE\n");
 
-    for(i = 0; i < 255; ++i){
-        candidateTrees[i] = NULL;
-    }
+    for(i = 0; i < 256; ++i)
+        trees[i] = NULL;
 
-    for(i = 0;i < freqTable.length; ++i){
-        candidateTrees[i] = makeTree(
-            freqTable.frequencies[i].symbol,
-            freqTable.frequencies[i].frequency);
+    /* Transfer the data from the frequency table to a "wood" of nodes.  */
+    for(i = 0;i < freqTable.length; ++i)
+        trees[i] = makeTree(freqTable.frequencies[i]);
 
-	verbosePrint("Tree %d:\n",i);
-	printTree(candidateTrees[i]);
-    }
+/*    printTrees(trees,freqTable.length);*/
 
+    /* Always keep track of the number of trees. */
     numberOfTrees = i;
-
-    verbosePrint("numberOfTrees:%d\n",numberOfTrees);
 
     /* While the full Huffman tree hasn't yet been built. */
     while(numberOfTrees > 1){
 
 	/* Find and remove the two notes with the lowest probability in the tree*/
 
-	findTwoMinValues(candidateTrees,freqTable.length,&tree1,&tree2);
+	findTwoMinValues(trees,freqTable.length,&tree1,&tree2);
 
-	verbosePrint("tree1:%d\n",tree1);
-	verbosePrint("tree2:%d\n",tree2);
+/*	verbosePrint("tree1:%d\n",tree1);
+	verbosePrint("tree2:%d\n",tree2);*/
 
-	newTree = (makeTreeFromTrees(candidateTrees[tree1],candidateTrees[tree2]));
+	newTree = makeTreeFromTrees(
+	    trees[tree1],
+	    trees[tree2]);
 
-	/* Remove these two trees */
-/*	free(candidateTrees[tree1]);
-	free(candidateTrees[tree2]);*/
+	/* Remove these two minimum trees */
+	freeTree(trees[tree1]);
+	freeTree(trees[tree2]);
+	trees[tree1] = NULL;
+	trees[tree2] = NULL;
 
-	verbosePrint("NEW TREE:\n");
-	printTree(newTree);
+/*	verbosePrint("NEW TREE:\n");
+	printTree(newTree);*/
 
-	candidateTrees[tree2] = newTree;
-	candidateTrees[tree1] = NULL;
+	trees[tree2] = newTree;
+/*	printTrees(trees,freqTable.length);*/
 
 	/* Two of the trees were desotryed and of these two trees got replaced
 	   by a new tree */
 	--numberOfTrees;
 
-        /* find the two trees with the lowest probabilities. */
     }
 
-    /* Do Remember to free the memory taken up by the trees! */
+    /* Do remember to free the memory taken up by the trees! */
 
     verbosePrint("The huffman tree:\n");
 
-    for(i = 0; i < freqTable.length; ++i){
-	if(candidateTrees[i] != NULL){
-	    tree = candidateTrees[i];
+    /* Find the remaining tree, this tree is the huffman tree. */
+    for(i = 0; i < freqTable.length; ++i)
+	if(trees[i] != NULL){
+	    huffmanTree = trees[i];
 	    break;
 	}
-    }
 
-    printTree(tree);
+    printTree(huffmanTree);
 
-    return tree;
+    return huffmanTree;
 }
 
 

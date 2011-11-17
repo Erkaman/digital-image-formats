@@ -99,7 +99,6 @@ void verbosePrint(const char * format, ...)
 
     if(verbose){
         va_start(vl, format);
-	printf("verbose:%d\n",verbose);
         vprintf(format, vl);
         va_end(vl);
     }

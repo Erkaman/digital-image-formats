@@ -6,7 +6,7 @@
 frequencyTable buildFrequencyTable(FILE * in)
 {
     frequencyTable freqTable;
-    unsigned long frequencies[255];
+    unsigned long frequencies[256];
     int symbol;
     int i;
     int freqTablei;
@@ -14,7 +14,7 @@ frequencyTable buildFrequencyTable(FILE * in)
 
     fseek(in,0,SEEK_SET);
 
-    for(i = 0;i < 255; ++i)
+    for(i = 0;i < 256; ++i)
         frequencies[i] = 0;
 
     /* find the freqencies of all the possible values a byte can have.
@@ -33,7 +33,7 @@ frequencyTable buildFrequencyTable(FILE * in)
     freqTable.length = 0;
     freqTablei = 0;
 
-    for(i = 0;i < 255; ++i){
+    for(i = 0;i < 256; ++i){
         /* If the symbol occurred at all in the file*/
         if(frequencies[i] != 0){
 
@@ -66,11 +66,8 @@ void printFrequencyTable(frequencyTable freqTable)
 {
     int i;
 
-    verbosePrint("Printing Frequency Table:\n");
-
-    for(i = 0;i < freqTable.length; ++i){
+    for(i = 0;i < freqTable.length; ++i)
         printAlphabetSymbol(freqTable.frequencies[i]);
-    }
 }
 
 int alphabetSymbolCompare(const void * a, const void * b)
@@ -88,8 +85,7 @@ void printAlphabetSymbol(alphabetSymbol symbol)
                      symbol.symbol,
                      symbol.frequency);
     else
-        verbosePrint("non-printable:%c:%d\n",
+        verbosePrint("non-printable:%d:%d\n",
                      symbol.symbol,
                      symbol.frequency);
 }
-
