@@ -1,4 +1,9 @@
 * PROFILE: DAVID A. HUFFMAN
 http://www.huffmancoding.com/my-family/my-uncle/scientific-american
 
-Tikz-qtree
+* Tikz-qtree
+http://tex.stackexchange.com/questions/2340/how-to-make-a-3-level-deep-tree-with-tikz
+
+* An Explanation of the Deflate Algorithm
+http://zlib.net/feldspar.html
+
