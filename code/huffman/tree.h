@@ -4,24 +4,32 @@
 #include "freq_table.h"
 
 /* A node of the Huffman tree. */
-struct node {
-    alphabetSymbol symbol;
-    struct node * left;
-    struct node * right;
+struct Node {
+    AlphabetSymbol symbol;
+    struct Node * left;
+    struct Node * right;
 };
 
-struct node * makeTree(alphabetSymbol symbol);
+struct Node * makeTree(AlphabetSymbol symbol);
 
-struct node * makeTreeFromTrees(struct node * tree1, struct node * tree2);
+struct Node * makeTreeFromTrees(struct Node * tree1, struct Node * tree2);
 
-void printTree(struct node * node);
+void findTwoMinValues(struct Node ** trees,int length,int * tree1, int * tree2);
 
-void findTwoMinValues(struct node ** trees,int length,int * tree1, int * tree2);
+struct Node * deepCopyTree(struct Node * tree);
 
-struct node * deepCopyTree(struct node * tree);
+void freeTree(struct Node * tree);
 
-void freeTree(struct node * tree);
+void printTrees(struct Node ** trees,int length);
 
-void printTrees(struct node ** trees,int length);
+int isEmptyNode(struct Node * node);
+
+int maxDepth(struct Node * node);
+
+void printTree(struct Node * node);
+
+/*void padding(char ch, int n);
+
+void printTree(struct Node * node, int level);*/
 
 #endif /* _TREE_H_ */

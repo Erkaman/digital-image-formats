@@ -3,9 +3,9 @@
 #include <ctype.h>
 #include "../common.h"
 
-frequencyTable buildFrequencyTable(FILE * in)
+FrequencyTable buildFrequencyTable(FILE * in)
 {
-    frequencyTable freqTable;
+    FrequencyTable freqTable;
     unsigned long frequencies[256];
     int symbol;
     int i;
@@ -56,13 +56,13 @@ frequencyTable buildFrequencyTable(FILE * in)
     qsort(
         freqTable.frequencies,
         freqTable.length,
-        sizeof(alphabetSymbol),
+        sizeof(AlphabetSymbol),
         alphabetSymbolCompare);
 
     return freqTable;
 }
 
-void printFrequencyTable(frequencyTable freqTable)
+void printFrequencyTable(FrequencyTable freqTable)
 {
     int i;
 
@@ -72,13 +72,16 @@ void printFrequencyTable(frequencyTable freqTable)
 
 int alphabetSymbolCompare(const void * a, const void * b)
 {
-    const alphabetSymbol * aSymbol = a;
-    const alphabetSymbol * bSymbol = b;
+    const AlphabetSymbol * aSymbol = a;
+    const AlphabetSymbol * bSymbol = b;
 
-    return (aSymbol->frequency - bSymbol->frequency);
+    if(aSymbol->frequency != bSymbol->frequency)
+	return (aSymbol->frequency - bSymbol->frequency);
+    else
+	return (aSymbol->symbol - bSymbol->symbol);
 }
 
-void printAlphabetSymbol(alphabetSymbol symbol)
+void printAlphabetSymbol(AlphabetSymbol symbol)
 {
     if(isprint(symbol.symbol))
         verbosePrint("printable:%c:%d\n",

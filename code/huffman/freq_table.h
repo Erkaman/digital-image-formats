@@ -6,21 +6,21 @@
 typedef struct{
     BYTE symbol;
     unsigned long frequency;
-}  alphabetSymbol;
+}  AlphabetSymbol;
 
 
 typedef struct{
-    alphabetSymbol frequencies[255];
+    AlphabetSymbol frequencies[255];
     BYTE length;
-} frequencyTable;
+} FrequencyTable;
 
 
-frequencyTable buildFrequencyTable(FILE * in);
+FrequencyTable buildFrequencyTable(FILE * in);
 
-void printFrequencyTable(frequencyTable freqTable);
+void printFrequencyTable(FrequencyTable freqTable);
 
 int alphabetSymbolCompare(const void * a, const void * b);
 
-void printAlphabetSymbol(alphabetSymbol symbol);
+void printAlphabetSymbol(AlphabetSymbol symbol);
 
 #endif /* _FREQ_TABLE_H_ */
