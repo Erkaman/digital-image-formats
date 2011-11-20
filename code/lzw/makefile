@@ -1,11 +1,11 @@
 PROG = lzw
 include ../default
-objects = lzw.o ../common.o
+objects = main.o ../common.o
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
-lzw.o : lzw.c ../common.h
+main.o : main.h ../common.h
 ../common.o : ../common.h
 
 clean :

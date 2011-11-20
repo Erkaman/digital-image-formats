@@ -1,35 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include "../common.h"
-
-/* FIX THE DAMN COMMAD LINE PARSER: THE LINE ./lzw --help doesn't work!!!! */
-
-void printHelp(void);
-void verbosePrint(const char * format, ...);
-void debugPrint(const char * format, ...);
-
-/* Set this macro to 1 if you want helpful debug messages */
-#define DEBUG 1
-
-/* compression */
-
-void lzw_compress(FILE * in,FILE * out);
-void outputCode(unsigned int code,FILE * out);
-int findMatch(unsigned int hash_prefix,unsigned int hash_character);
-
-/* decompression */
-
-void lzw_decompress(FILE * in,FILE * out);
-void translateCode(unsigned int newCode);
-char printString(FILE * out);
-unsigned int inputCode(FILE *input);
-
-typedef struct {
-    unsigned int stringCode;
-    unsigned int characterCode;
-} tableEntry;
+#include "main.h"
 
 tableEntry * stringTable;
 int * codeValues;
@@ -37,23 +6,17 @@ int * codeValues;
 char stringCodeStack[40000];
 int stackp;
 
-int verbose;
-
 unsigned int codeSize;
 unsigned int tableSize;
-unsigned int  hashingShift;
+unsigned int hashingShift;
 unsigned int maxValue;
 unsigned int maxCode;
-
 
 int main(int argc, char *argv[])
 {
     int decompress = 0;
     FILE * in;
     FILE * out;
-    char * outFile;
-    char * inFile;
-    char extension[5];
 
     codeSize = 12;
     verbose = 0;
@@ -86,11 +49,16 @@ int main(int argc, char *argv[])
                     codeSize = 12;
 
                 }
-            } else if(argc == 1){
+            } else
                 break;
-            }
+
             ++argv;
             --argc;
+        }
+
+        if(argc < 2){
+            printf("An input file AND an output file must be specified.\n");
+            return 1;
         }
 
         if(codeSize == 15)
@@ -109,38 +77,16 @@ int main(int argc, char *argv[])
         stringTable = (tableEntry *)malloc(sizeof(tableEntry) * tableSize);
         codeValues = (int *)malloc(sizeof(int) * tableSize);
 
-        inFile = *argv;
-        in = fopen(inFile,"rb");
+        in = fopen(argv[0],"rb");
         assertFileOpened(in);
 
-        if(decompress){
-	    /* TODO: change argv to inFile */
-            strncpyBack(extension,*argv,4);
+	out = fopen(argv[1],"wb");
+        assertFileOpened(out);
 
-            if(!strcmp(extension,".lzw")){
-                outFile = changeExtension(*argv,"unc");
-
-                out = fopen(outFile,"wb");
-                free(outFile);
-                assertFileOpened(out);
-            }else{
-
-                outFile = strAppend(*argv,".unc");
-                out = fopen(outFile,"wb");
-                free(outFile);
-                assertFileOpened(out);
-            }
-
-            lzw_decompress(in,out);
-        }else{
-	    /* TODO: change argv to inFile */
-            outFile = strAppend(*argv,".lzw");
-            out = fopen(outFile,"wb");
-            free(outFile);
-            assertFileOpened(out);
-
-            lzw_compress(in,out);
-        }
+        if(decompress)
+            LZW_Decompress(in,out);
+        else
+            LZW_Compress(in,out);
 
         fclose(in);
         fclose(out);
@@ -154,7 +100,7 @@ int main(int argc, char *argv[])
 
 void printHelp(void)
 {
-    printf("Usage: lzw IN\n");
+    printf("Usage: lzw IN OUT\n");
     printf("Compress or decompress a LZW encoded file.\n"
            "Compression is done by default");
     printf("  --help\tDisplay this help message.\n");
@@ -194,7 +140,7 @@ char printString(FILE * out)
     return returnValue;
 }
 
-void lzw_decompress(FILE * in,FILE * out)
+void LZW_Decompress(FILE * in,FILE * out)
 {
     unsigned int oldCode;
     unsigned int newCode;
@@ -252,7 +198,7 @@ void lzw_decompress(FILE * in,FILE * out)
     }
 }
 
-void lzw_compress(FILE * in,FILE * out)
+void LZW_Compress(FILE * in,FILE * out)
 {
     unsigned int charCode;
     unsigned int stringCode;
@@ -323,7 +269,7 @@ void outputCode(unsigned int code,FILE * out)
     /* while all bits haven't yet been read. */
     while(remainingCodeBits > 0){
 
-	/* if the number of bits to be read is less than the current input value */
+        /* if the number of bits to be read is less than the current input value */
         if(remainingPacketBits < remainingCodeBits){
             /* write what can be written*/
 
@@ -336,16 +282,16 @@ void outputCode(unsigned int code,FILE * out)
 
             code >>= remainingPacketBits;
 
-	    /* reset the packet */
-	    remainingPacketBits = 8;
-	    packet = 0;
+            /* reset the packet */
+            remainingPacketBits = 8;
+            packet = 0;
             shift = 0;
         }else{
-	    /* if the number of bits remaining to be read is less than the
-	     bits in the current input value. */
+            /* if the number of bits remaining to be read is less than the
+               bits in the current input value. */
 
             /* remainingPacketBits >= remainingCodeBits */
-	    code = firstNBits(code,remainingCodeBits);
+            code = firstNBits(code,remainingCodeBits);
             packet |= code << shift;
 
             shift += remainingCodeBits;
@@ -379,8 +325,8 @@ unsigned int inputCode(FILE * input)
 
     /* While an entire code hasn't yet been read.  */
     while(remainingCodeBits > 0){
-	/* If the current packet doesn't contain enough bits
-          to fill the current code. */
+        /* If the current packet doesn't contain enough bits
+           to fill the current code. */
         if(remainingPacketBits < remainingCodeBits){
 
             code |=
@@ -389,23 +335,23 @@ unsigned int inputCode(FILE * input)
             shift += remainingPacketBits;
             remainingCodeBits -= remainingPacketBits;
 
-	    /* read in a new packet */
+            /* read in a new packet */
             packet = (BYTE)getc(input);
             remainingPacketBits = 8;
         }else{
-	    /* If the number of bits remaining to be read in the code
-	     * is less than or equal to the number of bits in the
-	     * current packet. */
+            /* If the number of bits remaining to be read in the code
+             * is less than or equal to the number of bits in the
+             * current packet. */
 
-	    /* read as many bits needed from the packet. */
+            /* read as many bits needed from the packet. */
             code |=
                 (firstNBits(packet,remainingCodeBits) << shift);
 
-	    /* Right shift away the bits that were written to the code.*/
+            /* Right shift away the bits that were written to the code.*/
             packet >>= remainingCodeBits;
             remainingPacketBits -= remainingCodeBits;
 
-	    /* The entire code has been read, stop the loop. */
+            /* The entire code has been read, stop the loop. */
             remainingCodeBits = 0;
         }
     }
@@ -440,27 +386,5 @@ int findMatch(unsigned int stringCode,unsigned int charCode)
 
         if (index < 0)
             index += tableSize;
-    }
-}
-
-void verbosePrint(const char * format, ...)
-{
-    va_list vl;
-
-    if(verbose){
-        va_start(vl, format);
-        vprintf(format, vl);
-        va_end(vl);
-    }
-}
-
-void debugPrint(const char * format, ...)
-{
-    va_list vl;
-
-    if(DEBUG){
-        va_start(vl, format);
-        vprintf(format, vl);
-        va_end(vl);
     }
 }

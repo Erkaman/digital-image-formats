@@ -62,7 +62,7 @@ int main(int argc, char * argv[])
 
 void printHelp(void)
 {
-    printf("Usage: tga IN\n");
+    printf("Usage: tga IN OUT\n");
     printf("Dump the information and color data of a TGA file.\n\n");
     printf("  --help\tDisplay this help message.\n");
 
