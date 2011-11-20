@@ -28,9 +28,14 @@ char * changeExtension(char * fileName,char * newExtension)
     if(extensionEnd == NULL)
         extensionEnd = fileName + strlen(fileName);
 
-    size = (extensionEnd - fileName + 1) + strlen(newExtension);
+    size = (extensionEnd - fileName + 1) + strlen(newExtension) + 1;
 
-    changedFileName = (char *) malloc(size);
+    verbosePrint("s1:%d\n",extensionEnd - fileName + 1);
+    verbosePrint("s2:%d\n",strlen(newExtension));
+
+    verbosePrint("s:%d\n",size);
+
+    changedFileName = (char *) malloc(sizeof(char) * size);
 
     strncpy(changedFileName, fileName, extensionEnd - fileName);
 

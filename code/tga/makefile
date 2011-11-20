@@ -1,12 +1,11 @@
 PROG = tga
 include ../default
-objects = tga.o ../common.o util.o
+objects = main.o ../common.o
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
-tga.o : tga.h util.h ../common.h
-util.o : util.h tga.h
+main.o : main.h ../common.h
 ../common.o : ../common.h
 
 clean :
