@@ -3,9 +3,7 @@
 
 #include "../common.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 
 void RLE_Encode(FILE * in, FILE * out);
 void RLE_Decode(FILE * in, FILE * out);
