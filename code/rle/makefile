@@ -1,11 +1,11 @@
 PROG = rle
 include ../default
-objects = rle.o ../common.o
+objects = main.o ../common.o
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
-tga.o : tga.h
+main.o : main.h
 ../common.o : ../common.h
 
 clean :
