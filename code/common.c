@@ -42,21 +42,21 @@ char * changeExtension(char * fileName,char * newExtension)
     return changedFileName;
 }
 
-BYTE readByte(FILE * fp)
+BYTE readByte(FILE * in)
 {
     BYTE s;
-    fread(&s,sizeof(BYTE),1,fp);
+    fread(&s,sizeof(BYTE),1,in);
     return s;
 }
 
-void writeByte(BYTE b,FILE * fp)
+void writeByte(BYTE b,FILE * out)
 {
-    fwrite(&b,sizeof(unsigned char),1,fp);
+    fwrite(&b,sizeof(BYTE),1,out);
 }
 
-void readStr(FILE * fp,size_t length,char * str)
+void readStr(FILE * in,size_t length,char * str)
 {
-    fread(str,sizeof(char),length,fp);
+    fread(str,sizeof(char),length,in);
 }
 
 BYTE firstNBits(BYTE num,unsigned int n)
@@ -102,4 +102,22 @@ void verbosePrint(const char * format, ...)
         vprintf(format, vl);
         va_end(vl);
     }
+}
+
+void freeDataContainer(DataContainer data)
+{
+    free(data.data);
+    data.data = NULL;
+
+    data.size = 0;
+}
+
+DataContainer allocateDataContainer(unsigned long size)
+{
+    DataContainer data;
+
+    data.size = size;
+    data.data = (BYTE *) malloc(sizeof(BYTE) * size);
+
+    return data;
 }

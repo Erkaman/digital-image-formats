@@ -1,26 +1,11 @@
-#include "../common.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <limits.h>
-
-#define RUN_LENGTH_PACKET 1
-#define RAW_PACKET 0
-
-void RLE_Encode(char * inputfile,char * outputfile);
-void RLE_Decode(char * inputfile,char * outputfile);
-void packBitsEncode(char * inputfile,char * outputfile);
-void packBitsDecode(char * inputfile,char * outputfile);
-void writeRunLengthPacket(BYTE length,BYTE data,FILE * fp);
-void writeRawPacket(BYTE length,BYTE * data,FILE * fp);
-void printHelp(void);
+#include "rle.h"
 
 int main(int argc, char *argv[])
 {
     int decompress = 0;
     int optimize = 0;
-    int help = 0;
-    int n;
+    FILE * in;
+    FILE * out;
 
     if(argc == 1){
         printf("No arguments specified.\n");
@@ -28,52 +13,52 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    /* parse command line arguments */
+    /* parse the command line arguments */
 
     ++argv;
-    n = 1;
+    --argc;
+    while(1){
 
-    while(n < argc && (*argv)[0] == '-'){
-
-        if(!strcmp(*argv,"--help"))
-            help = 1;
+        if(!strcmp("--help",*argv)){
+            printHelp();
+            return 0;
+        }
+        else if(!strcmp("-d",*argv))
+            decompress = 1;
+        else if(!strcmp("-p",*argv))
+            optimize = 1;
         else
-            switch((*argv)[1]){
-            case 'd':
-                decompress = 1;
-                break;
-            case 'p':
-                optimize = 1;
-                break;
-            }
+            break;
+
         ++argv;
-        ++n;
+	--argc;
     }
 
-    if(help){
-        printHelp();
-        return 0;
-    }
-
-    if((argc - n) < 2){
-        printf("An input AND an output file must be specified");
+    if(argc < 1){
+        printf("An input AND an output file must be specified.");
         return 1;
     }
 
+    in = fopen(argv[0],"rb");
+    out = fopen(argv[1],"wb");
+
+    assertFileOpened(in);
+    assertFileOpened(out);
 
     if(optimize){
-        if(decompress){
-            packBitsDecode(argv[0],argv[1]);
-        } else{
-            packBitsEncode(argv[0],argv[1]);
-        }
+        if(decompress)
+            packBitsDecode(in,out);
+        else
+            packBitsEncode(in,out);
     } else{
-        if(decompress){
-            RLE_Decode(argv[0],argv[1]);
-        }else{
-            RLE_Encode(argv[0],argv[1]);
-        }
+        if(decompress)
+            RLE_Decode(in,out);
+        else
+            RLE_Encode(in,out);
     }
+
+    fclose(in);
+    fclose(out);
 
     return 0;
 }
@@ -81,25 +66,16 @@ int main(int argc, char *argv[])
 void printHelp(void)
 {
     printf("Usage: rle [OPTION]... IN OUT\n");
-    printf("Compress or decompress the IN file to the OUT file using the Run Length Encoding algorithm.\n");
+    printf("Compress or decompress the IN file to the OUT file using the Run Length Encoding/Decoding algorithm.\n");
 
     printf("  --help\tDisplay this help message.\n");
-    printf("  -p\tUse the packBits algorithm for the (de)compression(default is RLE).\n");
-    printf("  -d\t Perform a decompression rather than a compression to the output file..\n");
+    printf("  -p\tUse the packBits algorithm for the (de)compression(default is plain RLE).\n");
+    printf("  -d\t Perform decompression rather than compression to the output file.\n");
 }
 
-
-void RLE_Decode(char * inputfile,char * outputfile)
+void RLE_Decode(FILE * in, FILE * out)
 {
-    FILE * in;
-    FILE * out;
     BYTE c,length;
-
-    in = fopen(inputfile,"rb");
-    out = fopen(outputfile,"wb");
-
-    assertFileOpened(in);
-    assertFileOpened(out);
 
     length = readByte(in);
     c = readByte(in);
@@ -111,31 +87,20 @@ void RLE_Decode(char * inputfile,char * outputfile)
         length = readByte(in);
         c = readByte(in);
     }
-
-    fclose(in);
-    fclose(out);
 }
 
-void RLE_Encode(char * inputfile,char * outputfile)
+void RLE_Encode(FILE * in, FILE * out)
 {
-    FILE * in;
-    FILE * out;
-
     BYTE c2,c1;
     BYTE length;
     int passedFirstCharacter;
-
-    in = fopen(inputfile,"rb");
-    out = fopen(outputfile,"wb");
-
-    assertFileOpened(in);
-    assertFileOpened(out);
 
     length = 1;
     passedFirstCharacter = 0;
 
     c2 = readByte(in);
     while (!feof(in)){
+
         /* if it's not the first character. */
         if(passedFirstCharacter){
             if(c2 == c1 && length < BYTE_MAX)
@@ -162,45 +127,35 @@ void RLE_Encode(char * inputfile,char * outputfile)
     fclose(out);
 }
 
-void writeRawPacket(BYTE length,BYTE * data,FILE * fp)
+void writeRawPacket(BYTE length,BYTE * data,FILE * out)
 {
     BYTE packetHead;
     int i;
 
     packetHead = 0;
-    packetHead |= length ;
-    writeByte(packetHead,fp);
+    packetHead |= length;
+    writeByte(packetHead,out);
     for(i = 0 ; i < (length + 1) ; ++i)
-        writeByte(data[i],fp);
+        writeByte(data[i],out);
 }
 
-void writeRunLengthPacket(BYTE length,BYTE data,FILE * fp)
+void writeRunLengthPacket(BYTE length,BYTE data,FILE * out)
 {
     BYTE packetHead;
 
     packetHead = 0x80;
     packetHead |= length;
-    writeByte(packetHead,fp);
-    writeByte(data,fp);
+    writeByte(packetHead,out);
+    writeByte(data,out);
 }
 
-
-void packBitsEncode(char * inputfile,char * outputfile)
+void packBitsEncode(FILE * in, FILE * out)
 {
-    FILE * in;
-    FILE * out;
-
     BYTE c2,c1;
     BYTE length;
     int passedFirstCharacter;
     int packetType;
     BYTE data[128];
-
-    in = fopen(inputfile,"rb");
-    out = fopen(outputfile,"wb");
-
-    assertFileOpened(in);
-    assertFileOpened(out);
 
     length = 0;
     passedFirstCharacter = 0;
@@ -260,23 +215,11 @@ void packBitsEncode(char * inputfile,char * outputfile)
             writeRawPacket(length,data,out);
         }
     }
-
-    fclose(in);
-    fclose(out);
 }
 
-void packBitsDecode(char * inputfile,char * outputfile)
+void packBitsDecode(FILE * in, FILE * out)
 {
-    FILE * in;
-    FILE * out;
     BYTE b,length,head;
-
-    in = fopen(inputfile,"rb");
-    out = fopen(outputfile,"wb");
-
-    assertFileOpened(in);
-    assertFileOpened(out);
-
 
     head = readByte(in);
 
@@ -301,9 +244,4 @@ void packBitsDecode(char * inputfile,char * outputfile)
 
         head = readByte(in);
     }
-
-    fclose(in);
-    fclose(out);
 }
-
-

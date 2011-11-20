@@ -7,9 +7,18 @@
 #define BYTE uint8_t
 #define BYTE_MAX UINT8_MAX
 
-BYTE readByte(FILE * fp);
-void writeByte(BYTE b,FILE * fp);
-void readStr(FILE * fp,size_t length,char * str);
+typedef struct{
+    BYTE * data;
+    unsigned long size;
+} DataContainer;
+
+void freeDataContainer(DataContainer data);
+DataContainer allocateDataContainer(unsigned long size);
+
+BYTE readByte(FILE * in);
+void writeByte(BYTE b,FILE * out);
+
+void readStr(FILE * in,size_t length,char * str);
 
 void assertFile(FILE * fp,char * errorStr);
 void assertFileOpened(FILE * fp);
