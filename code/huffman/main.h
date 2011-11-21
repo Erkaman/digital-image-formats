@@ -3,6 +3,12 @@
 
 #include "freq_table.h"
 #include "tree.h"
+#include "../common.h"
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
 
 typedef struct{
     /* the code value of the code*/

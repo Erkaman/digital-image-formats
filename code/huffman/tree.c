@@ -1,16 +1,16 @@
 #include "tree.h"
 #include <stdlib.h>
 
-struct Node * makeTreeFromTrees(struct Node * tree1, struct Node * tree2)
+struct Node * makeTreeFromTrees(struct Node * leftTree, struct Node * rightTree)
 {
     struct Node * tree;
 
     tree = (struct Node *)malloc(sizeof(struct Node));
-    tree->symbol.frequency = tree1->symbol.frequency + tree2->symbol.frequency;
+    tree->symbol.frequency = leftTree->symbol.frequency + rightTree->symbol.frequency;
     tree->symbol.symbol = 0;
 
-    tree->left = deepCopyTree(tree1);
-    tree->right = deepCopyTree(tree2);
+    tree->left = deepCopyTree(leftTree);
+    tree->right = deepCopyTree(rightTree);
 
     return tree;
 }

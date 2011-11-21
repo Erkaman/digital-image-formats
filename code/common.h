@@ -15,6 +15,16 @@ typedef struct{
 void freeDataContainer(DataContainer data);
 DataContainer allocateDataContainer(unsigned long size);
 
+DataContainer getEmptyDataContainer(void);
+
+DataContainer accommodateDataContainer(DataContainer data, unsigned long newSize);
+
+BYTE readNextByte(DataContainer data);
+
+void printData(DataContainer data);
+
+void writeData(DataContainer data, FILE * out);
+
 BYTE readByte(FILE * in);
 void writeByte(BYTE b,FILE * out);
 
@@ -37,5 +47,9 @@ char * strncpyBack( char * destination, const char * source, size_t num );
 int verbose;
 
 void verbosePrint(const char * format, ...);
+
+void printWarning(const char * format, ...);
+void printError(const char * format, ...);
+
 
 #endif /* _COMMON_H_ */

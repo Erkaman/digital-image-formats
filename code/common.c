@@ -111,7 +111,9 @@ void verbosePrint(const char * format, ...)
 
 void freeDataContainer(DataContainer data)
 {
-    free(data.data);
+    if(data.data != NULL || data.size != 0){
+	free(data.data);
+    }
     data.data = NULL;
 
     data.size = 0;
@@ -127,3 +129,90 @@ DataContainer allocateDataContainer(unsigned long size)
     return data;
 }
 
+void printWarning(const char * format, ...)
+{
+    va_list vl;
+
+    printf("Warning: ");
+
+    va_start(vl, format);
+    vprintf(format, vl);
+    va_end(vl);
+}
+
+void printError(const char * format, ...)
+{
+    va_list vl;
+
+    printf("ERROR: ");
+
+    va_start(vl, format);
+    vprintf(format, vl);
+    va_end(vl);
+}
+
+BYTE readNextByte(DataContainer data)
+{
+    BYTE ret;
+
+    if(data.size == 0){
+	printError("common.c readNextByte: Reached end of data stream.\n");
+	exit(1);
+    }
+
+    ret = *data.data;
+    ++data.data;
+
+    return ret;
+}
+
+void writeData(DataContainer data, FILE * out)
+{
+    unsigned long i;
+
+    for(i = 0; i < data.size; ++i){
+	putc(data.data[i],out);
+    }
+}
+
+void printData(DataContainer data)
+{
+    unsigned long i;
+
+    for(i = 0; i < data.size; ++i)
+	verbosePrint("%d\n",data.data[i]);
+}
+
+DataContainer accommodateDataContainer(DataContainer data, unsigned long newSize)
+{
+    unsigned long i;
+    unsigned long transfer;
+    DataContainer newData;
+
+    newData = allocateDataContainer(newSize);
+
+    /* If all of the data in the old container fit into the new. */
+    if(data.size < newSize)
+	transfer = data.size;
+    else
+	/* If not all the data in the old container fit in the new. */
+	transfer = newSize;
+
+    for(i = 0; i < transfer; ++i)
+	newData.data[i] = data.data[i];
+
+    /* Free any memory in the previous container. */
+    freeDataContainer(data);
+
+    return newData;
+}
+
+DataContainer getEmptyDataContainer(void)
+{
+    DataContainer data;
+
+    data.data = NULL;
+    data.size = 0;
+
+    return data;
+}

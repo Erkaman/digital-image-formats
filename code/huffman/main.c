@@ -1,83 +1,58 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "../common.h"
 #include "main.h"
-#include "tree.h"
 
 int main(int argc, char *argv[])
 {
     FILE * in;
     FILE * out;
-    char * outName;
-    char * inName;
     int decompress = 0;
-    char extension[5];
 
     verbose = 1;
+
 
     if(argc == 1){
         printf("No file was specified.\n");
         printf("Try --help for more information.\n");
-    } else {
+    }
 
-        /* do the command line parsing */
+    /* do the command line parsing */
 
-        /*++argv;
-          --argc;
-          while(1){
+    ++argv;
+    --argc;
+    while(1){
 
-          if(!strcmp("--help",*argv)){
-          printHelp();
-          return 0;
-          }
-          else if(!strcmp("-d",*argv))
-          decompress = 1;
-          else if(!strcmp("-v",*argv))
-          verbose = 1;
-
-          ++argv;
-          --argc;
-          }*/
+        if(!strcmp("--help",*argv)){
+            printHelp();
+            return 0;
+        }
+        else if(!strcmp("-d",*argv))
+            decompress = 1;
+        else if(!strcmp("-v",*argv))
+            verbose = 1;
+	else
+	    break;
 
         ++argv;
-
-        inName = *argv;
-        in = fopen(inName,"rb");
-        assertFileOpened(in);
-
-        if(decompress){
-
-            strncpyBack(extension,inName,4);
-
-            if(!strcmp(extension,".hfm")){
-                outName = changeExtension(inName,".unc");
-                out = fopen(outName,"wb");
-                assertFileOpened(out);
-            }else{
-
-                outName = strAppend(*argv,".unc");
-                out = fopen(outName,"wb");
-                assertFileOpened(out);
-            }
-
-            huffmanDecompress(in,out);
-
-            /* TODO: */
-            free(outName);
-
-        }else{
-            outName = strAppend(inName,".hfm");
-            out = fopen(outName,"wb");
-            assertFileOpened(out);
-
-            huffmanCompress(in,out);
-            free(outName);
-        }
-
-        fclose(in);
-        fclose(out);
+        --argc;
     }
+
+    if(argc != 2){
+        printf("An input AND an output file must be specified.");
+        return 1;
+    }
+
+    in = fopen(argv[0],"rb");
+    assertFileOpened(in);
+
+    out = fopen(argv[1],"wb");
+    assertFileOpened(out);
+
+    if(decompress)
+        huffmanDecompress(in,out);
+    else
+        huffmanCompress(in,out);
+
+    fclose(in);
+    fclose(out);
 
     return 0;
 }
@@ -98,24 +73,24 @@ void huffmanCompress(FILE * in,FILE * out)
     CodesList optimumCodes;
     struct Node * huffmanTree;
 
-/*    freqTable = buildFrequencyTable(in);
-*/
+    freqTable = buildFrequencyTable(in);
 
-    freqTable.length = 4;
+/*    freqTable.length = 5; */
 
-    in = in;
+/*    freqTable.frequencies[0].symbol = 'e';
+    freqTable.frequencies[0].frequency = 5;
 
-    freqTable.frequencies[0].symbol = 'e';
-    freqTable.frequencies[0].frequency = 1;
+    freqTable.frequencies[1].symbol = 'd';
+    freqTable.frequencies[1].frequency = 6;
 
-    freqTable.frequencies[1].symbol = 'r';
-    freqTable.frequencies[1].frequency = 1;
+    freqTable.frequencies[2].symbol = 'c';
+    freqTable.frequencies[2].frequency = 6;
 
-    freqTable.frequencies[2].symbol = 'i';
-    freqTable.frequencies[2].frequency = 1;
+    freqTable.frequencies[3].symbol = 'b';
+    freqTable.frequencies[3].frequency = 7;
 
-    freqTable.frequencies[3].symbol = 'c';
-    freqTable.frequencies[3].frequency = 1;
+    freqTable.frequencies[4].symbol = 'a';
+    freqTable.frequencies[4].frequency = 15;*/
 
     printFrequencyTable(freqTable);
 
@@ -126,7 +101,6 @@ void huffmanCompress(FILE * in,FILE * out)
 /*    huffmanEncode(in,out,optimumCodes);*/
 
     out = out;
-
 }
 
 struct Node * constructHuffmanTree(FrequencyTable freqTable)
@@ -140,16 +114,15 @@ struct Node * constructHuffmanTree(FrequencyTable freqTable)
     int tree1;
     int tree2;
 
-    verbosePrint("CONSTRUCTHUFFMANTREE\n");
+    verbosePrint("CONSTRUCT_HUFFMAN_TREE\n");
 
     for(i = 0; i < 256; ++i)
         trees[i] = NULL;
 
-    /* Transfer the data from the frequency table to a "wood" of nodes.  */
     for(i = 0;i < freqTable.length; ++i)
         trees[i] = makeTree(freqTable.frequencies[i]);
 
-/*    printTrees(trees,freqTable.length);*/
+    printTrees(trees,freqTable.length);
 
     /* Always keep track of the number of trees. */
     numberOfTrees = i;
@@ -161,21 +134,45 @@ struct Node * constructHuffmanTree(FrequencyTable freqTable)
 
         findTwoMinValues(trees,freqTable.length,&tree1,&tree2);
 
-/*      verbosePrint("tree1:%d\n",tree1);
-        verbosePrint("tree2:%d\n",tree2);*/
+#if 0
+	/* Shorter codes are placed to the left of longer codes. */
+	if(maxDepth(trees[tree1]) < maxDepth(trees[tree2])){
 
-        newTree = makeTreeFromTrees(
-            trees[tree1],
-            trees[tree2]);
+	    newTree = makeTreeFromTrees(
+		trees[tree1],
+		trees[tree2]);
+	} else if(maxDepth(trees[tree1]) > maxDepth(trees[tree2])){
+	    newTree = makeTreeFromTrees(
+		trees[tree2],
+		trees[tree1]);
+	} else{
+	    /* if the codes lengths are equal. */
 
-        /* Remove these two minimum trees */
+	    /* Those elements that are first in the set are placed leftmost. */
+	    if(trees[tree1]->symbol.symbol < trees[tree2]->symbol.symbol){
+		newTree = makeTreeFromTrees(
+		    trees[tree1],
+		    trees[tree2]);
+	    } else{
+		newTree = makeTreeFromTrees(
+		    trees[tree2],
+		    trees[tree1]);
+	    }
+	}
+#endif
+
+	newTree = makeTreeFromTrees(
+		    trees[tree1],
+		    trees[tree2]);
+
+        /* Remove the two minimum trees */
         freeTree(trees[tree1]);
         freeTree(trees[tree2]);
         trees[tree1] = NULL;
         trees[tree2] = NULL;
 
-/*      verbosePrint("NEW TREE:\n");
-        printTree(newTree);*/
+      verbosePrint("NEW TREE:\n");
+        printTree(newTree);
 
         trees[tree2] = newTree;
 /*      printTrees(trees,freqTable.length);*/
@@ -185,8 +182,6 @@ struct Node * constructHuffmanTree(FrequencyTable freqTable)
         --numberOfTrees;
 
     }
-
-    /* Do remember to free the memory taken up by the trees! */
 
     verbosePrint("The huffman tree:\n");
 
@@ -222,7 +217,7 @@ CodesList makeNewCodesList(void)
     CodesList codes;
 
     for(i = 0; i < 256; ++i)
-	codes.codes[i].codeLength = 0;
+        codes.codes[i].codeLength = 0;
 
     return codes;
 }
@@ -245,8 +240,8 @@ void traverseHuffmanTree(
     /* bit shifting */
 
 /*    verbosePrint("traverseHuffmanTree\n");
-    verbosePrint("depth:%d\n",depth);
-    verbosePrint("code:%d\n",code);*/
+      verbosePrint("depth:%d\n",depth);
+      verbosePrint("code:%d\n",code);*/
 
     if(isEmptyNode(node)){
 
@@ -254,24 +249,25 @@ void traverseHuffmanTree(
         newCode.value = code;
         newCode.codeLength = depth;
 
+	/* Reverse the codes! */
         codes->codes[node->symbol.symbol] = newCode;
 
         return;
-    }
-
-    if(node->left != NULL){
-        traverseHuffmanTree(
-            node->left,
-            depth+1,
-            code | (1 << depth),
-            codes);
     }
 
     if(node->right != NULL){
         traverseHuffmanTree(
             node->right,
             depth+1,
-            code,
+            (code << 1) | (1),
+            codes);
+    }
+
+    if(node->left != NULL){
+        traverseHuffmanTree(
+            node->left,
+            depth+1,
+	    code << 1,
             codes);
     }
 }
@@ -302,8 +298,8 @@ void printCodesList(CodesList codes)
     verbosePrint("Codes List:\n");
 
     for(i = 0; i < 256; ++i)
-	if(codes.codes[i].codeLength != 0)
-	    printCode(codes.codes[i]);
+        if(codes.codes[i].codeLength != 0)
+            printCode(codes.codes[i]);
 }
 
 void huffmanEncode(FILE * in,FILE * out, CodesList codes)
@@ -321,15 +317,15 @@ void huffmanEncode(FILE * in,FILE * out, CodesList codes)
     c = getc(in);
     while(c != EOF){
 
-	printCode(codes.codes[c]);
-	outputCode(codes.codes[c],out);
-	sum += codes.codes[c].codeLength;
-	c = getc(in);
+        printCode(codes.codes[c]);
+        outputCode(codes.codes[c],out);
+        sum += codes.codes[c].codeLength;
+        c = getc(in);
     }
 
     verbosePrint("Code length:%d\n",sum);
 
-     out = out;
+    out = out;
 }
 
 void outputCode(Code c,FILE * out)
@@ -351,48 +347,48 @@ void outputCode(Code c,FILE * out)
     /* while all bits haven't yet been read. */
     while(remainingCodeBits > 0){
 
-	/* if the number of bits to be read is less than the current input value */
+        /* if the number of bits to be read is less than the current input value */
         if(remainingPacketBits < remainingCodeBits){
             /* write what can be written*/
 
-/*	    verbosePrint("B1\n"); */
+/*          verbosePrint("B1\n"); */
 
-	    shift -= remainingPacketBits;
+            shift -= remainingPacketBits;
             packet |=
                 ((code >> (remainingCodeBits - remainingPacketBits)) << shift);
 
-/*	    verbosePrint("output packet:%x\n",packet); */
+/*          verbosePrint("output packet:%x\n",packet); */
 
             putc(packet,out);
 
             remainingCodeBits -= remainingPacketBits;
-/*	    verbosePrint("remainingCodeBits:%d\n",remainingCodeBits);
-	    verbosePrint("remainingPacketBits:%d\n",remainingPacketBits);*/
+/*          verbosePrint("remainingCodeBits:%d\n",remainingCodeBits);
+            verbosePrint("remainingPacketBits:%d\n",remainingPacketBits);*/
 
-	    /* get rid of n last bits */
-	    code <<= c.codeLength - remainingPacketBits;
-	    code >>= c.codeLength - remainingPacketBits;
+            /* get rid of n last bits */
+            code <<= c.codeLength - remainingPacketBits;
+            code >>= c.codeLength - remainingPacketBits;
 
-	    /* reset the packet */
-	    remainingPacketBits = 8;
-	    packet = 0;
+            /* reset the packet */
+            remainingPacketBits = 8;
+            packet = 0;
             shift = 8;
         }else{
-	    /* if the number of bits remaining to be read is less than the
-	     bits in the current input value. */
+            /* if the number of bits remaining to be read is less than the
+               bits in the current input value. */
 
             /* remainingPacketBits >= remainingCodeBits */
-/*	    code = remainingCodeBits;*/
+/*          code = remainingCodeBits;*/
 
-/*	    verbosePrint("B2\n"); */
+/*          verbosePrint("B2\n"); */
 
             shift -= remainingCodeBits;
 
-/*	    verbosePrint("shift:%d\n",shift); */
-/*	    verbosePrint("B1:%d\n",code << shift); */
+/*          verbosePrint("shift:%d\n",shift); */
+/*          verbosePrint("B1:%d\n",code << shift); */
 
-	    packet |= code << shift;
-/*	    verbosePrint("packet:%x\n",packet); */
+            packet |= code << shift;
+/*          verbosePrint("packet:%x\n",packet); */
 
             remainingPacketBits -=  remainingCodeBits;
 

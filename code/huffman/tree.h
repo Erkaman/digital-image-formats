@@ -12,7 +12,7 @@ struct Node {
 
 struct Node * makeTree(AlphabetSymbol symbol);
 
-struct Node * makeTreeFromTrees(struct Node * tree1, struct Node * tree2);
+struct Node * makeTreeFromTrees(struct Node * leftTree, struct Node * rightTree);
 
 void findTwoMinValues(struct Node ** trees,int length,int * tree1, int * tree2);
 

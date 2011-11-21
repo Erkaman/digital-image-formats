@@ -6,6 +6,8 @@
 #include "gif.h"
 #include <stdarg.h>
 
+/* Implement command line parsing and -v flag. */
+
 int subBlockIndex;
 
 GIFDataSubBlocks imageDataSubBlocks;
