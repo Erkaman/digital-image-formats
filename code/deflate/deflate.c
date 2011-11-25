@@ -2,39 +2,120 @@
 #include "../common.h"
 #include <stdlib.h>
 
-BYTE * dataStream;
-int dataI;
-
-HuffmanCode fixedHuffmanCodes[TREE_SIZE];
-
 int remainingPacketBits;
 
-int getMinimumCodeLength(HuffmanCode * codes)
+CodesList fixedHuffmanCodes;
+CodesList fixedDistanceCodes;
+
+LengthTableEntry lengthTable[LENGTH_CODES] = {
+
+    {0,3},
+    {0,4},
+    {0,5},
+    {0,6},
+    {0,7},
+    {0,8},
+    {0,9},
+    {0,10},
+
+    {1,11},
+    {1,13},
+    {1,15},
+    {1,17},
+
+    {2,19},
+    {2,23},
+    {2,27},
+    {2,31},
+
+    {3,35},
+    {3,43},
+    {3,51},
+    {3,59},
+
+    {4,67},
+    {4,83},
+    {4,99},
+    {4,115},
+
+    {5,131},
+    {5,163},
+    {5,195},
+    {5,227},
+};
+
+DistanceTableEntry distanceTable[DISTANCE_CODES] = {
+    {0,1},
+    {0,2},
+    {0,3},
+    {0,4},
+
+    {1,5},
+    {1,7},
+
+    {2,9},
+    {2,13},
+
+    {3,17},
+    {3,25},
+
+    {4,33},
+    {4,49},
+
+    {5,65},
+    {5,97},
+
+    {6,129},
+    {6,193},
+
+    {7,257},
+    {7,385},
+
+    {8,513},
+    {8,769},
+
+    {9,1025},
+    {9,1537},
+
+    {10,2049},
+    {10,3073},
+
+    {11,4097},
+    {11,6145},
+
+    {12,8193},
+    {12,12289},
+
+    {13,16385},
+    {13,24577},
+};
+
+int getMinimumCodeLength(CodesList codes)
 {
     int min;
     int i;
 
-    min = codes[0].codeLength;
+    min = codes.codes[0].codeLength;
 
-    for(i = 1; i < TREE_SIZE; ++i)
-        if(codes[i].codeLength < 0)
-            min = codes[i].codeLength;
+    for(i = 1; i < codes.size; ++i)
+        if(codes.codes[i].codeLength < min)
+            min = codes.codes[i].codeLength;
 
     return min;
 }
 
-BYTE getNextByte(void)
+BYTE getNextByte(DataStream * stream)
 {
-    return dataStream[++dataI];
+    return stream->stream.data[++stream->position];
 }
-
-
 
 void setFixedHuffmanCodes(void)
 {
     int i;
     int codesI = 0;
     HuffmanCode code;
+
+    fixedHuffmanCodes.size = HUFFMAN_CODES;
 
     verbosePrint("Assigning static huffman codes:\n");
 
@@ -46,7 +127,7 @@ void setFixedHuffmanCodes(void)
         code.codeValue = 0x30 + i;
         code.litteralValue = i;
         code.codeLength = 8;
-        fixedHuffmanCodes[codesI++] = code;
+        fixedHuffmanCodes.codes[codesI++] = code;
 
         printCode(code);
     }
@@ -57,7 +138,7 @@ void setFixedHuffmanCodes(void)
         code.codeValue = 0x190 + i - 144;
         code.litteralValue = i;
         code.codeLength = 9;
-        fixedHuffmanCodes[codesI++] = code;
+        fixedHuffmanCodes.codes[codesI++] = code;
 
         printCode(code);
     }
@@ -68,7 +149,7 @@ void setFixedHuffmanCodes(void)
         code.codeValue = 0x0 + i - 256;
         code.litteralValue = i;
         code.codeLength = 7;
-        fixedHuffmanCodes[codesI++] = code;
+        fixedHuffmanCodes.codes[codesI++] = code;
 
         printCode(code);
     }
@@ -79,120 +160,356 @@ void setFixedHuffmanCodes(void)
         code.codeValue = 0xc0 + i - 280;
         code.litteralValue = i;
         code.codeLength = 8;
-        fixedHuffmanCodes[codesI++] = code;
+        fixedHuffmanCodes.codes[codesI++] = code;
 
         printCode(code);
     }
 }
 
-DataContainer deflateDecompress(DataContainer data)
+void setFixedDistanceCodes(void)
 {
-    DataContainer decompressedData;
-    int lastBlock;
-    DEFLATE_BlockHeader header;
-    unsigned long i;
+    int i;
+    int codesI = 0;
+    HuffmanCode code;
+
+    fixedDistanceCodes.size = DISTANCE_CODES;
+
+    verbosePrint("Assigning distance codes:\n");
+
+    /*
+      "Distance codes 0-31 are represented by (fixed-length) 5-bit codes"
+    */
+    for(i = 0; i <= 31; ++i){
+        code.codeValue = i;
+        code.litteralValue = i;
+        code.codeLength = 5;
+        fixedDistanceCodes.codes[codesI++] = code;
+
+        printCode(code);
+    }
+}
+
+
+void readNonCompresedBlock(DataStream * compressedStream, DataStream * decompressedStream)
+{
     BYTE b1;
     BYTE b2;
-    int decompressedI;
-
     unsigned long uncompressedBlockSize;
+    unsigned long i;
 
-    unsigned short fixedCode;
+/* if dynaic codes are used a new table is read in before the decompression
+   of the data. */
 
-    int foundIndex;
+    remainingPacketBits = 8;
 
-/*    unsigned short fixedCode; */
+    /* FIXME: does this handle big and little endian? */
+    b1 = getNextByte(compressedStream);
+    b2 = getNextByte(compressedStream);
+
+    verbosePrint("b1:%d\n",b1);
+    verbosePrint("b2:%d\n",b2);
+
+    uncompressedBlockSize = (b1 + b2 * 256);
+
+    decompressedStream->stream = accommodateDataContainer(decompressedStream->stream,
+                                                          decompressedStream->stream.size + uncompressedBlockSize);
+
+    /* Skip NLEN */
+    getNextByte(compressedStream);
+    getNextByte(compressedStream);
+
+    for(i = 0; i < uncompressedBlockSize; ++i){
+/*        decompressedStream->stream.data[decompressedStream->position++] =
+          getNextByte(compressedStream);*/
+
+        addElementToStream(decompressedStream, getNextByte(compressedStream));
+
+        verbosePrint("%c",decompressedStream->stream.data[decompressedStream->position-1]);
+    }
+}
+
+void addElementToStream(DataStream * stream, BYTE element)
+{
+    verbosePrint("Added to decompressed stream:%d=%c\n",element,element);
+    stream->stream.data[stream->position++] = element;
+}
+
+DataContainer deflateDecompress(DataContainer data)
+{
+    DEFLATE_BlockHeader header;
+    DataStream compressedStream;
+    DataStream decompressedStream;
+
+    CodesList huffmanCodes;
+    CodesList distanceCodes;
+
+    compressedStream.stream = data;
+
+    /* Remember, the first to bytes of the compressed stream were headers bytes, and
+       we have already read them, and so we skip them. */
+    compressedStream.position = 2;
+
+    /* No decompressed data has so far been read. */
+    decompressedStream.position = 0;
+    decompressedStream.stream.size = 0;
 
     /* Put this into a preparatory function? */
     setFixedHuffmanCodes();
+    setFixedDistanceCodes();
 
-    decompressedData = getEmptyDataContainer();
+    decompressedStream.stream = getEmptyDataContainer();
 
-    dataStream = data.data;
-    dataI = 2;
     remainingPacketBits = 8;
 
-    lastBlock = 0;
-
-    decompressedI = 0;
-
-    decompressedData.size = 0;
-
     do{
+        /* Skip past to the next byte in the stream where the next block begins. */
+        if(decompressedStream.position > 2){
+            verbosePrint("hai");
+            ++compressedStream.position;
+        }
 
-        /* if dynaic codes are used a new table is read in before the decompression
-           of the data. */
-        header = readDEFLATE_BlockHeader();
+        header = readDEFLATE_BlockHeader(&compressedStream);
         printDEFLATE_BlockHeader(header);
 
         if(header.BTYPE == BTYPE_NO_COMPRESSION){
-            remainingPacketBits = 8;
 
-            /* FIXME: does this handle big and little endian? */
-            b1 = getNextByte();
-            b2 = getNextByte();
-            uncompressedBlockSize = (b1 + b2 * 256);
+            readNonCompresedBlock(&compressedStream, &decompressedStream);
+        } else{
 
-            decompressedData = accommodateDataContainer(decompressedData,
+            if (header.BTYPE == BTYPE_COMPRESSED_DYNAMIC_HUFFMAN_CODES) {
 
-                                                        decompressedData.size + uncompressedBlockSize);
+                /* Read huffman codes. */
+                /* Read distance codes. */
 
-            /* Skip NLEN */
-            getNextByte();
-            getNextByte();
-
-            for(i = 0; i < uncompressedBlockSize; ++i)
-                decompressedData.data[decompressedI++] = getNextByte();
-        } else if (header.BTYPE == BTYPE_COMPRESSED_FIXED_HUFFMAN_CODES){
-
-            /* read code of minimum value. */
-            fixedCode = inputCodeLSB(getMinimumCodeLength(fixedHuffmanCodes));
-
-            foundIndex = findCode(fixedHuffmanCodes,fixedCode);
-
-            while(foundIndex == -1){
-
-		fixedCode = (fixedCode << 1) | inputCodeLSB(1);
-
-		foundIndex = findCode(fixedHuffmanCodes,fixedCode);
+            } else if(header.BTYPE == BTYPE_COMPRESSED_FIXED_HUFFMAN_CODES) {
+                huffmanCodes = fixedHuffmanCodes;
+                distanceCodes = fixedDistanceCodes;
             }
 
-	    printCode(fixedHuffmanCodes[foundIndex]);
-
+            readCompresedBlock(
+                huffmanCodes,
+                distanceCodes,
+                &compressedStream,
+                &decompressedStream);
         }
 
 
     }while(header.BFINAL == 0);
 
-    return decompressedData;
+    decompressedStream.stream.size = decompressedStream.position - 1;
+
+    return decompressedStream.stream;
+}
+
+void readCompresedBlock(
+    CodesList huffmanCodes,
+    CodesList distanceCodes,
+    DataStream * compressedStream,
+    DataStream * decompressedStream)
+{
+    HuffmanCode code;
+
+
+    while(1){
+
+        code = readCode(huffmanCodes, compressedStream);
+
+        printCode(code);
+
+        if( decompressedStream->position == decompressedStream->stream.size){
+
+            decompressedStream->stream =
+                accommodateDataContainer(
+                    decompressedStream->stream,
+                    DATA_STREAM_GROW_FACTOR *
+                    ( decompressedStream->stream.size > 0 ? decompressedStream->stream.size : 1));
+        }
+
+        /* If the code is a simple literal value. */
+        if(code.litteralValue <= LITTERAL_VALUES_MAX){
+            /* */
+	    verbosePrint("Decoded:%d=%c\n",code.litteralValue,code.litteralValue);
+            addElementToStream(decompressedStream, code.litteralValue);
+
+        }
+        else if(code.litteralValue == END_OF_BLOCK){
+            /* If the code is a end of block code, then stop.*/
+            break;
+        } else if(code.litteralValue >= DISTANCE_MIN &&
+                  code.litteralValue <= DISTANCE_MAX){
+            verbosePrint("DECODE DISTANCE PAIR FOUND\n");
+
+            decodeLengthDistancePair(
+                code,
+                distanceCodes,
+                compressedStream,
+                decompressedStream);
+
+
+        } else{
+            printError("Invalid code found:\n");
+            printCode(code);
+        }
+    }
+
+    decompressedStream = decompressedStream;
+}
+
+void decodeLengthDistancePair(
+    HuffmanCode lengthCode,
+    CodesList distanceCodes,
+    DataStream * compressedStream,
+    DataStream * decompressedStream)
+{
+    unsigned short fullLengthCode;
+
+    unsigned short fullDistanceCode;
+
+    HuffmanCode distanceCode;
+
+    fullLengthCode =  readRestOfLengthCode(
+        lengthCode.litteralValue,
+        compressedStream);
+
+    verbosePrint("length code:");
+    printCode(lengthCode);
+    verbosePrint("beginning length code:%d\n",lengthCode.litteralValue);
+    verbosePrint("Real length code:%d\n",fullLengthCode);
+
+    /* Read the following distance code. */
+    distanceCode = readCode(distanceCodes, compressedStream);
+
+    verbosePrint("distance code:");
+    printCode(distanceCode);
+
+    fullDistanceCode = readRestOfDistanceCode(distanceCode.litteralValue,compressedStream);
+
+    verbosePrint("beginning distance code value:%d\n", distanceCode.litteralValue);
+    verbosePrint("real distance code value:%d\n",fullDistanceCode);
+
+    outputLengthDistancePair(fullLengthCode, fullDistanceCode, decompressedStream);
+
+
+    /* Decode distance length pair. */
+}
+
+void outputLengthDistancePair(
+    unsigned short lengthCode,
+    unsigned short distanceCode,
+    DataStream * decompressedStream)
+{
+    unsigned short i;
+    BYTE toAdd;
+
+    verbosePrint("Decoding length distance pair:\n");
+
+    for(i = 0; i < lengthCode; ++i){
+
+        toAdd = decompressedStream->stream.data[decompressedStream->position - distanceCode];
+
+	verbosePrint("Decoded:%d=%c\n",toAdd,toAdd);
+
+        addElementToStream(decompressedStream, toAdd);
+    }
+}
+
+unsigned short readRestOfDistanceCode(unsigned short code,DataStream * compressedStream)
+{
+    unsigned short distanceCode;
+    DistanceTableEntry entry;
+
+    entry = distanceTable[code];
+
+    if(entry.extraBits != 0){
+	distanceCode = entry.minDist + inputCodeLSBRev(entry.extraBits,compressedStream);
+    } else{
+	distanceCode = entry.minDist;
+    }
+
+    compressedStream = compressedStream;
+
+    return distanceCode;
+}
+
+unsigned short readRestOfLengthCode(
+    unsigned short code,
+    DataStream * compressedStream)
+{
+    unsigned short lengthCode;
+    LengthTableEntry entry;
+
+    entry = lengthTable[code - 257];
+
+    if(entry.extraBits != 0){
+	lengthCode = entry.minLength + inputCodeLSBRev(entry.extraBits,compressedStream);
+    } else{
+	lengthCode = entry.minLength;
+    }
+
+    return lengthCode;
+}
+
+HuffmanCode readCode(CodesList codes,  DataStream * stream)
+{
+    int minimumCodeLength;
+    unsigned short codeValue;
+    int foundIndex;
+    unsigned short codeLength;
+
+    /* inefficient.  */
+    minimumCodeLength = getMinimumCodeLength(codes);
+    verbosePrint("minimum code length:%d\n",minimumCodeLength);
+
+    /* read code of minimum value. */
+    codeLength = minimumCodeLength;
+    codeValue = inputCodeLSBRev(minimumCodeLength, stream);
+
+    foundIndex = findCode(codes,codeValue,codeLength);
+
+    while(foundIndex == -1){
+
+        codeValue = appendBit(codeValue,stream);
+        codeLength++;
+
+        foundIndex = findCode(codes,codeValue,codeLength);
+    }
+
+    return codes.codes[foundIndex];
 }
 
 
-unsigned int inputCodeLSBRev(int codeSize)
+unsigned int inputCodeLSBRev(int codeSize, DataStream * stream)
 {
     unsigned short code;
     int i;
 
-    /* fixme this cod causes the codes to be build in wrong order. Fix so that they git build in the reverse order. */
-    for(i = 0; i < codeSize; ++i){
-        code = code | (inputCodeLSB(1) << codeSize);
-    }
+    code = 0;
+
+    for(i = 0; i < codeSize; ++i)
+        code = appendBit(code,stream);
 
     verbosePrint("output reverse LSB code:%d\n",code);
     return code;
+}
 
+unsigned short appendBit(unsigned short codeValue, DataStream * stream)
+{
+    unsigned short bit;
 
-int findCode(HuffmanCode * codes, unsigned short codeValue)
+    bit = inputCodeLSB(1,stream);
+
+    return bit | (codeValue << 1);
+}
+
+int findCode(CodesList codes,unsigned short codeValue, unsigned short codeLength)
 {
     int i;
 
-    for(i = 0; i < TREE_SIZE; ++i){
-        if(codes[i].codeValue == codeValue){
+    for(i = 0; i < codes.size; ++i)
+        if(codes.codes[i].codeValue == codeValue && codes.codes[i].codeLength == codeLength)
             break;
-        }
-    }
 
-    if(i == TREE_SIZE){
+    if(i == codes.size){
         return -1;
     } else{
         verbosePrint("Found code with value %d and index %d\n",codeValue,i);
@@ -200,7 +517,7 @@ int findCode(HuffmanCode * codes, unsigned short codeValue)
     }
 }
 
-unsigned int inputCodeLSB(int codeSize)
+unsigned int inputCodeLSB(int codeSize, DataStream * stream)
 {
     unsigned int returnValue;
     int shift;
@@ -216,12 +533,13 @@ unsigned int inputCodeLSB(int codeSize)
 
             /* read in what's left of the current byte */
             returnValue |=
-                (firstNBits(dataStream[dataI],remainingPacketBits) << shift);
+                (firstNBits(stream->stream.data[stream->position],remainingPacketBits) << shift);
             /* increase the shift */
             shift += remainingPacketBits;
             codeSize -= remainingPacketBits;
-            dataI++;
+            stream->position++;
             remainingPacketBits = 8;
+	    verbosePrint("Starting new byte\n");
 
         }else{
             /* if remainingPacketBits > codeSize */
@@ -230,9 +548,9 @@ unsigned int inputCodeLSB(int codeSize)
                get rid of the bytes read in. */
 
             returnValue |=
-                (firstNBits(dataStream[dataI],codeSize) << shift);
+                (firstNBits(stream->stream.data[stream->position], codeSize) << shift);
 
-            dataStream[dataI] >>= codeSize;
+            stream->stream.data[stream->position] >>= codeSize;
             remainingPacketBits -= codeSize;
 
             /* enough bits of data has been read in. This line thus causes the loop to terminate
@@ -241,20 +559,17 @@ unsigned int inputCodeLSB(int codeSize)
         }
     }
 
-    verbosePrint("inputcodeLSB::%d\n",returnValue);
+    verbosePrint("inputcodeLSB:%d\n",returnValue);
     return returnValue;
 }
 
-DEFLATE_BlockHeader readDEFLATE_BlockHeader(void)
+DEFLATE_BlockHeader readDEFLATE_BlockHeader(DataStream * stream)
 {
     DEFLATE_BlockHeader header;
 
     /* This may not work for variably sized codes. */
-    if(dataI > 2){
-        ++dataI;
-    }
-    header.BFINAL = inputCodeLSB(1);
-    header.BTYPE = inputCodeLSB(2);
+    header.BFINAL = inputCodeLSB(1,stream);
+    header.BTYPE = inputCodeLSB(2,stream);
 
     return header;
 }

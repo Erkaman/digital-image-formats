@@ -7,3 +7,15 @@ http://tex.stackexchange.com/questions/2340/how-to-make-a-3-level-deep-tree-with
 * An Explanation of the Deflate Algorithm
 http://zlib.net/feldspar.html
 
+
+* Canonical Huffman code
+http://en.wikipedia.org/wiki/Canonical_Huffman_code
+
+* Huffman coding.
+http://compressions.sourceforge.net/Huffman.html
+
+* Efficient way of storing Huffman tree
+http://stackoverflow.com/questions/759707/efficient-way-of-storing-huffman-tree
+
+* Huffman compression algorithm
+http://stackoverflow.com/questions/903375/huffman-compression-algorithm
