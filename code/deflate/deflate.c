@@ -189,7 +189,6 @@ void setFixedDistanceCodes(void)
     }
 }
 
-
 void readNonCompresedBlock(DataStream * compressedStream, DataStream * decompressedStream)
 {
     BYTE b1;
@@ -211,9 +210,6 @@ void readNonCompresedBlock(DataStream * compressedStream, DataStream * decompres
 
     uncompressedBlockSize = (b1 + b2 * 256);
 
-    decompressedStream->stream = accommodateDataContainer(decompressedStream->stream,
-                                                          decompressedStream->stream.size + uncompressedBlockSize);
-
     /* Skip NLEN */
     getNextByte(compressedStream);
     getNextByte(compressedStream);
@@ -230,8 +226,28 @@ void readNonCompresedBlock(DataStream * compressedStream, DataStream * decompres
 
 void addElementToStream(DataStream * stream, BYTE element)
 {
-    verbosePrint("Added to decompressed stream:%d=%c\n",element,element);
-    stream->stream.data[stream->position++] = element;
+    unsigned long newSize;
+
+
+    verbosePrint("size test: %d = %d\n",
+                 stream->position,
+                 stream->stream.size);
+
+    /* accommodate the size of the output stream of needed. */
+    if( stream->position == stream->stream.size){
+
+        newSize = DATA_STREAM_GROW_FACTOR *
+            ( stream->stream.size > 0 ? stream->stream.size : 1);
+
+        verbosePrint("new decompressed stream size allocated: %d\n",newSize);
+        stream->stream =
+            accommodateDataContainer(
+                stream->stream,
+                newSize);
+    }
+
+    verbosePrint("Added to decompressed stream:%d=%c\n",element,element);    stream->stream.data[stream->position++] = element;
+    verbosePrint("new stream position:%d\n", stream->position);
 }
 
 DataContainer deflateDecompress(DataContainer data)
@@ -264,7 +280,6 @@ DataContainer deflateDecompress(DataContainer data)
     do{
         /* Skip past to the next byte in the stream where the next block begins. */
         if(decompressedStream.position > 2){
-            verbosePrint("hai");
             ++compressedStream.position;
         }
 
@@ -272,7 +287,6 @@ DataContainer deflateDecompress(DataContainer data)
         printDEFLATE_BlockHeader(header);
 
         if(header.BTYPE == BTYPE_NO_COMPRESSION){
-
             readNonCompresedBlock(&compressedStream, &decompressedStream);
         } else{
 
@@ -292,11 +306,10 @@ DataContainer deflateDecompress(DataContainer data)
                 &compressedStream,
                 &decompressedStream);
         }
-
-
     }while(header.BFINAL == 0);
 
-    decompressedStream.stream.size = decompressedStream.position - 1;
+    verbosePrint("final size: %d", decompressedStream.position);
+    decompressedStream.stream.size = decompressedStream.position;
 
     return decompressedStream.stream;
 }
@@ -309,26 +322,16 @@ void readCompresedBlock(
 {
     HuffmanCode code;
 
-
     while(1){
 
         code = readCode(huffmanCodes, compressedStream);
 
         printCode(code);
 
-        if( decompressedStream->position == decompressedStream->stream.size){
-
-            decompressedStream->stream =
-                accommodateDataContainer(
-                    decompressedStream->stream,
-                    DATA_STREAM_GROW_FACTOR *
-                    ( decompressedStream->stream.size > 0 ? decompressedStream->stream.size : 1));
-        }
-
         /* If the code is a simple literal value. */
         if(code.litteralValue <= LITTERAL_VALUES_MAX){
             /* */
-	    verbosePrint("Decoded:%d=%c\n",code.litteralValue,code.litteralValue);
+            verbosePrint("Decoded:%d=%c\n",code.litteralValue,code.litteralValue);
             addElementToStream(decompressedStream, code.litteralValue);
 
         }
@@ -344,8 +347,6 @@ void readCompresedBlock(
                 distanceCodes,
                 compressedStream,
                 decompressedStream);
-
-
         } else{
             printError("Invalid code found:\n");
             printCode(code);
@@ -367,13 +368,14 @@ void decodeLengthDistancePair(
 
     HuffmanCode distanceCode;
 
+    verbosePrint("length code:");
+    printCode(lengthCode);
+    verbosePrint("beginning length code:%d\n",lengthCode.litteralValue);
+
     fullLengthCode =  readRestOfLengthCode(
         lengthCode.litteralValue,
         compressedStream);
 
-    verbosePrint("length code:");
-    printCode(lengthCode);
-    verbosePrint("beginning length code:%d\n",lengthCode.litteralValue);
     verbosePrint("Real length code:%d\n",fullLengthCode);
 
     /* Read the following distance code. */
@@ -388,9 +390,6 @@ void decodeLengthDistancePair(
     verbosePrint("real distance code value:%d\n",fullDistanceCode);
 
     outputLengthDistancePair(fullLengthCode, fullDistanceCode, decompressedStream);
-
-
-    /* Decode distance length pair. */
 }
 
 void outputLengthDistancePair(
@@ -403,11 +402,13 @@ void outputLengthDistancePair(
 
     verbosePrint("Decoding length distance pair:\n");
 
+    verbosePrint("length code:%d\n",lengthCode);
+
     for(i = 0; i < lengthCode; ++i){
 
         toAdd = decompressedStream->stream.data[decompressedStream->position - distanceCode];
 
-	verbosePrint("Decoded:%d=%c\n",toAdd,toAdd);
+        verbosePrint("Decoded:%d=%c\n",toAdd,toAdd);
 
         addElementToStream(decompressedStream, toAdd);
     }
@@ -421,12 +422,10 @@ unsigned short readRestOfDistanceCode(unsigned short code,DataStream * compresse
     entry = distanceTable[code];
 
     if(entry.extraBits != 0){
-	distanceCode = entry.minDist + inputCodeLSBRev(entry.extraBits,compressedStream);
+        distanceCode = entry.minDist + inputCodeLSB(entry.extraBits,compressedStream);
     } else{
-	distanceCode = entry.minDist;
+        distanceCode = entry.minDist;
     }
-
-    compressedStream = compressedStream;
 
     return distanceCode;
 }
@@ -441,9 +440,9 @@ unsigned short readRestOfLengthCode(
     entry = lengthTable[code - 257];
 
     if(entry.extraBits != 0){
-	lengthCode = entry.minLength + inputCodeLSBRev(entry.extraBits,compressedStream);
+        lengthCode = entry.minLength + inputCodeLSB(entry.extraBits,compressedStream);
     } else{
-	lengthCode = entry.minLength;
+        lengthCode = entry.minLength;
     }
 
     return lengthCode;
@@ -539,7 +538,7 @@ unsigned int inputCodeLSB(int codeSize, DataStream * stream)
             codeSize -= remainingPacketBits;
             stream->position++;
             remainingPacketBits = 8;
-	    verbosePrint("Starting new byte\n");
+            verbosePrint("Starting new byte\n");
 
         }else{
             /* if remainingPacketBits > codeSize */

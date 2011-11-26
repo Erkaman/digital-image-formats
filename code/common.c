@@ -204,6 +204,8 @@ DataContainer accommodateDataContainer(DataContainer data, unsigned long newSize
     /* Free any memory in the previous container. */
     freeDataContainer(data);
 
+    newData.size = newSize;
+
     return newData;
 }
 
