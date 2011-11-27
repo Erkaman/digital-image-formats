@@ -31,6 +31,8 @@ typedef struct{
 } HuffmanCode;
 
 typedef struct {
+    /* The maximum size of any of the alphabets in the
+     DEFLATE format never exceed the number 288. */
     HuffmanCode codes[HUFFMAN_CODES];
     unsigned short size;
 } CodesList;
@@ -49,6 +51,55 @@ typedef struct{
     unsigned short extraBits;
     unsigned short minLength;
 } LengthTableEntry;
+
+typedef struct {
+    unsigned short HLIT; /* 5 bits. number of literal/length codes - 257(257-286).   */
+    unsigned short HDIST; /* 5 bits. Number of distance codes - 1 (1 - 32)  */
+    unsigned short HCLEN; /* 4 bits. Number of code length codes - 4 (4 - 19) */
+} DEFLATE_DynamicBlockHeader;
+
+CodesList loadCodeLengthCodes(unsigned short HCLEN,DataStream * compressedStream);
+
+
+CodesList loadDistanceCodes(unsigned short HDIST,
+    CodesList codeLengthCodes,
+    DataStream * compressedStream);
+
+
+void repeatZeroLengthCode(
+    BYTE * codeLengths,
+    int * i,
+    int minCodeLength,
+    int extraBits,
+    DataStream * compressedStream);
+
+CodesList loadLiteralLengthCodes(
+    unsigned short HLIT,
+    CodesList codeLengthCodes,
+    DataStream * compressedStream);
+
+CodesList loadUsingCodeLengthCodes(
+    unsigned short length,
+    unsigned short alphabetLength,
+    CodesList codeLengthCodes,
+    DataStream * compressedStream);
+
+
+#define CODE_LENGTH_CODES 19
+
+CodesList translateCodes(BYTE * codeLengths, int alphabetSize);
+
+void translateCodesTest(void);
+
+int * getCodeLengthFreqs(BYTE * codeLengths, int alphabetSize);
+
+void loadDynamicTables(
+    CodesList * huffmanCodes,
+    CodesList * distanceCodes,
+    DataStream * compressedStream);
+
+DEFLATE_DynamicBlockHeader loadDEFLATE_DynamicBlockHeader(DataStream * compressedStream);
+void printDEFLATE_DynamicBlockHeader(DEFLATE_DynamicBlockHeader  blockHeader);
 
 #define DATA_STREAM_GROW_FACTOR 2
 
@@ -120,5 +171,12 @@ void outputLengthDistancePair(
     unsigned short lengthCode,
     unsigned short distanceCode,
     DataStream * decompressedStream);
+
+void printCodesList(CodesList codes);
+
+void repeatPreviousLengthCode(
+    BYTE * codeLengths,
+    int * i,
+    DataStream * compressedStream);
 
 #endif /* _DEFLATE_H_ */

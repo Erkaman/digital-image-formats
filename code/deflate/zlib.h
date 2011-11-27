@@ -40,5 +40,7 @@ void printZLIB_FLG(ZLIB_FLG flg);
 
 unsigned long adler32(DataContainer data);
 
+void validateCheckSum(DataContainer data, DataContainer decompressed);
+
 
 #endif /* _ZLIB_H_ */

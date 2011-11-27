@@ -65,12 +65,16 @@ void ZLIB_DecompressFile(FILE * in, FILE * out)
 {
     DataContainer decompressed, compressed;
 
+
+
     compressed = getCompressedData(in);
+
 
     verbosePrint("Read in compressed data, size: %ld\n",compressed.size);
 /*    printData(compressed); */
 
     decompressed = ZLIB_Decompress(compressed);
+
 
     freeDataContainer(compressed);
 

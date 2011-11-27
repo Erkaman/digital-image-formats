@@ -1,4 +1,5 @@
 #include "zlib.h"
+#include <math.h>
 
 void checkCheckBits(BYTE cmfByte,BYTE flgByte,ZLIB_FLG flg)
 {
@@ -40,8 +41,9 @@ DataContainer ZLIB_Decompress(DataContainer data)
     /* read dictionary if necessary. */
 
     /* decompress. */
-
     decompressed = deflateDecompress(data);
+
+    validateCheckSum(data,decompressed);
 
     /* the decompressor only works to the last block, then we here
      validate the checksum.
@@ -49,6 +51,28 @@ DataContainer ZLIB_Decompress(DataContainer data)
      Remember: ONLY THE DECOMPRESSED DATA COUNTS, and no dictionary count in. */
 
     return decompressed;
+}
+
+void validateCheckSum(DataContainer data, DataContainer decompressed)
+{
+    /* Does this work for computers of different Endian? */
+    unsigned long calcChecksum;
+    unsigned long dataChecksum;
+
+    calcChecksum = adler32(decompressed);
+
+    dataChecksum =
+	data.data[data.size - 4] * pow(256,3) +
+	data.data[data.size - 3] * pow(256,2) +
+	data.data[data.size - 2] * pow(256,1) +
+	data.data[data.size - 1] * pow(256,0);
+
+    verbosePrint("checkSums: calculated = %ld. Proper = %ld\n",calcChecksum,dataChecksum);
+
+    if(calcChecksum != dataChecksum){
+	printError("ZLIB decompressed data check does not match, corrupted data!");
+	exit(1);
+    }
 }
 
 
@@ -135,12 +159,8 @@ unsigned long adler32(DataContainer data)
 
     for (index = 0; index < data.size; ++index)
     {
-        verbosePrint("addler32:number:%x\n",data.data[index]);
         a = (a + data.data[index]) % MOD_ADLER;
         b = (b + a) % MOD_ADLER;
-
-        verbosePrint("addler32:a:%d,b:%d\n",a,b);
-
     }
 
     return (b << 16) | a;

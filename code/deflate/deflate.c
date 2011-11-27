@@ -1,6 +1,7 @@
 #include "deflate.h"
 #include "../common.h"
 #include <stdlib.h>
+#include <ctype.h>
 
 int remainingPacketBits;
 
@@ -95,10 +96,17 @@ int getMinimumCodeLength(CodesList codes)
     int min;
     int i;
 
-    min = codes.codes[0].codeLength;
+    /* find the first non-zero length code */
+    for(i = 0; i < codes.size; ++i){
+        if(codes.codes[i].codeLength != 0){
+            min = codes.codes[i].codeLength;
+            break;
+        }
+    }
 
-    for(i = 1; i < codes.size; ++i)
-        if(codes.codes[i].codeLength < min)
+    /* find the minimum length code. */
+    for(; i < codes.size; ++i)
+        if(codes.codes[i].codeLength != 0 && codes.codes[i].codeLength < min)
             min = codes.codes[i].codeLength;
 
     return min;
@@ -129,7 +137,6 @@ void setFixedHuffmanCodes(void)
         code.codeLength = 8;
         fixedHuffmanCodes.codes[codesI++] = code;
 
-        printCode(code);
     }
 
     /* Literal values 144-255 are given the codes
@@ -140,7 +147,6 @@ void setFixedHuffmanCodes(void)
         code.codeLength = 9;
         fixedHuffmanCodes.codes[codesI++] = code;
 
-        printCode(code);
     }
 
     /* Literal values 256-279 are given the codes
@@ -151,7 +157,6 @@ void setFixedHuffmanCodes(void)
         code.codeLength = 7;
         fixedHuffmanCodes.codes[codesI++] = code;
 
-        printCode(code);
     }
 
     /* Literal values 280-287 are given the codes
@@ -162,7 +167,6 @@ void setFixedHuffmanCodes(void)
         code.codeLength = 8;
         fixedHuffmanCodes.codes[codesI++] = code;
 
-        printCode(code);
     }
 }
 
@@ -184,8 +188,6 @@ void setFixedDistanceCodes(void)
         code.litteralValue = i;
         code.codeLength = 5;
         fixedDistanceCodes.codes[codesI++] = code;
-
-        printCode(code);
     }
 }
 
@@ -250,6 +252,7 @@ void addElementToStream(DataStream * stream, BYTE element)
     verbosePrint("new stream position:%d\n", stream->position);
 }
 
+
 DataContainer deflateDecompress(DataContainer data)
 {
     DEFLATE_BlockHeader header;
@@ -258,6 +261,9 @@ DataContainer deflateDecompress(DataContainer data)
 
     CodesList huffmanCodes;
     CodesList distanceCodes;
+
+/*    translateCodesTest();
+      return decompressedStream.stream; */
 
     compressedStream.stream = data;
 
@@ -279,26 +285,33 @@ DataContainer deflateDecompress(DataContainer data)
 
     do{
         /* Skip past to the next byte in the stream where the next block begins. */
-        if(decompressedStream.position > 2){
-            ++compressedStream.position;
-        }
 
         header = readDEFLATE_BlockHeader(&compressedStream);
         printDEFLATE_BlockHeader(header);
 
         if(header.BTYPE == BTYPE_NO_COMPRESSION){
+
+
             readNonCompresedBlock(&compressedStream, &decompressedStream);
+
+	    /* ?????  */
+            if(decompressedStream.position > 2){
+                ++compressedStream.position;
+            }
+
         } else{
 
             if (header.BTYPE == BTYPE_COMPRESSED_DYNAMIC_HUFFMAN_CODES) {
 
-                /* Read huffman codes. */
-                /* Read distance codes. */
+                loadDynamicTables(&huffmanCodes, &distanceCodes, &compressedStream);
+/*                break; */
 
             } else if(header.BTYPE == BTYPE_COMPRESSED_FIXED_HUFFMAN_CODES) {
                 huffmanCodes = fixedHuffmanCodes;
                 distanceCodes = fixedDistanceCodes;
             }
+
+            verbosePrint("Codes have been constructed\n.");
 
             readCompresedBlock(
                 huffmanCodes,
@@ -312,6 +325,207 @@ DataContainer deflateDecompress(DataContainer data)
     decompressedStream.stream.size = decompressedStream.position;
 
     return decompressedStream.stream;
+}
+
+void loadDynamicTables(
+    CodesList * huffmanCodes,
+    CodesList * distanceCodes,
+    DataStream * compressedStream)
+{
+    DEFLATE_DynamicBlockHeader blockHeader;
+
+    CodesList codeLengthCodes;
+
+    blockHeader = loadDEFLATE_DynamicBlockHeader(compressedStream);
+    printDEFLATE_DynamicBlockHeader(blockHeader);
+
+    codeLengthCodes = loadCodeLengthCodes(blockHeader.HCLEN, compressedStream);
+
+    verbosePrint("code length codes:\n");
+    printCodesList(codeLengthCodes);
+
+    *huffmanCodes = loadLiteralLengthCodes(
+        blockHeader.HLIT,
+        codeLengthCodes,
+        compressedStream);
+
+    verbosePrint("huffman codes:\n");
+    printCodesList(*huffmanCodes);
+
+    *distanceCodes = loadDistanceCodes(
+        blockHeader.HDIST,
+        codeLengthCodes,
+        compressedStream);
+
+    verbosePrint("distance codes:\n");
+    printCodesList(*distanceCodes);
+}
+
+CodesList loadLiteralLengthCodes(
+    unsigned short HLIT,
+    CodesList codeLengthCodes,
+    DataStream * compressedStream)
+{
+    verbosePrint("Loading Literal Length Codes\n");
+    return loadUsingCodeLengthCodes(
+        HLIT + 257,
+        HUFFMAN_CODES,
+        codeLengthCodes,
+        compressedStream);
+}
+
+CodesList loadDistanceCodes(unsigned short HDIST,
+                            CodesList codeLengthCodes,
+                            DataStream * compressedStream)
+{
+    verbosePrint("Loading Distance Codes\n");
+
+    return loadUsingCodeLengthCodes(
+        HDIST + 1,
+        DISTANCE_CODES,
+        codeLengthCodes,
+        compressedStream);
+}
+
+CodesList loadUsingCodeLengthCodes(
+    unsigned short length,
+    unsigned short alphabetLength,
+    CodesList codeLengthCodes,
+    DataStream * compressedStream)
+{
+    int  i;
+    BYTE codeLengths[HUFFMAN_CODES];
+    HuffmanCode code;
+    int codesLenI;
+
+    codesLenI = 0;
+
+    for(i = 0; i < alphabetLength; ++i){
+        codeLengths[i] = 0;
+    }
+
+    while(1){
+        code = readCode(codeLengthCodes, compressedStream);
+        verbosePrint("found code:\n");
+        printCode(code);
+
+        if(/*code.litteralValue >= 0 &&*/ code.litteralValue <= 15){
+
+	    verbosePrint("outputting simple code %d at index %d\n",
+                     code.litteralValue,
+                     codesLenI);
+
+            codeLengths[codesLenI++] = code.litteralValue;
+
+        } else if(code.litteralValue == 16){
+            repeatPreviousLengthCode(codeLengths, &codesLenI, compressedStream);
+
+        }else if(code.litteralValue == 17){
+            repeatZeroLengthCode(codeLengths, &codesLenI, 3, 3, compressedStream);
+
+        } else if(code.litteralValue == 18){
+            repeatZeroLengthCode(codeLengths, &codesLenI, 11, 7, compressedStream);
+        }
+
+        if(codesLenI == length){
+            break;
+        }
+    }
+
+    return translateCodes(codeLengths, alphabetLength);
+}
+
+void repeatPreviousLengthCode(
+    BYTE * codeLengths,
+    int * i,
+    DataStream * compressedStream)
+{
+    int repeatLength;
+    int previousCode;
+    int j;
+
+    repeatLength =  3 + inputCodeLSB(2, compressedStream);
+
+    previousCode = codeLengths[(*i) - 1];
+
+    for(j = 0; j < repeatLength; ++j){
+        verbosePrint("outputting repeat code length %d at index %d\n",
+                     previousCode,
+                     *i);
+        codeLengths[*i] = 0;
+        (*i)++;
+    }
+}
+
+void repeatZeroLengthCode(
+    BYTE * codeLengths,
+    int * i,
+    int minCodeLength,
+    int extraBits,
+    DataStream * compressedStream)
+{
+    int realLength;
+    int j;
+
+    /* Repeat codes are recursive!!!!
+
+     Example:
+Codes 8, 16 (+2 bits 11),
+16 (+2 bits 10) will expand to
+12 code lengths of 8 (1 + 6 + 5)*/
+
+    realLength =  minCodeLength + inputCodeLSB(extraBits,compressedStream);
+
+    for(j = 0; j < realLength; ++j){
+        verbosePrint("outputting zero length at index %d\n", *i);
+
+        codeLengths[*i] = 0;
+        (*i)++;
+    }
+
+}
+
+CodesList loadCodeLengthCodes(unsigned short HCLEN,DataStream * compressedStream)
+{
+    unsigned short realLength;
+    BYTE codeLengthOrder[CODE_LENGTH_CODES] = {
+        16, 17, 18,0, 8, 7,
+        9, 6, 10, 5, 11, 4,
+        12, 3, 13, 2, 14, 1, 15};
+
+    BYTE codeLengths[CODE_LENGTH_CODES];
+
+    int i;
+
+    realLength = HCLEN + 4;
+
+    for(i = 0; i < CODE_LENGTH_CODES; ++i)
+        codeLengths[i] = 0;
+
+    for(i = 0; i < realLength; ++i)
+        codeLengths[codeLengthOrder[i]] = inputCodeLSB(3, compressedStream);
+
+    return translateCodes(codeLengths , CODE_LENGTH_CODES);
+}
+
+DEFLATE_DynamicBlockHeader loadDEFLATE_DynamicBlockHeader(DataStream * compressedStream)
+{
+    DEFLATE_DynamicBlockHeader blockHeader;
+
+    blockHeader.HLIT = inputCodeLSB(5,compressedStream);
+    blockHeader.HDIST = inputCodeLSB(5,compressedStream);
+    blockHeader.HCLEN = inputCodeLSB(4,compressedStream);
+
+    return blockHeader;
+}
+
+void printDEFLATE_DynamicBlockHeader(DEFLATE_DynamicBlockHeader blockHeader)
+{
+    verbosePrint("DEFLATE Dynamic Block Header\n");
+
+    verbosePrint("HLIT:%d\n", blockHeader.HLIT);
+    verbosePrint("HDIST:%d\n", blockHeader.HDIST);
+    verbosePrint("HCLEN:%d\n", blockHeader.HCLEN);
 }
 
 void readCompresedBlock(
@@ -504,6 +718,7 @@ int findCode(CodesList codes,unsigned short codeValue, unsigned short codeLength
 {
     int i;
 
+    verbosePrint("codes size:%d",codes.size);
     for(i = 0; i < codes.size; ++i)
         if(codes.codes[i].codeValue == codeValue && codes.codes[i].codeLength == codeLength)
             break;
@@ -538,7 +753,7 @@ unsigned int inputCodeLSB(int codeSize, DataStream * stream)
             codeSize -= remainingPacketBits;
             stream->position++;
             remainingPacketBits = 8;
-            verbosePrint("Starting new byte\n");
+            verbosePrint("Starting new byte: %x\n", stream->stream.data[stream->position]);
 
         }else{
             /* if remainingPacketBits > codeSize */
@@ -591,7 +806,8 @@ void printDEFLATE_BlockHeader(DEFLATE_BlockHeader header)
         verbosePrint("Compressed with dynamic Huffman codes");
         break;
     case BTYPE_RESERVED:
-        verbosePrint("Reserved(error");
+        printError("Reserved(error");
+        printf("hai\n");
         exit(0);
         break;
     }
@@ -605,17 +821,140 @@ void printCode(HuffmanCode code)
 {
     int i;
 
-    verbosePrint("Code literal value:%d = %c.",code.litteralValue,code.litteralValue);
+    if(isprint(code.litteralValue))
+	verbosePrint("Code literal value:%d = %c.",code.litteralValue,code.litteralValue);
+    else
+	verbosePrint("Code literal value:%d.",code.litteralValue);
 
-    verbosePrint("Code Value:%d = ",code.codeValue);
+    if(code.codeLength == 0){
+        verbosePrint("zero length code.");
+    }else{
 
-    for(i = (code.codeLength - 1); i >= 0 ; --i)
-        verbosePrint("%d", getBitToggled(code.codeValue,i));
+        verbosePrint("Code Value:%d = ",code.codeValue);
 
+        for(i = (code.codeLength - 1); i >= 0 ; --i)
+            verbosePrint("%d", getBitToggled(code.codeValue,i));
+    }
     verbosePrint(".\n");
 }
 
 int getBitToggled(unsigned short value,int bit)
 {
     return (((value & (1 << bit)) >> bit));
+}
+
+CodesList translateCodes(BYTE * codeLengths, int alphabetSize)
+{
+    int * codeLengthFreqs;
+    int * nextCode;
+    int i;
+    CodesList translatedCodes;
+
+    unsigned short code;
+    int maxBits;
+    int bits;
+    int len;
+
+    /* Step 1. */
+    codeLengthFreqs = getCodeLengthFreqs(codeLengths, alphabetSize);
+
+    verbosePrint("Printing frequency table:\n");
+    for(i = 0; i < alphabetSize; ++i)
+        if(codeLengthFreqs[i] != 0)
+            verbosePrint("N:%d | %d\n",i,codeLengthFreqs[i]);
+
+    /* Step 2*/
+
+    maxBits = 0;
+
+    for(i = 1;i < alphabetSize; ++i)
+        if(codeLengthFreqs[i] != 0)
+            maxBits = i;
+
+    /* enough memory? */
+    nextCode = (int *)malloc(sizeof(int) * (maxBits + 1));
+
+    code = 0;
+
+    codeLengthFreqs[0] = 0;
+
+    for(bits = 1; bits <= maxBits; ++bits){
+        code = (code + codeLengthFreqs[bits - 1]) << 1;
+        nextCode[bits] =  code;
+    }
+
+    verbosePrint("Printing next code:\n");
+    for(i = 1; i <= maxBits; ++i){
+        verbosePrint("N:%d | %d\n",i,nextCode[i]);
+    }
+
+    /* Step 3 */
+    translatedCodes.size = alphabetSize;
+
+    for(i = 0; i < alphabetSize; ++i){
+        translatedCodes.codes[i].litteralValue = i;
+        translatedCodes.codes[i].codeLength = 0;
+    }
+
+    for(i = 0; i < alphabetSize; ++i){
+
+        len = codeLengths[i];
+
+        if(len != 0){
+            translatedCodes.codes[i].codeValue = nextCode[len];
+            translatedCodes.codes[i].codeLength = len;
+
+            nextCode[len]++;
+        }
+
+    }
+
+    free(codeLengthFreqs);
+    free(nextCode);
+
+    return translatedCodes;
+}
+
+int * getCodeLengthFreqs(BYTE * codeLengths, int alphabetSize)
+{
+    int * freqs;
+    int i;
+
+    freqs = (int *)malloc(sizeof(int) * alphabetSize);
+
+    for(i = 0; i < alphabetSize; ++i)
+        freqs[i] = 0;
+
+    for(i = 0; i < alphabetSize; ++i)
+        ++freqs[codeLengths[i]];
+
+    return freqs;
+}
+
+void translateCodesTest(void)
+{
+    int i;
+    int alphabetLength = 8;
+    BYTE codeLengths[8] = /*{2,1,3,3}; */
+
+        {3,3,3,
+         3,3,
+         2,4,4};
+
+    CodesList codes;
+
+    codes = translateCodes(codeLengths, alphabetLength);
+
+
+    for(i = 0; i < alphabetLength; ++i)
+        printCode(codes.codes[i]);
+}
+
+void printCodesList(CodesList codes)
+{
+    int i;
+
+    for(i = 0; i < codes.size; ++i)
+        printCode(codes.codes[i]);
+
 }
