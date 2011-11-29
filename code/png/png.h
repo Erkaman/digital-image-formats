@@ -55,7 +55,7 @@ typedef struct{
      See http://www.w3.org/TR/PNG/#11iCCP
      and
     http://www.color.org/ICC1V42.pdf*/
-    DataContainer profile;
+    FixedDataList profile;
 } ICC_Profile;
 
 /* How this structures should be interpreted depends on the color type used. */
@@ -110,16 +110,16 @@ typedef struct {
 } textDataList;
 
 typedef struct {
-    unsigned long R;
-    unsigned long G;
-    unsigned long B;
+    INT32 R;
+    INT32 G;
+    INT32 B;
 } RGB;
 
 typedef struct {
-    unsigned long R;
-    unsigned long G;
-    unsigned long B;
-    unsigned long A;
+    INT32 R;
+    INT32 G;
+    INT32 B;
+    INT32 A;
 } RGBA;
 
 typedef union {
@@ -128,33 +128,11 @@ typedef union {
 
     RGBA rgba;
 
-    unsigned long index;
+    INT32 index;
 
-    unsigned long greyscale;
+    INT32 greyscale;
 
 } Color;
-
-typedef struct {
-
-    Color * colors;
-
-    unsigned long size;
-
-} ColorData;
-
-
-typedef struct {
-    ColorData * palette;
-
-    unsigned long size;
-} Palette;
-
-typedef struct {
-    Palette * pallettes;
-
-    unsigned long size;
-} PaletteList;
-
 
 typedef struct {
     INT32 x;
@@ -165,7 +143,7 @@ typedef struct {
 } PixelDimensions;
 
 typedef struct {
-    uint16_t year;
+    INT16 year;
 
     BYTE month;
     BYTE day;
@@ -182,9 +160,9 @@ typedef struct {
     /* Put in the proper order. */
     /* The compressed datastream is then the concatenation of the
      * contents of the data fields of all the IDAT chunks. */
-    ColorData colorData;
+    FixedDataList colorData;
 
-    Palette palette;
+    FixedDataList * palette;
 
     /* Suggested palettes */
 
@@ -202,11 +180,11 @@ typedef struct {
 
     Color * backgroundColor;
 
-    uint16_t * imageHistogram;
+    INT16 * imageHistogram;
 
     PixelDimensions * pixelDimensions;
 
-    PaletteList * suggestedPalettes;
+/*    PaletteList * suggestedPalettes; */
 
     TimeStamp * timeStamp;
 

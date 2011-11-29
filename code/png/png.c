@@ -57,16 +57,14 @@ void writePNG(PNG_Image image, FILE * out)
 
 void writeSignature(BYTE * signature, FILE * out)
 {
-    unsigned long i;
+    size_t i;
 
     fprintf(out, "PNG Signature:\n");
-    for(i = 0; i < SIGNATURE_LENGTH; ++i){
-        if(i != (SIGNATURE_LENGTH - 1)){
+    for(i = 0; i < SIGNATURE_LENGTH; ++i)
+        if(i != (SIGNATURE_LENGTH - 1))
             fprintf(out, "%d ", signature[i]);
-        } else{
+        else
             fprintf(out, "%d\n", signature[i]);
-        }
-    }
 }
 
 Chunk loadChunk(FILE * in)
@@ -100,8 +98,8 @@ Chunk loadChunk(FILE * in)
 void validateCRC(Chunk chunk)
 {
     FixedDataList checkData;
-    unsigned long i;
-    unsigned long calcCrc32;
+    size_t i;
+    INT32 calcCrc32;
 
     /* Get the data to be validated: the chunk type and the chunk data */
 
@@ -109,7 +107,6 @@ void validateCRC(Chunk chunk)
     checkData = getNewFixedDataList(sizeof(BYTE),chunk.length + 4);
 
     for(i = 0; i < 4; ++i)
-	/* ???? */
         checkData.list[i] = &chunk.chunkType[i];
 
     for(i = i; i < (chunk.length + 4); ++i)
@@ -151,7 +148,7 @@ unsigned int crc32(FixedDataList data){
     BYTE b;
 
     for(i = 0; i < data.count; ++i){
-	b = *(BYTE *)data.list[i];
+        b = *(BYTE *)data.list[i];
         reminder ^= b; /* must be zero extended */
         for(bit = 0; bit < 8; bit++)
             if(reminder & 0x01)
