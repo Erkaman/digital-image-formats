@@ -21,7 +21,7 @@ typedef struct {
 #define DATA_LIST_GROWTH_FACTOR 2
 
 DataList allocateNewDataList(size_t size, size_t count, size_t position);
-void freeDataList(DataList list);
+void freeDataList(DataList list, int freeElements);
 void printDataList(DataList list, void (*printFunc)(void *));
 DataList getNewDataList(size_t size);
 void print_size_t(void * s);

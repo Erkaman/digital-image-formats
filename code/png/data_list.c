@@ -14,8 +14,16 @@ DataList  allocateNewDataList(size_t size, size_t maxCount, size_t count)
     return list;
 }
 
-void freeDataList(DataList list)
+void freeDataList(DataList list, int freeElements);
 {
+    size_t i;
+
+    if(freeElements){
+	for(i = 0; i < list.count; ++i){
+	    free(list[i]);
+	}
+    }
+
     if(list.list != NULL /*|| list.count != 0*/)
 	free(list.list);
 

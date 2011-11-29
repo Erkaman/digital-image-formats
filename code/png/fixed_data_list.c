@@ -1,7 +1,15 @@
 #include "fixed_data_list.h"
 
-void freeFixedDataList(FixedDataList list)
+void freeFixedDataList(FixedDataList list, int freeElements)
 {
+    size_t i;
+
+    if(freeElements){
+	for(i = 0; i < list.count; ++i){
+	    free(list[i]);
+	}
+    }
+
     if(list.list != NULL /*|| list.count != 0*/)
 	free(list.list);
 

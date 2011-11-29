@@ -8,11 +8,6 @@
 #include "png_defs.h"
 
 typedef struct {
-    DataList list;
-    size_t position;
-} DataStream;
-
-typedef struct {
     INT32 length;
     char chunkType[5];
     FixedDataList chunkData;
@@ -208,6 +203,8 @@ unsigned int crc32(FixedDataList data);
 void validateCRC(Chunk chunk);
 
 int isCriticalChunk(Chunk chunk);
+
+FixedDataList readBytes(size_t count, FILE * in);
 
 #endif /* _PNG_H_ */
 

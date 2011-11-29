@@ -83,8 +83,10 @@ Chunk loadChunk(FILE * in)
     verbosePrint("Chunk Type: %s\n", chunk.chunkType);
 
     /* TODO: Remember to free this memory! */
-    chunk.chunkData = getNewFixedDataList(sizeof(BYTE), chunk.length);
-    fread(chunk.chunkData.list, sizeof(BYTE), chunk.length, in);
+    chunk.chunkData = readBytes(chunk.length, in);
+
+    verbosePrint("data:\n");
+    printFixedDataList(chunk.chunkData, printByte);
 
     fread(&chunk.CRC, sizeof(INT32), 1, in);
     chunk.CRC = htonl(chunk.CRC);
@@ -95,28 +97,49 @@ Chunk loadChunk(FILE * in)
     return chunk;
 }
 
+FixedDataList readBytes(size_t count, FILE * in)
+{
+    FixedDataList list;
+    size_t i;
+    BYTE * b;
+
+    list = getNewFixedDataList(sizeof(void *), count);
+
+    for(i = 0; i < count; ++i){
+	b = malloc(sizeof(BYTE));
+	*b = getc(in);
+	printf("%d:%d\n",i,*b);
+	list.list[i] = b;
+    }
+
+    return list;
+}
+
 void validateCRC(Chunk chunk)
 {
     FixedDataList checkData;
     size_t i;
-    INT32 calcCrc32;
+    INT32 calcCRC;
 
-    /* Get the data to be validated: the chunk type and the chunk data */
-
-    /* The chunk length bytes are included in the calculation. */
     checkData = getNewFixedDataList(sizeof(BYTE),chunk.length + 4);
 
     for(i = 0; i < 4; ++i)
         checkData.list[i] = &chunk.chunkType[i];
 
     for(i = i; i < (chunk.length + 4); ++i)
-        checkData.list[i] = &chunk.chunkData.list[i-4];
+        checkData.list[i] = chunk.chunkData.list[i-4];
 
     verbosePrint("CRC data:\n");
     printFixedDataList(checkData, printByte);
     verbosePrint("wut:\n");
 
-    calcCrc32 = crc32(checkData);
+    calcCRC = crc32(checkData);
+
+    if(calcCRC != chunk.CRC){
+	printError("Chunk has invalid checksum: chunk %d != calc %d\n", chunk.CRC, calcCRC );
+	exit(1);
+    } else
+	verbosePrint("Chunk has valid checksum!\n");
 }
 
 int isCriticalChunk(Chunk chunk)
@@ -159,3 +182,4 @@ unsigned int crc32(FixedDataList data){
 
     return reminder ^ 0xFFFFFFFF;
 }
+m

@@ -4,5 +4,5 @@
 
 void printByte(void * byte)
 {
-    printf("%d\n", *((BYTE *) byte));
+    verbosePrint("%d\n", *((BYTE *) byte));
 }
