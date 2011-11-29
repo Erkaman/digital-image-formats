@@ -2,22 +2,26 @@
 #define _PNG_H_
 
 #include "../common.h"
-#include <stdint.h>
+#include "data_list.h"
+#include "fixed_data_list.h"
+
+#include "png_defs.h"
 
 typedef struct {
-    DataContainer signatureData;
-} Signature;
+    DataList list;
+    size_t position;
+} DataStream;
 
 typedef struct {
-    uint32_t length;
+    INT32 length;
     char chunkType[5];
-    DataContainer chunkData;
-    uint32_t CRC;
+    FixedDataList chunkData;
+    INT32 CRC;
 } Chunk;
 
 typedef struct {
-    uint32_t width;
-    uint32_t height;
+    INT32 width;
+    INT32 height;
 
     BYTE bitDepth;
     BYTE colorType;
@@ -29,17 +33,17 @@ typedef struct {
 } ImageHeader;
 
 typedef struct {
-    uint32_t whitePointX;
-    uint32_t whitePointY;
+    INT32 whitePointX;
+    INT32 whitePointY;
 
-    uint32_t RedX;
-    uint32_t RedY;
+    INT32 RedX;
+    INT32 RedY;
 
-    uint32_t GreenX;
-    uint32_t GreenY;
+    INT32 GreenX;
+    INT32 GreenY;
 
-    uint32_t BlueX;
-    uint32_t BlueY;
+    INT32 BlueX;
+    INT32 BlueY;
 
 } PrimaryChromaticities;
 
@@ -153,8 +157,8 @@ typedef struct {
 
 
 typedef struct {
-    uint32_t x;
-    uint32_t y;
+    INT32 x;
+    INT32 y;
 
     BYTE unitSpecifier;
 
@@ -171,7 +175,7 @@ typedef struct {
 } TimeStamp;
 
 typedef struct {
-    Signature signature;
+    BYTE signature[SIGNATURE_LENGTH];
 
     ImageHeader header;
 
@@ -190,7 +194,7 @@ typedef struct {
     PrimaryChromaticities * chromaticities;
 
     /* The gamma chunk contains this and only this value. */
-    uint32_t * imageGamma;
+    INT32 * imageGamma;
 
     SignificantBits * significantBits;
 
@@ -208,95 +212,20 @@ typedef struct {
 
 } PNG_Image;
 
-/* Header chunk. */
-#define IHDR "IHDR"
-
-/* Palette */
-#define PLTE "PLTE"
-
-/* Image data chunk. */
-#define IDAT "IDAT"
-
-/* Ending chunk. */
-#define IEND "IEND"
-
-/* Ending chunk. */
-#define tRNS  "tRNS"
-
-#define cHRM  "cHRM"
-
-#define gAMA "gAMA"
-
-#define iCCP "iCCP"
-
-#define sBIT "sBIT"
-
-#define sRGB  "sRGB"
-
-#define tEXt "tEXt"
-
-#define zTXt "zTXt"
-
-#define iTXt "iTXt"
-
-#define bKGD "bKGD"
-
-#define hIST "hIST"
-
-#define pHYs "pHYs"
-
-#define sPLT "sPLT "
-
-#define tIME "tIME"
-
-
-#define GREYSCALE_COLOR 0
-#define TRUECOLOR_COLOR 2
-#define INDEXED_COLOR 3
-#define GREYSCALE_ALPHA_COLOR 4
-#define TRUECOLOR_ALPHA_COLOR 6
-
-/* The only allowed compression method. */
-#define DEFLATE_COMPRESSION_METHOD 0
-
-/* The only allowed filter method. */
-#define FILTER_METHOD_0 0
-
-/* Filter types: */
-
-#define NO_FILTER 0
-#define SUB_FILTER 1
-#define UP_FILTER 2
-#define AVERAGE_FILTER 3
-#define PAETH_FILTER 4
-
-/* Interlacing types. */
-
-#define NO_INTERLACE 0
-#define ADAM7_INTERLACE 1
-
-#define PERCEPTUAL_RENDERING_INTENT 0
-#define RELATIVE_COLORIMETRIC_RENDERING_INTENT 1
-#define SATURATION_RENDERING_INTENT 2
-#define ABSOLUTE_COLORIMETRIC_RENDERING_INTENT 3
-
-/* Units specifiers. Used in the pHYs chunk. */
-
-#define UNKNOWN_UNIT 0
-#define METRE_UNIT 1
-
 void dumpPNG(FILE * in, FILE * out);
 
 PNG_Image loadPNG(FILE * in);
-Signature loadSignature(FILE * in);
+void loadSignature(BYTE * signature, FILE * in);
+
 ImageHeader loadImageHeader(FILE * in);
 Chunk loadChunk(FILE * in);
 
 void writePNG(PNG_Image image, FILE * out);
 
-void writeSignature(Signature signature, FILE * out);
+void writeSignature(BYTE * signature, FILE * out);
 
-unsigned int crc32(DataContainer data);
+unsigned int crc32(FixedDataList data);
+
 
 void validateCRC(Chunk chunk);
 
