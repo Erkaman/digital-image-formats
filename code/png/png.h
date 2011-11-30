@@ -198,6 +198,9 @@ void writeRenderingIntent(BYTE * renderingIntent, FILE * out);
 INT32 * loadImageGamma(DataStream stream);
 void writeImageGamma(INT32 * imageGamma, FILE * out);
 
+PixelDimensions * loadPixelDimensions(DataStream stream);
+void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out);
+
 void writePNG(PNG_Image image, FILE * out);
 void freePNG_Image(PNG_Image image);
 
@@ -215,7 +218,6 @@ int isCriticalChunk(Chunk chunk);
 int isChunkType(Chunk chunk, char * chunkType);
 
 FixedDataList readBytes(size_t count, FILE * in);
-
 
 #endif /* _PNG_H_ */
 

@@ -54,6 +54,8 @@ PNG_Image loadPNG(FILE * in)
 
 	else if(isChunkType(chunk, gAMA))
             image.imageGamma = loadImageGamma(stream);
+	else if(isChunkType(chunk, pHYs))
+            image.pixelDimensions = loadPixelDimensions(stream);
 
         else {
             if(!isCriticalChunk(chunk)){
@@ -88,6 +90,7 @@ void writePNG(PNG_Image image, FILE * out)
 
     writeRenderingIntent(image.renderingIntent, out);
     writeImageGamma(image.imageGamma, out);
+    writePixelDimensions(image.pixelDimensions, out);
 }
 
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
@@ -314,5 +317,35 @@ void writeImageGamma(INT32 * imageGamma, FILE * out)
 {
     if(imageGamma != NULL){
 	fprintf(out, "Image Gamma: %d / 100000\n", *imageGamma);
+    }
+}
+
+PixelDimensions * loadPixelDimensions(DataStream stream)
+{
+    PixelDimensions * pixelDimensions;
+
+    pixelDimensions = malloc(sizeof(PixelDimensions));
+
+    pixelDimensions->x = read32BitsNumber(&stream);
+    pixelDimensions->y = read32BitsNumber(&stream);
+
+    pixelDimensions->unitSpecifier = readStreamByte(&stream);
+
+    return pixelDimensions;
+}
+
+void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out)
+{
+    char unit[] = "Unknown unit";
+
+    fprintf(out, "Pixel Dimensions:\n");
+
+    if(pixelDimensions != NULL){
+
+	if(pixelDimensions->unitSpecifier == METRE_UNIT)
+	    strcpy(unit,"Metre");
+
+	fprintf(out, "X:%d pixels per %s\n",pixelDimensions->x, unit);
+	fprintf(out, "Y:%d pixels per %s\n",pixelDimensions->y, unit);
     }
 }
