@@ -9,8 +9,8 @@
 
 typedef struct {
     INT32 length;
-    char chunkType[5];
-    FixedDataList chunkData;
+    char type[5];
+    FixedDataList data;
     INT32 CRC;
 } Chunk;
 

@@ -40,16 +40,16 @@ PNG_Image loadPNG(FILE * in)
         chunk = loadChunk(in);
 
 
-        if(!strcmp(chunk.chunkType, IEND))
+        if(!strcmp(chunk.type, IEND))
             break;
-        else if(!strcmp(chunk.chunkType, IDAT)){
+        else if(!strcmp(chunk.type, IDAT)){
             /* read the rest of the IDATs */
         }else {
             if(!isCriticalChunk(chunk)){
                 printWarning("Unknown ancillary chunk %s found, skipping chunk.",
-                             chunk.chunkType);
+                             chunk.type);
             } else{
-                printError("Unknown critcal chunk %s found.", chunk.chunkType);
+                printError("Unknown critcal chunk %s found.", chunk.type);
                 exit(1);
             }
         }
@@ -62,7 +62,7 @@ PNG_Image loadPNG(FILE * in)
 
 void freeChunk(Chunk chunk)
 {
-    freeFixedDataList(chunk.chunkData,1);
+    freeFixedDataList(chunk.data,1);
 }
 
 void writePNG(PNG_Image image, FILE * out)
@@ -93,15 +93,15 @@ Chunk loadChunk(FILE * in)
 
     verbosePrint("Chunk length: % ld\n", chunk.length);
 
-    fread(chunk.chunkType, sizeof(char), 4, in);
-    chunk.chunkType[4] = '\0';
-    verbosePrint("Chunk Type: %s\n", chunk.chunkType);
+    fread(chunk.type, sizeof(char), 4, in);
+    chunk.type[4] = '\0';
+    verbosePrint("Chunk Type: %s\n", chunk.type);
 
     /* TODO: Remember to free this memory! */
-    chunk.chunkData = readBytes(chunk.length, in);
+    chunk.data = readBytes(chunk.length, in);
 
     verbosePrint("data:\n");
-    printFixedDataList(chunk.chunkData, printByte);
+    printFixedDataList(chunk.data, printByte);
 
     fread(&chunk.CRC, sizeof(INT32), 1, in);
     chunk.CRC = htonl(chunk.CRC);
@@ -138,10 +138,10 @@ void validateCRC(Chunk chunk)
     checkData = getNewFixedDataList(sizeof(void *),chunk.length + 4);
 
     for(i = 0; i < 4; ++i)
-        checkData.list[i] = &chunk.chunkType[i];
+        checkData.list[i] = &chunk.type[i];
 
     for(i = i; i < (chunk.length + 4); ++i)
-        checkData.list[i] = chunk.chunkData.list[i-4];
+        checkData.list[i] = chunk.data.list[i-4];
 
 
     calcCRC = crc32(checkData);
@@ -161,7 +161,7 @@ void validateCRC(Chunk chunk)
 
 int isCriticalChunk(Chunk chunk)
 {
-    return isupper((BYTE)chunk.chunkType[0]);
+    return isupper((BYTE)chunk.type[0]);
 }
 
 ImageHeader loadImageHeader(FILE * in)
