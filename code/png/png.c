@@ -9,7 +9,6 @@ void dumpPNG(FILE * in, FILE * out)
     PNG_Image image;
 
     image = loadPNG(in);
-    verbosePrint("lol\n");
     writePNG(image,out);
     freePNG_Image(image);
 }
@@ -40,7 +39,7 @@ PNG_Image loadPNG(FILE * in)
 
         chunk = loadChunk(in);
 
-	
+
         if(!strcmp(chunk.chunkType, IEND))
             break;
         else if(!strcmp(chunk.chunkType, IDAT)){
@@ -124,7 +123,6 @@ FixedDataList readBytes(size_t count, FILE * in)
     for(i = 0; i < count; ++i){
         b = malloc(sizeof(BYTE));
         *b = getc(in);
-        printf("%d:%d\n",i,*b);
         list.list[i] = b;
     }
 
@@ -145,9 +143,6 @@ void validateCRC(Chunk chunk)
     for(i = i; i < (chunk.length + 4); ++i)
         checkData.list[i] = chunk.chunkData.list[i-4];
 
-    verbosePrint("CRC data:\n");
-    printFixedDataList(checkData, printByte);
-    verbosePrint("wut:\n");
 
     calcCRC = crc32(checkData);
 
