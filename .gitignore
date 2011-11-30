@@ -29,3 +29,5 @@ WEBSSW/
 *.lot
 
 *.stackdump
+
+src/
