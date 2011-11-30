@@ -188,25 +188,28 @@ typedef struct {
 void dumpPNG(FILE * in, FILE * out);
 
 PNG_Image loadPNG(FILE * in);
-void loadSignature(BYTE * signature, FILE * in);
 
+void loadSignature(BYTE * signature, FILE * in);
 ImageHeader loadImageHeader(FILE * in);
-Chunk loadChunk(FILE * in);
 
 void writePNG(PNG_Image image, FILE * out);
 void freePNG_Image(PNG_Image image);
 
+Chunk loadChunk(FILE * in);
+void freeChunk(Chunk chunk);
+
 void writeSignature(BYTE * signature, FILE * out);
+void writeHeader(ImageHeader header, FILE * out);
 
 unsigned int crc32(FixedDataList data);
 
 void validateCRC(Chunk chunk);
 
 int isCriticalChunk(Chunk chunk);
+int isChunkType(Chunk chunk, char * chunkType);
 
 FixedDataList readBytes(size_t count, FILE * in);
 
-void freeChunk(Chunk chunk);
 
 #endif /* _PNG_H_ */
 

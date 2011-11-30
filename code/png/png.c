@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include "print_funcs.h"
+#include "data_stream.h"
 
 void dumpPNG(FILE * in, FILE * out)
 {
@@ -16,8 +17,6 @@ void dumpPNG(FILE * in, FILE * out)
 void freePNG_Image(PNG_Image image)
 {
     image = image;
-
-    return;
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -39,10 +38,9 @@ PNG_Image loadPNG(FILE * in)
 
         chunk = loadChunk(in);
 
-
-        if(!strcmp(chunk.type, IEND))
+        if(isChunkType(chunk, IEND))
             break;
-        else if(!strcmp(chunk.type, IDAT)){
+	else if(isChunkType(chunk, IDAT)){
             /* read the rest of the IDATs */
         }else {
             if(!isCriticalChunk(chunk)){
@@ -60,6 +58,11 @@ PNG_Image loadPNG(FILE * in)
     return image;
 }
 
+int isChunkType(Chunk chunk, char * chunkType)
+{
+    return (!strcmp(chunk.type, chunkType));
+}
+
 void freeChunk(Chunk chunk)
 {
     freeFixedDataList(chunk.data,1);
@@ -68,6 +71,45 @@ void freeChunk(Chunk chunk)
 void writePNG(PNG_Image image, FILE * out)
 {
     writeSignature(image.signature, out);
+    writeHeader(image.header, out);
+}
+
+void writeHeader(ImageHeader header, FILE * out)
+{
+    fprintf(out, "PNG Image Header:\n");
+
+    fprintf(out, "Image width: %u\n", header.width);
+    fprintf(out, "Image height: %u\n", header.height);
+
+    fprintf(out, "Bit Depth: %u bits\n", header.bitDepth);
+    fprintf(out, "Color type: ");
+
+    switch(header.colorType){
+	case GREYSCALE_COLOR:
+	    fprintf(out, "Greyscale");
+	    break;
+	case TRUECOLOR_COLOR:
+	    fprintf(out, "Truecolor");
+	    break;
+	case INDEXED_COLOR:
+	    fprintf(out, "Indexed Color");
+	    break;
+	case GREYSCALE_ALPHA_COLOR:
+	    fprintf(out, "Greyscale Alpha Color");
+	    break;
+	case TRUECOLOR_ALPHA_COLOR:
+	    fprintf(out, "Truecolor Alpha Color");
+	    break;
+    }
+
+    fprintf(out, "\n");
+
+
+    fprintf(out, "Compression Method: %u\n", header.compressionMethod);
+    fprintf(out, "Filter Method: %u\n", header.filterMethod);
+    fprintf(out, "Interlace Method: %u\n", header.interlaceMethod);
+
+
 }
 
 void writeSignature(BYTE * signature, FILE * out)
@@ -168,12 +210,18 @@ ImageHeader loadImageHeader(FILE * in)
 {
     ImageHeader header;
     Chunk headerChunk;
+    DataStream stream;
 
     headerChunk = loadChunk(in);
+    stream = getNewDataStream(headerChunk.data, PNG_ENDIAN);
 
-    headerChunk = headerChunk;
-    header = header;
-    in = in;
+    header.width = read32BitsNumber(&stream);
+    header.height = read32BitsNumber(&stream);
+    header.bitDepth = readStreamByte(&stream);
+    header.colorType = readStreamByte(&stream);
+    header.compressionMethod = readStreamByte(&stream);
+    header.filterMethod = readStreamByte(&stream);
+    header.interlaceMethod = readStreamByte(&stream);
 
     return header;
 }

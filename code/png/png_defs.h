@@ -3,9 +3,12 @@
 
 /* Constants */
 
+#include "data_stream.h"
+#include <stdint.h>
+
+
 #define SIGNATURE_LENGTH 8
 
-#include <stdint.h>
 
 /* An unsigned 4 byte number.*/
 #define INT32 uint32_t
@@ -90,5 +93,6 @@
 #define UNKNOWN_UNIT 0
 #define METRE_UNIT 1
 
+#define PNG_ENDIAN ENDIAN_BIG
 
 #endif /* _PNG_DEFS_H_ */
