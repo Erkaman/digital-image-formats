@@ -18,6 +18,9 @@ void freePNG_Image(PNG_Image image)
 {
     if(image.renderingIntent != NULL)
 	free(image.renderingIntent);
+
+    if(image.imageGamma != NULL)
+	free(image.imageGamma);
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -45,15 +48,14 @@ PNG_Image loadPNG(FILE * in)
         if(isChunkType(chunk, IEND))
             break;
         else if(isChunkType(chunk, IDAT)){
-            /* read the rest of the IDATs */
-        }else if(isChunkType(chunk, sRGB)){
+
+        }else if(isChunkType(chunk, sRGB))
             image.renderingIntent = loadRenderingIntent(stream);
 
-            verbosePrint("ptr:%d\n", image.renderingIntent);
-            verbosePrint("val:%d\n", *image.renderingIntent);
+	else if(isChunkType(chunk, gAMA))
+            image.imageGamma = loadImageGamma(stream);
 
-            /* read the rest of the IDATs */
-        }else {
+        else {
             if(!isCriticalChunk(chunk)){
                 printWarning("Unknown ancillary chunk %s found, skipping chunk.",
                              chunk.type);
@@ -85,6 +87,7 @@ void writePNG(PNG_Image image, FILE * out)
     writeHeader(image.header, out);
 
     writeRenderingIntent(image.renderingIntent, out);
+    writeImageGamma(image.imageGamma, out);
 }
 
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
@@ -297,3 +300,19 @@ unsigned int crc32(FixedDataList data){
     return reminder ^ 0xFFFFFFFF;
 }
 
+INT32 * loadImageGamma(DataStream stream)
+{
+    INT32 * gamma;
+
+    gamma = malloc(sizeof(INT32));
+
+    *gamma = read32BitsNumber(&stream);
+
+    return gamma;
+}
+void writeImageGamma(INT32 * imageGamma, FILE * out)
+{
+    if(imageGamma != NULL){
+	fprintf(out, "Image Gamma: %d / 100000\n", *imageGamma);
+    }
+}

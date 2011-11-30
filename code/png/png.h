@@ -195,6 +195,9 @@ ImageHeader loadImageHeader(FILE * in);
 BYTE * loadRenderingIntent(DataStream stream);
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out);
 
+INT32 * loadImageGamma(DataStream stream);
+void writeImageGamma(INT32 * imageGamma, FILE * out);
+
 void writePNG(PNG_Image image, FILE * out);
 void freePNG_Image(PNG_Image image);
 
