@@ -14,13 +14,13 @@ DataList  allocateNewDataList(size_t size, size_t maxCount, size_t count)
     return list;
 }
 
-void freeDataList(DataList list, int freeElements);
+void freeDataList(DataList list, int freeElements)
 {
     size_t i;
 
     if(freeElements){
 	for(i = 0; i < list.count; ++i){
-	    free(list[i]);
+	    free(list.list[i]);
 	}
     }
 
@@ -73,7 +73,7 @@ DataList accommodateDataListCount(DataList oldList, size_t newCount)
 	newList.list[i] = oldList.list[i];
 
     /* Free any memory in the previous container. */
-    freeDataList(oldList);
+    freeDataList(oldList,0);
 
     return newList;
 }
