@@ -192,6 +192,9 @@ PNG_Image loadPNG(FILE * in);
 void loadSignature(BYTE * signature, FILE * in);
 ImageHeader loadImageHeader(FILE * in);
 
+BYTE * loadRenderingIntent(DataStream stream);
+void writeRenderingIntent(BYTE * renderingIntent, FILE * out);
+
 void writePNG(PNG_Image image, FILE * out);
 void freePNG_Image(PNG_Image image);
 

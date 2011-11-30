@@ -16,7 +16,8 @@ void dumpPNG(FILE * in, FILE * out)
 
 void freePNG_Image(PNG_Image image)
 {
-    image = image;
+    if(image.renderingIntent != NULL)
+	free(image.renderingIntent);
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -28,6 +29,7 @@ PNG_Image loadPNG(FILE * in)
 {
     PNG_Image image;
     Chunk chunk;
+    DataStream stream;
 
     loadSignature(image.signature, in);
     /* TODO: Validate signature. */
@@ -38,9 +40,18 @@ PNG_Image loadPNG(FILE * in)
 
         chunk = loadChunk(in);
 
+        stream = getNewDataStream(chunk.data, PNG_ENDIAN);
+
         if(isChunkType(chunk, IEND))
             break;
-	else if(isChunkType(chunk, IDAT)){
+        else if(isChunkType(chunk, IDAT)){
+            /* read the rest of the IDATs */
+        }else if(isChunkType(chunk, sRGB)){
+            image.renderingIntent = loadRenderingIntent(stream);
+
+            verbosePrint("ptr:%d\n", image.renderingIntent);
+            verbosePrint("val:%d\n", *image.renderingIntent);
+
             /* read the rest of the IDATs */
         }else {
             if(!isCriticalChunk(chunk)){
@@ -52,7 +63,7 @@ PNG_Image loadPNG(FILE * in)
             }
         }
 
-	freeChunk(chunk);
+        freeChunk(chunk);
     }
 
     return image;
@@ -72,7 +83,34 @@ void writePNG(PNG_Image image, FILE * out)
 {
     writeSignature(image.signature, out);
     writeHeader(image.header, out);
+
+    writeRenderingIntent(image.renderingIntent, out);
 }
+
+void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
+{
+    if(renderingIntent != NULL){
+        fprintf(out,"Rendering Intent: ");
+
+	switch(*renderingIntent){
+	    case PERCEPTUAL_RENDERING_INTENT:
+		fprintf(out, "Perceptual");
+		break;
+	    case RELATIVE_COLORIMETRIC_RENDERING_INTENT:
+		fprintf(out, "Relative Colorimetric");
+		break;
+	    case SATURATION_RENDERING_INTENT:
+		fprintf(out, "Saturation");
+		break;
+	    case ABSOLUTE_COLORIMETRIC_RENDERING_INTENT:
+		fprintf(out, "Absolute colorimetric");
+		break;
+	}
+
+        fprintf(out, "\n");
+    }
+}
+
 
 void writeHeader(ImageHeader header, FILE * out)
 {
@@ -85,24 +123,24 @@ void writeHeader(ImageHeader header, FILE * out)
     fprintf(out, "Color type: ");
 
     switch(header.colorType){
-	case GREYSCALE_COLOR:
-	    fprintf(out, "Greyscale");
-	    break;
-	case TRUECOLOR_COLOR:
-	    fprintf(out, "Truecolor");
-	    break;
-	case INDEXED_COLOR:
-	    fprintf(out, "Indexed Color");
-	    break;
-	case GREYSCALE_ALPHA_COLOR:
-	    fprintf(out, "Greyscale Alpha Color");
-	    break;
-	case TRUECOLOR_ALPHA_COLOR:
-	    fprintf(out, "Truecolor Alpha Color");
-	    break;
+    case GREYSCALE_COLOR:
+        fprintf(out, "Greyscale");
+        break;
+    case TRUECOLOR_COLOR:
+        fprintf(out, "Truecolor");
+        break;
+    case INDEXED_COLOR:
+        fprintf(out, "Indexed Color");
+        break;
+    case GREYSCALE_ALPHA_COLOR:
+        fprintf(out, "Greyscale Alpha Color");
+        break;
+    case TRUECOLOR_ALPHA_COLOR:
+        fprintf(out, "Truecolor Alpha Color");
+        break;
     }
 
-    fprintf(out, "\n");
+    fprintf(out, "(%u)\n",header.colorType);
 
 
     fprintf(out, "Compression Method: %u\n", header.compressionMethod);
@@ -196,9 +234,9 @@ void validateCRC(Chunk chunk)
 
     /* Figure out how to free this memory. */
 /*    freeFixedDataList(checkData, 0);
-    for(i = 0; i < 4; ++i){
-	free(checkData.list[i]);
-    }*/
+      for(i = 0; i < 4; ++i){
+      free(checkData.list[i]);
+      }*/
 }
 
 int isCriticalChunk(Chunk chunk)
@@ -226,6 +264,17 @@ ImageHeader loadImageHeader(FILE * in)
     return header;
 }
 
+BYTE * loadRenderingIntent(DataStream stream)
+{
+    BYTE * b;
+
+    b = malloc(sizeof(BYTE));
+
+    *b = readStreamByte(&stream);
+
+    return b;
+}
+
 #define CRC32_POLY 0xEDB88320
 
 unsigned int crc32(FixedDataList data){
@@ -247,3 +296,4 @@ unsigned int crc32(FixedDataList data){
 
     return reminder ^ 0xFFFFFFFF;
 }
+
