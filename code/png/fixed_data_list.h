@@ -14,6 +14,6 @@ typedef struct {
 void freeFixedDataList(FixedDataList list, int freeElements);
 void printFixedDataList(FixedDataList list, void (*printFunc)(void *));
 FixedDataList getNewFixedDataList(size_t size, size_t count);
-
+void addNewCopy(void * add, size_t size, size_t i, FixedDataList * list);
 
 #endif /* _FIXED_DATA_LIST_H_ */

@@ -11,6 +11,14 @@ void dumpPNG(FILE * in, FILE * out)
     image = loadPNG(in);
     verbosePrint("lol\n");
     writePNG(image,out);
+    freePNG_Image(image);
+}
+
+void freePNG_Image(PNG_Image image)
+{
+    image = image;
+
+    return;
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -32,6 +40,7 @@ PNG_Image loadPNG(FILE * in)
 
         chunk = loadChunk(in);
 
+	
         if(!strcmp(chunk.chunkType, IEND))
             break;
         else if(!strcmp(chunk.chunkType, IDAT)){
@@ -45,9 +54,16 @@ PNG_Image loadPNG(FILE * in)
                 exit(1);
             }
         }
+
+	freeChunk(chunk);
     }
 
     return image;
+}
+
+void freeChunk(Chunk chunk)
+{
+    freeFixedDataList(chunk.chunkData,1);
 }
 
 void writePNG(PNG_Image image, FILE * out)
@@ -106,10 +122,10 @@ FixedDataList readBytes(size_t count, FILE * in)
     list = getNewFixedDataList(sizeof(void *), count);
 
     for(i = 0; i < count; ++i){
-	b = malloc(sizeof(BYTE));
-	*b = getc(in);
-	printf("%d:%d\n",i,*b);
-	list.list[i] = b;
+        b = malloc(sizeof(BYTE));
+        *b = getc(in);
+        printf("%d:%d\n",i,*b);
+        list.list[i] = b;
     }
 
     return list;
@@ -121,7 +137,7 @@ void validateCRC(Chunk chunk)
     size_t i;
     INT32 calcCRC;
 
-    checkData = getNewFixedDataList(sizeof(BYTE),chunk.length + 4);
+    checkData = getNewFixedDataList(sizeof(void *),chunk.length + 4);
 
     for(i = 0; i < 4; ++i)
         checkData.list[i] = &chunk.chunkType[i];
@@ -136,10 +152,16 @@ void validateCRC(Chunk chunk)
     calcCRC = crc32(checkData);
 
     if(calcCRC != chunk.CRC){
-	printError("Chunk has invalid checksum: chunk %d != calc %d\n", chunk.CRC, calcCRC );
-	exit(1);
+        printError("Chunk has invalid checksum: chunk %d != calc %d\n", chunk.CRC, calcCRC );
+        exit(1);
     } else
-	verbosePrint("Chunk has valid checksum!\n");
+        verbosePrint("Chunk has valid checksum!\n");
+
+    /* Figure out how to free this memory. */
+/*    freeFixedDataList(checkData, 0);
+    for(i = 0; i < 4; ++i){
+	free(checkData.list[i]);
+    }*/
 }
 
 int isCriticalChunk(Chunk chunk)

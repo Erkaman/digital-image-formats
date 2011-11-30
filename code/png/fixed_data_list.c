@@ -6,7 +6,7 @@ void freeFixedDataList(FixedDataList list, int freeElements)
 
     if(freeElements){
 	for(i = 0; i < list.count; ++i){
-	    free(list[i]);
+	    free(list.list[i]);
 	}
     }
 
@@ -34,3 +34,4 @@ FixedDataList getNewFixedDataList(size_t size, size_t count)
 
     return list;
 }
+
