@@ -189,6 +189,8 @@ void dumpPNG(FILE * in, FILE * out);
 
 PNG_Image loadPNG(FILE * in);
 
+PNG_Image getEmptyPNG_Image(void);
+
 void loadSignature(BYTE * signature, FILE * in);
 ImageHeader loadImageHeader(FILE * in);
 

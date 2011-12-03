@@ -16,6 +16,7 @@ void dumpPNG(FILE * in, FILE * out)
 
 void freePNG_Image(PNG_Image image)
 {
+
     if(image.renderingIntent != NULL)
 	free(image.renderingIntent);
 
@@ -28,11 +29,30 @@ void loadSignature(BYTE * signature, FILE * in)
     fread(signature, sizeof(BYTE),SIGNATURE_LENGTH , in);
 }
 
+PNG_Image getEmptyPNG_Image(void)
+{
+    PNG_Image image;
+
+    image.palette = NULL;
+    image.profile = NULL;
+    image.chromaticities = NULL;
+    image.imageGamma = NULL;
+    image.significantBits = NULL;
+    image.renderingIntent = NULL;
+    image.backgroundColor = NULL;
+    image.imageHistogram = NULL;
+    image.pixelDimensions = NULL;
+
+    return image;
+}
+
 PNG_Image loadPNG(FILE * in)
 {
     PNG_Image image;
     Chunk chunk;
     DataStream stream;
+
+    image = getEmptyPNG_Image();
 
     loadSignature(image.signature, in);
     /* TODO: Validate signature. */
