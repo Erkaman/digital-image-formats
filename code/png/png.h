@@ -200,6 +200,9 @@ void writeRenderingIntent(BYTE * renderingIntent, FILE * out);
 INT32 * loadImageGamma(DataStream stream);
 void writeImageGamma(INT32 * imageGamma, FILE * out);
 
+TimeStamp * loadTimeStamp(DataStream stream);
+void writeTimeStamp(TimeStamp * timeStamp, FILE * out);
+
 PixelDimensions * loadPixelDimensions(DataStream stream);
 void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out);
 

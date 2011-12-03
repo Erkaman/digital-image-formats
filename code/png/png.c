@@ -16,12 +16,14 @@ void dumpPNG(FILE * in, FILE * out)
 
 void freePNG_Image(PNG_Image image)
 {
-
     if(image.renderingIntent != NULL)
-	free(image.renderingIntent);
+        free(image.renderingIntent);
 
     if(image.imageGamma != NULL)
-	free(image.imageGamma);
+        free(image.imageGamma);
+
+    if(image.timeStamp != NULL)
+        free(image.timeStamp);
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -42,6 +44,7 @@ PNG_Image getEmptyPNG_Image(void)
     image.backgroundColor = NULL;
     image.imageHistogram = NULL;
     image.pixelDimensions = NULL;
+    image.timeStamp = NULL;
 
     return image;
 }
@@ -72,17 +75,21 @@ PNG_Image loadPNG(FILE * in)
         }else if(isChunkType(chunk, sRGB))
             image.renderingIntent = loadRenderingIntent(stream);
 
-	else if(isChunkType(chunk, gAMA))
+        else if(isChunkType(chunk, gAMA))
             image.imageGamma = loadImageGamma(stream);
-	else if(isChunkType(chunk, pHYs))
+
+        else if(isChunkType(chunk, pHYs))
             image.pixelDimensions = loadPixelDimensions(stream);
+
+        else if(isChunkType(chunk, tIME))
+            image.timeStamp = loadTimeStamp(stream);
 
         else {
             if(!isCriticalChunk(chunk)){
-                printWarning("Unknown ancillary chunk %s found, skipping chunk.",
+                printWarning("Unknown ancillary chunk %s found, skipping chunk.\n",
                              chunk.type);
             } else{
-                printError("Unknown critcal chunk %s found.", chunk.type);
+                printError("Unknown critcal chunk %s found.\n", chunk.type);
                 exit(1);
             }
         }
@@ -111,6 +118,7 @@ void writePNG(PNG_Image image, FILE * out)
     writeRenderingIntent(image.renderingIntent, out);
     writeImageGamma(image.imageGamma, out);
     writePixelDimensions(image.pixelDimensions, out);
+    writeTimeStamp(image.timeStamp, out);
 }
 
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
@@ -118,20 +126,20 @@ void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
     if(renderingIntent != NULL){
         fprintf(out,"Rendering Intent: ");
 
-	switch(*renderingIntent){
-	    case PERCEPTUAL_RENDERING_INTENT:
-		fprintf(out, "Perceptual");
-		break;
-	    case RELATIVE_COLORIMETRIC_RENDERING_INTENT:
-		fprintf(out, "Relative Colorimetric");
-		break;
-	    case SATURATION_RENDERING_INTENT:
-		fprintf(out, "Saturation");
-		break;
-	    case ABSOLUTE_COLORIMETRIC_RENDERING_INTENT:
-		fprintf(out, "Absolute colorimetric");
-		break;
-	}
+        switch(*renderingIntent){
+        case PERCEPTUAL_RENDERING_INTENT:
+            fprintf(out, "Perceptual");
+            break;
+        case RELATIVE_COLORIMETRIC_RENDERING_INTENT:
+            fprintf(out, "Relative Colorimetric");
+            break;
+        case SATURATION_RENDERING_INTENT:
+            fprintf(out, "Saturation");
+            break;
+        case ABSOLUTE_COLORIMETRIC_RENDERING_INTENT:
+            fprintf(out, "Absolute colorimetric");
+            break;
+        }
 
         fprintf(out, "\n");
     }
@@ -336,7 +344,7 @@ INT32 * loadImageGamma(DataStream stream)
 void writeImageGamma(INT32 * imageGamma, FILE * out)
 {
     if(imageGamma != NULL){
-	fprintf(out, "Image Gamma: %d / 100000\n", *imageGamma);
+        fprintf(out, "Image Gamma: %d / 100000\n", *imageGamma);
     }
 }
 
@@ -358,14 +366,49 @@ void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out)
 {
     char unit[] = "Unknown unit";
 
-    fprintf(out, "Pixel Dimensions:\n");
 
     if(pixelDimensions != NULL){
 
-	if(pixelDimensions->unitSpecifier == METRE_UNIT)
-	    strcpy(unit,"Metre");
+        fprintf(out, "Pixel Dimensions:\n");
 
-	fprintf(out, "X:%d pixels per %s\n",pixelDimensions->x, unit);
-	fprintf(out, "Y:%d pixels per %s\n",pixelDimensions->y, unit);
+        if(pixelDimensions->unitSpecifier == METRE_UNIT)
+            strcpy(unit,"Metre");
+
+        fprintf(out, "X:%d pixels per %s\n",pixelDimensions->x, unit);
+        fprintf(out, "Y:%d pixels per %s\n",pixelDimensions->y, unit);
+    }
+}
+
+TimeStamp * loadTimeStamp(DataStream stream)
+{
+    TimeStamp * timeStamp;
+
+    timeStamp = malloc(sizeof(TimeStamp));
+
+    timeStamp->year = read16BitsNumber(&stream);
+
+    timeStamp->month = readStreamByte(&stream);
+    timeStamp->day = readStreamByte(&stream);
+    timeStamp->hour = readStreamByte(&stream);
+    timeStamp->minute = readStreamByte(&stream);
+    timeStamp->second = readStreamByte(&stream);
+
+    return timeStamp;
+}
+
+void writeTimeStamp(TimeStamp * timeStamp, FILE * out)
+{
+    if(timeStamp != NULL){
+        fprintf(out,"Image last-modification time: ");
+
+        fprintf(out, "%d/%d - %d %02d:%02d:%02d\n",
+                timeStamp->day,
+                timeStamp->month,
+                timeStamp->year,
+                timeStamp->hour,
+                timeStamp->minute,
+                timeStamp->second
+            );
+
     }
 }
