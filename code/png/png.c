@@ -5,7 +5,6 @@
 #include "../print_funcs.h"
 #include "../data_stream.h"
 
-
 void dumpPNG(FILE * in, FILE * out)
 {
     PNG_Image image;

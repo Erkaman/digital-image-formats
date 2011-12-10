@@ -102,18 +102,28 @@ typedef struct {
 
 } textDataList;
 
+typedef INT32 Channel;
+
 typedef struct {
-    INT32 R;
-    INT32 G;
-    INT32 B;
+    Channel R;
+    Channel G;
+    Channel B;
 } RGB;
 
 typedef struct {
-    INT32 R;
-    INT32 G;
-    INT32 B;
-    INT32 A;
+    Channel R;
+    Channel G;
+    Channel B;
+    Channel A;
 } RGBA;
+
+typedef INT32 Index;
+typedef INT32 Greyscale;
+
+typedef struct {
+    Greyscale greyscale;
+    Channel alpha;
+} GrayscaleAlpha;
 
 typedef union {
 
@@ -121,9 +131,11 @@ typedef union {
 
     RGBA rgba;
 
-    INT32 index;
+    Index index;
 
-    INT32 greyscale;
+    Greyscale greyscale;
+
+    GrayscaleAlpha grayscaleAlpha;
 
 } Color;
 

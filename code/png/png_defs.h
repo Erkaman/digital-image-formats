@@ -79,7 +79,7 @@
 
 /* Interlacing types. */
 
-#define NO_INTERLACE0
+#define NO_INTERLACE 0
 #define ADAM7_INTERLACE 1
 
 #define PERCEPTUAL_RENDERING_INTENT 0
