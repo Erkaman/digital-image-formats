@@ -2,8 +2,9 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
-#include "print_funcs.h"
-#include "data_stream.h"
+#include "../print_funcs.h"
+#include "../data_stream.h"
+
 
 void dumpPNG(FILE * in, FILE * out)
 {
@@ -90,7 +91,7 @@ PNG_Image loadPNG(FILE * in)
                              chunk.type);
             } else{
                 printError("Unknown critcal chunk %s found.\n", chunk.type);
-                exit(1);
+/*                exit(1); */
             }
         }
 
@@ -145,7 +146,6 @@ void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
     }
 }
 
-
 void writeHeader(ImageHeader header, FILE * out)
 {
     fprintf(out, "PNG Image Header:\n");
@@ -176,12 +176,17 @@ void writeHeader(ImageHeader header, FILE * out)
 
     fprintf(out, "(%u)\n",header.colorType);
 
+    fprintf(out, "Compression Method: %u(always deflate if 0)\n", header.compressionMethod);
+    fprintf(out, "Filter Method: %u(always 0, which is default filtering)\n", header.filterMethod);
 
-    fprintf(out, "Compression Method: %u\n", header.compressionMethod);
-    fprintf(out, "Filter Method: %u\n", header.filterMethod);
-    fprintf(out, "Interlace Method: %u\n", header.interlaceMethod);
+    fprintf(out, "Interlace Method:");
 
+    if(header.interlaceMethod == NO_INTERLACE)
+	fprintf(out,"No interlacing");
+    else if(header.interlaceMethod == ADAM7_INTERLACE)
+	fprintf(out,"Adam7 interlacing");
 
+    fprintf(out, "(%u)\n",header.interlaceMethod);
 }
 
 void writeSignature(BYTE * signature, FILE * out)
@@ -409,6 +414,5 @@ void writeTimeStamp(TimeStamp * timeStamp, FILE * out)
                 timeStamp->minute,
                 timeStamp->second
             );
-
     }
 }

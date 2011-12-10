@@ -31,3 +31,6 @@ WEBSSW/
 *.stackdump
 
 src/
+
+code/png/img/
+code/deflate/zpipe/

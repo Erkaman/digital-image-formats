@@ -3,9 +3,8 @@
 
 /* Constants */
 
-#include "data_stream.h"
+#include "../data_stream.h"
 #include <stdint.h>
-
 
 #define SIGNATURE_LENGTH 8
 
@@ -80,7 +79,7 @@
 
 /* Interlacing types. */
 
-#define NO_INTERLACE 0
+#define NO_INTERLACE0
 #define ADAM7_INTERLACE 1
 
 #define PERCEPTUAL_RENDERING_INTENT 0

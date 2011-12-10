@@ -2,8 +2,6 @@
 #define _PNG_H_
 
 #include "../common.h"
-#include "data_list.h"
-#include "fixed_data_list.h"
 
 #include "png_defs.h"
 

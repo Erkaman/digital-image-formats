@@ -1,8 +1,6 @@
 #include "common.h"
-#include <stdlib.h>
 #include <string.h>
 #include <stdarg.h>
-#include <stdio.h>
 
 void assertFile(FILE * fp,char * errorStr)
 {

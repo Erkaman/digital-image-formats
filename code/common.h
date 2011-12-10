@@ -1,8 +1,12 @@
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
+#include "data_list.h"
+#include "fixed_data_list.h"
+#include "print_funcs.h"
+#include "data_stream.h"
+
 #include <stdio.h>
-#include <stdint.h>
 
 /* To get the htonl, ntohl, htons and ntohs functions portably this is done. */
 #ifdef WIN32
@@ -10,9 +14,6 @@
 #else
 #include <netinet/in.h>
 #endif
-
-#define BYTE uint8_t
-#define BYTE_MAX UINT8_MAX
 
 typedef struct{
     BYTE * data;
@@ -58,5 +59,5 @@ void verbosePrint(const char * format, ...);
 void printWarning(const char * format, ...);
 void printError(const char * format, ...);
 
-
 #endif /* _COMMON_H_ */
+
