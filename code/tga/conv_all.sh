@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # if no command line paramters were supplied, run it normally.
 if [ -z "$1" ]; then

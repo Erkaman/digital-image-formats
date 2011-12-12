@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
         printf("Try --help for more information.\n");
         return 1;
     }
-g
+
     /* parse the command line arguments */
 
     ++argv;

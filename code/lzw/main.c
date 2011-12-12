@@ -101,9 +101,9 @@ int main(int argc, char *argv[])
 void printHelp(void)
 {
     printf("Usage: lzw IN OUT\n");
-    printf("Compress or decompress a LZW encoded file.\n"
-           "Compression is done by default");
+    printf("Compress or decompress a LZW encoded file.\n");
     printf("  --help\tDisplay this help message.\n");
+    printf("  -c\tPerform compression. Done by default.\n");
     printf("  -d\tPerform decompression.\n");
     printf("  -v\tVerbose output.\n");
     printf("  -cs=\tSet the outputted code sizes.\n");
