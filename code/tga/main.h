@@ -116,7 +116,6 @@ unsigned long * loadColorMap(TGA_Header header, FILE * in);
 
 void writeColorMap(TGA_Header header, unsigned long * colorMap, FILE * out);
 
-
 void writeTGA_ExtensionArea(TGA_ExtensionArea * extension, FILE * out);
 
 TGA_ExtensionArea * loadTGAExtensionArea(FILE * in);

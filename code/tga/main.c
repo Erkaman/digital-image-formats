@@ -1,8 +1,5 @@
 #include "main.h"
 
-/* FIXME: Make sure alpha channels are printed out properly! */
-/* TODO: Delete any unused function definitions from the header. */
-
 int main(int argc, char * argv[])
 {
     FILE * in;
@@ -456,7 +453,6 @@ void writeColorData(unsigned long data,TGA_Header header,FILE * out)
             b = data & 0x1f;
             visible = (data & (0x01 << 16)) >> 16;
 
-            /* TODO: confused to meaning of the value of the alpha channel?*/
             a = visible ? 255 : 0;
             printRGBA(r,g,b,a,out);
         }
@@ -565,7 +561,6 @@ TGA_ImageData loadPostageStamp(TGA_Header header,unsigned long * colorMap, LONG 
     return loadTGA_ImageData(width,height,header,colorMap,0,in);
 }
 
-
 unsigned long * loadColorMap(TGA_Header header, FILE * in)
 {
     size_t pixelDepth = header.colorMapDepth;
@@ -606,4 +601,3 @@ LONG readLong(FILE * fp)
     fread(&s,sizeof(LONG),1,fp);
     return s;
 }
-
