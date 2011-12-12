@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
         printf("Try --help for more information.\n");
         return 1;
     }
-
+g
     /* parse the command line arguments */
 
     ++argv;
@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
         printf("An input AND an output file must be specified.");
         return 1;
     }
+
 
     in = fopen(argv[0],"rb");
     out = fopen(argv[1],"wb");
