@@ -1,11 +1,8 @@
 *.exe
 *.o
 
-# outputted from tga
 *.dmp
-
-# outputted from lzw
-*.lzw
+*.cmp
 *.unc
 
 auto/
@@ -17,7 +14,8 @@ WEBSSW/
 *.log
 *.out
 *.toc
-*.pdf
+#*.pdf
+latex/project.pdf
 *.run.xml
 *.blg
 *.bbl
@@ -30,11 +28,7 @@ WEBSSW/
 
 *.stackdump
 
-src/
-
-code/png/img/
-code/deflate/zpipe/
-
 # executables
 code/png/png
 code/rle/rle
+code/rle/tga
