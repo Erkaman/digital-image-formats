@@ -1,0 +1,542 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 6 -- Controlling User Access</TITLE>
+
+<META>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;6</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Controlling User Access</FONT>
+</H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#JavaScriptVBScriptWarningMessages">
+JavaScript/VBScript Warning Messages</A>
+<LI><A HREF="#PreparingforAccessControl">
+Preparing for Access Control</A>
+<UL>
+<LI><A HREF="#ThePasswordFile">
+The Password File</A>
+<LI><A HREF="#ConfiguringtheServer">
+Configuring the Server</A>
+<LI><A HREF="#ConfiguringYourSitesAccessSettings">
+Configuring Your Site's Access Settings</A>
+</UL>
+<LI><A HREF="#UnderstandingAccessMethods">
+Understanding Access Methods</A>
+<UL>
+<LI><A HREF="#BrowserAuthentication">
+Browser Authentication</A>
+<LI><A HREF="#FormProcessing">
+Form Processing</A>
+<LI><A HREF="#Cookies">
+Cookies</A>
+</UL>
+<LI><A HREF="#FromHere">
+From Here...</A>
+</UL>
+
+<HR>
+<P>
+Even if you aren't administering a Web site that contains sensitive
+information (like the complete financial records of your company),
+you may still wish to restrict or control user access. For example,
+if you were running a subscription-based site, you'd only want
+those who've paid to be able to log on. Or, you may simply wish
+to require anyone who stops by to first &quot;register&quot; by
+filling out a questionnaire before they continue to surf.
+<H2><A NAME="JavaScriptVBScriptWarningMessages"><FONT SIZE=5 COLOR=#FF0000>
+JavaScript/VBScript Warning Messages</FONT></A></H2>
+<P>
+A very simple level of user access control is to use nothing more
+than a reminder that a particular site has the following:
+<UL>
+<LI>Contains confidential material and by entering, the user agrees
+to a level of confidentiality.
+<LI>Utilizes advanced Web techniques (plug-ins, frames) or is
+optimized for a particular browser configuration.
+</UL>
+<P>
+You can implement this with client-side scripting by hooking into
+the <TT>OnClick</TT> event handler of the browser, as demonstrated
+in the code fragment of listing 6.1.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 6.1&nbsp;&nbsp;Using <I>OnClick</I> to Control Access
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+&lt;!--
+function reminder() {
+   return confirm(&quot;The area you're about to enter &quot; +
+                  &quot;uses advanced Web technology.\n&quot; +
+                  &quot;Do you wish to continue?&quot;);
+}
+// --&gt;
+&lt;/SCRIPT&gt;
+...
+&lt;A HREF=&quot;webtricks/index.html&quot;
+   ONCLICK=&quot;return reminder();&quot;&gt;Advanced Web Tricks&lt;/A&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The <TT>OnClick</TT> event handler responds to a <TT>true</TT>
+or <TT>false</TT> value and either activates the link or not,
+depending on what the user selects.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>NOTE</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+<TT>OnClick</TT>'s ability to respond to <TT>true</TT> or <TT>false</TT> values is a new feature to Navigator 3.0. For Navigator 2.0 or Internet Explorer, the return value is ignored.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<H2><A NAME="PreparingforAccessControl"><FONT SIZE=5 COLOR=#FF0000>
+Preparing for Access Control</FONT></A></H2>
+<P>
+If you want <I>real</I> security control with user names and passwords,
+the first step is to configure the Web server. This is done in
+two different ways. You can configure the server itself, or have
+an account on a major access provider to configure the directories
+of your site.
+<H3><A NAME="ThePasswordFile">
+The Password File</A></H3>
+<P>
+You're going to need a <I>password file </I>if you configure the
+server or just your own directories<I>. </I>This is often named
+<TT>.htpasswd</TT>. This is a flat-text file that contains user
+name/password pairs, one pair per line, for all authorized users.
+Individual lines in the file will resemble this:
+<BLOCKQUOTE>
+<PRE>
+sjwalter:Rin8y9njMYDQA
+</PRE>
+</BLOCKQUOTE>
+<P>
+The first element is the user name, the second the <I>encrypted</I>
+password.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>CAUTION</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+The password that displays is encrypted using an algorithm that makes it tough to decrypt. In fact, password checking in UNIX is done by accepting a password from the user, encrypting it, and comparing the encrypted forms.</BLOCKQUOTE>
+<BLOCKQUOTE>
+It is still possible to decipher these files by using what's commonly called the brute force technique.</BLOCKQUOTE>
+<BLOCKQUOTE>
+This technique involves the use of a program that keeps generating random words, encrypting them, and looking for a password match. It's not wise to make a password file too easy to decipher.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<P>
+Creating the password file is done automatically using a program
+such as <TT>htpasswd</TT>, which you run from the UNIX command
+line (via Telnet, for example).
+<P>
+Where you place the file isn't important but remembering where
+you put it <I>is </I>because you'll need that information later.
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>NOTE</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+The WindowsNT file system (NTFS) has access control built right in, allowing you to control who has access to a particular file (or directory) and the kind of access, such as read-only, read and write, execute, and so on, you permit. </BLOCKQUOTE>
+<BLOCKQUOTE>
+UNIX has similar abilities, called permissions, but you must be careful when restricting access under UNIX, because as far as the operating system is concerned, the Web server program is just another user. This makes it possible to restrict the access to a 
+
+file to such a degree that even the server cannot read it.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>TIP</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+It's a good idea to enforce a &quot;password lifespan&quot; system on your server, where you require that passwords be changed on a regular basis, such as once a month. This helps to keep your system secure by not allowing accounts to use passwords for 
+extended periods of time. The longer a particular password is valid on your system, the greater the chances of it being discovered.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<H3><A NAME="ConfiguringtheServer">
+Configuring the Server</A></H3>
+<P>
+If you are running your own Web server, you can set up security
+by editing the server's control files. For example, the Apache
+server and the NCSA server (<TT>httpd</TT>) use a <I>global access-control
+file</I> usually called <TT>access.conf</TT>, which is typically
+located in the <TT>conf/</TT> subdirectory below the actual server
+program. Other servers provide a graphical interface for access
+maintenance, either through the server software itself (as in
+the case of Web site by O'Reilly), or through a collection of
+HTML documents accessed by an ordinary browser (a method used
+by Netscape's FastTrack Server). Listing 6.2 shows an example
+<TT>access.conf</TT> file.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 6.2&nbsp;&nbsp;A Simple access.conf File<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;Directory /var/httpd/htdocs&gt;
+   AllowOverride All
+   AuthUserFile /var/httpd/.htpasswd
+   AuthGroupFile /dev/null
+   AuthName My Site
+   AuthType Basic
+
+   &lt;Limit GET&gt;
+      order allow,deny
+      allow from all
+      require valid&ETH;user
+   &lt;/Limit&gt;
+&lt;/Directory&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>NOTE</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+You're going to encounter the words &quot;usually&quot; and &quot;typically&quot; often when dealing with UNIX. Because of the flexibility of the system, it's quite common for individual administrators to customize their systems in a manner different from 
+
+the default settings.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<P>
+At first glance, the file structure resembles HTML with opening
+and closing tags identifying different blocks, but this is <I>not</I>
+HTML. Rather, these pseudo-HTML commands are called <I>sectioning
+directives</I> because their job is to limit the scope of the
+commands within the body of the directive.
+<P>
+<B>The Directory Directive</B>&nbsp;&nbsp;The <TT>Directory</TT>
+directive indicates that the commands within its body only affects
+the specified directory. The one parameter it takes is an <I>absolute</I>
+path that identifies the particular directory. Inside the directive,
+several additional commands are allowed, including:
+<UL>
+<LI><TT>AllowOverride</TT>-which identifies what server features
+can be locally overridden within the directory. This is done through
+the inclusion of an <TT>.htaccess</TT> file and is discussed later
+in this chapter.
+<LI><TT>AuthUserFile</TT>-specifies the password file that controls
+access to the directory. The path given must be an <I>absolute
+</I>path.
+<LI><TT>AuthGroupFile</TT>-specifies the group password file,
+if any. Specifying <TT>/dev/null</TT> for the <TT>AuthGroupFile</TT>
+is the UNIX way of saying that it doesn't exist.
+<LI><TT>AuthName</TT>-indicates what displays in the log-in dialog
+of the Web browser when a user attempts to access the directory.
+</UL>
+<P>
+<B>The Limit Directive</B>&nbsp;&nbsp;Within the directory specified
+by <TT>&lt;Directory&gt;</TT>, the <TT>&lt;Limit&gt;</TT> directive
+permits you to control <I>who</I> has access and <I>what</I> access
+they have. Restrict access by:
+<BLOCKQUOTE>
+domain name<BR>
+IP address<BR>
+individual user name<BR>
+users as a group
+</BLOCKQUOTE>
+<P>
+Using the example from listing 6.2:
+<BLOCKQUOTE>
+<PRE>
+&lt;Limit GET&gt;
+   order allow,deny
+   allow from all
+   require valid-user
+&lt;/Limit&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Access is available to anyone if they can supply a proper user
+name and password. You can find them in the file specified by
+<TT>AuthUserFile</TT>.
+<H3><A NAME="ConfiguringYourSitesAccessSettings">
+Configuring Your Site's Access Settings</A></H3>
+<P>
+If your server allows for local overrides of the global access-control
+settings, as set by the <TT>AllowOverride</TT> directive, you
+create a secured subdirectory on your local site. This is especially
+useful for those who are using a commercial ISP instead of running
+their own server. Most ISPs configure their systems to permit
+you to create secure subtrees of your Web site.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>NOTE</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+Being able to override the global access-control settings does not mean you can create and run CGI scripts locally within your Web directories. While your ISP is probably configured to allow you to override the password access to your Web site, chances are 
+
+the override capability is limited to password settings. This is because allowing for local CGI scripts creates potential security holes within the system.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<P>
+To implement security for a specific directory, place a file similar
+to <TT>access.conf</TT> within that directory. Typically, this
+file is named <TT>.htaccess.</TT> The leading period prevents
+it from being seen with a casual directory list and, once placed
+within a directory, it specifies the access control for <I>that
+directory and all subdirectories below it</I>. An example <TT>.htaccess</TT>
+file that implements password access is shown in listing 6.3.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 6.3&nbsp;&nbsp;Example <I>.htaccess</I> file<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+AuthUserFile /var/htdocs/mysite/.htpasswd
+AuthGroupFile /dev/null
+AuthName My Site
+AuthType Basic
+
+&lt;Limit GET&gt;
+order allow,deny
+allow from all
+require valid&ETH;user
+&lt;/Limit&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>NOTE</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+The password file specified by <TT>AuthUserFile</TT> doesn't have to be in the same directory as <TT>.htaccess</TT>, but the path given must be an absolute path. If you have an account on an ISP, chances are when you log into your account via Telnet, 
+you're automatically taken to your directory. This directory is not the root of the directory tree.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<H2><A NAME="UnderstandingAccessMethods"><FONT SIZE=5 COLOR=#FF0000>
+Understanding Access Methods</FONT></A></H2>
+<P>
+Once you configure your site to limit access according to a password
+list, there are several different methods of presenting the log-in
+process to the user. They are:
+<UL>
+<LI>Browser authentication
+<LI>Form Processing
+<LI>Cookies
+</UL>
+<P>
+Full source codes for each of these techniques is provided on
+the companion CD-ROM.
+<H3><A NAME="BrowserAuthentication">
+Browser Authentication</A></H3>
+<P>
+When the server recognizes that the browser is about to enter
+a secure area, it sends a request for user name/password authentication
+from the browser. Most browser's today display an &quot;Enter
+Username and Password&quot; dialog box similar to that shown in
+figure 6.1.
+<P>
+<A HREF="f6-1.gif"><B>Figure 6.1 :</B> <I>If the browser supports it, a log-in dialog
+displays before access is granted to a restricted site</I>.</A>
+<P>
+For the Web administrator, this requires the least amount of additional
+HTML coding because the only required task is the creation of
+the necessary password and access-control files that were covered
+earlier.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>CAUTION</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+If you're going to implement security on your site, prepare for problems from your users. Specifically, browsers that support authentication also remember the user name and password for a particular site for the duration of the current browsing session. 
+Some, like Internet Explorer, give the user the option to remember a user name/password combination permanently.</BLOCKQUOTE>
+<BLOCKQUOTE>
+This memory is confusing to some people who may register for your site, explore it, and then wander back out onto the Web for a while and return to your site before they quit the current session. As long as the browser didn't shut down, it remembers the 
+first user name/password combination the user entered. They'll be let back into your site without being asked to log in.</BLOCKQUOTE>
+<BLOCKQUOTE>
+The confusion results from the next time the user launches the browser and comes to your site. This time, they will be asked for a user name/password.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<H3><A NAME="FormProcessing">
+Form Processing</A></H3>
+<P>
+There are some browsers, however, that don't have authentication
+implemented. This makes access to a secure site under this technique
+almost impossible. One way, however, is to modify your log-in
+process to allow the user to fill out a form and log-in by submitting
+the form. One is shown in figure 6.2.
+<P>
+<A HREF="f6-2.gif"><B>Figure 6.2 :</B> <I>By using a form for your log-in procedure,
+you make your site accessible to browsers that don't support browser
+authentication</I>.</A>
+<P>
+Form-oriented access control relies on the ability of CGI to redirect
+the user to a different URL using a given set of parameters or
+circumstances.
+<H3><A NAME="Cookies">
+Cookies</A></H3>
+<P>
+As mentioned earlier, some browsers permit the user to store a
+user name/password pair in a permanent list. The browser can then
+refer to it each time your site is visited, eliminating the user's
+need to log in each time. Not all browsers support this option.
+If you're setting up your site using a gateway form, password
+storage is a moot point.
+<P>
+A cookie in the user's browser can store the user name/password
+combination and make things easier on your users. Cookies are
+simple text strings that are stored in a file on the user's computer.
+Categorized by site and sub-categorized by the content designer,
+cookies allow Web designers to store user-specific information
+that can be accessed or changed each time the user revisits the
+site.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>NOTE</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+One common use for cookies is to store configuration preferences for a particular user. For examples of this in action, see chapter 4, &quot;Saving Configurations with Cookies.&quot;</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<P>
+Because cookies are stored as a text file on the user's computer,
+it's not the safest place for sensitive data, such as passwords.
+However, if all you're interested in is keeping track of who's
+&quot;registered&quot; on your site, a cookie makes an easy way
+to identify people who have already gone through whatever process
+you specify.
+<P>
+This technique takes advantage of a derivative of the browser
+identification trick from chapter 1, &quot;Browser Identification,&quot;
+and is shown here in listing 6.4.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 6.4&nbsp;&nbsp;User Identification through Cookies
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+#!/usr/local/bin/perl
+
+if ($ENV{'HTTP COOKIE'}) {
+   foreach (split(/; /,$ENV{'HTTP_COOKIE'})) {
+      local($cookie,$value) = split(/=/);
+      $Cookies{$cookie} = $value;
+      $haveCookies = &quot;1&quot;;
+   }
+}
+
+if ($haveCookies) {
+   if ($Cookies{'username'}) {
+      $htmlFile = 'member.html';
+   }
+} else {
+   $htmlFile = 'visitor.html';
+}
+
+$htmlFile = join (&quot;/&quot;, $ENV{'DOCUMENT ROOT'}, $htmlFile);
+
+print &quot;Content-Type: text/html\n\n&quot;;
+
+open (HTML, &quot;&lt; $htmlFile&quot;);
+print &lt;HTML&gt;;
+close (HTML);
+
+exit (0);
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+From inside CGI, any cookies associated with a document are passed
+in the <TT>HTTP_COOKIE</TT> environment variable. Each cookie
+is represented by a name and value pair, for example:
+<BLOCKQUOTE>
+<PRE>
+username=Scotty
+</PRE>
+</BLOCKQUOTE>
+<P>
+with multiple cookies separated by semicolons:
+<BLOCKQUOTE>
+<PRE>
+username=Scotty;visits=15;favoriteColor=blue;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Listing 6.4 simply checks for the presence of a &quot;user name&quot;
+cookie, then loads the appropriate document using the <TT>Location</TT>
+header tag that instructs the server to redirect itself towards
+the specified file.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR VALIGN=TOP><TD><B>TIP</B></TD></TR>
+<TR VALIGN=TOP><TD>
+<BLOCKQUOTE>
+If all you intend to do is redirect the user to another document and not parse or modify the file before you present it to the user's browser, you can replace the last part of listing 6.4 that opens and prints the target file with:</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>print &quot;Location:  $htmlFile\n\n&quot;;</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Which instructs the server to request a totally new document.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE>
+</CENTER>
+<P>
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here...</FONT></A></H2>
+<P>
+This chapter introduced you to the methods involved in controlling
+user access to your Web site. After making certain your server
+is properly configured, you can implement any of the scripting
+techniques discussed to actually log on. If you want to explore
+extensions to these tricks, check out:
+<UL>
+<LI><A HREF="ch3.htm" >Chapter 3</A> &quot;Tracking Hit Counts,&quot; explains the differences
+between accesses and hits.
+<LI><A HREF="ch15.htm" >Chapter 15</A>, &quot;Managing a Database,&quot; unveils the techniques
+necessary for database creation and maintenance
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch5.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch7.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

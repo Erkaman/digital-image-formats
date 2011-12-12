@@ -1,0 +1,528 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 21 -- Calendar of Events</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;21</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Calendar of Events</FONT></H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#ScriptingTextAnimations">
+Scripting Text Animations</A>
+<LI><A HREF="#TheIltMARQUEEgtITag">
+The <I>&lt;MARQUEE&gt;</I> Tag</A>
+<LI><A HREF="#ScriptedMarquees">
+Scripted Marquees</A>
+<LI><A HREF="#TheEventsDatabase">
+The Events Database</A>
+<LI><A HREF="#HTMLBasedMarquees">
+HTML-Based Marquees</A>
+<LI><A HREF="#PerlDriving">
+Perl Driving</A>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+&quot;Fan sites,&quot; or Web sites that are dedicated to an individual's
+favorite <I>something</I>, are an interesting and often amusing
+facet of the CyberScenery. If you have something that you're <I>extremely</I>
+fond of, and you're considering constructing a Web site in homage
+to it, you might want to offer on your site (among all the other
+interesting little tidbits you just <I>know</I> your visitors
+can't live without) some sort of calendar or chronology of events.
+This could include appearance dates, historical dates, and so
+on.
+<H2><A NAME="ScriptingTextAnimations"><FONT SIZE=5 COLOR=#FF0000>
+Scripting Text Animations</FONT></A></H2>
+<P>
+When you think of &quot;animation,&quot; whether it's related
+to the Web or not, you normally think of graphics. While this
+is generally true, you're not limited to animating images. With
+a little creativity, you can also create animated text.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+City home pages, that is, Web sites that serve as introductions to a particular city, often use events calendars to advertise upcoming events. One such city is Mankato, MN, whose page can be found at <B><A 
+HREF="http://www.prairie.lakes.com/cgi-bin/db/cal/display_month.pl">http://www.prairie.lakes.com/cgi-bin/db/cal/display_month.pl</A></B>.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="TheIltMARQUEEgtITag"><FONT SIZE=5 COLOR=#FF0000>
+The <I>&lt;MARQUEE&gt;</I> Tag</FONT></A></H2>
+<P>
+Internet Explorer includes several new HTML tags. One of these
+tags, <TT>&lt;MARQUEE&gt;</TT>, lets you:
+<BLOCKQUOTE>
+Scroll text from left to right, or right to left.<BR>
+Start and end at specific locations.<BR>
+&quot;Loop&quot; the text continuously.
+</BLOCKQUOTE>
+<P>
+Listing 21.1 is a code fragment that demonstrates the <TT>&lt;MARQUEE&gt;</TT>
+tag in action.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 21.1&nbsp;&nbsp;Using Microsoft's</B> <I>&lt;MARQUEE&gt;
+<BR>
+</I>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;body bgcolor=&quot;White&quot;&gt;
+&lt;hr&gt;
+&lt;marquee behavior=slide 
+         direction=right&gt;This text slides from left to right.&lt;/marquee&gt;
+&lt;hr&gt;
+&lt;marquee behavior=slide 
+         direction=left&gt;This text slides from right to left.&lt;/marquee&gt;
+&lt;/body&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Part of a scripter's job is to take advantage of any and every
+built-in browser trick possible. For Explorer users, the <TT>&lt;MARQUEE&gt;</TT>
+tag fits the bill, but for the rest of the Web community, something
+else is required.
+<H2><A NAME="ScriptedMarquees"><FONT SIZE=5 COLOR=#FF0000>
+Scripted Marquees</FONT></A></H2>
+<P>
+JavaScript gives you the ability to control the messages displayed
+in the <I>status bar</I>. The status bar is that area at the bottom
+of the browser normally occupied by the URL of the currently selected
+hyperlink. Couple this with JavaScript's built-in timer functions,
+and you can create your own scrolling marquee easily.
+<P>
+The logic of a scrolling status bar is straightforward:
+<OL>
+<LI>Display the first character of the message at the far right
+of the window.
+<LI>Wait for a little bit.
+<LI>Shift the display to the left one character.
+<LI>Display the next character.
+<LI>Go back to step two and repeat the process over and over.
+</OL>
+<P>
+To &quot;keep as much code under one roof&quot; as possible, you
+can &quot;wrap&quot; much of the functionality-that is, bundling
+the data and functions that manipulate it, within a user-defined
+object, as demonstrated in listing 21.2.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 21.2&nbsp;&nbsp;A Marquee Object<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function Marquee(str) {
+   this.msg = str;
+
+   for(var i=0; i&lt;50; i++) {
+      this.msg = &quot; &quot; + this.msg;
+   }
+
+   this.pos   = 1;
+   this.delay = 500;
+   this.reset = clearMessage;
+   this.start = startMarquee;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The <TT>clearMessage</TT> and <TT>startMarquee</TT> references
+are examples of attaching functions to an object, creating <I>methods</I>.
+In this case, <TT>clearMessage()</TT> (listing 21.3) takes care
+of updating the status bar and keeps track of what part of the
+message is being displayed. The <TT>startMarquee()</TT> (also
+in listing 21.3) function simply gets everything going.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Remember, when associating functions to objects, do <I>not</I> include the parentheses or any parameters in either the target function name or the method name within the object. By <I>only</I> specifying the name and nothing else, you create a link to the 
+
+function without actually running it.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<HR>
+<BLOCKQUOTE>
+<B>Listing 21.3&nbsp;&nbsp;The</B> <I>clearMessage()</I> <B>Function
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function clearMessage(obj) {
+   if(obj == null) {
+      obj = this;
+   }
+
+   if(obj.pos &lt; obj.msg.length) {
+      window.status = obj.msg.substring(obj.pos, obj.msg.length);
+
+      obj.pos++;
+
+      window.setTimeout(&quot;clearMessage(&quot;+obj+&quot;)&quot;, obj.delay);
+   } else {
+      window.status = &quot; &quot;;
+      obj.pos = 0;
+   }
+}   
+
+function startMarquee() {
+   window.setTimeout(&quot;clearMessage(&quot;+this+&quot;)&quot;, this.delay);
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Notice that <TT>startMarquee()</TT> relies on the special <TT>this</TT>
+keyword to reference the current object, while <TT>clearMessage()</TT>
+method takes the object as a parameter. This is necessary because
+<TT>clearMessage()</TT> is normally called from within the <TT>setTimeout()</TT>
+function, and it's not possible to use the <TT>this</TT> keyword
+as part of the <TT>setTimeout()</TT> command to execute. It <I>is</I>
+possible, however, to construct a <TT>setTimeout()</TT> command
+like the one shown:
+<BLOCKQUOTE>
+<PRE>
+window.setTimeout(&quot;clearMessage(&quot;+this+&quot;)&quot;, this.delay);
+</PRE>
+</BLOCKQUOTE>
+<P>
+where <TT>this</TT> (because it's outside the parentheses) is
+resolved to the object itself. To make certain <TT>clearMessage()</TT>
+also works if called as an object method, the parameter is tested
+to see if it's &quot;null,&quot; which it would be if called as:
+<P>
+&quot;myMarquee.reset();clearMessage()&quot; determines how much
+of the current message to display and transfers that much to the
+status bar. If the message hasn't been totally displayed, the
+timer is reset to repeat the process until the entire message
+has been scrolled. By making <TT>clearMessage()</TT> a method
+of the marquee object, you can refer to the various properties
+of the marquee object directly, without having to reference the
+particular object. This also makes it possible to create multiple
+marquees, each with its own properties that <TT>clearMessage()</TT>
+will manipulate.
+<P>
+Implementing this object involves nothing more than creating a
+<TT>Marquee</TT> object and launching it by calling its <TT>start()</TT>
+method:
+<BLOCKQUOTE>
+<PRE>
+myMarquee = new Marquee(&quot;Your message here&quot;);
+myMarquee.start();
+</PRE>
+</BLOCKQUOTE>
+<P>
+Now, with the basis for your scrolling display finished, it's
+time to tie it into a database of available messages to display.
+<H2><A NAME="TheEventsDatabase"><FONT SIZE=5 COLOR=#FF0000>
+The Events Database</FONT></A></H2>
+<P>
+<A HREF="ch8.htm" >Chapter 8</A> &quot;Advertising with Billboards&quot; introduces
+the concept of using a JavaScript array to hold a large collection
+of information-a scripted database. If you wanted to display one
+of several different messages as a marquee, storing those messages
+as a database would make the most sense. In addition, the database
+needed here is much simpler-there's only one field per record
+(the text to display). Therefore, all that's really needed is
+an array of strings.
+<P>
+As before, start with creating the array (see listing 21.4), and
+populate it with the strings you want to display.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 21.4&nbsp;&nbsp;A &quot;Scrollbase&quot;<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function initArray(iSize) {
+   this.length = iSize;
+
+   for(var i=1; i&lt;=iSize; i++)
+      this[i] = null;
+
+   return this;
+}
+Messages    = new initArray(3);
+Messages[1] = new Marquee(&quot;Visit your bookstore!&quot;);
+Messages[2] = new Marquee(&quot;Buy this book!&quot;);
+Messages[3] = new Marquee(&quot;Tell your friends!&quot;);
+...
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Then write a little control code to scroll one Marquee object
+after another. The <TT>pos</TT> property of the marquee object
+becomes important at this point, because when the message has
+completed scrolling, the value of <TT>pos</TT> is reset to zero.
+With this information, you can have a master timing loop that
+watches what's happening in the Marquee objects and reacts appropriately,
+as demonstrated in listing 21.5.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 21.5&nbsp;&nbsp;Controlling Multiple Marquees<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+var iWhichMarquee = 1;
+var currMarquee  = null;
+
+function MarqueeMaster(marqueeArray) {
+   if(currMarquee == null || currMarquee.pos == 0) {
+      if(++iWhichMarquee &gt; marqueeArray.length) {
+         iWhichMarquee = 1;
+      }
+
+      currMarquee = marqueeArray[iWhichMarquee];
+
+      currMarquee.start();
+   }
+
+   setTimer(&quot;MarqueeMaster(&quot; + marqueeArray + &quot;)&quot;, 500);
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The <TT>MarqueeMaster()</TT> function relies on two global variables
+to keep track of which marquee is currently running. When first
+called, &quot;iCurrMarquee&quot; is &quot;null,&quot; so the process
+is initialized. Once &quot;currMarquee&quot; is set to a particular
+object, it then watches the object's <TT>pos</TT> property to
+see when it has reset itself (meaning the entire message has been
+displayed), and moves to the next marquee when done.
+<P>
+As with &quot;seeding&quot; an individual marquee, starting the
+master control requires only one JavaScript call:
+<BLOCKQUOTE>
+<PRE>
+MarqueeMaster(Messages);
+</PRE>
+</BLOCKQUOTE>
+<P>
+JavaScript's internal timing functions take care of the rest.
+<P>
+By using the <TT>Date</TT> object, you determine what the &quot;minute&quot;
+was when the page was loaded. If you assume that every 15 minutes
+you have a small demonstration, the script compares the current
+time to when the next demonstration is. Based on that, you can
+change the scrolling text as needed.
+<H2><A NAME="HTMLBasedMarquees"><FONT SIZE=5 COLOR=#FF0000>
+HTML-Based Marquees</FONT></A></H2>
+<P>
+You're not limited to scrolling the text in the status bar to
+display upcoming events. If you frame your site, you can dedicate
+one frame to display new messages in much the same way.
+<P>
+Starting with a simple <TT>&lt;FRAMESET&gt;</TT> configuration:
+<BLOCKQUOTE>
+<PRE>
+&lt;FRAMESET ROWS=&quot;*,50&quot;&gt;
+   &lt;FRAME NAME=&quot;main&quot; SRC=&quot;index2.html&quot;&gt;
+   &lt;FRAME NAME=&quot;marquee&quot; SRC=&quot;marquee.html&quot; NORESIZE SCROLLING=NO&gt;
+&lt;/FRAMESET&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+You can use the lower frame to display your messages. The actual
+code that drives the lower frame, however, must be located in
+the parent (the <TT>&lt;FRAMESET&gt;</TT>) document.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Because Navigator wipes the memory of a frame whenever a new document is loaded, any JavaScript code you may place within it is lost with each reload. If you want to perform JavaScript manipulation within a dynamically created document, you <I>must</I> 
+locate the JavaScript code elsewhere, such as in the parent frame.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+In fact, you can use much of the same code just created to handle
+scrollbar marquees. The only thing that really needs to change
+is the function that handles the displaying of the message. Listing
+21.6 demonstrates a slightly different <TT>clearMessage()</TT>
+function that handles writing to a different frame.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 21.6&nbsp;&nbsp;HTML Messages<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function clearMessage() {
+   tStr = &quot;&quot;;
+
+   if(pos &lt; msg.length) {
+      tStr += &quot;&lt;HTML&gt;&lt;HEAD&gt;&lt;/HEAD&gt;&quot;
+            + &quot;&lt;BODY BGCOLOR=#000000&gt;&quot;
+            + &quot;&lt;H2&gt;&quot;
+            + msg.substring(pos, msg.length)
+            + &quot;&lt;/H2&gt;&quot;
+            + &quot;&lt;/BODY&gt;&lt;/HTML&gt;&quot;;
+
+      pos++;
+
+      window.setTimeout(&quot;clearMessage()&quot;, delay);
+   } else {
+      tStr += &quot;&lt;HTML&gt;&lt;HEAD&gt;&lt;/HEAD&gt;&quot;
+            + &quot;&lt;BODY BGCOLOR=#000000&gt;&quot;
+            + &quot;&lt;/BODY&gt;&lt;/HTML&gt;&quot;;
+
+      pos = 0;
+   }
+
+   theFrame.document.write(tStr);
+   theFrame.document.close();
+}   
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The <TT>theFrame</TT> variable is actually a new property you
+add to the <TT>Marquee</TT> object, which points to the frame
+where you want to display the messages. This isn't strictly necessary,
+as you could always use:
+<BLOCKQUOTE>
+<PRE>
+window.frames['marqueeFrame']...;
+</PRE>
+</BLOCKQUOTE>
+<P>
+but creating a property to contain this reference makes coding
+easier.
+<P>
+If you wanted to get fancy, you could have the text and background
+color change dynamically as well. By adjusting the <TT>tStr</TT>
+variable that builds the new page to:
+<BLOCKQUOTE>
+<PRE>
+tStr += &quot;&lt;HTML&gt;&lt;HEAD&gt;&lt;/HEAD&gt;&lt;BODY BGCOLOR=&quot; + PickColor() + &quot;&gt;&quot;
+      + &quot;&lt;H2&gt;&lt;FONT COLOR=&quot; + PickColor() +
+      + msg.substring(pos, msg.length) + 
+      + &quot;&lt;/FONT&gt;&lt;/H2&gt;&lt;/BODY&gt;&lt;/HTML&gt;&quot;;
+</PRE>
+</BLOCKQUOTE>
+<P>
+You can implement a simple color picker function that returns
+one of the redefined text color strings that browsers recognize.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 21.7&nbsp;&nbsp;Pick a Color<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function PickColor() {
+   iWhich = RandInt(colorArray.length) + 1;
+   return colorArray[iWhich];
+}
+
+function LoadArray() {
+   this.length = LoadArray.arguments.length;
+
+   for(var i=1; i&lt;=LoadArray.arguments.length; i++) {
+      this[i] = LoadArray.arguments[i-1];
+   }
+
+   return this;
+}
+
+colorArray = new LoadArray(&quot;Black&quot;, &quot;Olive&quot;, &quot;Teal&quot;, &quot;Red&quot;, 
+                           &quot;Blue&quot;, &quot;Maroon&quot;, &quot;Navy&quot;, &quot;Gray&quot;, 
+                           &quot;Lime&quot;, &quot;Fuchsia&quot;, &quot;White&quot;, &quot;Green&quot;, 
+                           &quot;Purple&quot;, &quot;Silver&quot;, &quot;Yellow&quot;, &quot;Aqua&quot;);
+
+function RandInt(num) {
+   var n = (Math.random() * num).toString();
+   return parseInt(n.substring(1, n.indexOf(&quot;.&quot;)-1));
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+This code block also demonstrates a different way of array initilization-that
+of creating the array and loading it with data in one statement.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+The <TT>RandInt()</TT> function utilizes the built-in <TT>random()</TT> function to generate a random <I>integer</I> within the range of 0 and num-1. Because <TT>random()</TT> generates a floating-point number between 0 and 1, it's necessary to parse out 
+the decimal part of the result before returning the value for processing by other functions.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="PerlDriving"><FONT SIZE=5 COLOR=#FF0000>
+Perl Driving</FONT></A></H2>
+<P>
+With the code presented in the previous sections, you can display
+marquees scrolling across the bottom of the screen or display
+them within a separate frame. If you have a large database of
+possible events (or anything) that you want to scroll through,
+you may decide to store the database on the server as a Perl-readable
+file and have Perl do the following: 
+<OL>
+<LI>Pull a subset of information-for example, all the events scheduled
+for this month.
+<LI>Format and generate both the HTML code <I>and</I> the JavaScript
+code to have the event generator run on the user's browser once
+the data has been retrieved.
+</OL>
+<P>
+You'll find the source code for the Perl implementation on the
+companion CD-ROM.
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+This chapter takes a common concept, that of a calendar of upcoming
+events, and presents it in a slightly different manner: an animated
+&quot;TelePrompTer&quot; for your Web site. For more information
+about the concepts that relate to what you've learned here, check
+out:
+<UL>
+<LI><A HREF="ch12.htm" >Chapter 12</A>, &quot;Guestbook/Graffiti Wall,&quot; shows you
+how to create a guestbook and how to extend it by adding a graffiti
+wall to let visitors leave notes for others.
+<LI><A HREF="ch15.htm" >Chapter 15</A>, &quot;Managing a Database,&quot; guides you through
+several techniques for database creation and maintenance.
+<LI><A HREF="ch16.htm" >Chapter 16</A>, &quot;Searching the Database,&quot; has tips on
+how to speed up data access.
+<LI><A HREF="ch22.htm" >Chapter 22</A>, &quot;Creating Groupware Calendars,&quot; looks
+at groupware and implementing a scheduling calendar through the
+Web.
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch20.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch22.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

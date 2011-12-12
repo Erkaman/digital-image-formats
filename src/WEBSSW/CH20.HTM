@@ -1,0 +1,210 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter -- 20 Online Ordering</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;20</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Online Ordering</FONT></H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#IstheInternetSecure">
+Is the Internet Secure?</A>
+<UL>
+<LI><A HREF="#SecureServers">
+Secure Servers</A>
+<LI><A HREF="#AVirtualBank">
+A Virtual Bank</A>
+</UL>
+<LI><A HREF="#AutoReplyandConfirmationGenerators">
+Auto-Reply and Confirmation Generators</A>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+By now, you have your catalog, your shopping carts, and you've
+got visitors gleefully picking products off your CyberShelves.
+Once they have their baskets full, it's time to check out and
+pay up-which opens its own can of worms.
+<H2><A NAME="IstheInternetSecure"><FONT SIZE=5 COLOR=#FF0000>
+Is the Internet Secure?</FONT></A></H2>
+<P>
+The Internet is <I>not</I> secure; but, then again, nothing really
+is. The final piece of the online shopping puzzle is to try to
+develop a means for the customer to pay for what they want to
+buy as easily as they found the product-<I>without</I> having
+their financial information broadcast to many others. There are
+several different methods for accomplishing this:
+<BLOCKQUOTE>
+Use a server that supports the Secure Sockets Layer (SSL).<BR>
+Rely on a virtual bank service.<BR>
+Use a non-Internet method to complete the ordering. Examples would
+be mailing a check or telephoning the credit card number to a
+central site.
+</BLOCKQUOTE>
+<H3><A NAME="SecureServers">
+Secure Servers</A></H3>
+<P>
+When a Web server and browser communicate, information such as
+HTML documents and form submissions transmits as packets of plain
+text information. This is primarily to provide a basis that a
+variety of different machines can interpret. Because the Internet
+is a massive inter-connected network of computers, there may be
+several systems between the user's browser and the server, acting
+as &quot;relays&quot; to get the data between what (to the user)
+appears to be a direct connection.
+<P>
+This means that someone with some &quot;hacker savvy&quot; could
+intercept the data flowing through these routing systems and read
+the data stream. The Internet is not a very secure system.
+<P>
+Security is not just for ordering merchandise, but also for the
+transmittal of sensitive company information. As an answer to
+the demand that communications across the Web be more secure,
+the <I>Secure Sockets</I> protocol was created. With SSL, the
+packets are encrypted with a keyset established by the server
+and browser when they first connect. Because only the two systems
+involved have the decoder keys, anyone trying to intercept the
+data would see only garbage. The keys themselves are rather large
+(64 digits), making the possibility of guessing the correct key
+extremely difficult, if not impossible.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+As has been exhibited on the Internet in recent months, human ingenuity always wins out over intense planning. Even though companies like Netscape and Microsoft have claimed that their encryption schemes are secure, there have been numerous cases where 
+their security has been broken. This occurs most often in an attempt to test the security of the system, not to steal data. As with all security, remember one simple fact: <I>Anything that can be designed by one man can be undesigned by another.</I>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+To try to compensate for this, both Netscape and Microsoft offer special versions of their browsers that utilize 128-digit keys. While the possibility of cracking these new keys is even more remote, it never hurts to be cautious.</BLOCKQUOTE>
+<BLOCKQUOTE>
+For more information on browser and Web security, stop by Netscape's &quot;DevEdge Online&quot; <BR>
+(<B><A HREF="http://developer.netscape.com/index.html">http://developer.netscape.com/index.html</A></B>) or Microsoft's &quot;For Developers Only&quot; (<B><A HREF="http://www.microsoft.com/devonly/">http://www.microsoft.com/devonly/</A></B>).
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Even if you question the security of the SSL, it is more secure
+than the standard HTTP connection. Therefore, if you plan on accepting
+sensitive information such as credit card numbers over the Internet,
+you should <I>never</I> use anything less than SSL to accept the
+data. As a surfer, you should <I>never</I> give out this information
+if you're not connected via SSL.
+<H3><A NAME="AVirtualBank">
+A Virtual Bank</A></H3>
+<P>
+Several companies, First Virtual being one, have created online
+banks that, when tied with your credit card, provide an account
+in Cyberspace. Instead of passing credit card information over
+the Internet, you transmit the PIN for your virtual bank account.
+Once received, the order request is transmitted to the bank; the
+bank then sends an e-mail message back to you to verify that you
+indeed placed the order. Assuming that everything checks out,
+your order is processed.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+You can find more information about First Virtual at their site: <B><A HREF="http://www.fv.com/">http://www.fv.com/</A></B>.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+From the standpoint of a Web administrator, whether the buyer
+is using a credit card or a virtual bank PIN should make no difference-sensitive
+information is still being transmitted.
+<H2><A NAME="AutoReplyandConfirmationGenerators"><FONT SIZE=5 COLOR=#FF0000>
+Auto-Reply and Confirmation Generators</FONT></A></H2>
+<P>
+One method for making transactions secure is to simply not transmit
+the sensitive information over the Web. Instead, have your ordering
+system generate a confirming e-mail back to the user with a security
+code for them to reply to or use to call a specific number.
+<P>
+One of the virtual banks on the Internet, First Virtual, uses
+a similar system when you want to create an account with them.
+It is as follows:
+<OL>
+<LI>You fill out and submit a form with address and contact information.
+<LI>You receive an e-mail confirmation message that relays the
+information back to you along with an activation code and a toll-free
+phone number.
+<LI>You call the phone number and complete the process by giving
+them your credit card.
+</OL>
+<P>
+This way, your customers never transmit critical information over
+the Internet.
+<P>
+To implement an e-mail requestor, you use a form (as before) to
+submit the bulk of the order. However, instead of asking for the
+user's credit card information, you generate a unique &quot;order
+confirmation code&quot; that you e-mail to the user. To generate
+the code, you can use a code fragment similar to the block shown
+in listing 20.1.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 20.1&nbsp;&nbsp;Generating a Random Character Sequence
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+srand($$|time);
+
+@saltchars = (A..Z,0..9);
+
+for($i=0; $i&lt;10; $i++) {
+   $code = $code . $saltchars[int(rand($#saltchars+1))];
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The call to <TT>srand()</TT> seeds Perl's random number generator-in
+this case, with the current system time. This sets up the <TT>rand()</TT>
+function to dance through the array of possible characters for
+the code, pulling one at a time and concatenating it onto the
+end of <TT>$code</TT>. When finished, you have a 10-character
+random code.
+<P>
+While this should provide a code that's unique enough (that is,
+one that couldn't be generated again because of its random nature),
+it <I>is</I> possible, though unlikely, for the exact same sequence
+to be produced at some time in the future. To circumvent this,
+storing used codes within another file and checking the generated
+code against those that have already been used is a good idea.
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+This chapter looks at several different methods for completing
+the shopping process of getting money from the customer. For more
+information on the various tricks and tips demonstrated, check
+out:
+<UL>
+<LI><A HREF="ch13.htm" >Chapter 13</A>, &quot;Field Verification,&quot; explains how to
+validate form data from within the server and from within the
+client.
+<LI><A HREF="ch14.htm" >Chapter 14</A>, &quot;Form Processing,&quot; teaches you to use
+a form for processing e-mail.
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch19.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch21.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

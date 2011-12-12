@@ -1,0 +1,389 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 16 -- Searching the Database</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;16</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Searching the Database</FONT></H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#TheKeysPlease">
+The Keys, Please</A>
+<LI><A HREF="#TheBruteForceTechnique">
+The Brute Force Technique</A>
+<LI><A HREF="#SortingDatabaseInformation">
+Sorting Database Information</A>
+<LI><A HREF="#TheBinarySearch">
+The Binary Search</A>
+<LI><A HREF="#IndexedSearch">
+Indexed Search</A>
+<LI><A HREF="#MultipleKeys">
+Multiple Keys</A>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+As the previous chapter demonstrates, databases can be easily
+implemented both on the server and from within the browser. Regardless
+of where it's created, if the database is substantial, a means
+of quickly accessing the data is necessary, because a good deal
+of processor time is eaten up with the searching process.
+<H2><A NAME="TheKeysPlease"><FONT SIZE=5 COLOR=#FF0000>
+The Keys, Please</FONT></A></H2>
+<P>
+Before diving into database searching, an introduction to some
+commonly used termi-nology is in order. Consider the following
+database:
+<BLOCKQUOTE>
+<PRE>
+Covington|Cindy|AR
+Walter|Scott|MN
+Willson|Susan|TX
+</PRE>
+</BLOCKQUOTE>
+<P>
+In it, each record has three fields: first name, last name, and
+state. If you were looking for a particular record, you could
+do a search based on any one or more of these fields.
+<P>
+Within database jargon, the field you are basing your search on
+is a <I>search key</I>. Keys aren't limited to just a single field-you
+can create a <I>complex key</I> that consists of more than one
+field, such as state and last name. This is especially valuable
+when several database records may have the same information in
+one or more fields. Keys do not need to search the entire field.
+This is useful if you want to find all entries in a database that
+start with &quot;W.&quot;
+<P>
+Alternatively, you can create a totally new field for tracking
+purposes, where you can store a custom key.
+<H2><A NAME="TheBruteForceTechnique"><FONT SIZE=5 COLOR=#FF0000>
+The Brute Force Technique</FONT></A></H2>
+<P>
+The most straightforward method for searching through a database
+is the brute force method. With it you simply start at the beginning
+and work your way through the database one record at a time, looking
+for the desired field. For small files, this isn't too costly
+from the standpoint of system time used. However, if the size
+of the database becomes relatively large, it could take a lot
+of time to locate the desired information. Factor in the probability
+that more than one user is going to be doing a search at the same
+time, and your system can easily slow down to a crawl as each
+process tries to locate information. <P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+One way to reduce search time is to divide a large database into several smaller ones. This reduces the number of records that need to be searched. However, you only experience an improvement in search time if the database division is done carefully. If a 
+
+user chooses to search on a criterion that's different from how you've divided your data, you've actually slowed the process down by now having to open multiple files</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+The concept of &quot;large&quot; when talking about database files is a very relative term and can involve several factors: the number of records within the database, the number of fields within a record, and the number of fields you're using as your 
+search key.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+To implement a standard search, loop through the database as shown
+in listing 16.1.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 16.1&nbsp;&nbsp;Brute Force Search<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+# keyField is a list containing the record keys
+# key is the desired key to match
+#
+$howMany = @keyField;
+for ($index = 0; $index &lt; $howMany; $index++) {
+   if ($keyField{$index} =~ /$key/) {
+      break;
+   }
+}
+
+if ($index &lt; $howMany) {
+   # found it!
+} else {
+   # couldn't find a match
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The <TT>for</TT> loop steps through the field data, one record
+at a time, looking for the pattern stored in <TT>$key</TT> for
+a match. If a match is found, the loop is broken with <TT>$index</TT>
+equal to the index into the database. The <TT>if</TT> block then
+checks the value of <TT>$index</TT> and if it's less than <TT>$howMany</TT>,
+a match was successfully found.
+<P>
+This method isn't without its drawbacks, however. If the record
+you're looking for is located toward the end of the file, you'll
+have to search through every record in the database until you
+find it. It could take a long time if it's the very last record
+in a large database; as the database grows in size, the time necessary
+to read the entire database could become unacceptable. You have
+to decide if the amount of time it could take is worth the effort.
+<P>
+You can avoid this problem with a little planning and a different
+search technique, but before this new trick can work, the database
+needs to be ordered or <I>sorted</I> into some kind of order.
+<H2><A NAME="SortingDatabaseInformation"><FONT SIZE=5 COLOR=#FF0000>
+Sorting Database Information</FONT></A></H2>
+<P>
+If you've done any programming, you're no doubt familiar with
+<I>sorting</I>, or the ordering of data based on a preestablished
+criterion. Several search mechanisms that are considerably faster
+than the brute-force technique rely on the data being sorted.
+<P>
+With Perl, sorting is an easy task as there is a <TT>sort</TT>
+command built into the language. The syntax of <TT>sort</TT> is:
+<BLOCKQUOTE>
+<PRE>
+@sortedArray = sort sortFunction %unsortedArray;
+</PRE>
+</BLOCKQUOTE>
+<P>
+where:
+<UL>
+<LI><TT>sortedArray</TT>-the returned array in sorted order.
+<LI><TT>sortFunction</TT>-the user-written function that controls
+the sort.
+<LI><TT>unsortedArray</TT>-the original, unsorted array.
+</UL>
+<P>
+The only involved part of setting up a sort is the job of writing
+the <TT>sortFunction</TT>. The Perl <TT>sort</TT> command sets
+the global variables <TT>$a</TT> and <TT>$b</TT> to the two array
+elements being compared. It's then the job of the <TT>sortFunction</TT>
+to return one of three possible values:
+<BLOCKQUOTE>
+-1-if <TT>$a</TT> is less than <TT>$b</TT> (sort-wise)
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+0-if <TT>$a</TT> equals <TT>$b</TT> (sort-wise)
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+1-if <TT>$a</TT> is greater than <TT>$b</TT> (sort-wise)
+</BLOCKQUOTE>
+<P>
+as demonstrated in listing 16.2.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 16.2&nbsp;&nbsp;Simple Sort Structure<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+sub sortFunction {
+   if ($a &lt; $b) {
+      return -1;
+   } elseif ($a == $b) {
+      return 0;
+   } elseif ($a &gt; $b) {
+      return 1;
+   }
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+If the comparison being performed is simple (as shown in listing
+16.2), this can be written in Perl as:
+<BLOCKQUOTE>
+<PRE>
+$a &lt;=&gt; $b;
+</PRE>
+</BLOCKQUOTE>
+<P>
+which reduces the entire <TT>if...elseif...elseif</TT> block to
+one line.
+<P>
+Once the data sorts, a search technique like the <I>binary search</I>
+is employed.
+<H2><A NAME="TheBinarySearch"><FONT SIZE=5 COLOR=#FF0000>
+The Binary Search</FONT></A></H2>
+<P>
+The binary search is so named because it does the following:
+<UL>
+<LI>Dives half-way into a database, retrieving the middle record.
+<LI>Compares this record against the search key. If the record
+matches the key, the search stops.
+<LI>If the record doesn't match the key, the search discards one
+of the two halves of the dataset depending on what the comparison
+dictates. If the selected record comes <I>after</I> the key, the
+second half is discarded, because all records in it would come
+after the key. Otherwise, the first half is discarded.
+<LI>The search begins the process again, only this time with the
+remaining half.
+</UL>
+<P>
+This process of split-compare-discard continues until the desired
+record is found. From an <I>order of complexity</I> standpoint,
+a binary search, at most, has to look at half of the records within
+a database-even if the desired data is located toward the end
+of the file.<BR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+The concept of <I>order of complexity</I> was indirectly introduced earlier in the chapter when talking about the brute-force search. <I>Order of complexity</I> is programming terminology for how many iterations through a dataset a search algorithm must 
+perform (number of records that must be looked at). The goal when designing a search mechanism is to minimize the order of complexity.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Listing 16.3 demonstrates the binary search mechanism.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 16.3&nbsp;&nbsp;Binary Search<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+# keyField is a list containing the record keys
+# key is the desired key to match
+#
+$howMany = @keyField;
+$first   = 0;
+$last    = $howMany - 1;
+
+while(true) {
+   $index  = $first + ($last - $first) / 2;
+
+   if($keyField{$index} =~ /$key/) {
+      break;
+   }
+
+   if($keyField{$index} &lt; $key) {
+      # record comes before key
+      $first = $index + 1;
+   } elseif ($keyField{$index} &gt; $key) {
+      # record comes after key
+      $last = $index - 1;
+   } else {
+      # at this point, we've no match
+      $index = $howMany;
+   }
+}
+
+if ($index &lt; $howMany) {
+   # found it!
+} else {
+   # couldn't find a match
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<H2><A NAME="IndexedSearch"><FONT SIZE=5 COLOR=#FF0000>
+Indexed Search</FONT></A></H2>
+<P>
+If you want to search your database in more than one field, then
+simply sorting the data won't work. This only works if you sort
+on the last field first, then work your way backwards. In this
+case, creating a separate index file makes searching more practical.
+The index file is a database in itself, except that instead of
+the entire data record that includes all fields, the index file
+stores only two things:
+<OL>
+<LI>The field being indexed.
+<LI>An index counter that identifies the location of the record
+within the main database.
+</OL>
+<P>
+For example, given the following database:
+<BLOCKQUOTE>
+<PRE>
+Brandt|Carl|MN
+Covington|Cindy|AR
+Walter|Scott|MN
+Willson|Susan|TX
+</PRE>
+</BLOCKQUOTE>
+<P>
+The database itself is sorted alphabetically by last name, but
+not by state. An index file for state-based indexing would look
+something like this:
+<BLOCKQUOTE>
+<PRE>
+AR|2
+MN|1
+MN|3
+TX|4
+</PRE>
+</BLOCKQUOTE>
+<P>
+where the second field indicates which record has the necessary
+match.
+<P>
+Searching with an index file is no different from searching the
+database directly:
+<OL>
+<LI>Open the index.
+<LI>Scan the index for a match.
+<LI>Use the indexField data to find the record (or records) in
+the main database.
+</OL>
+<P>
+As with searching the main database, you can use accelerated search
+techniques, like the binary search, to find matching records.
+<H2><A NAME="MultipleKeys"><FONT SIZE=5 COLOR=#FF0000>
+Multiple Keys</FONT></A></H2>
+<P>
+The fields used to match records during a database search are
+called <I>key fields</I>. A key field may be &quot;unique&quot;
+(only one record has any given key) or it may be &quot;shared&quot;
+(more than one record has the same key). Binary searches are ideal
+for unique key databases, but shared keys cause a problem: If
+the binary search lands in the middle of a range of records that
+share a common key, which way does it go?
+<P>
+Shared keys can be avoided by creatively designing custom keys
+instead of using field data directly. For example, you could combine
+both a state field and a ZIP code field to create a new key.
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+This chapter looked at different methods for accessing the information
+stored within a database. With these techniques under your belt,
+you can apply them to several other methods, such as:
+<UL>
+<LI><A HREF="ch18.htm" >Chapter 18</A>, &quot;Online Store Product Searches,&quot; shows
+you how to apply search techniques to catalogs and indexes.
+<LI><A HREF="ch21.htm" >Chapter 21</A>, &quot;Calendar of Events,&quot; looks at a simple,
+yet unique implementation of an online calendar.
+<LI><A HREF="ch26.htm" >Chapter 26</A>, &quot;Online Testing,&quot; uses JavaScript to
+handle a multiple choice test.
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch15.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch17.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

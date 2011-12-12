@@ -1,0 +1,2629 @@
+<HTML>
+<HEAD>
+<TITLE>Appendix C -- JavaScript Glossary</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Appendix&nbsp;C</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>JavaScript Glossary</FONT></H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#Terms">
+Terms</A>
+<UL>
+<LI><A HREF="#Cookie">
+Cookie</A>
+<LI><A HREF="#EventHandler">
+Event Handler</A>
+<LI><A HREF="#Function">
+Function</A>
+<LI><A HREF="#Hierarchy">
+Hierarchy</A>
+<LI><A HREF="#Java">
+Java</A>
+<LI><A HREF="#JavaScript">
+JavaScript</A>
+<LI><A HREF="#Literal">
+Literal</A>
+<LI><A HREF="#Method">
+Method</A>
+<LI><A HREF="#Object">
+Object</A>
+<LI><A HREF="#Operator">
+Operator</A>
+<LI><A HREF="#Property">
+Property</A>
+<LI><A HREF="#Script">
+Script</A>
+</UL>
+<LI><A HREF="#Objects">
+Objects</A>
+<UL>
+<LI><A HREF="#anchors">
+anchors</A>
+<LI><A HREF="#button">
+button</A>
+<LI><A HREF="#checkbox">
+checkbox</A>
+<LI><A HREF="#Datenbsp">
+Date&nbsp;</A>
+<LI><A HREF="#documentnbsp">
+document&nbsp;</A>
+<LI><A HREF="#elementsnbsp1">
+elements&nbsp;</A>
+<LI><A HREF="#formnbsp">
+form&nbsp;</A>
+<LI><A HREF="#framenbsp">
+frame&nbsp;</A>
+<LI><A HREF="#hiddennbsp">
+hidden&nbsp;</A>
+<LI><A HREF="#historynbsp">
+history&nbsp;</A>
+<LI><A HREF="#linknbsp">
+link&nbsp;</A>
+<LI><A HREF="#locationnbsp">
+location&nbsp;</A>
+<LI><A HREF="#Mathnbsp">
+Math&nbsp;</A>
+<LI><A HREF="#navigatornbsp">
+navigator&nbsp;</A>
+<LI><A HREF="#passwordnbsp">
+password&nbsp;</A>
+<LI><A HREF="#radionbsp">
+radio&nbsp;</A>
+<LI><A HREF="#resetnbsp">
+reset&nbsp;</A>
+<LI><A HREF="#selectnbsp">
+select&nbsp;</A>
+<LI><A HREF="#stringnbsp">
+string&nbsp;</A>
+<LI><A HREF="#submitnbsp">
+submit&nbsp;</A>
+<LI><A HREF="#textnbsp">
+text&nbsp;</A>
+<LI><A HREF="#textareanbsp">
+textarea&nbsp;</A>
+<LI><A HREF="#windownbsp">
+window&nbsp;</A>
+</UL>
+<LI><A HREF="#Properties">
+Properties</A>
+<UL>
+<LI><A HREF="#action">
+action</A>
+<LI><A HREF="#alinkColornbsp">
+alinkColor&nbsp;</A>
+<LI><A HREF="#anchorsnbsp">
+anchors&nbsp;</A>
+<LI><A HREF="#appCodeNamenbsp">
+appCodeName&nbsp;</A>
+<LI><A HREF="#appNamenbsp">
+appName&nbsp;</A>
+<LI><A HREF="#appVersionnbsp">
+appVersion&nbsp;</A>
+<LI><A HREF="#bgColornbsp">
+bgColor&nbsp;</A>
+<LI><A HREF="#checkednbsp">
+checked&nbsp;</A>
+<LI><A HREF="#cookienbsp">
+cookie&nbsp;</A>
+<LI><A HREF="#defaultCheckednbsp">
+defaultChecked&nbsp;</A>
+<LI><A HREF="#defaultSelectednbsp">
+defaultSelected&nbsp;</A>
+<LI><A HREF="#defaultStatusnbsp">
+defaultStatus&nbsp;</A>
+<LI><A HREF="#defaultValuenbsp">
+defaultValue&nbsp;</A>
+<LI><A HREF="#Enbsp">
+E&nbsp;</A>
+<LI><A HREF="#elementsnbsp2">
+elements&nbsp;</A>
+<LI><A HREF="#encodingnbsp">
+encoding&nbsp;</A>
+<LI><A HREF="#fgColornbsp">
+fgColor&nbsp;</A>
+<LI><A HREF="#formsnbsp">
+forms&nbsp;</A>
+<LI><A HREF="#framesnbsp">
+frames&nbsp;</A>
+<LI><A HREF="#hashnbsp">
+hash&nbsp;</A>
+<LI><A HREF="#hostnbsp">
+host&nbsp;</A>
+<LI><A HREF="#hostnamenbsp">
+hostname&nbsp;</A>
+<LI><A HREF="#hrefnbsp">
+href&nbsp;</A>
+<LI><A HREF="#indexnbsp">
+index&nbsp;</A>
+<LI><A HREF="#lastModifiednbsp">
+lastModified&nbsp;</A>
+<LI><A HREF="#lengthnbsp">
+length&nbsp;</A>
+<LI><A HREF="#linkColor">
+linkColor</A>
+<LI><A HREF="#links">
+links</A>
+<LI><A HREF="#LN">
+LN2</A>
+<LI><A HREF="#LNnbspnbsp">
+LN10&nbsp;&nbsp;</A>
+<LI><A HREF="#locationnbspnbsp">
+location&nbsp;&nbsp;</A>
+<LI><A HREF="#LOGEnbspnbsp1">
+LOG2E&nbsp;&nbsp;</A>
+<LI><A HREF="#LOGEnbspnbsp2">
+LOG10E&nbsp;&nbsp;</A>
+<LI><A HREF="#methodnbspnbsp">
+method&nbsp;&nbsp;</A>
+<LI><A HREF="#namenbspnbsp">
+name&nbsp;&nbsp;</A>
+<LI><A HREF="#optionsnbspnbsp">
+options&nbsp;&nbsp;</A>
+<LI><A HREF="#parentnbspnbsp">
+parent&nbsp;&nbsp;</A>
+<LI><A HREF="#pathnamenbspnbsp">
+pathname&nbsp;&nbsp;</A>
+<LI><A HREF="#PInbspnbsp">
+PI&nbsp;&nbsp;</A>
+<LI><A HREF="#portnbspnbsp">
+port&nbsp;&nbsp;</A>
+<LI><A HREF="#protocolnbspnbsp">
+protocol&nbsp;&nbsp;</A>
+<LI><A HREF="#referrernbspnbsp">
+referrer&nbsp;&nbsp;</A>
+<LI><A HREF="#searchnbspnbsp">
+search&nbsp;&nbsp;</A>
+<LI><A HREF="#selectednbspnbsp">
+selected&nbsp;&nbsp;</A>
+<LI><A HREF="#selectedIndexnbspnbsp">
+selectedIndex&nbsp;&nbsp;</A>
+<LI><A HREF="#selfnbspnbsp">
+self&nbsp;&nbsp;</A>
+<LI><A HREF="#SQRTnbspnbsp1">
+SQRT1_2&nbsp;&nbsp;</A>
+<LI><A HREF="#SQRTnbspnbsp2">
+SQRT2&nbsp;&nbsp;</A>
+<LI><A HREF="#statusnbspnbsp">
+status&nbsp;&nbsp;</A>
+<LI><A HREF="#targetnbspnbsp">
+target&nbsp;&nbsp;</A>
+<LI><A HREF="#textnbspnbsp">
+text&nbsp;&nbsp;</A>
+<LI><A HREF="#titlenbspnbsp">
+title&nbsp;&nbsp;</A>
+<LI><A HREF="#topnbspnbsp">
+top&nbsp;&nbsp;</A>
+<LI><A HREF="#userAgentnbspnbsp">
+userAgent&nbsp;&nbsp;</A>
+<LI><A HREF="#valuenbspnbsp">
+value&nbsp;&nbsp;</A>
+<LI><A HREF="#vlinkColornbspnbsp">
+vlinkColor&nbsp;&nbsp;</A>
+<LI><A HREF="#window">
+window</A>
+</UL>
+<LI><A HREF="#Methods">
+Methods</A>
+<UL>
+<LI><A HREF="#absnbspnbsp">
+abs&nbsp;&nbsp;</A>
+<LI><A HREF="#acosnbspnbsp">
+acos&nbsp;&nbsp;</A>
+<LI><A HREF="#alertnbspnbsp">
+alert&nbsp;&nbsp;</A>
+<LI><A HREF="#anchornbspnbsp">
+anchor&nbsp;&nbsp;</A>
+<LI><A HREF="#asinnbspnbsp">
+asin&nbsp;&nbsp;</A>
+<LI><A HREF="#atannbspnbsp">
+atan&nbsp;&nbsp;</A>
+<LI><A HREF="#backnbspnbsp">
+back&nbsp;&nbsp;</A>
+<LI><A HREF="#bignbspnbsp">
+big&nbsp;&nbsp;</A>
+<LI><A HREF="#blinknbspnbsp">
+blink&nbsp;&nbsp;</A>
+<LI><A HREF="#blurnbspnbsp">
+blur&nbsp;&nbsp;</A>
+<LI><A HREF="#boldnbspnbsp">
+bold&nbsp;&nbsp;</A>
+<LI><A HREF="#ceilnbspnbsp">
+ceil&nbsp;&nbsp;</A>
+<LI><A HREF="#charAtnbspnbsp">
+charAt&nbsp;&nbsp;</A>
+<LI><A HREF="#clearnbspnbsp">
+clear&nbsp;&nbsp;</A>
+<LI><A HREF="#clearTimeout">
+clearTimeout</A>
+<LI><A HREF="#click">
+click</A>
+<LI><A HREF="#closenbspnbsp">
+close&nbsp;&nbsp;</A>
+<LI><A HREF="#confirmnbspnbsp">
+confirm&nbsp;&nbsp;</A>
+<LI><A HREF="#cosnbspnbsp">
+cos&nbsp;&nbsp;</A>
+<LI><A HREF="#escapenbspnbsp">
+escape*&nbsp;&nbsp;</A>
+<LI><A HREF="#evalnbspnbsp">
+eval*&nbsp;&nbsp;</A>
+<LI><A HREF="#expnbspnbsp">
+exp&nbsp;&nbsp;</A>
+<LI><A HREF="#fixednbspnbsp">
+fixed&nbsp;&nbsp;</A>
+<LI><A HREF="#floornbspnbsp">
+floor&nbsp;&nbsp;</A>
+<LI><A HREF="#focusnbspnbsp">
+focus&nbsp;&nbsp;</A>
+<LI><A HREF="#fontcolornbspnbsp">
+fontcolor&nbsp;&nbsp;</A>
+<LI><A HREF="#fontsizenbspnbsp">
+fontsize&nbsp;&nbsp;</A>
+<LI><A HREF="#forwardnbspnbsp">
+forward&nbsp;&nbsp;</A>
+<LI><A HREF="#getDatenbspnbsp">
+getDate&nbsp;&nbsp;</A>
+<LI><A HREF="#getDaynbspnbsp">
+getDay&nbsp;&nbsp;</A>
+<LI><A HREF="#getHoursnbspnbsp">
+getHours&nbsp;&nbsp;</A>
+<LI><A HREF="#getMinutesnbspnbsp">
+getMinutes&nbsp;&nbsp;</A>
+<LI><A HREF="#getMonthnbspnbsp">
+getMonth&nbsp;&nbsp;</A>
+<LI><A HREF="#getSecondsnbspnbsp">
+getSeconds&nbsp;&nbsp;</A>
+<LI><A HREF="#getTime">
+getTime</A>
+<LI><A HREF="#getTimezoneOffsetnbspnbsp">
+getTimezoneOffset&nbsp;&nbsp;</A>
+<LI><A HREF="#getYearnbspnbsp">
+getYear&nbsp;&nbsp;</A>
+<LI><A HREF="#go">
+go</A>
+<LI><A HREF="#indexOfnbspnbsp">
+indexOf&nbsp;&nbsp;</A>
+<LI><A HREF="#isNaNnbspnbsp">
+isNaN*&nbsp;&nbsp;</A>
+<LI><A HREF="#italicsnbspnbsp">
+italics&nbsp;&nbsp;</A>
+<LI><A HREF="#lastIndexOfnbspnbsp">
+lastIndexOf&nbsp;&nbsp;</A>
+<LI><A HREF="#linknbspnbsp">
+link&nbsp;&nbsp;</A>
+<LI><A HREF="#lognbspnbsp">
+log&nbsp;&nbsp;</A>
+<LI><A HREF="#maxnbspnbsp">
+max&nbsp;&nbsp;</A>
+<LI><A HREF="#minnbspnbsp">
+min&nbsp;&nbsp;</A>
+<LI><A HREF="#opennbspnbsp">
+open&nbsp;&nbsp;</A>
+<LI><A HREF="#parsenbspnbsp">
+parse&nbsp;&nbsp;</A>
+<LI><A HREF="#parseFloatnbspnbsp">
+parseFloat*&nbsp;&nbsp;</A>
+<LI><A HREF="#parseIntnbspnbsp">
+parseInt*&nbsp;&nbsp;</A>
+<LI><A HREF="#pownbspnbsp">
+pow&nbsp;&nbsp;</A>
+<LI><A HREF="#promptnbspnbsp">
+prompt&nbsp;&nbsp;</A>
+<LI><A HREF="#randomnbspnbsp">
+random&nbsp;&nbsp;</A>
+<LI><A HREF="#roundnbspnbsp">
+round&nbsp;&nbsp;</A>
+<LI><A HREF="#selectnbspnbsp">
+select&nbsp;&nbsp;</A>
+<LI><A HREF="#setDatenbspnbsp">
+setDate&nbsp;&nbsp;</A>
+<LI><A HREF="#setHoursnbspnbsp">
+setHours&nbsp;&nbsp;</A>
+<LI><A HREF="#setMinutesnbspnbsp">
+setMinutes&nbsp;&nbsp;</A>
+<LI><A HREF="#setMonthnbspnbsp">
+setMonth&nbsp;&nbsp;</A>
+<LI><A HREF="#setSecondsnbspnbsp">
+setSeconds&nbsp;&nbsp;</A>
+<LI><A HREF="#setTimenbspnbsp">
+setTime&nbsp;&nbsp;</A>
+<LI><A HREF="#setTimeoutnbspnbsp">
+setTimeout&nbsp;&nbsp;</A>
+<LI><A HREF="#setYearnbspnbsp">
+setYear&nbsp;&nbsp;</A>
+<LI><A HREF="#sinnbspnbsp">
+sin&nbsp;&nbsp;</A>
+<LI><A HREF="#smallnbspnbsp">
+small&nbsp;&nbsp;</A>
+<LI><A HREF="#sqrtnbspnbsp">
+sqrt&nbsp;&nbsp;</A>
+<LI><A HREF="#strikenbspnbsp">
+strike&nbsp;&nbsp;</A>
+<LI><A HREF="#subnbspnbsp">
+sub&nbsp;&nbsp;</A>
+<LI><A HREF="#submitnbspnbsp">
+submit&nbsp;&nbsp;</A>
+<LI><A HREF="#substringnbspnbsp">
+substring&nbsp;&nbsp;</A>
+<LI><A HREF="#supnbspnbsp">
+sup&nbsp;&nbsp;</A>
+<LI><A HREF="#tannbspnbsp">
+tan&nbsp;&nbsp;</A>
+<LI><A HREF="#toGMTStringnbspnbsp">
+toGMTString&nbsp;&nbsp;</A>
+<LI><A HREF="#toLocaleStringnbspnbsp">
+toLocaleString&nbsp;&nbsp;</A>
+<LI><A HREF="#toLowerCasenbspnbsp">
+toLowerCase&nbsp;&nbsp;</A>
+<LI><A HREF="#toStringnbspnbsp">
+toString&nbsp;&nbsp;</A>
+<LI><A HREF="#toUpperCasenbspnbsp">
+toUpperCase&nbsp;&nbsp;</A>
+<LI><A HREF="#unEscapenbspnbsp">
+unEscape*&nbsp;&nbsp;</A>
+<LI><A HREF="#UTCnbspnbsp">
+UTC&nbsp;&nbsp;</A>
+<LI><A HREF="#writenbspnbsp">
+write&nbsp;&nbsp;</A>
+<LI><A HREF="#writelnnbspnbsp">
+writeln&nbsp;&nbsp;</A>
+</UL>
+<LI><A HREF="#EventHandlers">
+Event Handlers</A>
+<UL>
+<LI><A HREF="#onBlur">
+onBlur</A>
+<LI><A HREF="#onChangenbspnbsp">
+onChange&nbsp;&nbsp;</A>
+<LI><A HREF="#onClicknbspnbsp">
+onClick&nbsp;&nbsp;</A>
+<LI><A HREF="#onFocusnbspnbsp">
+onFocus&nbsp;&nbsp;</A>
+<LI><A HREF="#onLoadnbspnbsp">
+onLoad&nbsp;&nbsp;</A>
+<LI><A HREF="#onMouseOvernbspnbsp">
+onMouseOver&nbsp;&nbsp;</A>
+<LI><A HREF="#onSelectnbspnbsp">
+onSelect&nbsp;&nbsp;</A>
+<LI><A HREF="#onSubmitnbspnbsp">
+onSubmit&nbsp;&nbsp;</A>
+<LI><A HREF="#onUnloadnbspnbsp">
+onUnload&nbsp;&nbsp;</A>
+</UL>
+</UL>
+<HR>
+<H2><A NAME="Terms"><FONT SIZE=5 COLOR=#FF0000>
+Terms</FONT></A></H2>
+<P>
+While not necessarily JavaScript objects or keywords, the following
+items can help in your understanding of JavaScript and how it
+works. These are the general terms that are used in most discussions
+about JavaScript and its implementation.
+<H3><A NAME="Cookie">
+Cookie</A></H3>
+<P>
+A special object containing state/status information about the
+client that can be accessed by the server. Included in that state
+object is a description of the range of URLs for which that state
+is valid. Future HTTP requests from the client falling within
+a range of URLs described within the state object will include
+transmission of the current value of the state object from the
+client back to the server.
+<P>
+This simple form of data storage allows the server to provide
+&quot;personalized&quot; service to the client. Online merchants
+can store information about items currently in an &quot;electronic
+shopping basket,&quot; services can post registration information
+and automate functions such as typing a user ID, and user preferences
+can be saved on the client and retrieved by the server when the
+site is contacted. For limited use information, such as shopping
+services, it is also possible to set a time limit on the life
+of the cookie information.
+<P>
+CGI scripts are typically used to set and retrieve cookie values.
+To generate the cookie requires sending an HTTP header in the
+following format:
+<BLOCKQUOTE>
+<PRE>
+Set-Cookie: NAME=Value; [EXPIRES=date;] [PATH=pathname;] [DOMAIN=domainname;] [SECURE]
+</PRE>
+</BLOCKQUOTE>
+<P>
+When a request for cookie information is made, the list of cookie
+information is searched for all URLs that match the current URL.
+Any matches are returned in this format:
+<BLOCKQUOTE>
+<PRE>
+cookie: NAME1=string1; NAME2=string2; ...
+</PRE>
+</BLOCKQUOTE>
+<P>
+<I>Cookie</I> was an arbitrarily assigned name. For more information
+about the cookie and its function, see <B><A HREF="http://home.netscape.com/newsref/std/cookie_spec.html">http://home.netscape.com/newsref/std/cookie_spec.html</A></B>.
+<H3><A NAME="EventHandler">
+Event Handler</A></H3>
+<P>
+Attributes of HTML tags embedded in documents. The attribute assigns
+a JavaScript command or function to execute when the event happens.
+<H3><A NAME="Function">
+Function</A></H3>
+<P>
+A user-defined or built-in set of statements that perform a task.
+It can also return a value when used with the <TT>return</TT>
+statement.
+<H3><A NAME="Hierarchy">
+Hierarchy</A></H3>
+<P>
+Navigator objects exist in a set relationship to each other that
+reflects the structure of an HTML page. This is referred to as
+instance hierarchy because it only works with specific instances
+of objects, rather than general classes.
+<P>
+The <TT>window</TT> object is the parent of all other Navigator
+objects. Underneath <TT>window</TT>, <TT>location</TT>, <TT>history</TT>,
+and <TT>document</TT> all share precedence. <TT>Document</TT>
+includes forms, links, and anchors.
+<P>
+Each object is a descendant of the higher object. A form called
+<TT>orderForm</TT> is an object, but is also a property of <TT>document</TT>.
+As such, it is referred to as <TT>document.orderForm</TT>.
+<H3><A NAME="Java">
+Java</A></H3>
+<P>
+An object-oriented, platform-independent programming language
+developed by Sun Microsystems and used to add additional functionality
+to Web pages. Programming in Java requires a Java Development
+Kit with compiler and core classes.
+<H3><A NAME="JavaScript">
+JavaScript</A></H3>
+<P>
+A scripting language developed by Netscape for HTML documents.
+Scripts are performed after specific user-triggered events. Creating
+JavaScript Web documents requires a text editor and a compatible
+browser.
+<H3><A NAME="Literal">
+Literal</A></H3>
+<P>
+An absolute value not assigned to a variable. Examples include
+1, 3.1415927, &quot;Bob,&quot; and true.
+<H3><A NAME="Method">
+Method</A></H3>
+<P>
+A function assigned to an object. For example, <TT>bigString.toUpperCase()</TT>
+returns an uppercase version of the string contained in <TT>bigString</TT>.
+<H3><A NAME="Object">
+Object</A></H3>
+<P>
+A construct with properties that are JavaScript variables or other
+objects. Functions associated with an object are known as the
+object's methods. You access the properties of an object with
+a simple notation:
+<BLOCKQUOTE>
+<PRE>
+objectName.propertyName
+</PRE>
+</BLOCKQUOTE>
+<P>
+Both object and property names are case-sensitive.
+<H3><A NAME="Operator">
+Operator</A></H3>
+<P>
+Performs a function on one or more operands or variables. Operators
+are divided into two classes: binary and unary. Binary operators
+need two operands, and unary operands can operate on a single
+operand.
+<P>
+For example, addition is a binary operand:
+<BLOCKQUOTE>
+<PRE>
+sum = 1 + 1
+</PRE>
+</BLOCKQUOTE>
+<P>
+Unary operands are often used to update counters. The following
+example increases the variable by 1:
+<BLOCKQUOTE>
+<PRE>
+counter++
+</PRE>
+</BLOCKQUOTE>
+<H3><A NAME="Property">
+Property</A></H3>
+<P>
+Used to describe an object. A property is defined by assigning
+it a value. There are several properties in JavaScript that contain
+constants: values that never change.
+<H3><A NAME="Script">
+Script</A></H3>
+<P>
+One or more JavaScript commands enclosed with a <TT>&lt;SCRIPT&gt;</TT>
+tag.
+<H2><A NAME="Objects"><FONT SIZE=5 COLOR=#FF0000>
+Objects</FONT></A></H2>
+<P>
+JavaScript is an object-oriented language, so at its heart are
+a predefined set of objects which relate to the various components
+of an HTML page and their relationship to each other. To view
+or manipulate the state of an object requires the use of properties
+and methods, which are also covered in this appendix. If an object
+is also used as a property of another object, that relationship
+is listed following the definition. Related properties, methods,
+and event handlers for each object are listed following the definition.
+<H3><A NAME="anchors">
+anchors</A></H3>
+<P>
+A piece of text that can be the target of a hypertext link. This
+is a read-only object which is set in HTML with <TT>&lt;A&gt;</TT>
+tags. To determine how many anchors are included in a document,
+use the <TT>length</TT> property.
+<BLOCKQUOTE>
+<PRE>
+document.anchors.length
+</PRE>
+</BLOCKQUOTE>
+<P>
+Unless the anchor name is an integer, the value of <TT>document.anchor[index]</TT>
+returns null.
+<P>
+Property of <TT>document</TT>. <I>See</I> <TT>link</TT> object;
+<I>see</I> <TT>anchor</TT> method.
+<H3><A NAME="button">
+button</A></H3>
+<P>
+An object that is a form element that must be defined within a
+<TT>&lt;FORM&gt;</TT> tag and can be used to perform an action.
+<P>
+Property of <TT>form</TT>.
+<P>
+<I>See</I> objects <TT>reset</TT> and <TT>submit</TT>; <I>see</I>
+properties<TT> name</TT> and <TT>value</TT>; <I>see</I> <TT>click</TT>
+method; <I>see</I> <TT>onClick</TT> event handler.
+<H3><A NAME="checkbox">
+checkbox</A></H3>
+<P>
+A form element that the user sets to on or off by clicking that
+must be defined in a <TT>&lt;FORM&gt;</TT> tag. Using the checkbox
+object, you can see if the box is checked and review the name
+and value.
+<P>
+Property of <TT>form</TT>. <I>See</I> <TT>radio</TT> object; <I>see</I>
+properties <TT>checked</TT>, <TT>defaultChecked</TT>, <TT>name</TT>,
+<TT>value</TT>; <I>see</I> <TT>click</TT> method; <I>see</I> <TT>onClick</TT>
+event handler.
+<H3><A NAME="Datenbsp">
+Date&nbsp;</A></H3>
+<P>
+Replaces a normal date type. Although it does not have any properties,
+it is equipped with a wide range of methods. In its current release,
+<TT>Date</TT> does not work with dates prior to 1/1/70.
+<P>
+Methods for getting and setting time and date information are
+divided into four classes: <TT>set</TT>, <TT>get</TT>, <TT>to</TT>,
+and <TT>parse/UTC</TT>.
+<P>
+Except for the date, all numerical representation of date components
+begin with zero. This should not present a problem except with
+months, which are represented by zero (January) through 11 (December).
+<P>
+The standard date syntax is <TT>&quot;Thu, 11 Jan 1996 06:20:00
+GMT&quot;</TT>. U.S. time-zone abbreviations are also understood,
+but for universal use, specify the time-zone offset. For example,
+<TT>&quot;Thu, 11 Jan 1996 06:20:00 GMT+0530&quot;</TT> is a place
+5 hours and 30 minutes west of the Greenwich meridian.
+<P>
+<I>See</I> methods <TT>getDate</TT>, <TT>getDay</TT>, <TT>getHours</TT>,
+<TT>getMinutes</TT>, <TT>getMonth</TT>, <TT>getSeconds</TT>, <TT>getTime</TT>,
+<TT>getTimezoneOffset</TT>, <TT>getYear</TT>, <TT>parse</TT>,
+<TT>setDate</TT>, <TT>setHours</TT>, <TT>setMinutes</TT>, <TT>setMonth</TT>,
+<TT>setSeconds</TT>, <TT>setTime</TT>, <TT>setYear</TT>, <TT>toGMTString</TT>,
+<TT>toLocaleString</TT>, <TT>toString</TT>.
+<H3><A NAME="documentnbsp">
+document&nbsp;</A></H3>
+<P>
+An object created by Navigator when a page is loaded, containing
+information on the current document, such as title, background
+color, and forms. These properties are defined within <TT>&lt;BODY&gt;</TT>
+tags. It also provides methods for displaying HTML text to the
+user.
+<P>
+You can reference the anchors, forms, and links of a document
+by using the <TT>anchors</TT>, <TT>forms</TT>, and <TT>links</TT>
+arrays of the <TT>document</TT> object. These arrays contain an
+entry for each <TT>anchor</TT>, <TT>form</TT>, or <TT>link</TT>
+in a document.
+<P>
+Property of <TT>window</TT>. <I>See</I> <TT>frame</TT> object;
+<I>see</I> properties <TT>alinkColor</TT>, <TT>anchors</TT>, <TT>bgColor</TT>,
+<TT>cookie</TT>, <TT>fgColor</TT>, <TT>forms</TT>, <TT>lastModified</TT>,
+<TT>linkColor</TT>, <TT>links</TT>, <TT>location</TT>, <TT>referrer</TT>,
+<TT>title</TT>, <TT>vlinkColor</TT>; <I>see</I> methods <TT>clear</TT>,
+<TT>close</TT>, <TT>open</TT>, <TT>write</TT>, <TT>writeln</TT>;
+<I>see</I> <TT>onLoad</TT> and <TT>onUnload</TT> event handlers.
+<H3><A NAME="elementsnbsp1">
+elements&nbsp;</A></H3>
+<P>
+An array of <TT>form</TT> elements in source order, including
+buttons, checkboxes, radio buttons, text, and textarea objects.
+The elements can be referred to by their index:
+<BLOCKQUOTE>
+<PRE>
+formName.elements[index]
+</PRE>
+</BLOCKQUOTE>
+<P>
+Elements can also be referenced by the element name. For example,
+a password element called newPassword is the second form element
+on an HTML page. It's value is accessed in three ways:
+<BLOCKQUOTE>
+<PRE>
+formName.elements[1].value
+formName.elements[&quot;newPassword&quot;].value
+formName.newPassword.value
+</PRE>
+</BLOCKQUOTE>
+<P>
+Values cannot be set or changed using the read-only <TT>elements</TT>
+array.
+<P>
+Property of <TT>form</TT>. <I>See</I> <TT>length</TT> property.
+<H3><A NAME="formnbsp">
+form&nbsp;</A></H3>
+<P>
+A property of the <TT>document</TT> object. Each form in a document
+is a separate and distinct object that can be referenced using
+the <TT>form</TT> object. The <TT>form</TT> object is an array
+created as forms are defined through HTML tags. If the first <TT>form</TT>
+in a document is named <TT>orderForm</TT>, then it could be referenced
+as <TT>document.orderForm</TT> or <TT>document.forms[0]</TT>.
+<P>
+Property of <TT>document</TT>. <I>See</I> hidden OBJECT; <I>see</I>
+properties <TT>action</TT>, <TT>elements</TT>, <TT>encoding</TT>,
+<TT>forms</TT>, <TT>method</TT>, <TT>name</TT>, <TT>target</TT>;
+<I>see</I> <TT>submit</TT> method; <I>see</I> <TT>onSubmit</TT>
+event handler.
+<H3><A NAME="framenbsp">
+frame&nbsp;</A></H3>
+<P>
+A window that contains HTML subdocuments that are independently
+scrollable. <TT>Frames</TT> can point to different URLs and can
+be targeted by other frames-all in the same window. Each <TT>frame</TT>
+is a <TT>window</TT> object defined using the <TT>&lt;FRAMESET&gt;</TT>
+tag to define the layout that makes up the page. The page is defined
+from a parent HTML document. All subdocu-ments are children of
+the parent.
+<P>
+If a <TT>frame</TT> contains definitions for <TT>SRC</TT> and
+<TT>NAME</TT> attributes, then the <TT>frame</TT> can be identified
+from a sibling by using the <TT>parent</TT> object as <TT>parent.frameName</TT>
+or <TT>parent.frames[index]</TT>.
+<P>
+Property of <TT>window</TT>. <I>See</I> <TT>document</TT> and
+<TT>window</TT> objects; <I>see</I> properties <TT>defaultStatus</TT>,
+<TT>frames</TT>, <TT>parent</TT>, <TT>self</TT>, <TT>status</TT>,
+<TT>top</TT>, <TT>window</TT>; <I>see</I> methods <TT>setTimeout</TT>
+and <TT>clearTimeout</TT>.
+<H3><A NAME="hiddennbsp">
+hidden&nbsp;</A></H3>
+<P>
+A text object suppressed from appearing on an HTML form. <TT>Hidden</TT>
+objects can be used in addition to <TT>cookies</TT> to pass name/value
+pairs for client/server communication.
+<P>
+Property of <TT>form</TT>. <I>See</I> properties <TT>cookie</TT>,
+<TT>defaultValue</TT>, <TT>name</TT>, <TT>value</TT>.
+<H3><A NAME="historynbsp">
+history&nbsp;</A></H3>
+<P>
+This object is derived from the Go menu and contains URL link
+information for previously visited pages.
+<P>
+Property of <TT>document</TT>. <I>See</I> <TT>location</TT> object;
+<I>see</I> <TT>length</TT> property; <I>see</I> methods <TT>back</TT>,
+<TT>forward</TT>, <TT>go</TT>.
+<H3><A NAME="linknbsp">
+link&nbsp;</A></H3>
+<P>
+A <TT>location</TT> object. In addition to providing information
+about existing hypertext links, the <TT>link</TT> object can also
+be used to define new links.
+<P>
+Property of <TT>document</TT>. <I>See</I> <TT>anchor</TT> object;
+<I>see</I> properties <TT>hash</TT>, <TT>host</TT>, <TT>hostname</TT>,
+<TT>href</TT>, <TT>length</TT>, <TT>pathname</TT>, <TT>port</TT>,
+<TT>protocol</TT>, <TT>search</TT>, <TT>target</TT>; <I>see</I>
+<TT>link</TT> method; <I>see</I> <TT>onClick</TT> and <TT>onMouseOver</TT>
+event handlers.
+<H3><A NAME="locationnbsp">
+location&nbsp;</A></H3>
+<P>
+Contains complete URL information for the current document, while
+each property of <TT>location</TT> contains a different portion
+of the URL.
+<P>
+Property of <TT>document</TT>. <I>See</I> <TT>history</TT> object;
+<I>see</I> properties <TT>hash</TT>, <TT>host</TT>, <TT>hostname</TT>,
+<TT>href</TT>, <TT>location</TT>, <TT>pathname</TT>, <TT>port</TT>,
+<TT>protocol</TT>, <TT>search</TT>, <TT>target</TT>.
+<H3><A NAME="Mathnbsp">
+Math&nbsp;</A></H3>
+<P>
+Includes properties for mathematical constants and methods for
+functions. For example, to access the value of pi in an equation,
+use:
+<BLOCKQUOTE>
+<PRE>
+Math.PI
+</PRE>
+</BLOCKQUOTE>
+<P>
+Standard trigonometric, logarithmic, and exponential functions
+are also included. All arguments in trigonometric functions use
+radians.
+<P>
+<I>See</I> properties <TT>E</TT>, <TT>LN10</TT>, <TT>LN2</TT>,
+<TT>PI</TT>, <TT>SQRT1_2</TT>, <TT>SQRT2</TT>; <I>see</I> methods
+<TT>abs</TT>, <TT>acos</TT>, <TT>asin</TT>, <TT>atan</TT>, <TT>ceil</TT>,
+<TT>cos</TT>, <TT>exp</TT>, <TT>floor</TT>, <TT>log</TT>, <TT>max</TT>,
+<TT>min</TT>, <TT>pow</TT>, <TT>random</TT>, <TT>round</TT>, <TT>sin</TT>,
+<TT>sqrt</TT>, <TT>tan</TT>.
+<H3><A NAME="navigatornbsp">
+navigator&nbsp;</A></H3>
+<P>
+Contains information on the current version of Navigator used
+by the client.
+<P>
+<I>See</I> objects <TT>link</TT> and <TT>anchors</TT>; <I>see</I>
+properties <TT>appName</TT>, <TT>appCodeName</TT>, <TT>appVersion</TT>,
+<TT>userAgent</TT>.
+<H3><A NAME="passwordnbsp">
+password&nbsp;</A></H3>
+<P>
+Created by HTML password text fields and masked when entered by
+the user. It must be defined with an HTML <TT>&lt;FORM&gt;</TT>
+tag.
+<P>
+Property of <TT>form</TT>. <I>See</I> <TT>text</TT> object; <I>see</I>
+properties <TT>defaultValue</TT>, <TT>name</TT>, <TT>value</TT>;
+<I>see</I> methods <TT>focus</TT>, <TT>blur</TT>, <TT>select</TT>.
+<H3><A NAME="radionbsp">
+radio&nbsp;</A></H3>
+<P>
+Objects created within HTML <TT>&lt;FORM&gt;</TT> tags that represent
+radio buttons. A set of radio buttons enables the user to select
+one item from a list. When it is created, it takes the form of
+<TT>document.formName.radioName[index]</TT>, where the index is
+a number representing each button beginning with zero.
+<P>
+Property of <TT>form</TT>. <I>See</I> objects <TT>checkbox</TT>,
+<TT>select</TT>; <I>see</I> properties <TT>checked</TT>, <TT>defaultChecked</TT>,
+<TT>index</TT>, <TT>length</TT>, <TT>name</TT>, <TT>value</TT>;<TT>
+</TT><I>see</I> <TT>click</TT> method; <I>see</I> <TT>onClick</TT>
+event handler.
+<H3><A NAME="resetnbsp">
+reset&nbsp;</A></H3>
+<P>
+Correlates with an HTML reset button, which resets all <TT>form</TT>
+objects to their default values. A reset object must be created
+within a <TT>&lt;FORM&gt;</TT> tag.
+<P>
+Property of <TT>form</TT>. <I>See</I> objects <TT>button</TT>
+and <TT>submit</TT>; <I>see</I> properties <TT>name</TT> and <TT>value</TT>;
+<I>see</I> <TT>click</TT> method; <I>see</I> <TT>onClick</TT>
+event handler.
+<H3><A NAME="selectnbsp">
+select&nbsp;</A></H3>
+<P>
+A selection list or scrolling list on an HTML form. A selection
+list enables the user to choose one item from a list, while a
+scrolling list enables the choice of one or more items from a
+list.
+<P>
+Property of <TT>form</TT>. <I>See</I> <TT>radio</TT> object; <I>see</I>
+properties <TT>length</TT>, <TT>name</TT>, <TT>options</TT>, <TT>selectedIndex</TT>;
+<I>see</I> methods <TT>blur</TT> and <TT>focus</TT>; <I>see</I>
+event handlers <TT>onBlur</TT>, <TT>onChange</TT>, <TT>onFocus</TT>.
+<P>
+For the <TT>options</TT> property of <TT>select</TT>, <I>see</I>
+<TT>defaultSelected</TT>, <TT>index</TT>, <TT>selected</TT>, <TT>text</TT>,
+<TT>value</TT>.
+<H3><A NAME="stringnbsp">
+string&nbsp;</A></H3>
+<P>
+A series of characters defined by double or single quotes. For
+example:
+<BLOCKQUOTE>
+<PRE>
+myDog = &quot;Brittany Spaniel&quot;
+</PRE>
+</BLOCKQUOTE>
+<P>
+returns a string object called <TT>myDog</TT> with the value <TT>&quot;Brittany
+Spaniel&quot;</TT>. Quotation marks are not a part of the string's
+value-they are only used to delimit the string. The object's value
+is manipulated using methods that return a variation on the string,
+for example <TT>myDog.toUpperCase()</TT> returns <TT>&quot;BRITTANY
+SPANIEL&quot;</TT>. It also includes methods that return HTML
+versions of the string, such as <TT>bold</TT> and <TT>italics</TT>.
+<P>
+<I>See</I> <TT>text</TT> and <TT>textarea</TT> objects; <I>see</I>
+<TT>length</TT> property; <I>see</I> methods <TT>anchor</TT>,
+<TT>big</TT>, <TT>blink</TT>, <TT>bold</TT>, <TT>charAt</TT>,
+<TT>fixed</TT>, <TT>fontcolor</TT>, <TT>fontsize</TT>, <TT>indexOf</TT>,
+<TT>italics</TT>, <TT>lastIndexOf</TT>, <TT>link</TT>, <TT>small</TT>,
+<TT>strike</TT>, <TT>sub</TT>, <TT>substring</TT>, <TT>sup</TT>,
+<TT>toLowerCase</TT>, <TT>toUpperCase</TT>.
+<H3><A NAME="submitnbsp">
+submit&nbsp;</A></H3>
+<P>
+Causes the form to be submitted to the program specified by the
+<TT>action</TT> property. It is created within an HTML <TT>&lt;FORM&gt;</TT>
+tag. It always loads a new page, which may be the same as the
+current page if an action isn't specified.
+<P>
+Property of <TT>form</TT>. <I>See</I> objects <TT>button</TT>
+and <TT>reset</TT>; <I>see</I> properties <TT>name</TT> and <TT>value</TT>;
+<I>see</I> method <TT>click</TT>; <I>see</I> event handler <TT>onClick</TT>.
+<H3><A NAME="textnbsp">
+text&nbsp;</A></H3>
+<P>
+A one-line input field on an HTML form that accepts characters
+or numbers. <TT>Text</TT> objects can be updated by assigning
+new contents to its value.
+<P>
+Property of <TT>form</TT>. <I>See</I> objects <TT>password</TT>,
+<TT>string</TT>, <TT>textarea</TT>; <I>see</I> properties <TT>defaultValue</TT>,
+<TT>name</TT>, <TT>value</TT>; <I>see</I> methods <TT>focus</TT>,
+<TT>blur</TT>, <TT>select</TT>; <I>see</I> event handlers <TT>onBlur</TT>,
+<TT>onChange</TT>, <TT>onFocus</TT>, <TT>onSelect</TT>.
+<H3><A NAME="textareanbsp">
+textarea&nbsp;</A></H3>
+<P>
+Similar to a <TT>text</TT> object, with the addition of multiple
+lines. A <TT>textarea</TT> object can also be updated by assigning
+new contents to its value.
+<P>
+Property of <TT>form</TT>. <I>See</I> objects <TT>password</TT>,
+<TT>string</TT>, <TT>text</TT>; <I>see</I> properties <TT>defaultValue</TT>,
+<TT>name</TT>, <TT>value</TT>; <I>see</I> methods <TT>focus</TT>,
+<TT>blur</TT>, <TT>select</TT>; <I>see</I> event handlers <TT>onBlur</TT>,
+<TT>onChange</TT>, <TT>onFocus</TT>, <TT>onSelect</TT>.
+<H3><A NAME="windownbsp">
+window&nbsp;</A></H3>
+<P>
+Created by Navigator when a page is loaded containing properties
+that apply to the whole window. It is the top-level object for
+each <TT>document</TT>, <TT>location</TT>, and <TT>history</TT>
+object. Because its existence is assumed, you do not have to reference
+the name of the window when referring to its objects, properties,
+or methods. For example, the following two lines have the same
+result (printing a message to the status line):
+<BLOCKQUOTE>
+<PRE>
+status(&quot;Go away from here.&quot;)
+window.status(&quot;Go away from here.&quot;)
+</PRE>
+</BLOCKQUOTE>
+<P>
+A new window is created using the <TT>open</TT> method:
+<BLOCKQUOTE>
+<PRE>
+aNewWindow = window.open(&quot;URL&quot;,&quot;Window_Name&quot;,[&quot;windowFeatures&quot;])
+</PRE>
+</BLOCKQUOTE>
+<P>
+The variable name is used to refer to the window's properties
+and methods. The window name is used in the target argument of
+a form or <TT>anchor</TT> tag.
+<P>
+<I>See</I> objects <TT>document</TT> and <TT>frame</TT>; <I>see</I>
+properties <TT>defaultStatus</TT>, <TT>frames</TT>, <TT>parent</TT>,
+<TT>self</TT>, <TT>status</TT>, <TT>top</TT>, <TT>window</TT>;
+<I>see</I> methods <TT>alert</TT>, <TT>close</TT>, <TT>confirm</TT>,
+<TT>open</TT>, <TT>prompt</TT>, <TT>setTimeout</TT>, <TT>clearTimeout</TT>;
+<I>see</I> event handlers <TT>onLoad</TT> and <TT>onUnload</TT>.
+<H2><A NAME="Properties"><FONT SIZE=5 COLOR=#FF0000>
+Properties</FONT></A></H2>
+<P>
+Properties are used to view or set the values of objects. An object
+is simply a vague generality until a property is used to define
+the values which make it specific.
+<H3><A NAME="action">
+action</A></H3>
+<P>
+The <TT>action</TT> property is a reflection of the <TT>action</TT>
+attribute in an HTML <TT>&lt;FORM&gt;</TT> tag, consisting of
+a destination URL for the submitted data. This value can be set
+or changed before or after the document has been loaded and formatted.
+<P>
+In this example, the <TT>action</TT> for a form called <TT>outlineForm</TT>
+is set to the URL contained in the variable <TT>outlineURL.</TT>
+<BLOCKQUOTE>
+<PRE>
+outlineForm.action=outlineURL
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>form</TT>. <I>See</I> properties <TT>encoding</TT>,
+<TT>method</TT>, <TT>target</TT>.
+<H3><A NAME="alinkColornbsp">
+alinkColor&nbsp;</A></H3>
+<P>
+The color of a link after the mouse button is depressed-but before
+it's released-and expressed as a hexadecimal RGB triplet or string
+literal. It cannot be changed after the HTML source is processed.
+Both of these examples set the color to alice blue.
+<BLOCKQUOTE>
+<PRE>
+document.alinkColor=&quot;aliceblue&quot;
+document.alinkColor=&quot;F0F8FF&quot;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>document</TT>. <I>See</I> properties <TT>bgColor</TT>,
+<TT>fgColor</TT>, <TT>linkColor</TT>, <TT>vlinkColor</TT>.
+<H3><A NAME="anchorsnbsp">
+anchors&nbsp;</A></H3>
+<P>
+An array of all defined anchors in the current document. If the
+length of an anchor array in a document is 5, then the <TT>anchors</TT>
+array is represented as <TT>document.anchors[0]</TT> through <TT>document.anchors[4]</TT>.
+<P>
+Property of <TT>document</TT>. <I>See</I> <TT>anchor</TT> object;
+<I>see</I> properties <TT>length</TT> and <TT>links</TT>.
+<H3><A NAME="appCodeNamenbsp">
+appCodeName&nbsp;</A></H3>
+<P>
+Returns a read-only string with the code name of the browser.
+<BLOCKQUOTE>
+<PRE>
+document.write(&quot;The code name of your browser is &quot; + navigator.appCodeName)
+</PRE>
+</BLOCKQUOTE>
+<P>
+For most Netscape Navigator 2.0, this returns:
+<BLOCKQUOTE>
+<PRE>
+The code name of your browser is Mozilla
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>navigator</TT>. <I>See</I> properties <TT>appName</TT>,
+<TT>appVersion</TT>, <TT>userAgent</TT>.
+<H3><A NAME="appNamenbsp">
+appName&nbsp;</A></H3>
+<P>
+Returns a read-only string with the name of the browser.
+<P>
+Property of <TT>navigator</TT>. <I>See</I> properties <TT>appCodeName</TT>,
+<TT>appVersion</TT>, <TT>userAgent</TT>.
+<H3><A NAME="appVersionnbsp">
+appVersion&nbsp;</A></H3>
+<P>
+Returns a string with the version information of the browser in
+the format &quot;releaseNumber (platform; country).&quot; For
+a release of Netscape 2.0:
+<BLOCKQUOTE>
+<PRE>
+document.write(navigator.appVersion)
+</PRE>
+</BLOCKQUOTE>
+<P>
+returns
+<BLOCKQUOTE>
+<PRE>
+2.0 (Win95; I)
+</PRE>
+</BLOCKQUOTE>
+<P>
+This specifies Navigator 2.0 running on Windows 95 with an international
+release. The <TT>U</TT> country code specifies a U.S. release,
+while an <TT>I</TT> indicates an international release.
+<P>
+Property of <TT>navigator</TT>. <I>See</I> properties <TT>appName</TT>,
+<TT>appCodeName</TT>, <TT>userAgent</TT>.
+<H3><A NAME="bgColornbsp">
+bgColor&nbsp;</A></H3>
+<P>
+The document background color expressed as a hexadecimal RGB triplet
+or string literal. It can be reset at any time. Both of these
+examples set the background to alice blue.
+<BLOCKQUOTE>
+<PRE>
+document.bgColor = &quot;aliceblue&quot;
+document.bgColor = &quot;F0F8FF&quot;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>document</TT>. <I>See</I> properties <TT>alinkColor</TT>,
+<TT>fgColor</TT>, <TT>linkColor</TT>, <TT>vlinkColor</TT>.
+<H3><A NAME="checkednbsp">
+checked&nbsp;</A></H3>
+<P>
+A Boolean value (<TT>true</TT> or <TT>false</TT>), indicating
+whether a checkbox or radio button is selected. The value is updated
+immediately when an item is checked. It's used in the following
+form:
+<BLOCKQUOTE>
+<PRE>
+formName.checkboxName.checked
+formName.radioButtonName[index].checked
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>checkbox</TT> and <TT>radio</TT>. <I>See</I> <TT>defaultChecked</TT>
+property.
+<H3><A NAME="cookienbsp">
+cookie&nbsp;</A></H3>
+<P>
+String value of a small piece of information stored by Navigator
+in a client-side cookies.txt file. The value stored in the cookie
+is found using substring <TT>charAt</TT>, <TT>IndexOf</TT>, and
+<TT>lastIndexOf</TT>.
+<P>
+For more information, <I>see</I> the discussion under TERMS.
+<P>
+Property of <TT>document</TT>. <I>See</I> <TT>hidden</TT> object.
+<H3><A NAME="defaultCheckednbsp">
+defaultChecked&nbsp;</A></H3>
+<P>
+A Boolean value (<TT>true</TT> or <TT>false</TT>) indicating whether
+a checkbox or radio button is checked by default. Setting a value
+to <TT>defaultChecked</TT> can override the checked attribute
+of a form element. The following section of code will reset a
+group of radio buttons to its original state by finding and setting
+the default button:
+<BLOCKQUOTE>
+<PRE>
+for (var i in menuForm.choices) {
+   if (menuForm.choices[i].defaultChecked) {
+      menuForm.choice[i].defaultChecked = true
+   }
+}
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>checkbox</TT> and <TT>radio</TT>. <I>See</I> <TT>form</TT>
+object; <I>see</I> <TT>checked</TT> property.
+<H3><A NAME="defaultSelectednbsp">
+defaultSelected&nbsp;</A></H3>
+<P>
+A Boolean value (<TT>true</TT> or <TT>false</TT>) representing
+the default state of an item in a form select element. Setting
+a value with this property can override the selected attribute
+of an <TT>&lt;OPTION&gt;</TT> tag. The syntax is identical to
+<TT>defaultChecked</TT>.
+<P>
+Property of <TT>options</TT>. <I>See</I> properties <TT>index</TT>,
+<TT>selected</TT>, <TT>selectedIndex</TT>.
+<H3><A NAME="defaultStatusnbsp">
+defaultStatus&nbsp;</A></H3>
+<P>
+The default message displayed in the status bar at the bottom
+of a Navigator window when nothing else is displayed. This is
+preempted by a priority or transient message, such as a <TT>mouseOver</TT>
+event with an <TT>anchor</TT>. For example:
+<BLOCKQUOTE>
+<PRE>
+window.defaultStatus = &quot;Welcome to my home page&quot;
+</PRE>
+</BLOCKQUOTE>
+<P>
+displays the welcome message while the mouse is not over a link,
+or Netscape is not performing an action that it needs to notify
+the user about.
+<P>
+Property of <TT>window</TT>. <I>See</I> <TT>status</TT> property.
+<H3><A NAME="defaultValuenbsp">
+defaultValue&nbsp;</A></H3>
+<P>
+The initial contents of <TT>hidden</TT>, <TT>password</TT>, <TT>text</TT>,
+<TT>textarea</TT>, and <TT>string</TT> form elements. For password
+elements, it is initially set to null for security reasons, regardless
+of any set value.
+<P>
+Property of <TT>hidden</TT>, <TT>password</TT>, <TT>text</TT>,
+<TT>textarea</TT>. <I>See</I> <TT>value</TT> property.
+<H3><A NAME="Enbsp">
+E&nbsp;</A></H3>
+<P>
+The base of natural logarithms, also known as Euler's constant.
+The value is approximately 2.718.
+<P>
+Property of <TT>Math</TT>. <I>See</I> properties <TT>LN2</TT>,
+<TT>LN10</TT>, <TT>LOG2E</TT>, <TT>LOG10E</TT>, <TT>PI</TT>, <TT>SQRT1_2</TT>,
+<TT>SQRT2</TT>.
+<H3><A NAME="elementsnbsp2">
+elements&nbsp;</A></H3>
+<P>
+An array of objects containing form elements in HTML source order.
+The array index begins with zero and ends with the number of <TT>form</TT>
+elements-1.
+<P>
+Property of <TT>form</TT>. <I>See</I> <TT>elements</TT> object.
+<H3><A NAME="encodingnbsp">
+encoding&nbsp;</A></H3>
+<P>
+Returns a string reflecting the Mime encoding type, which is set
+in the <TT>enctype</TT> attribute of an HTML <TT>&lt;FORM&gt;</TT>
+tag.
+<P>
+Property of <TT>form</TT>. <I>See</I> properties <TT>action</TT>,
+<TT>method</TT>, <TT>target</TT>.
+<H3><A NAME="fgColornbsp">
+fgColor&nbsp;</A></H3>
+<P>
+The color of foreground text represented as a hexadecimal RGB
+triplet or a string literal. This value cannot be changed after
+a document is processed. It can take two forms:
+<BLOCKQUOTE>
+<PRE>
+document.fgColor=&quot;aliceblue&quot;
+document.fgColor=&quot;F0F8FF&quot;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>document</TT>. <I>See</I> properties <TT>alinkColor</TT>,
+<TT>bgColor</TT>, <TT>linkColor</TT>, <TT>vlinkColor</TT>; <I>see</I>
+<TT>fontcolor</TT> methods.
+<H3><A NAME="formsnbsp">
+forms&nbsp;</A></H3>
+<P>
+An array of objects corresponding to named forms in HTML source
+order and containing an entry for each <TT>form</TT> object in
+a document.
+<P>
+Property of <TT>document</TT>. <I>See</I> <TT>form</TT> object;
+<I>see</I> <TT>length</TT> property.
+<H3><A NAME="framesnbsp">
+frames&nbsp;</A></H3>
+<P>
+An array of objects corresponding to child frame windows created
+using the <TT>&lt;FRAMESET&gt;</TT> tag. To obtain the number
+of child frames in a window, use the <TT>length</TT> property.
+<P>
+Property of <TT>window</TT>. <I>See</I> <TT>frame</TT> object;
+<I>see</I> <TT>length</TT> property.
+<H3><A NAME="hashnbsp">
+hash&nbsp;</A></H3>
+<P>
+Returns a string with the portion of a URL beginning with a hash
+mark (#), which denotes an <TT>anchor</TT> name fragment. It can
+be used to set a <TT>hash</TT> property, although it is safest
+to set the entire URL as an <TT>href</TT> property. An error is
+returned if the <TT>hash</TT> isn't found in the current location.
+<P>
+Property of <TT>link</TT> and <TT>location</TT>. <I>See</I> <TT>anchor</TT>
+object; <I>see</I> properties <TT>host</TT>, <TT>hostname</TT>,
+<TT>href</TT>, <TT>pathname</TT>, <TT>port</TT>, <TT>protocol</TT>,
+<TT>search properties</TT>.
+<H3><A NAME="hostnbsp">
+host&nbsp;</A></H3>
+<P>
+Returns a string formed by combining the <TT>hostname</TT> and
+<TT>port</TT> properties of a URL and provides a method for changing
+it.
+<BLOCKQUOTE>
+<PRE>
+location.host = &quot;www.montna.com:80&quot;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>link</TT> and <TT>location</TT>. <I>See</I> properties
+<TT>hash</TT>, <TT>hostname</TT>, <TT>href</TT>, <TT>pathname</TT>,
+<TT>port</TT>, <TT>protocol</TT>, <TT>search</TT>.
+<H3><A NAME="hostnamenbsp">
+hostname&nbsp;</A></H3>
+<P>
+Returns or changes a string with the domain name or IP address
+of a URL.
+<P>
+Property of <TT>link</TT> and <TT>location</TT>. <I>See</I> properties
+<TT>hash</TT>, <TT>host</TT>, <TT>href</TT>, <TT>pathname</TT>,
+<TT>port</TT>, <BR>
+<TT>protocol</TT>, <TT>search</TT>.
+<H3><A NAME="hrefnbsp">
+href&nbsp;</A></H3>
+<P>
+Returns a string with the entire URL. All other <TT>location</TT>
+and <TT>link</TT> properties are substrings of <TT>href</TT>,
+which can be changed at any time.
+<P>
+Property of <TT>link</TT> and <TT>location</TT>. <I>See</I> properties
+<TT>hash</TT>, <TT>host</TT>, <TT>hostname</TT>, <TT>pathname</TT>,
+<TT>port</TT>, <TT>protocol</TT>, <TT>search</TT>.
+<H3><A NAME="indexnbsp">
+index&nbsp;</A></H3>
+<P>
+Returns the index of an option in a select element with zero being
+the first item.
+<P>
+Property of <TT>options</TT>. <I>See</I> properties <TT>defaultSelected</TT>,
+<TT>selected</TT>, <TT>selectedIndex</TT>.
+<H3><A NAME="lastModifiednbsp">
+lastModified&nbsp;</A></H3>
+<P>
+A read-only string containing the date that the current document
+was last changed, based on the file attributes. The string is
+formatted in the standard form used by JavaScript (see <TT>Date</TT>
+object). A common usage is:
+<BLOCKQUOTE>
+<PRE>
+document.write(&quot;This page last modified on &quot; + document.lastModified)
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>document</TT>.
+<H3><A NAME="lengthnbsp">
+length&nbsp;</A></H3>
+<P>
+An integer reflecting a length- or size-related property of an
+object.<BR>
+
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Object</B></TD><TD WIDTH=439><B>Property Measured</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>history</TT></TD><TD WIDTH=439>Length of the history list
+</TD></TR>
+<TR><TD WIDTH=151><TT>string</TT></TD><TD WIDTH=439>Integer length of the string; zero for a null string
+</TD></TR>
+<TR><TD WIDTH=151><TT>radio</TT></TD><TD WIDTH=439>Number of radio buttons
+</TD></TR>
+<TR><TD WIDTH=151><TT>anchors</TT>, <TT>forms</TT>, <TT>frames</TT>, <TT>links</TT>, <TT>options</TT>
+</TD><TD WIDTH=439>Number of elements in the array</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Property of <TT>anchors</TT>, <TT>elements</TT>, <TT>forms</TT>,
+<TT>frame</TT>, <TT>frames</TT>, <TT>history</TT>, <TT>links</TT>,
+<TT>options</TT>, <TT>radio</TT>,  <TT>string</TT>, <TT>window</TT>.
+<H3><A NAME="linkColor">
+linkColor</A></H3>
+<P>
+The hyperlink color displayed in the document, expressed as a
+hexadecimal RGB triplet or as a string literal. It corresponds
+to the <TT>link</TT> attribute in the HTML <TT>&lt;BODY&gt;</TT>
+tag, and cannot be changed after the document is processed.
+<P>
+Property of <TT>document</TT>. <I>See</I> properties <TT>alinkColor</TT>,
+<TT>bgColor</TT>, <TT>fgColor</TT>, <TT>vlinkColor</TT>.
+<H3><A NAME="links">
+links</A></H3>
+<P>
+An array representing <TT>link</TT> objects defined in HTML using
+<TT>&lt;A HREF=URL&gt;</TT> tags with the first <TT>link</TT>
+identified as <TT>document.links[0]</TT>.
+<P>
+<I>See</I> <TT>link</TT> object. <I>See</I> properties <TT>anchor</TT>s
+and <TT>length</TT>.
+<H3><A NAME="LN">
+LN2</A></H3>
+<P>
+A constant representing the natural logarithm of 2 (approximately
+0.693).
+<P>
+Property of <TT>Math</TT>. <I>See</I> properties <TT>E</TT>, <TT>LN10</TT>,
+<TT>LOG2E</TT>, <TT>LOG10E</TT>, <TT>PI</TT>, <TT>SQRT1_2</TT>,
+<TT>SQRT2</TT>.
+<H3><A NAME="LNnbspnbsp">
+LN10&nbsp;&nbsp;</A></H3>
+<P>
+A constant representing the natural logarithm of 10 (approximately
+2.302).
+<P>
+Property of <TT>Math</TT>. <I>See</I> properties <TT>E</TT>, <TT>LN2</TT>,
+<TT>LOG2E</TT>, <TT>LOG10E</TT>, <TT>PI</TT>, <TT>SQRT1_2</TT>,
+<TT>SQRT2</TT>.
+<H3><A NAME="locationnbspnbsp">
+location&nbsp;&nbsp;</A></H3>
+<P>
+Returns a string with the URL of the current document. This read-only
+property (<TT>document.location</TT>) is different from the location
+<TT>objects</TT> properties (<TT>window.location.propertyName</TT>),
+which can be changed.
+<P>
+Property of <TT>document</TT>. <I>See</I> <TT>location</TT> object.
+<H3><A NAME="LOGEnbspnbsp1">
+LOG2E&nbsp;&nbsp;</A></H3>
+<P>
+A constant representing the base 2 logarithm of <TT>e</TT> (approximately
+1.442).
+<P>
+Property of <TT>Math</TT>. <I>See</I> properties <TT>E</TT>, <TT>LN2</TT>,
+<TT>LN10</TT>, <TT>LOG10E</TT>, <TT>PI</TT>, <TT>SQRT1_2</TT>,
+<TT>SQRT2</TT>.
+<H3><A NAME="LOGEnbspnbsp2">
+LOG10E&nbsp;&nbsp;</A></H3>
+<P>
+A constant representing the base 10 logarithm of <TT>e</TT> (approximately
+.434).
+<P>
+Property of <TT>Math</TT>. <I>See</I> properties <TT>E</TT>, <TT>LN2</TT>,
+<TT>LN10</TT>, <TT>LOG2E</TT>, <TT>SQRT1_2</TT>, <TT>SQRT2</TT>.
+<H3><A NAME="methodnbspnbsp">
+method&nbsp;&nbsp;</A></H3>
+<P>
+Reflects the method attribute of an HTML <TT>&lt;FORM&gt;</TT>
+tag: either <TT>&lt;GET&gt;</TT> or <TT>&lt;POST&gt;</TT>. It
+can be set at any time. The first function returns the current
+value of the form object, while the second function sets the method
+to the contents of <TT>newMethod</TT>.
+<BLOCKQUOTE>
+<PRE>
+function getMethod(formObj) {
+   return formObj.method
+}
+function setMethod(formObj,newMethod) {
+   formObj.method = newMethod
+}
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>form</TT>. <I>See</I> properties <TT>action</TT>,
+<TT>encoding</TT>, <TT>target</TT>.
+<H3><A NAME="namenbspnbsp">
+name&nbsp;&nbsp;</A></H3>
+<P>
+Returns a string with the <TT>name</TT> attribute of the object.
+This is the internal name for <TT>button</TT>, <TT>reset</TT>,
+and <TT>submit</TT> objects, not the on-screen label.
+<P>
+For example, after opening a new window with <TT>indexOutline
+= window.open(&quot;http://www.wossamatta.com/outline.html&quot;,&quot;MenuPage&quot;)</TT>
+and issuing the command <TT>document. write(indexOutline.name)</TT>,
+JavaScript returns &quot;MenuPage,&quot; which was specified as
+the name attribute.
+<P>
+Property of <TT>button</TT>, <TT>checkbox</TT>, <TT>frame</TT>,
+<TT>password</TT>, <TT>radio</TT>, <TT>reset</TT>, <TT>select</TT>,
+<TT>submit</TT>, <TT>text</TT>, <TT>textarea</TT>, <TT>window</TT>.
+<I>See</I> <TT>value</TT> property.
+<H3><A NAME="optionsnbspnbsp">
+options&nbsp;&nbsp;</A></H3>
+<P>
+An array of <TT>option</TT> objects created by a <TT>select</TT>
+form element. The first option's index is zero, the second is
+1, and so on.
+<P>
+<I>See</I> <TT>select</TT> object.
+<H3><A NAME="parentnbspnbsp">
+parent&nbsp;&nbsp;</A></H3>
+<P>
+Refers to the calling document in the current frame created by
+a <TT>&lt;FRAMESET&gt;</TT> tag. Using <TT>parent</TT> allows
+access to other frames created by the same <TT>&lt;FRAMESET&gt;</TT>
+tag. For example, two frames invoked are called &quot;index&quot;
+and &quot;contents.&quot; The &quot;index&quot; frame can write
+to the &quot;contents&quot; frame using the syntax:
+<BLOCKQUOTE>
+<PRE>
+parent.contents.document.write(&quot;Kilroy was here.&quot;)
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>frame</TT> and <TT>window</TT>.
+<H3><A NAME="pathnamenbspnbsp">
+pathname&nbsp;&nbsp;</A></H3>
+<P>
+Returns the path portion from an URL. Although the <TT>pathname</TT>
+can be changed at any time, it is always safer to change the entire
+URL at once using the <TT>href</TT> property.
+<P>
+Property of <TT>link</TT> and <TT>location</TT>. <I>See</I> properties
+<TT>hash</TT>, <TT>host</TT>, <TT>hostname</TT>, <TT>href</TT>,
+<TT>port</TT>, <BR>
+<TT>protocol</TT>, <TT>search</TT>.
+<H3><A NAME="PInbspnbsp">
+PI&nbsp;&nbsp;</A></H3>
+<P>
+Returns the value of pi (approximately 3.1415927). This is the
+ratio of the circumference of a circle to its diameter.
+<P>
+Property of <TT>Math</TT>. <I>See</I> properties <TT>E</TT>, <TT>LN2</TT>,
+<TT>LN10</TT>, <TT>LOG2E</TT>, <TT>LOG10E</TT>, <TT>SQRT1_2</TT>,
+<TT>SQRT2</TT>.
+<H3><A NAME="portnbspnbsp">
+port&nbsp;&nbsp;</A></H3>
+<P>
+Returns the port number of a URL address, which is a substring
+of the <TT>host</TT> property in <TT>href</TT>.
+<P>
+Property of <TT>link</TT> and <TT>location</TT>. <I>See</I> properties
+<TT>hash</TT>, <TT>host</TT>, <TT>hostname</TT>, <TT>href</TT>,
+<TT>pathname</TT>, <TT>protocol</TT>, <TT>search</TT>.
+<H3><A NAME="protocolnbspnbsp">
+protocol&nbsp;&nbsp;</A></H3>
+<P>
+Returns a string with the initial portion of the URL, up to and
+including the colon, which indicates the access method (<TT>http</TT>,
+<TT>ftp</TT>, <TT>mailto</TT>, and so on).
+<P>
+Property of <TT>link</TT> and <TT>location</TT>.
+<P>
+<I>See</I> properties <TT>hash</TT>, <TT>host</TT>, <TT>hostname</TT>,
+<TT>href</TT>, <TT>pathname</TT>, <TT>port</TT>, <TT>search</TT>.
+<H3><A NAME="referrernbspnbsp">
+referrer&nbsp;&nbsp;</A></H3>
+<P>
+Returns a read-only URL of the document that called the current
+document. In conjunction with a CGI script, it can be used to
+keep track of how users are linked to a page.
+<BLOCKQUOTE>
+<PRE>
+document.write(&quot;You came here from a page at &quot; + document.referrer)
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>document</TT>.
+<H3><A NAME="searchnbspnbsp">
+search&nbsp;&nbsp;</A></H3>
+<P>
+Returns a string containing any query information appended to
+a URL.
+<P>
+Property of <TT>link</TT> and <TT>location</TT>. <I>See</I> properties
+<TT>hash</TT>, <TT>host</TT>, <TT>hostname</TT>, <TT>href</TT>,
+<TT>pathname</TT>, <TT>port</TT>, <TT>protocol</TT>.
+<H3><A NAME="selectednbspnbsp">
+selected&nbsp;&nbsp;</A></H3>
+<P>
+Returns a Boolean value (<TT>true</TT> or <TT>false</TT>) indicating
+the current state of an option in a <TT>select</TT> object. The
+selected property can be changed at any time, and the display
+will immediately update to reflect the new value. The selected
+property is useful for <TT>select</TT> elements that are created
+using the <TT>multiple</TT> attribute. Using this property, you
+can view or change the value of any element in an <TT>options</TT>
+array without changing the value of any other element in the array.
+<P>
+Property of <TT>options</TT>. <I>See</I> properties <TT>defaultSelected</TT>,
+<TT>index</TT>, <TT>selectedIndex</TT>.
+<H3><A NAME="selectedIndexnbspnbsp">
+selectedIndex&nbsp;&nbsp;</A></H3>
+<P>
+Returns an integer specifying the index of a selected item. The
+<TT>selectedIndex</TT> property is useful for <TT>select</TT>
+elements that are created without using the <TT>multiple</TT>
+attribute. If <TT>selectedIndex</TT> is evaluated when the <TT>multiple</TT>
+option is selected, the property returns the index of the first
+option only. Setting the property clears any other options that
+are selected in the element.
+<P>
+Property of <TT>select</TT>, <TT>options</TT>. <I>See</I> properties
+<TT>defaultSelected</TT>, <TT>index</TT>, <TT>selected</TT>.
+<H3><A NAME="selfnbspnbsp">
+self&nbsp;&nbsp;</A></H3>
+<P>
+Refers to the current window or form, and is useful for removing
+ambiguity when dealing with <TT>window</TT> and <TT>form</TT>
+properties with the same name.
+<P>
+Property of <TT>frame</TT> and <TT>window</TT>. <I>See</I> <TT>window</TT>
+property.
+<H3><A NAME="SQRTnbspnbsp1">
+SQRT1_2&nbsp;&nbsp;</A></H3>
+<P>
+The square root of 1/2, also expressed as the inverse of the square
+root of 2 (approximately 0.707).
+<P>
+Property of <TT>Math</TT>. <I>See</I> properties <TT>E</TT>, <TT>LN2</TT>,
+<TT>LN10</TT>, <TT>LOG2E</TT>, <TT>LOG10E</TT>, <TT>PI</TT>, <TT>SQRT2</TT>.
+<H3><A NAME="SQRTnbspnbsp2">
+SQRT2&nbsp;&nbsp;</A></H3>
+<P>
+The square root of 2 (approximately 1.414).
+<P>
+Property of <TT>Math</TT>. <I>See</I> properties <TT>E</TT>, <TT>LN2</TT>,
+<TT>LN10</TT>, <TT>LOG2E</TT>, <TT>LOG10E</TT>, <TT>PI</TT>, <TT>SQRT1_2</TT>.
+<H3><A NAME="statusnbspnbsp">
+status&nbsp;&nbsp;</A></H3>
+<P>
+Specifies a priority or transient message to display in the status
+bar at the bottom of the window, usually triggered by a <TT>mouseOver</TT>
+event from an <TT>anchor</TT>. To display when the mouse pointer
+is placed over a link, the usage is:
+<BLOCKQUOTE>
+<PRE>
+&lt;A anchor definition onMouseOver=&quot;window.dstatus='Your message.'; return true&quot;&gt;link&lt;/A&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Note the use of nested quotes and the required <TT>return true</TT>
+required for operation.
+<P>
+Property of <TT>window</TT>. <I>See</I> <TT>defaultStatus</TT>
+property.
+<H3><A NAME="targetnbspnbsp">
+target&nbsp;&nbsp;</A></H3>
+<P>
+A string specifying the name of a window for responses to be posted
+to after a form is submitted. For a link, <TT>target</TT> returns
+a string specifying the name of the window that displays the content
+of a selected hypertext link.
+<BLOCKQUOTE>
+<PRE>
+homePage.target = &quot;http://www.wossamatta.com/&quot;
+</PRE>
+</BLOCKQUOTE>
+<P>
+A literal must be used to set the <TT>target</TT> property. JavaScript
+expressions and variables are invalid entries.
+<P>
+Property of <TT>form</TT>, <TT>link</TT>, <TT>location</TT>. <I>See</I>
+properties <TT>action</TT>, <TT>encoding</TT>, <TT>method</TT>.
+<H3><A NAME="textnbspnbsp">
+text&nbsp;&nbsp;</A></H3>
+<P>
+Returns the value of text following the <TT>&lt;OPTION&gt;</TT>
+tag in a <TT>select</TT> object. It can also be used to change
+the value of the option, with an important limitations-while the
+value is changed, its appearance on-screen is not.
+<P>
+Property of <TT>options</TT>.
+<H3><A NAME="titlenbspnbsp">
+title&nbsp;&nbsp;</A></H3>
+<P>
+Returns the read-only value set within HTML <TT>&lt;TITLE&gt;</TT>
+tags. If a document doesn't include a title, the value is <TT>null</TT>.
+<P>
+Property of <TT>document</TT>.
+<H3><A NAME="topnbspnbsp">
+top&nbsp;&nbsp;</A></H3>
+<P>
+The topmost window, called an ancestor or Web browser window,
+that contains <TT>frames</TT> or nested <TT>framesets</TT>.
+<P>
+Property of <TT>window</TT>.
+<H3><A NAME="userAgentnbspnbsp">
+userAgent&nbsp;&nbsp;</A></H3>
+<P>
+Header sent as part of HTTP protocol from client to server to
+identify the type of client. The syntax of the returned value
+is the same as <TT>appVersion</TT>.
+<P>
+Property of <TT>navigator</TT>. <I>See</I> properties <TT>appName</TT>,
+<TT>appVersion</TT>, <TT>appCodeName</TT>.
+<H3><A NAME="valuenbspnbsp">
+value&nbsp;&nbsp;</A></H3>
+<P>
+The value of an object depends on the type of object it is applied
+to.
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Object</B></TD><TD WIDTH=439><B>Value Attribute</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>button</TT>, <TT>reset</TT>,</TD><TD WIDTH=439>Value attribute that appears on&nbsp;&nbsp;
+</TD></TR>
+<TR><TD WIDTH=151><TT>submit</TT></TD><TD WIDTH=439>screen, not the button name
+</TD></TR>
+<TR><TD WIDTH=151><TT>checkbox</TT></TD><TD WIDTH=439><TT>on</TT> if item is selected, <TT>off</TT> if not
+</TD></TR>
+<TR><TD WIDTH=151><TT>radio</TT></TD><TD WIDTH=439>String reflection of value
+</TD></TR>
+<TR><TD WIDTH=151><TT>hidden</TT>, <TT>text</TT>, <TT>textarea</TT>
+</TD><TD WIDTH=439>Contents of the field</TD></TR>
+<TR><TD WIDTH=151><TT>select</TT></TD><TD WIDTH=439>Reflection of option value
+</TD></TR>
+<TR><TD WIDTH=151><TT>password</TT></TD><TD WIDTH=439>Return a valid default value, but an encrypted version if modified by the user
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Changing the value of a <TT>text</TT> or <TT>textarea</TT> object
+results in an immediate update to the screen. All other <TT>form</TT>
+objects are not graphically updated when changed.
+<P>
+Property of <TT>button</TT>, <TT>checkbox</TT>, <TT>hidden</TT>,
+<TT>options</TT>, <TT>password</TT>, <TT>radio</TT>, <TT>reset</TT>,
+<TT>submit</TT>, <TT>text</TT>, <TT>textarea</TT>.
+<P>
+For <TT>password</TT>, <TT>text</TT>, and <TT>textarea</TT>, <I>see</I>
+<TT>defaultValue</TT> property.
+<P>
+For <TT>button</TT>, <TT>reset</TT>, and <TT>submit</TT>, <I>see</I>
+<TT>name</TT> property.
+<P>
+For <TT>options</TT>, <I>see</I> properties <TT>defaultSelected</TT>,
+<TT>selected</TT>, <TT>selectedIndex</TT>, <TT>text</TT>.
+<P>
+For <TT>checkbox</TT> and <TT>radio</TT>, <I>see</I> properties
+<TT>checked</TT> and <TT>defaultChecked</TT>.
+<H3><A NAME="vlinkColornbspnbsp">
+vlinkColor&nbsp;&nbsp;</A></H3>
+<P>
+Returns or sets the color of visited links using hexadecimal RGB
+triplets or a string literal. The property cannot be set after
+the document has been formatted. To override the browser defaults,
+color settings are used with the <TT>onLoad</TT> event handler
+in the <TT>&lt;BODY&gt;</TT> tag:
+<BLOCKQUOTE>
+<PRE>
+&lt;BODY onLoad=&quot;document.vlinkColor='aliceblue'&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Property of <TT>document</TT>. <I>See</I> properties <TT>alinkColor</TT>,
+<TT>bgColor</TT>, <TT>fgColor</TT>, <TT>linkColor</TT>.
+<H3><A NAME="window">
+window</A></H3>
+<P>
+A synonym for the current window to remove ambiguity between a
+<TT>window</TT> and <TT>form</TT> object of the same name. While
+it also applies to the current frame, it is less ambiguous to
+use the <TT>self</TT> property.
+<P>
+Property of <TT>frame</TT> and <TT>window</TT>. <I>See</I> <TT>self</TT>
+property.
+<H2><A NAME="Methods"><FONT SIZE=5 COLOR=#FF0000>
+Methods</FONT></A></H2>
+<P>
+Methods are functions and procedures used to perform an operation
+on an object, variable, or constant. With the exception of built-in
+functions, methods must be used with an object:
+<BLOCKQUOTE>
+<PRE>
+object.method()
+</PRE>
+</BLOCKQUOTE>
+<P>
+Even if the method does not require any arguments, the parantheses
+are still required.
+<P>
+The object which utilizes the method is listed after the definition
+as &quot;Method of <I>object,&quot; </I>followed by any cross-references
+to other methods. Stand-alone functions that are not used with
+objects are indicated with an asterisk (*).
+<H3><A NAME="absnbspnbsp">
+abs&nbsp;&nbsp;</A></H3>
+<P>
+Returns the absolute (unsigned) value of its argument.
+<BLOCKQUOTE>
+<PRE>
+document.write(Math.abs(-10));
+document.write(Math.abs(12))
+</PRE>
+</BLOCKQUOTE>
+<P>
+The above examples return 10 and 12, respectively.
+<P>
+Method of <TT>Math</TT>.
+<H3><A NAME="acosnbspnbsp">
+acos&nbsp;&nbsp;</A></H3>
+<P>
+Returns the arc cosine (from zero to pi radians) of its argument.
+The argument should be a number between -1 and 1. If the value
+is outside the valid range, a zero is returned.
+<P>
+Method of <TT>Math</TT>. <I>See</I> methods <TT>asin</TT>, <TT>atan</TT>,
+<TT>cos</TT>, <TT>sin</TT>, <TT>tan</TT>.
+<H3><A NAME="alertnbspnbsp">
+alert&nbsp;&nbsp;</A></H3>
+<P>
+Displays a JavaScript Alert dialog box with an OK button and a
+user-defined message. Before the users can continue, they must
+press the OK button.
+<P>
+Method of <TT>window</TT>. <I>See</I> methods <TT>confirm</TT>
+and <TT>prompt</TT>.
+<H3><A NAME="anchornbspnbsp">
+anchor&nbsp;&nbsp;</A></H3>
+<P>
+Used with <TT>write</TT> or <TT>writeln</TT> methods, <TT>anchor</TT>
+creates and displays an HTML hypertext target. The syntax is:
+<BLOCKQUOTE>
+<PRE>
+textString.anchor(anchorName)
+</PRE>
+</BLOCKQUOTE>
+<P>
+where <TT>textString</TT> is what the user <I>see</I>s, and <TT>anchorName</TT>
+is equivalent to the <TT>name</TT> attribute of an HTML <TT>&lt;anchor&gt;</TT>
+tag.
+<P>
+Method of <TT>string</TT>. <I>See</I> <TT>link</TT> method.
+<H3><A NAME="asinnbspnbsp">
+asin&nbsp;&nbsp;</A></H3>
+<P>
+Returns the arc sine (between -pi/2 and pi/2 radians) of a number
+between -1 and 1. If the number is outside the range, a zero is
+returned.
+<P>
+Method of <TT>Math</TT>. <I>See</I> methods <TT>acos</TT>, <TT>atan</TT>,
+<TT>cos</TT>, <TT>sin</TT>, <TT>tan</TT>.
+<H3><A NAME="atannbspnbsp">
+atan&nbsp;&nbsp;</A></H3>
+<P>
+Returns the arc tangent (between -pi/2 and pi/2 radians) of a
+number between -1 and 1. If the number is outside the range, a
+zero is returned.
+<P>
+Method of <TT>Math</TT>. <I>See</I> methods <TT>acos</TT>, <TT>asin</TT>,
+<TT>cos</TT>, <TT>sin</TT>, <TT>tan</TT>.
+<H3><A NAME="backnbspnbsp">
+back&nbsp;&nbsp;</A></H3>
+<P>
+Recalls the previous URL from the history list. This method is
+the same as <TT>history.go (-1)</TT>.
+<P>
+Method of <TT>history</TT>. <I>See</I> methods <TT>forward</TT>
+and <TT>go</TT>.
+<H3><A NAME="bignbspnbsp">
+big&nbsp;&nbsp;</A></H3>
+<P>
+Formats a string object as a big font by encasing it with HTML
+<TT>&lt;BIG&gt;</TT> tags. Both of the following examples result
+in the same output-displaying the message &quot;Welcome to my
+home page&quot; in a big font:
+<BLOCKQUOTE>
+<PRE>
+var welcomeMessage = &quot;Welcome to my home page.&quot;
+document.write(welcomeMessage.big())
+
+&lt;BIG&gt; Welcome to my home page.&lt;/BIG&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>fontsize</TT>,
+<TT>small</TT>.
+<H3><A NAME="blinknbspnbsp">
+blink&nbsp;&nbsp;</A></H3>
+<P>
+Formats a <TT>string</TT> object as a blinking line by encasing
+it with HTML <TT>&lt;BLINK&gt;</TT> tags. Both of the following
+examples produce a flashing line that says &quot;Notice&quot;:
+<BLOCKQUOTE>
+<PRE>
+var attentionMessage = &quot;Notice&quot;
+document.write(attentionMessage.blink())
+
+&lt;BLINK&gt;Notice&lt;/BLINK&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>bold</TT>, <TT>italics</TT>,
+<TT>strike</TT>.
+<H3><A NAME="blurnbspnbsp">
+blur&nbsp;&nbsp;</A></H3>
+<P>
+Removes focus from the specified <TT>form</TT> element. For example,
+the following line removes focus from <TT>feedback</TT>:
+<BLOCKQUOTE>
+<PRE>
+feedback.blur()
+</PRE>
+</BLOCKQUOTE>
+<P>
+assuming that <TT>feedback</TT> is defined as:
+<BLOCKQUOTE>
+<PRE>
+&lt;input type=&quot;text&quot; name=&quot;feedback&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Method of <TT>password</TT>, <TT>select</TT>, <TT>text</TT>, <TT>textarea</TT>.
+<I>See</I> methods <TT>focus</TT> and <TT>select</TT>.
+<H3><A NAME="boldnbspnbsp">
+bold&nbsp;&nbsp;</A></H3>
+<P>
+Formats a <TT>string</TT> object in bold text by encasing it with
+HTML <TT>&lt;B&gt;</TT> tags.
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>blink</TT>,
+<TT>italics</TT>, <TT>strike</TT>.
+<H3><A NAME="ceilnbspnbsp">
+ceil&nbsp;&nbsp;</A></H3>
+<P>
+Returns the smallest integer greater than, or equal to, its argument.
+For example:
+<BLOCKQUOTE>
+<PRE>
+Math.ceil(1.01)
+</PRE>
+</BLOCKQUOTE>
+<P>
+returns a <TT>2</TT>.
+<P>
+Method of <TT>Math</TT>. <I>See</I> <TT>floor</TT> method.
+<H3><A NAME="charAtnbspnbsp">
+charAt&nbsp;&nbsp;</A></H3>
+<P>
+Returns the character from a string at the specified index. The
+first character is at position zero and the last at length-1.
+<BLOCKQUOTE>
+<PRE>
+var userName = &quot;Bobba Louie&quot;
+document.write(userName.charAt(4)
+</PRE>
+</BLOCKQUOTE>
+<P>
+returns an &quot;a.&quot;
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>indexOf</TT>
+and <TT>lastIndexOf</TT>.
+<H3><A NAME="clearnbspnbsp">
+clear&nbsp;&nbsp;</A></H3>
+<P>
+Clears the contents of a window, regardless of how the window
+was filled.
+<P>
+Method of <TT>document</TT>. <I>See</I> methods <TT>close</TT>,
+<TT>open</TT>, <TT>write</TT>, <TT>writeln</TT>.
+<H3><A NAME="clearTimeout">
+clearTimeout</A></H3>
+<P>
+Cancels a <TT>timeout</TT> set with the <TT>setTimeout</TT> method.
+A <TT>timeout</TT> is set using a unique timeout ID, which must
+be used to clear it:
+<BLOCKQUOTE>
+<PRE>
+clearTimeout(waitTime)
+</PRE>
+</BLOCKQUOTE>
+<P>
+Method of <TT>frame</TT> and <TT>window</TT>. <I>See</I> <TT>setTimeout</TT>
+method.
+<H3><A NAME="click">
+click</A></H3>
+<P>
+Simulates a mouse click on the calling <TT>form</TT> element with
+the effect dependent on the type of element.<BR>
+
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Form Element</B></TD><TD WIDTH=439><B>Action</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>Button</TT>, <TT>Reset</TT>, and <TT>submit</TT>
+</TD><TD WIDTH=439>Same as clicking button.</TD></TR>
+<TR><TD WIDTH=151><TT>Radio</TT></TD><TD WIDTH=439>Selects radio button.
+</TD></TR>
+<TR><TD WIDTH=151><TT>Checkbox</TT></TD><TD WIDTH=439>Marks checkbox and sets value to on.
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Method of <TT>button</TT>, <TT>checkbox</TT>, <TT>radio</TT>,
+<TT>reset</TT>, <TT>submit</TT>.
+<H3><A NAME="closenbspnbsp">
+close&nbsp;&nbsp;</A></H3>
+<P>
+For a <TT>document</TT> object, closes the current stream of output
+and forces its display. It also stops the browser winsock animation
+and displays &quot;Document: Done&quot; in the status bar.
+<P>
+For a <TT>window</TT> object, closes the current window. As with
+all window commands, the <TT>window</TT> object is assumed. For
+example:
+<BLOCKQUOTE>
+<PRE>
+window.close()
+close()
+self.close()
+</PRE>
+</BLOCKQUOTE>
+<P>
+all close the current window.
+<P>
+Method of <TT>document</TT> and <TT>window</TT>. <I>See</I> methods
+<TT>clear</TT>, <TT>open</TT>, <TT>write</TT>, <TT>writeln</TT>.
+<H3><A NAME="confirmnbspnbsp">
+confirm&nbsp;&nbsp;</A></H3>
+<P>
+Displays a JavaScript confirmation dialog box with a message and
+buttons for OK and Cancel. Confirm returns a <TT>true</TT> if
+the user selects OK and <TT>false</TT> for Cancel. The following
+example loads a new window if the user presses OK:
+<BLOCKQUOTE>
+<PRE>
+if (confirm(&quot;Are you sure you want to enter.&quot;) {
+   tourWindow = window.open(&quot;http:\\www.haunted.com\&quot;,&quot;hauntedhouse&quot;)
+}
+</PRE>
+</BLOCKQUOTE>
+<P>
+Method of <TT>window</TT>. <I>See</I> methods <TT>alert</TT> and
+<TT>prompt</TT>.
+<H3><A NAME="cosnbspnbsp">
+cos&nbsp;&nbsp;</A></H3>
+<P>
+Returns the cosine of the argument. The angle's size must be expressed
+in radians.
+<P>
+Method of <TT>Math</TT>. <I>See</I> methods <TT>acos</TT>, <TT>asin</TT>,
+<TT>atan</TT>, <TT>sin</TT>, <TT>tan</TT>.
+<H3><A NAME="escapenbspnbsp">
+escape*&nbsp;&nbsp;</A></H3>
+<P>
+Returns ASCII code of its argument based on the ISO Latin-1 character
+set in the form %xx, where xx is the ASCII code. It is not associated
+with any other object, but is actually part of the JavaScript
+language.
+<P>
+<I>See</I> <TT>unescape</TT> METHOD.
+<H3><A NAME="evalnbspnbsp">
+eval*&nbsp;&nbsp;</A></H3>
+<P>
+This built-in function takes a string or numeric expression as
+its argument. If a string, it attempts to convert it to a numeric
+expression. <TT>Eval</TT> then evaluates the expression and returns
+the value.
+<BLOCKQUOTE>
+<PRE>
+var x = 10
+var y = 20
+document.write(eval(&quot;x + y&quot;))
+</PRE>
+</BLOCKQUOTE>
+<P>
+This method can also be used to perform JavaScript commands included
+as part of a string.
+<BLOCKQUOTE>
+<PRE>
+var doThis = &quot;if (x==10) { alert(&quot;Your maximum has been reached&quot;) }
+function checkMax () {
+   x++;
+   eval(doThis)
+}
+</PRE>
+</BLOCKQUOTE>
+<P>
+This can be useful when converting a date from a form (always
+a string) into a numerical expression or number.
+<H3><A NAME="expnbspnbsp">
+exp&nbsp;&nbsp;</A></H3>
+<P>
+Returns <TT>e</TT> (Euler's constant) to the power of the argument
+to compute a natural logarithm.
+<P>
+Method of <TT>Math</TT>. <I>See</I> methods <TT>log</TT> and <TT>pow</TT>.
+<H3><A NAME="fixednbspnbsp">
+fixed&nbsp;&nbsp;</A></H3>
+<P>
+Formats the calling string into a fixed-pitch font by encasing
+it in HTML <TT>&lt;TT&gt;</TT> tags.
+<P>
+Method of <TT>string</TT>.
+<H3><A NAME="floornbspnbsp">
+floor&nbsp;&nbsp;</A></H3>
+<P>
+Returns the integer less than, or equal to, its argument. For
+example:
+<BLOCKQUOTE>
+<PRE>
+Math.floor(2.99)
+</PRE>
+</BLOCKQUOTE>
+<P>
+returns a <TT>2</TT>.
+<P>
+Method of <TT>Math</TT>. <I>See</I> <TT>ceil</TT> method.
+<H3><A NAME="focusnbspnbsp">
+focus&nbsp;&nbsp;</A></H3>
+<P>
+Navigates to a specific <TT>form</TT> element and gives it focus.
+From that point, a value can be entered by JavaScript commands
+or the user can complete the entry.
+<P>
+Method of <TT>password</TT>, <TT>select</TT>, <TT>text</TT>, <TT>textarea</TT>.
+<I>See</I> methods <TT>blur</TT> and <TT>select</TT>.
+<H3><A NAME="fontcolornbspnbsp">
+fontcolor&nbsp;&nbsp;</A></H3>
+<P>
+Formats the string object to a specific color expressed as a hexadecimal
+RGB triplet or a string literal, similar to using <TT>&lt;FONT
+COLOR=COLOR&gt;</TT>.
+<P>
+Method of <TT>string</TT>.
+<H3><A NAME="fontsizenbspnbsp">
+fontsize&nbsp;&nbsp;</A></H3>
+<P>
+Formats the string object to a specific font size: one of the
+seven defined sizes using an integer through the <TT>&lt;FONTSIZE=SIZE&gt;</TT>
+tag. If a string is passed, then the size is changed relative
+to the value set in the <TT>&lt;BASEFONT&gt;</TT> tag.
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>big</TT> and
+<TT>small</TT>.
+<H3><A NAME="forwardnbspnbsp">
+forward&nbsp;&nbsp;</A></H3>
+<P>
+Loads the next document on the URL history list. This method is
+the same as <TT>history.go(1)</TT>.
+<P>
+Method of <TT>history</TT>. <I>See</I> methods <TT>back</TT> and
+<TT>go</TT>.
+<H3><A NAME="getDatenbspnbsp">
+getDate&nbsp;&nbsp;</A></H3>
+<P>
+Returns the day of the month as an integer between 1 and 31.
+<P>
+Method of <TT>Date</TT>.
+<P>
+<I>See</I> <TT>setDate</TT> method.
+<H3><A NAME="getDaynbspnbsp">
+getDay&nbsp;&nbsp;</A></H3>
+<P>
+Returns the day of the week as an integer from zero (Sunday) to
+six (Saturday). There is not a corresponding <TT>setDay</TT> command
+because the day is automatically computed when the date value
+is assigned.
+<P>
+Method of <TT>Date</TT>.
+<H3><A NAME="getHoursnbspnbsp">
+getHours&nbsp;&nbsp;</A></H3>
+<P>
+Returns the hour of the day in 24-hour format, from zero (midnight)
+to 23 (11 PM).
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>setHours</TT> method.
+<H3><A NAME="getMinutesnbspnbsp">
+getMinutes&nbsp;&nbsp;</A></H3>
+<P>
+Returns the minutes with an integer from zero to 59.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>setMinutes</TT> method.
+<H3><A NAME="getMonthnbspnbsp">
+getMonth&nbsp;&nbsp;</A></H3>
+<P>
+Returns the month of the year as an integer between zero (January)
+and 11 (December).
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>setMonth</TT> method.
+<H3><A NAME="getSecondsnbspnbsp">
+getSeconds&nbsp;&nbsp;</A></H3>
+<P>
+Returns the seconds in an integer from zero to 59.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>setSeconds</TT> method.
+<H3><A NAME="getTime">
+getTime</A></H3>
+<P>
+Returns an integer representing the current value of the date
+object. The value is the number of milliseconds since midnight,
+January 1, 1970. This value can be used to compare the length
+of time between two date values.
+<P>
+For functions involving computation of dates, it is useful to
+define variables defining the minutes, hours, and days in milliseconds:
+<BLOCKQUOTE>
+<PRE>
+var dayMillisec = 1000 * 60 * 60 * 24 //1,000 milliseconds x 60 sec x 60 min x 24 hrs
+var hourMillisec = 1000 * 60 * 60 //1,000 milliseconds x 60 sec x 60 min
+var minuteMillisec = 1000 * 60 //1,000 milliseconds x 60 sec
+</PRE>
+</BLOCKQUOTE>
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>setTime</TT> method.
+<H3><A NAME="getTimezoneOffsetnbspnbsp">
+getTimezoneOffset&nbsp;&nbsp;</A></H3>
+<P>
+Returns the difference in minutes between the client machine and
+Greenwich mean time. This value is a constant except for daylight
+savings time.
+<P>
+Method of <TT>Date</TT>.
+<H3><A NAME="getYearnbspnbsp">
+getYear&nbsp;&nbsp;</A></H3>
+<P>
+Returns the year of the date object minus 1900. For example, 1996
+is returned as <TT>96</TT>.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>setYear</TT> method.
+<H3><A NAME="go">
+go</A></H3>
+<P>
+Loads a document specified in the history list by its URL or relative
+to the current position on the list. If the URL is incomplete,
+then the closest match is used. The search is not case-sensitive.
+<P>
+Method of <TT>history</TT>. <I>See</I> methods <TT>back</TT> and
+<TT>forward</TT>.
+<H3><A NAME="indexOfnbspnbsp">
+indexOf&nbsp;&nbsp;</A></H3>
+<P>
+Returns the location of a specific character or string, starting
+the search from a specific location. The first character of the
+string is specified as zero and the last is the string's length-1.
+The syntax is:
+<BLOCKQUOTE>
+<PRE>
+stringName.indexOf([character|string], [startingPoint])
+</PRE>
+</BLOCKQUOTE>
+<P>
+The <TT>startingPoint</TT> is zero by default.
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>charAt</TT>
+and <TT>lastIndexof</TT>.
+<H3><A NAME="isNaNnbspnbsp">
+isNaN*&nbsp;&nbsp;</A></H3>
+<P>
+For UNIX platforms only, this stand-alone function returns true
+if the argument is not a number. On all platforms except Windows,
+the <TT>parseFloat</TT> and <TT>parseInt</TT> return <TT>NaN</TT>
+when the argument is not a number.
+<P>
+<I>See</I> METHODS <TT>parseFloat</TT> and <TT>parseInt</TT>.
+<H3><A NAME="italicsnbspnbsp">
+italics&nbsp;&nbsp;</A></H3>
+<P>
+Formats a string object into italics by encasing it an HTML <TT>&lt;I&gt;</TT>
+tag.
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>blink</TT>,
+<TT>bold</TT>, <TT>strike</TT>.
+<H3><A NAME="lastIndexOfnbspnbsp">
+lastIndexOf&nbsp;&nbsp;</A></H3>
+<P>
+Returns the index of a character or <TT>string</TT> in a string
+object by looking backwards from the end of the <TT>string</TT>
+or a user-specified index.
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>charAt</TT>
+and <TT>indexOf</TT>.
+<H3><A NAME="linknbspnbsp">
+link&nbsp;&nbsp;</A></H3>
+<P>
+Creates a hypertext link to another URL by defining the <TT>&lt;HREF&gt;</TT>
+attribute and the text representing the link to the user.
+<P>
+Method of <TT>string</TT>. <I>See</I> <TT>anchor</TT> method.
+<H3><A NAME="lognbspnbsp">
+log&nbsp;&nbsp;</A></H3>
+<P>
+Returns the natural logarithm (base e) of a positive numeric expression
+greater than zero. An out-of-range number always returns -1.797693134862316e+308.
+<P>
+Method of <TT>Math</TT>. <I>See</I> methods <TT>exp</TT> and <TT>pow</TT>.
+<H3><A NAME="maxnbspnbsp">
+max&nbsp;&nbsp;</A></H3>
+<P>
+Returns the greater of its two arguments. For example:
+<BLOCKQUOTE>
+<PRE>
+Math.max(1,100)
+</PRE>
+</BLOCKQUOTE>
+<P>
+returns <TT>100</TT>.
+<P>
+Method of <TT>Math</TT>. <I>See</I> <TT>min</TT> method.
+<H3><A NAME="minnbspnbsp">
+min&nbsp;&nbsp;</A></H3>
+<P>
+Returns the lesser of its two arguments.
+<P>
+Method of <TT>Math</TT>. <I>See</I> <TT>max</TT> method.
+<H3><A NAME="opennbspnbsp">
+open&nbsp;&nbsp;</A></H3>
+<P>
+For a document, opens a stream to collect the output of <TT>write</TT>
+or <TT>writeln</TT> methods. If a document already exists in the
+target window, then the open method clears it. The stream is ended
+by using the <TT>document.close()</TT> method.
+<P>
+For a window, it opens a new browser window in a similar fashion
+to choosing File, New Web Browser from the Netscape menu. Using
+the URL argument, it loads a document into the new window; otherwise,
+the new window is blank. When used as part of an event handler,
+the form must include the window object; otherwise, the document
+is assumed. Window features are defined by a comma-separated list
+of options with <TT>=1</TT> or <TT>=yes</TT> to enable and <TT>=0</TT>
+or <TT>=no</TT> to disable. Window features include toolbar, location,
+directories, status, menubar, scrollbars, resizable, copyhistory,
+width and height.
+<P>
+Method of <TT>document</TT> and <TT>window</TT>. <I>See</I> methods
+<TT>clear</TT>, <TT>close</TT>, <TT>write</TT>, <TT>writeln</TT>.
+<H3><A NAME="parsenbspnbsp">
+parse&nbsp;&nbsp;</A></H3>
+<P>
+Takes a date string, such as <TT>&quot;Jan 11, 1996&quot;</TT>,
+and returns the number of milliseconds since midnight, Jan. 1,
+1970. This function can be used to set date values based on string
+values. When passed a string with a time, it returns the time
+value.
+<P>
+Because <TT>parse</TT> is a static function of Date, it is always
+used as <TT>Date.parse()</TT> rather than as a method of a created
+<TT>date</TT> object.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>UTC</TT> method.
+<H3><A NAME="parseFloatnbspnbsp">
+parseFloat*&nbsp;&nbsp;</A></H3>
+<P>
+Parses a string argument and returns a floating-point number if
+the first character is a plus sign, minus sign, decimal point,
+exponent, or a numeral. If it encounters a character other than
+one of the valid choices after that point, it returns the value
+up to that location and ignores all succeeding characters. If
+the first character is not a valid character, <TT>parseFloat</TT>
+returns one of two values based on the platform:
+<BLOCKQUOTE>
+Windows&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>0
+<BR>
+</TT>Non-Windows&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<TT>NaN</TT>
+</BLOCKQUOTE>
+<P>
+<I>See</I> <TT>isNaN</TT> method.
+<H3><A NAME="parseIntnbspnbsp">
+parseInt*&nbsp;&nbsp;</A></H3>
+<P>
+Parses a string argument and returns an integer based on a specified
+radix or base. A radix of 10 converts the value to a decimal,
+while eight converts to octal, and 16 to hexadecimal. Values greater
+than 10 for bases above 10 are represented with letters (A through
+F) in place of numbers.
+<P>
+Floating-point values are converted to integers. The rules for
+evaluating the string are identical to <TT>parseFloat</TT>.
+<P>
+<I>See</I> <TT>isNaN</TT> and <TT>parseFloat</TT> methods.
+<H3><A NAME="pownbspnbsp">
+pow&nbsp;&nbsp;</A></H3>
+<P>
+Returns a base raised to an exponent.
+<P>
+Method of <TT>Math</TT>. <I>See</I> <TT>exp</TT> and <TT>log</TT>
+methods.
+<H3><A NAME="promptnbspnbsp">
+prompt&nbsp;&nbsp;</A></H3>
+<P>
+Displays a prompt dialog box that accepts user input. If an initial
+value is not specified for <TT>inputDefault</TT>, the dialog box
+displays the value <TT>&lt;undefined&gt;</TT>.
+<P>
+Method of <TT>window</TT>. <I>See</I> <TT>alert</TT> and <TT>confirm</TT>
+methods.
+<H3><A NAME="randomnbspnbsp">
+random&nbsp;&nbsp;</A></H3>
+<P>
+On UNIX machines only, returns a pseudo-random number between
+zero and 1.
+<P>
+Method of <TT>Math</TT>.
+<H3><A NAME="roundnbspnbsp">
+round&nbsp;&nbsp;</A></H3>
+<P>
+Returns the value of a floating-point argument rounded to the
+next highest integer if the decimal portion is greater than, or
+equal to, .5, or the next lowest integer if less than .5.
+<P>
+Method of <TT>Math</TT>.
+<H3><A NAME="selectnbspnbsp">
+select&nbsp;&nbsp;</A></H3>
+<P>
+Selects the input area of a specified form element. Used in conjunction
+with the <TT>focus</TT> method, JavaScript can highlight a field
+and position the cursor for user input.
+<P>
+Method of <TT>password</TT>, <TT>text</TT>, <TT>textarea</TT>.
+<I>See</I> methods <TT>blur</TT> and <TT>focus</TT>.
+<H3><A NAME="setDatenbspnbsp">
+setDate&nbsp;&nbsp;</A></H3>
+<P>
+Sets the day of the month.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>getDate</TT> method.
+<H3><A NAME="setHoursnbspnbsp">
+setHours&nbsp;&nbsp;</A></H3>
+<P>
+Sets the hour for the current time.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>getHours</TT> method.
+<H3><A NAME="setMinutesnbspnbsp">
+setMinutes&nbsp;&nbsp;</A></H3>
+<P>
+Sets the minutes for the current time.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>getMinutes</TT> method.
+<H3><A NAME="setMonthnbspnbsp">
+setMonth&nbsp;&nbsp;</A></H3>
+<P>
+Sets the month with an integer from zero (January) to 11 (December).
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>getMonth</TT> method.
+<H3><A NAME="setSecondsnbspnbsp">
+setSeconds&nbsp;&nbsp;</A></H3>
+<P>
+Sets the seconds for the current time.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>getSeconds</TT> method.
+<H3><A NAME="setTimenbspnbsp">
+setTime&nbsp;&nbsp;</A></H3>
+<P>
+Sets the value of a date object.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>getTime</TT> method.
+<H3><A NAME="setTimeoutnbspnbsp">
+setTimeout&nbsp;&nbsp;</A></H3>
+<P>
+Evaluates an expression after a specified amount of time, expressed
+in milliseconds. This is not repeated indefinitely. For example,
+setting a timeout to three seconds will evaluate the expression
+once after three seconds-not every three seconds. To call <TT>setTimeout</TT>
+recursively, reset the timeout as part of the function invoked
+by the method. Calling the function <TT>startclock</TT> in the
+following example sets a loop in motion that clears the timeout,
+displays the current time, and sets the timeout to redisplay the
+time in one second.
+<BLOCKQUOTE>
+<PRE>
+var timerID = null;
+var timerRunning = false;
+function stopclock () {
+  if(timerRunning) cleartimeout(timerID);
+  timerRunning=false;
+}
+function startclock () {
+  stopclock();
+  showtime();
+}
+function showtime () {
+  var now = new Date();
+  ...
+  document.clock.face.value =   timeValue;
+  timerID = setTimeout(&quot;showtime()&quot;,1000);
+  timerRunning = true;
+}
+</PRE>
+</BLOCKQUOTE>
+<P>
+Method of <TT>window</TT>. <I>See</I> <TT>clearTimeout</TT> method.
+<H3><A NAME="setYearnbspnbsp">
+setYear&nbsp;&nbsp;</A></H3>
+<P>
+Sets the year in the current date using an integer representing
+the year minus 1900.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>getYear</TT> method.
+<H3><A NAME="sinnbspnbsp">
+sin&nbsp;&nbsp;</A></H3>
+<P>
+Returns the sine of an argument. The argument is the size of an
+angle expressed in radians, and the returned value is from -1
+to 1.
+<P>
+Method of <TT>Math</TT>. <I>See</I> methods <TT>acos</TT>, <TT>asin</TT>,
+<TT>atan</TT>, <TT>cos</TT>, <TT>tan</TT>.
+<H3><A NAME="smallnbspnbsp">
+small&nbsp;&nbsp;</A></H3>
+<P>
+Formats a string object into a small font using the HTML <TT>&lt;SMALL&gt;</TT>
+tags.
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>big</TT> and
+<TT>fontsize</TT>.
+<H3><A NAME="sqrtnbspnbsp">
+sqrt&nbsp;&nbsp;</A></H3>
+<P>
+Returns the square root of a positive numeric expression. If the
+argument's value is outside the range, the returned value is zero.
+<H3><A NAME="strikenbspnbsp">
+strike&nbsp;&nbsp;</A></H3>
+<P>
+Formats a string object as strikeout text using the HTML <TT>&lt;STRIKE&gt;</TT>
+tags.
+<P>
+Method of <TT>string</TT>. <I>See</I> methods <TT>blink</TT>,
+<TT>bold</TT>, <TT>italics</TT>.
+<H3><A NAME="subnbspnbsp">
+sub&nbsp;&nbsp;</A></H3>
+<P>
+Formats a string object into subscript text using the HTML <TT>&lt;SUB&gt;</TT>
+tags.
+<P>
+Method of string. <I>See</I> sup method.
+<H3><A NAME="submitnbspnbsp">
+submit&nbsp;&nbsp;</A></H3>
+<P>
+Performs the same action as clicking a submit button.
+<P>
+Method of <TT>form</TT>. <I>See</I> <TT>submit</TT> object; <I>see</I>
+<TT>onSubmit</TT> event handler.
+<H3><A NAME="substringnbspnbsp">
+substring&nbsp;&nbsp;</A></H3>
+<P>
+Returns a subset of a string object based on two indexes. If the
+indexes are equal, an empty string is returned. Regardless of
+order, the substring is built from the smallest index to the largest.
+<P>
+Method of <TT>string</TT>.
+<H3><A NAME="supnbspnbsp">
+sup&nbsp;&nbsp;</A></H3>
+<P>
+Formats a string object into superscript text using the HTML <TT>&lt;SUP&gt;</TT>
+tags.
+<P>
+Method of <TT>string</TT>. <I>See</I> <TT>sub</TT> method.
+<H3><A NAME="tannbspnbsp">
+tan&nbsp;&nbsp;</A></H3>
+<P>
+Returns the tangent of an argument. The argument is the size of
+an angle expressed in radians.
+<P>
+Method of <TT>Math</TT>. <I>See</I> methods <TT>acos</TT>, <TT>asin</TT>,
+<TT>atan</TT>, <TT>cos</TT>, <TT>sin</TT>.
+<H3><A NAME="toGMTStringnbspnbsp">
+toGMTString&nbsp;&nbsp;</A></H3>
+<P>
+Converts a date object to a string using Internet Greenwich mean
+time (GMT) conventions. For example, if <TT>today</TT> is a date
+object:
+<BLOCKQUOTE>
+<PRE>
+today.toGMTString()
+</PRE>
+</BLOCKQUOTE>
+<P>
+then the string &quot;Mon, 18 Dec 1995 17:28:35 GMT&quot; is returned.
+Actual formatting may vary from platform to platform. The time
+and date are based on the client machine.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>toLocaleString</TT> method.
+<H3><A NAME="toLocaleStringnbspnbsp">
+toLocaleString&nbsp;&nbsp;</A></H3>
+<P>
+Converts a date object to a string using the local conventions,
+such as <TT>mm/dd/yy hh:mm:ss</TT>.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>toGMTString</TT> method.
+<H3><A NAME="toLowerCasenbspnbsp">
+toLowerCase&nbsp;&nbsp;</A></H3>
+<P>
+Converts all characters in a string to lowercase.
+<P>
+Method of <TT>string</TT>. <I>See</I> <TT>toUpperCase</TT> method.
+<H3><A NAME="toStringnbspnbsp">
+toString&nbsp;&nbsp;</A></H3>
+<P>
+Converts a date or location object to a string.
+<P>
+Method of <TT>Date</TT>, <TT>location</TT>.
+<H3><A NAME="toUpperCasenbspnbsp">
+toUpperCase&nbsp;&nbsp;</A></H3>
+<P>
+Converts all characters in a string to uppercase.
+<P>
+Method of <TT>string</TT>.
+<P>
+<I>See</I> <TT>toLowerCase</TT> method.
+<H3><A NAME="unEscapenbspnbsp">
+unEscape*&nbsp;&nbsp;</A></H3>
+<P>
+Returns a character based on its ASCII value expressed as a string
+in the format <TT>%xxx</TT> where xxx is a decimal number between
+zero and 255, or 0x0 to 0xFF in hex.
+<P>
+<I>See</I> <TT>escape</TT> METHOD.
+<H3><A NAME="UTCnbspnbsp">
+UTC&nbsp;&nbsp;</A></H3>
+<P>
+Returns the number of milliseconds for a date in Universal Coordinated
+Time (UTC) since midnight, January 1, 1970.
+<P>
+UTC is a constant, and is always used as <TT>Date.UTC()</TT>,
+not with a created date object.
+<P>
+Method of <TT>Date</TT>. <I>See</I> <TT>parse</TT> method.
+<H3><A NAME="writenbspnbsp">
+write&nbsp;&nbsp;</A></H3>
+<P>
+Writes one or more lines to a document window, and can include
+HTML tags and JavaScript expressions, including numeric, string,
+and logical values. The write method does not add a new line (<TT>&lt;BR&gt;</TT>
+or <TT>/n</TT>) character to the end of the output. If called
+from an event handler, the current document is cleared if a new
+window is not created for the output.
+<P>
+Method of <TT>document</TT>. <I>See</I> methods <TT>close</TT>,
+<TT>clear</TT>, <TT>open</TT>, <TT>writeln</TT>.
+<H3><A NAME="writelnnbspnbsp">
+writeln&nbsp;&nbsp;</A></H3>
+<P>
+Writes one or more lines to a document window followed by a new
+line character, and can include HTML tags and JavaScript expressions,
+including numeric, string, and logical values. If called from
+an event handler, the current document is cleared if a new window
+is not created for the output.
+<P>
+Method of <TT>document</TT>. <I>See</I> methods <TT>close</TT>,
+<TT>clear</TT>, <TT>open</TT>, <TT>write</TT>.
+<H2><A NAME="EventHandlers"><FONT SIZE=5 COLOR=#FF0000>
+Event Handlers</FONT></A></H2>
+<P>
+Event handlers are where JavaScript gets its power. By looking
+for specific user actions, JavaScript can confirm or act on input
+immediately, without waiting for server introduction. Since user
+activity within an HTML page is limited to mouse movement and
+input on form elements.
+<H3><A NAME="onBlur">
+onBlur</A></H3>
+<P>
+Blurs occur when a <TT>select</TT>, <TT>text</TT>, or <TT>textarea</TT>
+field on a form loses focus.
+<P>
+Event handler of <TT>select</TT>, <TT>text</TT>, <TT>textarea</TT>.
+<I>See</I> event handlers <TT>onChange</TT> and <TT>onFocus</TT>.
+<H3><A NAME="onChangenbspnbsp">
+onChange&nbsp;&nbsp;</A></H3>
+<P>
+A change event happens when a <TT>select</TT>, <TT>text</TT>,
+or <TT>textarea</TT> element on a form is modified before losing
+focus.
+<P>
+Event handler of <TT>select</TT>, <TT>text</TT>, <TT>textarea</TT>.
+<I>See</I> event handlers <TT>onBlur</TT>, <TT>onFocus</TT>.
+<H3><A NAME="onClicknbspnbsp">
+onClick&nbsp;&nbsp;</A></H3>
+<P>
+Occurs when an object, such as a button or checkbox, is clicked.
+<P>
+Event handler of <TT>button</TT>, <TT>checkbox</TT>, <TT>radio</TT>,
+<TT>link</TT>, <TT>reset</TT>, <TT>submit</TT>.
+<H3><A NAME="onFocusnbspnbsp">
+onFocus&nbsp;&nbsp;</A></H3>
+<P>
+A form element receives focus by tabbing to or clicking the input
+area with the mouse. Selecting within a field results in a <TT>select</TT>
+event.
+<P>
+Event handler of <TT>select</TT>, <TT>text</TT>, <TT>textarea</TT>.
+<I>See</I> event handlers <TT>onBlur</TT> and <TT>onChange</TT>.
+<H3><A NAME="onLoadnbspnbsp">
+onLoad&nbsp;&nbsp;</A></H3>
+<P>
+A load event is created when Navigator finishes loading a window
+or all frames within a <TT>&lt;FRAMESET&gt;</TT> tag.
+<P>
+Event handler of <TT>window</TT>. <I>See</I> <TT>onUnload</TT>
+event handler.
+<H3><A NAME="onMouseOvernbspnbsp">
+onMouseOver&nbsp;&nbsp;</A></H3>
+<P>
+Occurs when the mouse pointer is placed over a <TT>link</TT> object.
+To function with the <TT>status</TT> or <TT>defaultStatus</TT>
+properties, the event handler must return <TT>true</TT>.
+<P>
+Event handler of <TT>link</TT>.
+<H3><A NAME="onSelectnbspnbsp">
+onSelect&nbsp;&nbsp;</A></H3>
+<P>
+A select event is triggered by selecting some or all of the text
+in a <TT>text</TT> or <TT>textarea</TT> field.
+<P>
+Event handler of <TT>text</TT>, <TT>textarea</TT>.
+<H3><A NAME="onSubmitnbspnbsp">
+onSubmit&nbsp;&nbsp;</A></H3>
+<P>
+Triggered by the user submitting a form. The event handler must
+return <TT>true</TT> to allow the form to be submitted to the
+server. Conversely, it returns <TT>false</TT> to block the form's
+submission.
+<P>
+Event handler of <TT>form</TT>. <I>See</I> <TT>submit</TT> object
+and method.
+<H3><A NAME="onUnloadnbspnbsp">
+onUnload&nbsp;&nbsp;</A></H3>
+<P>
+Occurs when exiting a document. For proper operation, place the
+<TT>onUnload</TT> handler in the <TT>&lt;BODY&gt;</TT> or <TT>&lt;FRAMESET&gt;</TT>
+tags.
+<P>
+Event handler of <TT>window</TT>. <I>See</I> <TT>onLoad</TT> event
+handler.
+<HR>
+
+<CENTER><P><A HREF="ch28.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

@@ -1,0 +1,585 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 1 -- Browser Identification</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;1</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Browser Identification</FONT></H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#ServerSideScreening">
+Server-Side Screening</A>
+<UL>
+<LI><A HREF="#HighBandwidthLowBandwidth">
+High Bandwidth/Low Bandwidth</A>
+<LI><A HREF="#CGIWrapping">
+CGI Wrapping</A>
+</UL>
+<LI><A HREF="#ClientSideScreening">
+Client-Side Screening</A>
+<UL>
+<LI><A HREF="#ClientPull">
+Client-Pull</A>
+<LI><A HREF="#ClientSideScripting">
+Client-Side Scripting</A>
+<LI><A HREF="#FakingIltNOSCRIPTgtI">
+Faking <I>&lt;NOSCRIPT&gt;</I></A>
+</UL>
+<LI><A HREF="#TheCompletedGateKeeper">
+The Completed GateKeeper</A>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+It's no surprise that with new technology opening up the Web,
+the multitude of browsers available are starting to show the strain
+because everyone supports different levels of Web interaction.
+A vast majority of Web surfers use Netscape Navigator and Internet
+Explorer but not everyone uses (or chooses) a browser that supports
+everything. The end result of this explosive growth is the increased
+load placed on Web designers. The task of creating a site that
+both takes advantage of new technology and works well for older
+browsers is becoming increasingly difficult.
+<P>
+Fortunately, there is a collection of scripting tricks that can
+make your life a bit easier.
+<H2><A NAME="ServerSideScreening"><FONT SIZE=5 COLOR=#FF0000>
+Server-Side Screening</FONT></A></H2>
+<P>
+Before the days of languages like VBScript and JavaScript, the
+only way you could steer a surfer to the pages designed for them
+was:
+<BLOCKQUOTE>
+Present a different link on your home page for each browser type,
+and let the user select the correct set of pages.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Use a CGI script to identify the user's browser and force-feed
+the proper pages.
+</BLOCKQUOTE>
+<H3><A NAME="HighBandwidthLowBandwidth">
+High Bandwidth/Low Bandwidth</A></H3>
+<P>
+The first technique is still in use today on many sites (see fig.
+1.1). Three valuable uses of it are: 
+<P>
+<A HREF="f1-1.gif"><B>Figure 1.1: </B><I>Using the &quot;High bandwidth/Low bandwidth&quot;
+technique lets the user decide whether or not to view the graphically
+intense version of your site</I>.</A>
+<OL>
+<LI>Provide the option to switch to a text-only version of the
+site for speed surfing.
+<LI>Provide &quot;scripted&quot; versus &quot;non-scripted&quot;
+access to your site, to make the best use of advanced browsers
+while at the same time allowing older browsers to surf. 
+<LI>Offer heavily graphic (for users with hardwired or T1 connections)
+and lightly-graphic (for slower modems) paths through your site.
+</OL>
+<P>
+This &quot;high-speed/low-speed&quot; option is necessary because
+there is no way to identify a user's access speed. Even once the
+world is wired with optical connections, you should still consider
+offering alternative routes through your site to accommodate &quot;speed
+surfers&quot; that use text-only browsers or &quot;script surfers&quot;
+that may be using any one of several different scripting languages.
+<P>
+The downside of using the first technique is that most people
+are overly curious. Invariably, someone clicks the wrong link
+and wanders through your site with pages not optimized for his
+or her browser. He or she perhaps encounters scripting errors
+or poorly presented pages and draws a negative conclusion about
+your ability as a Web master. He or she might even e-mail you
+to complain-yes, such people do exist!
+<H3><A NAME="CGIWrapping">
+CGI Wrapping</A></H3>
+<P>
+The second technique requires access to the CGI level of your
+Web server and for you to maintain one <I>page tree</I> (directory)
+for each supported browser configuration. In essence, you set
+up your home page as a browser-generic gatekeeper that is accessible
+even to old browsers. Within the page, any defined links are written
+to point to a CGI script instead of the HTML file directly:
+<BLOCKQUOTE>
+<PRE>
+&lt;A HREF=&quot;/cgi-bin/start.cgi&quot;&gt;Enter the site&lt;/A&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Clicking a link forces the server to launch the CGI script, which
+then checks the <TT>HTTP_USER_AGENT</TT> environment variable
+to determine the browser type. Listing 1.1 shows a Perl fragment
+that does this.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 1.1&nbsp;&nbsp;Using CGI to Identify the Browser Type
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+#!/usr/local/bin/perl
+
+$userAgent = $ENV{'HTTP_USER_AGENT'};
+
+if ($userAgent =~ 'Mosaic') {
+}
+   $htmlFile = 'mosaicVersion.html';
+} elseif ($userAgent =~ 'Netscape') {
+   $htmlFile = 'netscapeVersion.html';
+} else {
+   $htmlFile = 'otherVersion.html';
+}
+
+$htmlFile = join (&quot;/&quot;, $ENV{'DOCUMENT_ROOT'}, $htmlFile);
+
+print &quot;Content-type: text/html\n\n&quot;;
+
+open (HTML, &quot;&lt;&quot;, $htmlFile);
+
+while (&lt;HTML&gt;) {
+   print;
+}
+
+close (HTML);
+exit (0);
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+While the script in listing 1.1 is very simple, this method also
+creates some problems, such as:
+<UL>
+<LI>You need to edit this script every time a new browser type
+appears. This may often require tracking down a copy of the browser
+itself or perusing the site's access logs to determine what the
+new browser transmits for a user agent ID.
+<LI>Because this script, and the HTML page that calls it, rely
+on the user clicking the links, your carefully planned front door
+script can be completely bypassed by the user entering a specific
+URL. 
+</UL>
+<P>
+Finally, you still have to maintain a separate site for each browser
+type you choose to <BR>
+support. It is a lot of effort for the end result. Fortunately,
+the introduction of client-side scripting tools has made this
+job easier.
+<H2><A NAME="ClientSideScreening"><FONT SIZE=5 COLOR=#FF0000>
+Client-Side Screening</FONT></A></H2>
+<P>
+Until the advent of JavaScript and VBScript, the ability to screen
+users has traditionally been somewhat limited. This generally
+affected those not running their own Web servers and those who
+didn't have access to the CGI services of their Web servers. Before
+discussing the new tricks, let's have a quick review of an old
+method: <I>client-pull</I>.
+<H3><A NAME="ClientPull">
+Client-Pull</A></H3>
+<P>
+Within the browser, the process of loading a new page (or reloading
+the current page) is initiated by the user through clicking a
+link or the <TT>Reload</TT> button. The concept of <I>client-pull</I>
+was developed by Netscape as an early method of automating this
+process. In essence, an HTML document contains additional information
+that instructs the browser to do either one of these:
+<OL>
+<LI>Reload the current page after a period of time
+</OL>
+<P>
+or
+<OL>
+<LI>Load a new page after a period of time
+</OL>
+<P>
+The client (browser) remains in control of the process and, when
+the specified time has elapsed, &quot;pulls&quot; a new page from
+the server, hence <I>client-pull</I>. To initiate client-pull,
+you need to utilize a special HTML tag: <TT>&lt;META&gt;</TT>.
+<P>
+The <TT>&lt;META&gt;</TT> (HTML) tag, one of the more esoteric
+HTML tags, is used within the header block (as defined by the
+HTML <TT>&lt;HEAD&gt;...&lt;/HEAD&gt;</TT> tag pair) and allows
+you to embed document &quot;meta-information&quot; that's not
+defined by other HTML tags. Once in the document, the server can
+extract or browse for various uses:
+<BLOCKQUOTE>
+Identify a document's content or author
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Index and catalog documents on a site
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Control the loading or reloading of a page
+</BLOCKQUOTE>
+<P>
+The third case, client-pull, is of interest in the current discussion
+because it's the job of the client (browser) to request (pull)
+the next page based on the information in the tag.
+<P>
+An example <TT>&lt;META&gt;</TT> tag would be:
+<BLOCKQUOTE>
+<PRE>
+&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;secs; URL=newURL&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+The two attributes of the <TT>&lt;META&gt;</TT> tag are:
+<OL>
+<LI><TT>HTTP-EQUIV</TT> must be set to &quot;Refresh&quot; to
+activate client-pull.
+<LI><TT>CONTENT</TT> consists of a number that specifies the number
+of seconds to wait before pulling the next page, and a <TT>URL=</TT>
+element that identifies the page to pull.
+</OL>
+<P>
+Listing 1.2 shows a page that directs the user somewhere else;
+or, if his or her browser supports it, takes him or her there
+automatically after a one-second delay.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 1.2&nbsp;&nbsp;Client-Pull<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;TITLE&gt;Welcome!&lt;/TITLE&gt;
+&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;1; URL=http://www.visi.com/next.html&quot;&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+You really need to
+&lt;A HREF=&quot;http://www.visi.com/next.html&quot;&gt;go here&lt;/A&gt;
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=576><B>TIP</B></TD></TR>
+<TR><TD WIDTH=576>
+<BLOCKQUOTE>
+If you wish to experiment with client-pull and you're using Internet Explorer, you'll need to do your testing <I>online</I>; that is, you'll have to load your pages into your Web site and access them from the server rather than reading them from your local 
+
+hard disk. While Navigator acknowledges client-pull requests from locally loaded (from disk) documents, Explorer does not.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+For the purposes of browser identification, client-pull does have
+limitations. Only the oldest browsers don't support it, which
+are the same ones that don't support much else, leaving you with
+a collection of browsers that <I>do</I>, which still have varying
+levels of support for <I>other</I> features. To more accurately
+identify different browsers and their capabilities, it's necessary
+to turn to client-side scripting.
+<H3><A NAME="ClientSideScripting">
+Client-Side Scripting</A></H3>
+<P>
+Client-side scripting involves one of two languages: VBScript
+(from Microsoft) or JavaScript (from Netscape). In both, the scripting
+code is embedded directly into the HTML document, and contained
+within a <TT>&lt;SCRIPT&gt;</TT> tag block:
+<BLOCKQUOTE>
+<PRE>
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+&lt;!-- hide
+   ...
+// end hide --&gt;
+&lt;/SCRIPT&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+When using VBScript, the <TT>LANGUAGE</TT> attribute is set to
+<TT>VBScript</TT>, but the general configuration of the block
+is identical.
+<P>
+Any browser that doesn't support scripting ignores the tag but
+still displays the script statements as text for display. To hide
+the script body from these browsers, wrap the entire body of the
+script in an HTML comment statement (<TT>&lt;!--</TT> &#133; <TT>--&gt;</TT>).
+<BR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=576><B>CAUTION</B></TD></TR>
+<TR><TD WIDTH=576>
+<BLOCKQUOTE>
+JavaScript and VBScript handle the comment wrapping in different ways. After JavaScript encounters the first half of the comment tag (<TT>&lt;!--</TT>), it switches to &quot;JavaScript&quot; mode. From that point on, every line within the script block is 
+assumed to be JavaScript code until the closing <TT>&lt;/SCRIPT&gt;</TT> tag is encountered. This means that the closing comment tag (<TT>--&gt;)</TT> needs to be prefaced with a JavaScript comment identifier (<TT>//</TT>) to prevent JavaScript from trying 
+
+to interpret the tag as JavaScript.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+VBScript, on the other hand, doesn't make this assumption. In fact, prefacing the closing comment tag with a VBScript comment identifier (<TT>'</TT>) will cause VBScript to generate an error. Therefore, the proper structure of a VBScript block is:
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>&lt;SCRIPT LANGUAGE=&quot;VBScript&quot;&gt;</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>&lt;!-- hide</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>   ...</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>--&gt;</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>&lt;/SCRIPT</TT>
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Even though both Navigator and Explorer support JavaScript, Explorer
+doesn't fully implement the language. Therefore, if you're going
+to do heavy Java scripting later in your site, you'll want to
+redirect Explorer users to another set of pages. Trying to get
+one page set to handle both browsers would require a good deal
+of conditional scripting. Fortunately, this is done quite easily
+because both browsers support the JavaScript <TT>location</TT>
+object, which permits you to force the loading of a new page.
+Determine which page to load by examining the <TT>navigator</TT>
+object, which stores information about the browser. The conditional
+loading of different pages for Navigator and Explorer is demonstrated
+in listing 1.3.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 1.3&nbsp;&nbsp;Java Scripted Page Selection<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+&lt;!--
+   if(navigator.appName.indexOf(&quot;Netscape&quot;) != -1) {
+      location.href = &quot;netscape/index.html&quot;;
+   } else {
+      location.href = &quot;microsoft/index.html&quot;;
+   }
+// --&gt;
+&lt;/SCRIPT&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+At this point, there's only one more case to cover before the
+client-side gatekeeper is complete: browsers that don't support
+scripting (such as Mosaic). Because a page containing JavaScript
+has to be loaded and processed, it's desirable to prevent the
+<I>no-script</I> version from displaying in Navigator or Explorer.
+This is accomplished by using a <TT>&lt;NOSCRIPT</TT>&gt; tag.
+<H3><A NAME="FakingIltNOSCRIPTgtI">
+Faking <I>&lt;NOSCRIPT&gt;</I></A></H3>
+<P>
+With the release of Navigator 3.0, Netscape coined several new
+HTML tags, including <TT>&lt;NOSCRIPT&gt;</TT>. The purpose of
+a <TT>&lt;NOSCRIPT&gt;</TT> block is similar to that of <TT>&lt;NOFRAMES</TT>&gt;-it
+identifies an HTML block for processing by a browser that doesn't
+support scripting. However, <TT>&lt;NOSCRIPT&gt;</TT> is not part
+of the HTML standard and, because of this, many other browsers
+will probably not adopt it. Explorer doesn't support it, so it's
+not the best option for specifying scriptless HTML. Fortunately,
+there is another way that works across all browsers and it relies
+on a unique attribute of JavaScript.
+<P>
+While the JavaScript interpreter looks inside the comment tag
+block for its script code, it has the unique function that once
+it encounters a comment-end (<TT>--&gt;</TT>) tag, it ignores
+<I>everything else on that line</I>. Non-JavaScript browsers,
+on the other hand, pick up the processing after the comment closes
+and interpret the rest of the line as valid HTML.
+<P>
+This means that you can place an empty comment (<TT>&lt;!-- --&gt;</TT>)
+at the beginning of a line inside the <TT>&lt;SCRIPT&gt;</TT>
+tag and get an HTML statement that JavaScript (and browser) ignores,
+but displays to non-scripting browsers. This effectively creates
+the equivalent of a <TT>&lt;NOSCRIPT&gt;</TT> &#133; <TT>&lt;/NOSCRIPT&gt;</TT>
+block, as demonstrated in listing 1.4.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 1.4&nbsp;&nbsp;Creating a <I>&lt;NOSCRIPT&gt;</I> Block
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+&lt;!-- begin hide
+   // JavaScript browsers process this
+   ...
+// end hide --&gt;
+&lt;/SCRIPT&gt;
+
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+&lt;!-- --&gt;Non-Script browsers will process this
+&lt;/SCRIPT&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=576><B>NOTE</B></TD></TR>
+<TR><TD WIDTH=576>
+<BLOCKQUOTE>
+Even though the text in the second <TT>&lt;SCRIPT&gt;</TT> block is intended for browsers that don't support scripting, it is necessary to specify <TT>JavaScript</TT> as the scripting language because of how Internet Explorer processes the script tag. 
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Additionally, while Explorer also supports VBScript it doesn't permit &quot;no-script&quot; lines within a VBScript code block</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=576><B>TIP</B></TD></TR>
+<TR><TD WIDTH=576>
+<BLOCKQUOTE>
+Because of a quirk in Microsoft's implementation of JavaScript, you can't mix the &quot;no-script&quot; technique and actual JavaScript code within the <I>same</I> script tag (a trick that Navigator allows). However, by simply moving the 
+&quot;no-script&quot; code into a separate <TT>&lt;SCRIPT&gt;</TT> tag block, you avoid this problem
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+This technique gives you the ability to code specific page objects,
+such as graphics, anchors, even plain text, that are displayed
+for different browsers, depending on what scripting language the
+browser supports, hence making it possible to handle both advanced
+and simple browsers within the same documents. 
+<P>
+However, all browsers are not alike. For example, Internet Explorer
+2.1 for the Macintosh <I>does</I> support frames and other advanced
+HTML features, but <I>does not</I> support JavaScript. In fact,
+Explorer 2.1/Mac treats the <TT>&lt;SCRIPT&gt;</TT> tag differently
+from any other browser-it ignores <I>everything</I> within the
+tag, whether the tag contains JavaScript code or &quot;no-script&quot;
+statements. 
+<P>
+As such, trying to support all possible current browsers within
+the same document set is simply not possible, unless you're willing
+to sacrifice many of the advanced browser features.
+<H2><A NAME="TheCompletedGateKeeper"><FONT SIZE=5 COLOR=#FF0000>
+The Completed GateKeeper</FONT></A></H2>
+<P>
+If you want to use the latest and greatest Web technology and
+support the greatest number of browsers, one method is to split
+your site into two collections of documents, each optimized for
+a different type of browser. It's not necessary to create multiple
+versions for all documents-only those that make extensive use
+of advanced features or multimedia files. To automatically direct
+surfers to the pages best suited for their browsers, you need
+a &quot;gatekeeper&quot; or &quot;redirection script.&quot; Using
+the techniques demonstrated thus far, you can create a gatekeeper
+front page that will perform the following:
+<UL>
+<LI>Send Navigator users to the Netscape-optimized part of your
+site.
+<LI>Send Explorer users to the Microsoft-optimized part of your
+site.
+<LI>Take users of other browsers through a third part of your
+site that works best for them.
+</UL>
+<P>
+Listing 1.5 demonstrates the overall structure of the gatekeeper.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 1.5&nbsp;&nbsp;A Gatekeeper Front Page<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;HTML&gt;
+&lt;HEAD&gt;
+   &lt;TITLE&gt;GateKeeper&lt;/TITLE&gt;
+&lt;/HEAD&gt;
+&lt;BODY&gt;
+
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+&lt;!--
+   if(navigator.appName.indexOf(&quot;Netscape&quot;) != -1) {
+      location.href = &quot;netscape/index.html&quot;;
+   } else {
+      location.href = &quot;microsoft/index.html&quot;;
+   }
+// --&gt;
+&lt;/SCRIPT&gt;
+
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+&lt;!-- --&gt;&lt;H1&gt;Welcome!&lt;/H!&gt;
+&lt;!-- --&gt;&lt;HR&gt;
+&lt;!-- --&gt;This site utilizes the advanced features of
+&lt;!-- --&gt;&lt;A HREF=&quot;http://www.microsoft.com/ie/&quot;&gt;Internet Explorer&lt;/A&gt;
+&lt;!-- --&gt;and
+&lt;!-- --&gt;&lt;A HREF=&quot;http://home.netscape.com/&quot;&gt;Netscape Navigator&lt;/A&gt;.
+&lt;!-- --&gt;Download your copy now!
+&lt;/SCRIPT&gt;
+
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=576><B>NOTE</B></TD></TR>
+<TR><TD WIDTH=576>
+<BLOCKQUOTE>
+While this seems like extra work, depending on the site you're constructing, it might very well be worth it. If you're designing commercial sites, you'll probably encounter a client or two who wants <I>everyone</I> to have access to the site 
+<I>regardless</I> of the browser they use-and still support all the advanced features that make the Web so multimedia-rich.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+You can, however, save yourself some work (and maintenance) with some judicious JavaScript coding. Because Navigator and Explorer both support the <TT>navigator</TT> object and it's <TT>appName</TT> and <TT>appVersion</TT> properties, you can 
+&quot;wrap&quot; browser-specific pieces of code with conditional checks that make certain code work for one browser or the other. This effectively reduces your work from three distinct sets to two: JavaScript and non-JavaScript. 
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Examples of this technique are found throughout the book.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+If you want to take advantage of both the latest Web technologies
+and still make your site accessible to those not using the latest
+browsers, you'll need to use some form of gatekeeper.
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+This chapter starts the adventure through the world of Web scripting
+by examining several techniques for <I>screening</I> surfers through
+a site based on the type of browser used. This provides an excellent
+basis for several other techniques. If you're interested in seeing
+browser screening in action, check out:
+<UL>
+<LI><A HREF="ch2.htm" >Chapter 2</A> &quot;Plug-In Identification,&quot; examines how
+to tell if a plug-in is installed on a user's browser.
+<LI><A HREF="ch7.htm" >Chapter 7</A> &quot;Animating Images,&quot; tells you how to
+use HTML, GIFs, and client-pull.
+<LI><A HREF="ch24.htm" >Chapter 24</A>, &quot;Designing an eZine,&quot; shows you how
+to create and publish your own electronic online magazine.
+</UL>
+<HR>
+
+<CENTER><P>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch2.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

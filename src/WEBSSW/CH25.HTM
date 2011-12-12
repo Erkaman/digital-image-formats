@@ -1,0 +1,508 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 25 -- Creating a Coloring Book</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;25</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Creating a Coloring Book</FONT>
+</H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#WhatAreCyberCrayons">
+What Are CyberCrayons?</A>
+<LI><A HREF="#BasicColoringBookStructure">
+Basic Coloring Book Structure</A>
+<LI><A HREF="#DisplayingtheColorPalette">
+Displaying the Color Palette</A>
+<LI><A HREF="#TheEasel">
+The Easel</A>
+<LI><A HREF="#GeneratingGIFswithPerl">
+Generating GIFs with Perl</A>
+<LI><A HREF="#AddingColoringBookEnhancements">
+Adding Coloring Book Enhancements</A>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+If you think the interaction through the Web is limited to clicking
+hyperlinks and filling out forms, think again. While technologies
+like ActiveX, Java, and Shockwave have made the creation of interactive
+games and other products a popular feature of many Web sites,
+you can still create some interesting Web-based image manipulation
+applications with nothing more than Perl and JavaScript.
+<H2><A NAME="WhatAreCyberCrayons"><FONT SIZE=5 COLOR=#FF0000>
+What Are CyberCrayons?</FONT></A></H2>
+<P>
+This chapter takes a break from the serious side of Web scripting
+and presents a simple, yet fun, way to waste <I>hours</I> of online
+time.
+<P>
+A Web-based coloring book is a heavy-duty data-transmission application
+involving:
+<BLOCKQUOTE>
+Keeping track of current drawing color.<BR>
+Responding to the user's paint requests.<BR>
+Generating new images and incorporating new colors the user enters.
+<BR>
+Transmitting the image back to the user.
+</BLOCKQUOTE>
+<P>
+Transmitting images alone makes the application &quot;Internet
+intensive.&quot; If either your connection to your server or your
+server to the Internet is slow or bogs down due to massive activity,
+the coloring experience can be less than enjoyable. To try to
+offset this, the script set presented here attempts to minimize
+the amount of data transmitted between the client and the server
+by using JavaScript. This reduces the amount of data the server
+has to transmit to the minimum: a new graphic with additional
+painted colors.
+<H2><A NAME="BasicColoringBookStructure"><FONT SIZE=5 COLOR=#FF0000>
+Basic Coloring Book Structure</FONT></A></H2>
+<P>
+Splitting the task of maintaining the coloring book between JavaScript
+and Perl requires setting up a two-frame interface through the
+browser, as shown in figure 25.1. 
+<P>
+<A HREF="f25-1.gif"><B>Figure 25.1 :</B> <I>Splitting the browser into two separate
+frames enables JavaScript and Perl to interact within the same
+application</I>.</A>
+<P>
+The top frame, the <I>easel,</I> runs as the user's canvas, displaying
+the changes as the user paints. The bottom frame, the <I>palette</I><TT>,</TT>
+holds the available colors for painting, as well as identifies
+the current drawing color. 
+<H2><A NAME="DisplayingtheColorPalette"><FONT SIZE=5 COLOR=#FF0000>
+Displaying the Color Palette</FONT></A></H2>
+<P>
+The color palette has three duties:
+<OL>
+<LI>Display a table of available colors.
+<LI>Display the current drawing color.
+<LI>Update the current drawing color when the user selects a new
+color from the table.
+</OL>
+<P>
+Displaying the table is relatively simple, given the advanced
+HTML table controls available under Navigator 3.0 and Explorer
+3.0. Because you can specify the background color of individual
+table cells, you do not need to load a different &quot;color swatch&quot;
+from the server for each palette color you want to support. In
+essence, the color table code would look like the fragment in
+listing 25.1.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Because this technique relies on the ability to control the background color of individual table cells, this application only functions under Internet Explorer or Netscape Navigator (version 3.0 or later).</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<HR>
+<BLOCKQUOTE>
+<B>Listing 25.1&nbsp;&nbsp;Basic Color Table Structure<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;TABLE BORDER=4 CELLPADDING=0 CELLSPACING=0&gt;
+   &lt;TR&gt;
+      &lt;TD WIDTH=32 HEIGHT=32 BGCOLOR=red&gt;
+         &lt;A HREF=&quot;colors.htm&quot; 
+            ONCLICK=&quot;SetColor('red')&quot;&gt;&lt;IMG
+            SRC=&quot;blank.gif&quot; BORDER=0&gt;&lt;/A&gt;
+      &lt;/TD&gt;
+      ...
+&lt;/TABLE&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+<TT>The SetColor()</TT> function in the <TT>onClick</TT> handler is a user-defined JavaScript function that stores the current drawing color in a global variable. It's demonstrated in the coloring book code on the companion CD-ROM.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+The <TT>&lt;TD&gt;</TT> element shown in listing 25.1 repeats
+for each color in the table. This means that each palette cell
+is essentially the same-only the background color changes, so
+you can collapse all the repetitive HTML into one JavaScript function,
+like the one in listing 25.2.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+It's not <I>technically</I> necessary to load an image into the palette cells. However, loading a transparent GIF that is nothing <I>but </I>the transparent color is, unfortunately, necessary if you wish to support both Navigator and Explorer because each 
+
+browser handles cell sizing differently. The only way to ensure a specific cell size is to use &quot;placeholder&quot; images.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+On the positive side, because the same image is loaded into each cell, the amount of additional load time imposed is negligible.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<HR>
+<BLOCKQUOTE>
+<B>Listing 25.2&nbsp;&nbsp;JavaScript-Generated Colors<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function DrawColors() {
+   var tStr = &quot;&quot;;
+   var argc = DrawColors.arguments.length;
+   var argv = DrawColors.arguments;
+
+   for(var i=0; i&lt;argc; i++) {
+      tStr += '&lt;TD WIDTH=32 HEIGHT=32 BGCOLOR=' + 
+              argv[i] + '&gt;&lt;A HREF=&quot;colors.htm&quot; ' +
+              'ONCLICK=&quot;SetColor(' + &quot;'&quot; + argv[i] +
+              &quot;'&quot; + 
+              ')&quot;&gt;&lt;IMG SRC=&quot;blank.gif&quot; ' + 
+              'BORDER=0&gt;&lt;/A&gt;&lt;/TD&gt;';
+   }
+
+   return tStr;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Because <TT>DrawColors()</TT> creates as many table cells as it
+has parameters, you can replace the entire collection of table
+cells with the following code block:
+<BLOCKQUOTE>
+<PRE>
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+document.write(DrawColors(&quot;red,&quot; &quot;orange,&quot; &quot;yellow,&quot; &quot;green,&quot; 
+   &quot;blue,&quot; &quot;purple,&quot; &quot;black,&quot; &quot;white&quot;));
+&lt;/SCRIPT&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+The last cell to display is the one holding the current drawing
+color. As with the previous cells, JavaScript can be used to dynamically
+change the background color of this cell, based on a global variable
+stored in the parent document:
+<BLOCKQUOTE>
+<PRE>
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+document.write(DrawColors(parent.currColor));
+&lt;/SCRIPT&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+The global variable used here changes via the <TT>SetColor()</TT>
+function associated with the individual palette cell's <TT>onClick</TT>
+event. Each cell contains a hyperlink:
+<BLOCKQUOTE>
+<PRE>
+&lt;A HREF=&quot;colors.htm&quot; ...&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+which forces the palette document to reload itself. Each time
+the palette document loads, it checks the global color variable
+to determine what color to specify in the &quot;current drawing
+color&quot; cell of the displayed table.<BR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+In order to prevent the browser from caching the color palette document, it's necessary to include the following line in the <TT>&lt;HEAD&gt;</TT> block:
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>&lt;META NAME=&quot;Pragma&quot; CONTENT=&quot;no_cache&quot;&gt;</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+This meta tag instructs the browser not to cache (either in memory or on disk) the document.</BLOCKQUOTE>
+<BLOCKQUOTE>
+When designing non-caching documents, keep in mind that you may not be able to test the pages entirely until you load them onto the server. While Navigator recognizes the <TT>Pragma</TT> directive when embedded within an HTML document, Explorer ignores it 
+
+in favor of the file within its cache.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="TheEasel"><FONT SIZE=5 COLOR=#FF0000>
+The Easel</FONT></A></H2>
+<P>
+While the palette keeps track of the current color, the easel's
+responsibility is to:
+<UL>
+<LI>Display the image the user wants to color.
+<LI>Respond to mouse clicks over the image and pass the coordinates
+of the click as well as the paint color back to the server for
+processing.
+</UL>
+<P>
+This is a job for a Perl script. Handling mouse clicks over the
+image and recording the location is relatively straightforward-define
+the image as an image map, demonstrated in listing 25.3.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 25.3&nbsp;&nbsp;Image Map Definition<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;TABLE BORDER=3&gt;
+   &lt;TR&gt;&lt;TD&gt;
+      &lt;A HREF=&quot;http://www.visi.com/cgi-bin/color.pl/00FF00&quot;&gt;&lt;IMG 
+         SRC=&quot;house.gif&quot; ISMAP BORDER=0&gt;&lt;/A&gt;
+   &lt;/TD&gt;&lt;/TR&gt;
+&lt;/TABLE&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The key to the magic is how image maps are handled. By the definition
+of an image map, the URL used in listing 25.3:
+<BLOCKQUOTE>
+<PRE>
+http://www.visi.com/cgi-bin/color.pl/00FF00
+</PRE>
+</BLOCKQUOTE>
+<P>
+defines not only the program (<TT>color.pl</TT>) to use as the
+CGI binary, but the file (<TT>00FF00</TT>) to use as the map file.
+In this case, the map file is not really a map file, but the pen
+color to flood the image.
+<P>
+When an image map is clicked, the coordinates of the cursor are
+passed as part of a query string, as in:
+<BLOCKQUOTE>
+<PRE>
+http://www.visi.com/cgi-bin/color.pl/00FF00?75,25
+</PRE>
+</BLOCKQUOTE>
+<P>
+making all the information necessary to redraw the image available.
+But, before diving into image drawing, it's necessary to pick
+up a couple of other Perl skills-namely, the ability to modify
+GIF images on-the-fly.
+<H2><A NAME="GeneratingGIFswithPerl"><FONT SIZE=5 COLOR=#FF0000>
+Generating GIFs with Perl</FONT></A></H2>
+<P>
+Perl 5 is object-oriented. Authors from around the world have
+created a variety of add-on packages that extend the language
+in the same way as libraries of functions extended the capabilities
+of Perl 4. One such package is <TT>gd.pm</TT>, an interface to
+the <TT>gd</TT> library written by Thomas Boutell. While <TT>gd</TT>
+permits you to create and manipulate GIF images on-the-fly, <TT>gd.pm</TT>
+lets you do all this through Perl and transmit the new information
+back to the server and, ultimately, the user.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+<TT>gd.pm</TT> is available on the companion CD-ROM.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Implementing <TT>gd.pm</TT> for the purpose of a coloring book
+is simple. You include the package in your Perl source and write
+a control block similar to listing 25.4.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 25.4&nbsp;&nbsp;Using GD.pm with Perl<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+#!/usr/local/bin/perl 
+
+use GD;
+
+open (GIF, &quot;house.gif&quot;) || die;
+$myImage = newFromGif GD::Image(GIF) || die;
+close GIF;
+...
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Once the GIF has been &quot;imported&quot; into the <TT>gd</TT>
+system, you can use the coordinates and pen color from the image
+map to repaint the image, as demonstrated in listing 25.5.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 25.5&nbsp;&nbsp;Modifying Images with Perl<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+...
+$xcoord = ARGV[1];
+$ycoord = ARGV[2];
+$white = $myImage-&gt;colorAllocate(0,0,0); #background color
+$black = $myImage-&gt;colorAllocate(255,255,255);
+$currColor =  $myImage-&gt;colorAllocate($red, $green, $blue);
+$myImage-&gt;fill($xcoord, $ycoord,$currColor);
+...
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+The additional lines in listing 25.5 that create <TT>$white</TT> and <TT>$black</TT> are necessary because of the way the <TT>gd</TT> library works. When using the <TT>colorAllocate()</TT> method, the first color allocated is the background color. Because 
+
+the starting image is a line drawing (consisting only of black lines and a white background), allocating a white background prevents any possible image color problems when flooded with new colors.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+With the filling process complete, all that's left is to transmit
+the new graphic back to the user, as part of the new easel document.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 25.6&nbsp;&nbsp;The Easel<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+...
+print &quot;Content-type:  text/html\n\n&quot;;
+
+print &lt;&lt; __END_OF_EASEL__;
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;/HEAD&gt;
+&lt;BODY BGCOLOR=#ffffff&gt;
+
+&lt;CENTER&gt;
+
+&lt;H1&gt;Coloring Book&lt;/H1&gt;
+
+&lt;HR WIDTH=50%&gt;
+
+&lt;TABLE BORDER=3&gt;
+   &lt;TR&gt;&lt;TD&gt;
+      &lt;A HREF=&quot;http://www.visi.com/cgi-bin/color.pl/$penColor&quot;&gt;&lt;IMG 
+         SRC=&quot;$newImage.gif&quot; ISMAP BORDER=0&gt;&lt;/A&gt;
+   &lt;/TD&gt;&lt;/TR&gt;
+&lt;/TABLE&gt;
+
+&lt;/CENTER&gt;
+
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+__END_OF_EASEL__
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+This Perl fragment takes advantage of the <TT>&lt;Here-is&gt;</TT> tag. This tag, identified by the <TT>&lt;&lt;</TT> mark in a <TT>print</TT> statement, as in:
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>print &lt;&lt;tag;</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+instructs Perl to treat each line until the line:</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>tag</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+is encountered as though it had been formatted as:</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>print &quot;text&quot;;</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+This is another shortcut that makes creating large HTML documents easier to generate through Perl.</BLOCKQUOTE>
+<BLOCKQUOTE>
+As demonstrated in listing 25.6, you can still embed Perl variables within this block, which will be appropriately expanded.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+The only thing left requires the generation of a new GIF file
+that becomes the name of the new image-map graphic, which the
+updated image data is written to:
+<BLOCKQUOTE>
+<PRE>
+open(IMAGE, &quot;&gt;$newImage.gif&quot;);
+print IMAGE $myImage-&gt;gif;
+close(IMAGE);
+</PRE>
+</BLOCKQUOTE>
+<H2><A NAME="AddingColoringBookEnhancements"><FONT SIZE=5 COLOR=#FF0000>
+Adding Coloring Book Enhancements</FONT></A></H2>
+<P>
+The coloring book interface detailed here treats drawing as though
+you were flooding a region with color. While the Web does not
+permit the kind of interaction necessary to enable line drawing
+and other fancy paint functions, you could try these three ideas:
+<OL>
+<LI>Enable text creation and placement on the graphic.
+<LI>Print out the final image. To accomplish this, it's best to
+have the &quot;print mode&quot; spawn another browser window where
+the image takes up the entire client space. This prevents formatting
+problems from trying to print frames.
+<LI>Enable the placement of simple shapes-squares, circles, and
+so on. If the shapes are a consistent size, the artist can do
+the Web equivalent of &quot;drag-and-drop.&quot;
+</OL>
+<P>
+For examples on how to implement these ideas, check out the source
+code on the companion CD-ROM.
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+This chapter presented a project that had JavaScript and Perl
+working in chorus to reduce the amount of data moving across the
+Internet, while creating an application that's fun for kids as
+well as adults.
+<P>
+For more information on this and other related techniques, check
+out:
+<UL>
+<LI><A HREF="ch12.htm" >Chapter 12</A>, &quot;Guestbook/Graffiti Wall,&quot; shows you
+how to create a guestbook for visitors to &quot;sign in&quot;
+and leave messages for others on a graffiti wall.
+<LI><A HREF="ch15.htm" >Chapter 15</A>, &quot;Managing a Database,&quot; teaches you how
+to create and maintain a database.
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch24.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch26.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

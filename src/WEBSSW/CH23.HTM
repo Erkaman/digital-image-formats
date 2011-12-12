@@ -1,0 +1,687 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 23 -- Search Engine Front-End</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;23</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Search Engine Front-End</FONT>
+</H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#TalkingtoOnlineEngines">
+Talking to Online Engines</A>
+<LI><A HREF="#UnderstandingtheMostPopularSearchEngines">
+Understanding the Most Popular Search Engines</A>
+<UL>
+<LI><A HREF="#AltaVista">
+Alta Vista</A>
+<LI><A HREF="#ExciteNetsearch">
+Excite Netsearch</A>
+<LI><A HREF="#HotBot">
+HotBot</A>
+<LI><A HREF="#InfoSeekGuide">
+InfoSeek Guide</A>
+<LI><A HREF="#Lycos">
+Lycos</A>
+<LI><A HREF="#SharewareCOM">
+Shareware.COM</A>
+<LI><A HREF="#WebCrawler">
+WebCrawler</A>
+<LI><A HREF="#Yahoo">
+Yahoo!</A>
+</UL>
+<LI><A HREF="#InterfacingtoMultipleSearchEngines">
+Interfacing to Multiple Search Engines</A>
+<UL>
+<LI><A HREF="#DesigningaGenericSearchForm">
+Designing a Generic Search Form</A>
+<LI><A HREF="#BuildingtheQuery">
+Building the Query</A>
+</UL>
+<LI><A HREF="#ServerSideRedirection">
+Server-Side Redirection</A>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+With the vast amount of information available through the Web,
+finding exactly what you want can be a major problem. Enter the
+<I>search engine</I>, a site dedicated to cataloging the information
+stored in and around Cyberspace. If it wasn't for such &quot;library&quot;
+sites, the Web would be a massive collection of Cyber-eddies and
+backwaters-some of which you'd never find your way into, or out
+of.
+<P>
+With the number of search engines on the Web increasing almost
+as quickly as the number of sites, you need a search engine that
+searches the search engines just to bring things back under control.
+<H2><A NAME="TalkingtoOnlineEngines"><FONT SIZE=5 COLOR=#FF0000>
+Talking to Online Engines</FONT></A></H2>
+<P>
+All search engines, such as Yahoo!, shown in figure 23.1, rely
+on a similar interface-you fill out a form and submit it. What
+happens behind the scenes is also pretty standard.
+<P>
+<A HREF="f23-1.gif"><B>Figure 23.1 :</B> <I>Yahoo!, like other search engines, presents
+the user with a simple form interface to the massive database
+behind the scenes</I>.</A>
+<P>
+<I>How</I> the form interfaces with the engine varies, but they
+all use the same technique: The various configuration options
+for the engine are passed in as query parameters. In short, each
+engine uses a form something like this:
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM METHOD=GET ACTION=&quot;script&quot;&gt;
+&lt;!-- fields --&gt;
+&lt;/FORM&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+where <TT>script</TT> is the engine-specific script or program
+that's executed when the form is submitted.
+<P>
+<I>Fields</I> are the form fields where the engine needs to perform
+the search. These include the text to search for and (optionally)
+additional fields that control <I>how</I> the search is to be
+performed-such as &quot;match exactly&quot; or &quot;search UseNet.&quot;
+It's quite common for several of these fields to be selection
+lists or hidden fields in order to force a particular search type.
+<P>
+If you know what <I>fields</I> a particular engine requires, what
+the expected <I>values</I> are, and what the <TT>ACTION</TT> attribute
+of the <TT>&lt;FORM&gt;</TT> tag needs to be, you can create your
+own front-end for individual engines.
+<P>
+Therefore, the first step in building a front-end is to determine
+how to talk to each engine you want to v&ccedil;pport. Even though
+most online engines don't print a simple document detailing their
+interface, you can still quickly figure out what you need by resorting
+to &quot;Rule 1&quot; of the Web scripter's code:
+<P>
+<I>&quot;When learning how to do something, look over the shoulder
+of someone who's already figured it out.&quot;<BR>
+</I><P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Probably the easiest way to figure out what parameters are used by which engines is to &quot;creatively adapt&quot; the interface of another site that's already incorporating what you're looking for. An excellent place to start is <B>search.com</B> from 
+CNET, Inc. (<B>http://www.search.com/</B>). Claiming 250+ search engines under one roof, it has the most extensive listings of search interfaces of any site on the Web.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="UnderstandingtheMostPopularSearchEngines"><FONT SIZE=5 COLOR=#FF0000>
+Understanding the Most Popular Search Engines</FONT></A></H2>
+<P>
+To help cut down the learning curve, the following sections look
+at the form parameters for several of the most popular search
+engines. What's covered next is just the tip of the iceberg as
+far as online engines go, but should serve as a good starting
+point to designing your own search interface. While many of the
+engines covered have more form fields than you'll find here, what's
+listed below are the <I>minimum</I> fields you need to set for
+executing a search.
+<H3><A NAME="AltaVista">
+Alta Vista</A></H3>
+<P>
+Alta Vista (<B><A HREF="http://www.altavista.digital.com/">http://www.altavista.digital.com/</A></B>) is one of
+the most popular search <BR>
+engines on the Web today. Claiming to have indexed over 30 <I>million</I>
+pages from almost <I>270,000</I> sites, it may well be the most
+comprehensive look at Cyberspace under one roof. The <TT>&lt;FORM&gt;</TT>
+tag required to connect to Alta Vista is:
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM method=GET action=&quot;http://www.altavista.digital.com/cgi-bin/query&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+and table 23.1 shows some of the form fields it supports.<BR>
+<P>
+<CENTER><B>Table 23.1&nbsp;&nbsp;Alta Vista Form Fields</B></CENTER>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Field Name</B></TD><TD WIDTH=439><B>Field Value</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>q</TT></TD><TD WIDTH=439>Specifies what's being searched for (as entered by the user).
+</TD></TR>
+<TR><TD WIDTH=151><TT>pg</TT></TD><TD WIDTH=439>Set this to &quot;q.&quot;
+</TD></TR>
+<TR><TD WIDTH=151><TT>what</TT></TD><TD WIDTH=439>Controls what is being searched. Possible values are: &quot;Web&quot; (search the Web) and &quot;news&quot; (search UseNet).
+</TD></TR>
+<TR><TD WIDTH=151><TT>fmt</TT></TD><TD WIDTH=439>Controls formatting of search results. Possible values are: &quot;.&quot; (standard form), &quot;c&quot; (compact form), and &quot;d&quot; (detailed form).
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="ExciteNetsearch">
+Excite Netsearch</A></H3>
+<P>
+Excite (<B><A HREF="http://www.excite.com/">http://www.excite.com/</A></B>), developed by Architext
+Software, is an incredibly fast, full-text search engine. The
+engine is available for a variety of platforms, and can also be
+found on the companion CD-ROM. From within your own HTML pages,
+the <TT>&lt;FORM&gt;</TT> tag to connect to Excite would look
+like:
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM METHOD=POST ACTION=&quot;http://www.excite.com/search.gw&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Excite supports several form fields to control the type and breadth
+of its search, but the only three you need to hook into the engine
+are:
+<OL>
+<LI><TT>search</TT>-holds what you're searching for (as entered
+by the user).
+<LI><TT>searchType</TT>-defines the kind of search. Possible values
+are &quot;Keyword&quot; for keyword searches and &quot;Concept&quot;
+for topic searches.
+<LI><TT>showqbe</TT>-enables display of Excite's &quot;query-by-example&quot;
+tags on the search results lines. Set this field to &quot;1&quot;
+to display the tags, &quot;0&quot; to hide them.
+</OL>
+<H3><A NAME="HotBot">
+HotBot</A></H3>
+<P>
+HotBot (<B><A HREF="http://www.hotbot.com/">http://www.hotbot.com/</A></B>) is hosted by <I>HotWired</I>,
+the &quot;hip&quot; magazine, eZine, and netizen hang out. Based
+on Inktomi, it takes the following <TT>&lt;FORM&gt;</TT> tag to
+access:
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM METHOD=GET ACTION=&quot;http://www.hotbot.com/search.html&quot; NAME=HSQ&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+and table 23.2 details the form fields.<BR>
+<P>
+<CENTER><B>Table 23.2&nbsp;&nbsp;HotBot Form Fields</B></CENTER>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Field Name</B></TD><TD WIDTH=439><B>Field Value</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>MT</TT></TD><TD WIDTH=439>Specifies what's being searched for (as entered by the user).
+</TD></TR>
+<TR><TD WIDTH=151><TT>_v</TT></TD><TD WIDTH=439>A version tracking number used by HotBot. Set this to &quot;1.0.&quot;
+</TD></TR>
+<TR><TD WIDTH=151><TT>SM</TT></TD><TD WIDTH=439>Defines the kind of search matching desired. Possible values are: &quot;MC&quot; (match all words), &quot;SC&quot; (match any of the words), &quot;phrase&quot; (match the phrase), &quot;name&quot; (find the 
+person), and &quot;url&quot; (find the URL).
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="InfoSeekGuide">
+InfoSeek Guide</A></H3>
+<P>
+InfoSeek Guide (<B><A HREF="http://www.infoseek.com/">http://www.infoseek.com/</A></B>) is a comprehensive
+and accurate Web list of cataloged and reviewed sites, as well
+as a subset of a larger, Net-wide commercial service. The <TT>&lt;FORM&gt;</TT>
+tag to access InfoSeek looks like:
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM METHOD=GET ACTION=&quot;http://guide-p.infoseek.com/Titles&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+and the neccessary form fields are included in table 23.3.<BR>
+<P>
+<CENTER><B>Table 23.3&nbsp;&nbsp;InfoSeek Form Fields </B></CENTER>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Field Name</B></TD><TD WIDTH=439><B>Field Value</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>qt</TT></TD><TD WIDTH=439>Holds what you're searching for, as entered by the user.
+</TD></TR>
+<TR><TD WIDTH=151><TT>col</TT></TD><TD WIDTH=439>Identifies the <I>collection</I> to search. Normally displayed as a <TT>&lt;SELECT&gt;</TT> tag, possible values are: &quot;WW&quot; (World Wide Web), &quot;WW,cat_+&quot; (Infoseek Select Sites), 
+&quot;NN&quot; (usenet newsgroups), &quot;CT&quot; (company directory), &quot;EM&quot; (e-mail addresses), &quot;NW&quot; (Timely News), and &quot;FQ&quot; (Web FAQs).
+</TD></TR>
+<TR><TD WIDTH=151><TT>sv</TT></TD><TD WIDTH=439>a tracking field used by InfoSeek. Set this to &quot;A2.&quot;
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+To make it easier for Web masters to integrate Infoseek into their sites, Infoseek offers a Web Kit where you can select the options you want to use to access the search engine, and they generate the HTML for you. You can access the Web Kit from Infoseek's 
+
+site (<B><A HREF="http://www.infoseek.com/">http://www.infoseek.com/</A></B>).
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="Lycos">
+Lycos</A></H3>
+<P>
+Lycos (<B><A HREF="http://www.lycos.com/">http://www.lycos.com/</A></B>) is one of the &quot;granddaddies&quot;
+of the Web search world, and its age has given it the opportunity
+to refine its interface. The <TT>&lt;FORM&gt;</TT> tag to connect
+to Lycos looks like:
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM METHOD=GET ACTION=&quot;http://www.lycos.com/cgi-bin/pursuit&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+and only <I>one</I> form field is necessary:
+<UL>
+<LI><TT>query</TT>-holds what you're searching for (as entered
+by the user).
+</UL>
+<H3><A NAME="SharewareCOM">
+Shareware.COM</A></H3>
+<P>
+For software junkies, shareware.com (<B><A HREF="http://www.shareware.com">http://www.shareware.com</A></B>)
+is a virtual Mecca (pardon the pun) on the Internet. Originally
+called the <I>Virtual Shareware Library</I> (VSL) before CNET
+took over the job of maintaining it, shareware.com boasts a library
+of over 210,000 files, covering shareware, freeware, demos, games,
+drivers, and updates for most every operating system. The <TT>&lt;FORM&gt;</TT>
+tag to connect to shareware.com looks like:
+<BLOCKQUOTE>
+<PRE>
+&lt;form action=&quot;http://search.shareware.com/code/engine/Find&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+Because of the vastness of shareware.com's library, its search
+engine has more control fields than most, as detailed in table
+23.4. <BR>
+<P>
+<CENTER><B>Table 23.4&nbsp;&nbsp;Shareware.com Form Fields</B></CENTER>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Field Name</B></TD><TD WIDTH=426><B>Field Value</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>search</TT></TD><TD WIDTH=426>Specifies what's being searched for (as entered by the user).
+</TD></TR>
+<TR><TD WIDTH=151><TT>and</TT></TD><TD WIDTH=426>Can hold a second search term (also entered by the user).
+</TD></TR>
+<TR><TD WIDTH=151><TT>logop</TT></TD><TD WIDTH=426>Defines how <TT>search</TT> and <TT>and</TT> are related. Possible values are: &quot;or&quot; (match either), and &quot;and&quot; (match both).
+</TD></TR>
+<TR><TD WIDTH=151><TT>hits</TT></TD><TD WIDTH=426>Controls the number of hits to display on a page (such as 25).
+</TD></TR>
+<TR><TD WIDTH=151><TT>frame</TT></TD><TD WIDTH=426>Controls whether the search is returned in framed or nonframed mode. This is most often set to &quot;none.&quot;
+</TD></TR>
+<TR><TD WIDTH=151><TT>cfrom</TT></TD><TD WIDTH=426>Defines the type of search. This is normally set to &quot;quick.&quot;
+</TD></TR>
+<TR><TD WIDTH=151><TT>orfile</TT></TD><TD WIDTH=426>Almost always set to &quot;True.&quot;
+</TD></TR>
+<TR><TD WIDTH=151><TT>category</TT></TD><TD WIDTH=426>Controls what part of the shareware database is searched. Possible values are: &quot;MS-Windows,&quot; &quot;MS-Windows3.x,&quot; &quot;MS-Windows95,&quot; &quot;MS-WindowsNT,&quot; 
+&quot;Macintosh,&quot; &quot;DOS,&quot; &quot;OS2,&quot; &quot;PC-Games,&quot; &quot;UNIX,&quot; &quot;Novell-Netware,&quot; &quot;Amiga,&quot; &quot;Atari,&quot; &quot;Source-Code,&quot; and &quot;All-Categories.&quot;
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="WebCrawler">
+WebCrawler</A></H3>
+<P>
+WebCrawler (<B><A HREF="http://www.webcrawler.com/">http://www.webcrawler.com/</A></B>) is America Online's
+offering to the Web search world. To connect to WebCrawler, you
+use the following <TT>&lt;FORM&gt;</TT> tag:
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM METHOD=POST ACTION=&quot;http://webcrawler.com/cgi-bin/WebQuery&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+and define the following form fields as shown in table 23.5.<BR>
+<P>
+<CENTER><B>Table 23.5&nbsp;&nbsp;WebCrawler Form Fields</B></CENTER>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Field Name</B></TD><TD WIDTH=439><B>Field Value</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>searchtext</TT></TD><TD WIDTH=439>Holds what you're searching for (as entered by the user).
+</TD></TR>
+<TR><TD WIDTH=151><TT>andOr</TT></TD><TD WIDTH=439>Controls how the words in the search string are to be treated. Possible values are: &quot;all&quot; (match all words), and &quot;any&quot; (match any word).
+</TD></TR>
+<TR><TD WIDTH=151><TT>maxHits</TT></TD><TD WIDTH=439>Defines the number of hits to return per page. Common values are 10, 25, or 100.
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="Yahoo">
+Yahoo!</A></H3>
+<P>
+Web legend Yahoo! (<B><A HREF="http://www.yahoo.com/">http://www.yahoo.com/</A></B>) searches its
+own descriptions of sites (with their URLs and titles). Connecting
+to Yahoo! requires the following <TT>&lt;FORM&gt;</TT> tag:
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM METHOD=GET action=&quot;http://search.yahoo.com/bin/search&quot;&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+and (like Lycos) only <I>one</I> form field:
+<UL>
+<LI><TT>p</TT>-holds what you're searching for (as entered by
+the user).
+</UL>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+For the trivia prone, Yahoo! is actually an acronym. It stands for &quot;You Always Have Other Options.&quot;</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="InterfacingtoMultipleSearchEngines"><FONT SIZE=5 COLOR=#FF0000>
+Interfacing to Multiple Search Engines</FONT></A></H2>
+<P>
+As you can see, each engine is a little different. For most purposes,
+you'll probably <I>not</I> be putting every single engine on one
+search front-end form. However, even though they differ, they
+all require the user to fill in one field: what to search for.
+With this information, and a little arbitration (because you can
+always &quot;hard code&quot; the other necessary fields for an
+engine to particular settings), you can connect several sites
+together through one document.
+<H3><A NAME="DesigningaGenericSearchForm">
+Designing a Generic Search Form</A></H3>
+<P>
+What's needed is a generic form that can be set to post to whatever
+search engine is desired, which creates a problem of its own.
+While JavaScript is the obvious candidate for such manipulation-although,
+this can easily be done through Perl as well-JavaScript doesn't
+permit the <TT>ACTION</TT> attribute of a form to be modified
+from within the script code.
+<P>
+However, this turns out to be easily overcome, because:
+<UL>
+<LI>JavaScript <I>can</I> be used to change the <TT>href</TT>
+property of the current window, forcing a new document to load.
+<LI>Regular button objects can be caught through JavaScript by
+using their <TT>onClick</TT> event handlers.
+<LI>It's not necessary to define a form's <TT>ACTION</TT> attribute-it
+can be blank.
+</UL>
+<P>
+Put these three pieces together, and you have the basis for a
+&quot;multi-directional&quot; form. Listing 23.1 is an example
+of such a form configuration.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 23.1&nbsp;&nbsp;A Basic Multi-Engine Search Form<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;FORM method=POST action=&quot;&quot;&gt;
+
+&lt;B&gt;Search for: &lt;/B&gt;&lt;INPUT TYPE=TEXT
+   NAME=&quot;SearchTerm&quot; VALUE=&quot;&quot; SIZE=30&gt;&lt;BR&gt;
+
+&lt;B&gt;Search on: &lt;/B&gt;
+&lt;SELECT NAME=&quot;Engine&quot;&gt;
+   &lt;OPTION&gt;AltaVista
+   &lt;OPTION&gt;Excite
+   &lt;OPTION&gt;InfoSeek
+   &lt;OPTION&gt;Lycos
+   &lt;OPTION&gt;WebCrawler
+   &lt;OPTION&gt;Yahoo
+&lt;/SELECT&gt;  
+
+&lt;INPUT TYPE=BUTTON VALUE=&quot;Search!&quot; 
+   onClick=&quot;Search(this.form)&quot;&gt;
+
+&lt;/FORM&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The first thing you should notice about this form is that there
+is no <TT>Submit</TT> button, meaning that the form itself is
+never submitted. However, the <TT>Search!</TT> button (when clicked)
+fires its <TT>onClick</TT> event. In other words, the form has
+become a kind of &quot;local-submission&quot; form, where the
+browser, not the server, performs all the work.
+<P>
+The &quot;work&quot; performed by the <TT>onClick</TT> event itself
+is straightforward: Construct the proper query, then load the
+new &quot;page&quot; using the query information. Loading a new
+page in JavaScript is done by setting the <TT>href</TT> property
+of the window to the URL of the new document, as in:
+<BLOCKQUOTE>
+<PRE>
+window.href = &quot;http://search.yahoo.com/bin/search?p=JavaScript&quot;;
+</PRE>
+</BLOCKQUOTE>
+<P>
+which would call up Yahoo! and search for the term <TT>JavaScript</TT>,
+returning the result as the window's new document.<BR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Remember, a URL doesn't have to be just a domain, path, and file name. Query strings, for search engines and scripts, and hash strings, for referencing anchor tags, are also valid parts of the URL definition.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="BuildingtheQuery">
+Building the Query</A></H3>
+<P>
+Once the user has typed in a search string, selected a particular
+engine, and clicked the <TT>Search!</TT> button, it's the job
+of your JavaScript code to manipulate the user's search request
+into the correct format for the given search engine. As mentioned
+before, this involves building a new URL consisting of the domain,
+path, file (the search program), and one or more query terms.
+Because each engine varies a bit in the names of the form fields
+it recognizes (and in the number of additional fields required
+to successfully complete the search), an easy way to construct
+the new URL is to break it into two parts:
+<OL>
+<LI>The domain, path, file, any engine-specific search fields,
+and the search term field as the very last.
+<LI>The search term.
+</OL>
+<P>
+Listing 23.2 is an example of such a <TT>Search()</TT> function,
+building the correct URL according to the engine selected as specified
+by the form in listing 23.1.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 23.2&nbsp;&nbsp;The </B><I>Search()</I> <B>Function
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function initArray() { 
+   this.length = initArray.arguments.length; 
+
+   for(var i = 0; i &lt; this.length; i++) {
+      this[i+1] = initArray.arguments[i]; 
+   }
+} 
+
+var Engines = new initArray (
+   &quot;http://altavista.digital.com/cgi-bin/query?pg=q&amp;what;=web&amp;fmt;=&amp;q;=&quot;, 
+   &quot;http://www.excite.com/search.gw?search=&quot;, 
+   &quot;http://guide-p.infoseek.com/Titles?sv=A2;col=WW;qt=&quot;,
+   &quot;http://www.lycos.com/cgi-bin/pursuit?query=&quot;, 
+   &quot;http://query.webcrawler.com/cgi-bin/WebQuery?text=&quot;, 
+   &quot;http://search.yahoo.com/bin/search?p=&quot; 
+); 
+
+function Search(form) { 
+   var term = escape(form.SearchTerm.value); 
+   var eng  = parseInt(form.Engine.selectedIndex); 
+
+   window.location.href = Engines[eng+1] + term; 
+} 
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+A couple of things are worth noting about this code fragment.
+First, it creates an array of search engine URLs using an array-generation
+trick slightly different from what you've seen in previous chapters.
+Instead of allocating an array of the appropriate size and then
+filling it with data, the <TT>initArray()</TT> function combines
+both operations into one single step. Because JavaScript functions
+have an associated <TT>arguments</TT> array that contains all
+the functions parameters, it's easy to query the array for the
+number of strings defined.
+<P>
+Second, the search term, as entered by the user, is fed through
+JavaScript's <TT>escape()</TT> function before it's tacked onto
+the URL. This takes any special characters, such as spaces, and
+converts them to <I>%XX format,</I> which is a percent sign followed
+by a two-digit hexadecimal representation of the character-as
+in <TT>%20</TT> for a space, which is necessary to make certain
+the URL is processed properly.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+In order to be as cross-platform compatible as possible, the Web relies on common delimiters to identify when various fields and data stop and start. The most common delimiter is the space. Therefore, if a URL contains embedded spaces, such as the space 
+separating a sequence of search terms, it's necessary to encode the spaces so they aren't mistaken for end-of-URL markers.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Finally, once the URL has been constructed, setting the <TT>href</TT>
+property of the window's <TT>location</TT> object executes the
+search, having the same results as if the user had typed in the
+URL in the browser's location window.
+<H2><A NAME="ServerSideRedirection"><FONT SIZE=5 COLOR=#FF0000>
+Server-Side Redirection</FONT></A></H2>
+<P>
+While JavaScript is the most likely candidate for creating a search
+engine front-end, you can also achieve the same results through
+Perl. The major differences between a server-side and client-side
+interface are:
+<UL>
+<LI>The server-side version requires that you define the <TT>ACTION</TT>
+attribute of the form tag. Specifically, you need to point the
+form toward the Perl script on your server.
+<LI>Creating arrays within Perl doesn't require fancy set-up functions.
+Simply initialize them.
+<LI>The Perl equivalent of setting the <TT>href</TT> property
+is to send a <TT>Location:</TT> header line back to the server.
+</UL>
+<P>
+Listing 23.3 is an example of a Perl version of the search interface.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 23.3&nbsp;&nbsp;Interfacing to a Search Engine through
+Perl<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+#!/usr/local/bin/perl
+
+$CRLF = &quot;\r\n&quot;;  # '\r\n' for UNIX, '\n' for NT/95
+
+@Engines = (
+   &quot;AltaVista&quot;,
+   &quot;Excite&quot;,
+   &quot;InfoSeek&quot;,
+   &quot;Lycos&quot;,
+   &quot;WebCrawler&quot;,
+   &quot;Yahoo&quot;
+);
+
+@EngineURLs = (
+   &quot;http://altavista.digital.com/cgi-bin/query?pg=q&amp;what;=web&amp;fmt;=&amp;q;=&quot;, 
+   &quot;http://www.excite.com/search.gw?search=&quot;, 
+   &quot;http://guide-p.infoseek.com/Titles?sv=A2;col=WW;qt=&quot;,
+   &quot;http://www.lycos.com/cgi-bin/pursuit?query=&quot;, 
+   &quot;http://query.webcrawler.com/cgi-bin/WebQuery?text=&quot;, 
+   &quot;http://search.yahoo.com/bin/search?p=&quot; 
+); 
+
+if ($ENV{'REQUEST_METHOD'} eq 'POST') {
+   read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
+   @pairs = split(/&amp;/, $buffer);
+
+   foreach $pair (@pairs) {
+      ($name, $value)  = split(/=/, $pair, 2);
+      $tname = $name;
+
+      $contents{$name} = $value;
+   }
+}
+
+$numEngines = @Engines;
+
+for($i=0; $i&lt;$numEngines; $i++) {
+   if($contents{'Engines'} =~ /$Engines[$i]/) {
+      $term = $contents{'SearchTerm'};
+      $term =~ s/ /%20/g;
+
+      print &quot;Location: $EngineURLs[$i]$term&quot;,$CRLF,$CRLF;
+      exit;
+   }
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Working with two arrays (one who's contents match the <TT>&lt;OPTION&gt;</TT>
+tags from the form, the other with the corresponding URLs), the
+script searches for a match based on the engine the user has selected.
+Once found, the search term is extracted and encoded. The line:
+<BLOCKQUOTE>
+<PRE>
+$term =~ s/ /%20/g;
+</PRE>
+</BLOCKQUOTE>
+<P>
+performs a simple substitution throughout the search term, encoding
+any embedded spaces into <I>%XX</I> format. After that, the <TT>Location:</TT>
+header line instructs the browser to load a new document from
+the constructed URL.
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+This chapter demonstrates how to use scripting to create a &quot;common&quot;
+interface to a collection of different Web search engines, each
+with its own parameters and settings, in a manner that appears
+totally transparent to the user. The trick lies in hiding all
+the differences between the various engines within the form you
+display and using a bit of scripting to fill in the gaps.
+<P>
+For more information on related topics, check out:
+<UL>
+<LI><A HREF="ch13.htm" >Chapter 13</A>, &quot;Field Verification,&quot; where you learn
+to validate form data.
+<LI><A HREF="ch14.htm" >Chapter 14</A>, &quot;Form Processing,&quot; shows you how to
+use a form as a front-end to the Internet's mail system.
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch22.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch24.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

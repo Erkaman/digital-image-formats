@@ -1,0 +1,591 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 5 -- Creating Personalized Home Pages</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;5</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Creating Personalized Home Pages</FONT>
+</H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#TheresNoPlaceLikeHome">
+There's No Place Like Home</A>
+<LI><A HREF="#ConstructingCookies">
+Constructing Cookies</A>
+<UL>
+<LI><A HREF="#Limitations">
+Limitations</A>
+<LI><A HREF="#ImplementingtheDesign">
+Implementing the Design</A>
+<LI><A HREF="#AddingaLittlePersonality">
+Adding a Little Personality</A>
+</UL>
+<LI><A HREF="#HomemadePerl">
+Homemade Perl</A>
+<LI><A HREF="#EnhancingVirtualHomePages">
+Enhancing Virtual Home Pages</A>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+Everyone wants to carve out their own little niche on the World
+Wide Web, and accomplishing this is becoming easier every day.
+It started with service providers that offered space on their
+systems and an appropriately configured Web server for users to
+store Web pages, but that still required the user to do most of
+the scripting and construction.
+<P>
+One new twist on the personal home page is becoming more popular,
+especially with major sites like Microsoft, Netscape, and even
+Yahoo-a page that resides on <I>their</I> site that <I>you </I>can
+customize. Each person who visits that site will see a different
+page, depending on the options they chose.
+<H2><A NAME="TheresNoPlaceLikeHome"><FONT SIZE=5 COLOR=#FF0000>
+There's No Place Like Home</FONT></A></H2>
+<P>
+If you look around the Web these days, you'll find many major
+services, such as Microsoft and Yahoo, that are offering you the
+option to create your own &quot;home page&quot; that's &quot;hosted&quot;
+on their systems. Unlike having an account on a provider, these
+home pages have a set number of configuration options, and as
+far as the server is concerned, they don't take up much physical
+disk space. In order to understand <I>how</I> this works, it's
+first necessary to look at <I>what</I> makes up a typical &quot;home
+page.&quot;
+<P>
+When you stop and think about it, in the simplest sense, home
+pages are really nothing more than collections of information,
+with <I>what </I>information being decided by the home page owner.
+Surf the Web a bit and look at some of the various home pages
+out there, then sit down and try to figure out what they all have
+in common. You'll probably come up with a list similar to this:
+<BLOCKQUOTE>
+Page characteristics-like background color, text color, and so
+on.<BR>
+Some sort of &quot;welcome&quot; message at the top.<BR>
+Various little interesting bits of information (at least, information
+the owner deems interesting).<BR>
+A collection of links the owner likes.
+</BLOCKQUOTE>
+<P>
+When you create your own home page, you have to write the HTML,
+find the graphics, and upload everything to your provider. But,
+if you make some arbitrary decisions about the content of a home
+page, you can reduce all this work to selecting various options
+from one or more lists. Effectively, you turn home page creation
+into an act of <I>configuration</I> instead of <I>construction</I>.
+Apart from storing the various parameters mentioned, all you need
+to add is a means for the user to customize or change his or her
+own configuration.
+<H2><A NAME="ConstructingCookies"><FONT SIZE=5 COLOR=#FF0000>
+Constructing Cookies</FONT></A></H2>
+<P>
+One of the nice things about basing your home page generator entirely
+on cookies is that you can create the entire interface through
+JavaScript and you don't have to require Server-side (Perl) access.
+In essence, all the parameters defining the page are stored as
+cookies, and the browser reads this data through JavaScript and
+dynamically builds the page each time it loads.
+<P>
+Before exploring the process involved, there are some limitations
+imposed by Netscape's cookie specification that need to be reviewed.
+<H3><A NAME="Limitations">
+Limitations</A></H3>
+<P>
+Netscape's proposal for cookies places several limitations on
+the implementation. The specification states that at most there
+only needs to be:
+<UL>
+<LI>300 cookies total stored in the cookie file (that's across
+<I>all</I> pages and domains).
+<LI>20 cookies from any given domain (no matter how many pages
+may come from that).
+</UL>
+<P>
+With a little creativity, however, you can get around (or, at
+least, minimize) these limitations.
+<P>
+<B>Custom Domain&nbsp;&nbsp;</B>One way to circumvent the maximum
+cookie count limitation is to create a custom subdomain by dedicating
+a server and unique IP address within your primary domain. For
+example, if your domain is:
+<BLOCKQUOTE>
+<PRE>
+myplace.com
+</PRE>
+</BLOCKQUOTE>
+<P>
+dedicating a subdomain:
+<BLOCKQUOTE>
+<PRE>
+home.myplace.com
+</PRE>
+</BLOCKQUOTE>
+<P>
+<I>just</I> for your cookie-controlled home pages gives you the
+maximum number of cookies possible (20) for your domain.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+If you create a custom subdomain, you <I>must</I> specify the complete domain when you create your cookies. Otherwise, the default behavior is to use the primary domain, which lumps your cookies together with all the others for that domain.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+If you use a custom URL (or, even if you don't and simply use
+a special subdirectory instead), you can use one additional trick
+to make remembering the URL even simpler. Most servers are configured
+to retrieve a file with a particular name with only the domain
+and path given in the URL. This is called <I>indexing</I>, and
+it means that if the URL entered into the browser was:
+<BLOCKQUOTE>
+<PRE>
+http://home.myplace.com/
+</PRE>
+</BLOCKQUOTE>
+<P>
+The document that is returned is (more than likely):
+<BLOCKQUOTE>
+<PRE>
+http://home.myplace.com/index.html
+</PRE>
+</BLOCKQUOTE>
+<P>
+If &quot;index.html&quot; is the dynamic home page construction
+document, each user that logs in is presented with <I>his </I>or<I>
+her </I>own page; hence, no two surfers see the same page.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Not all servers specify <TT>index.html</TT> as the default <I>index</I> file. Other popular names are: <TT>default.htm</TT>, <TT>index.htm</TT>, and <TT>index.shtml</TT>. Consult your server documentation or check with your provider to find out what the 
+file name is for your system.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><BLOCKQUOTE>
+<B>What if There's No Index File?</B>
+</BLOCKQUOTE>
+
+</TD></TR>
+<TR><TD><BLOCKQUOTE>
+If the specified index file isn't found, or if the server isn't configured with default index names, the server will instead return a list of all the files within the specified directory, with each file configured as a hyperlink for opening or downloading. 
+
+This can be a problem if you don't want to give users a look at the underlying structure of your site.</BLOCKQUOTE>
+<BLOCKQUOTE>
+This is an important point to remember: If your server is configured to index, it will do it for <I>any</I> directory. This means that if you keep your graphics in a subdirectory (like <TT>images</TT> or <TT>gfx</TT>) and a user figures this out, which is 
+
+possible by examining the code of your document, he or she can easily try to load:
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>http://home.myplace.com/images/</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+and will be presented with a list of all your graphics and any subdirectories below that as well. For the Web purist, this is an ugly option, and one that can easily be prevented.</BLOCKQUOTE>
+<BLOCKQUOTE>
+One way to keep people from poking where you don't want them to is to place a small HTML file with the appropriate index name in each directory (except those directories where you're already providing such files) that consists of the following HTML 
+code:</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>&lt;HTML&gt;&lt;HEAD&gt;&lt;/HEAD&gt;&lt;BODY&gt;&lt;/BODY&gt;&lt;/HTML&gt;</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+This effectively blanks the page, preventing the user from seeing what's there. However, this <I>still </I>indicates to a savvy user that the path he or she entered does exist; some people are just too curious, so a more drastic measure would be to have 
+the file redirect the user back to your home page. You can do this by using the redirection techniques from chapter 1, &quot;Browser Identification.&quot; This way, if they bounce to a subdirectory you don't want them in, you kick them back to where you do 
+
+want them.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<BLOCKQUOTE>
+</BLOCKQUOTE>
+<P>
+<B>Understanding &quot;Cookie Stacking&quot;&nbsp;&nbsp;</B>Each
+individual cookie has a limit of its own. The cookie can't exceed
+4K (4096 bytes) in size, including the name and the other information
+combined. This can be used to your advantage by squeezing more
+than one piece of data, or more than one record field, into the
+cookie. Just be careful not to exceed the 4096-byte barrier, as
+any data beyond that point will be truncated.
+<P>
+<B>Overcoming Cookie Limitations&nbsp;&nbsp;</B>Whenever one of
+the cookie limitations is hit, whether it's the number of cookies/domain
+or number of cookies total, the oldest cookies in the cookie file
+are deleted as needed to make space for new cookies. Therefore,
+the &quot;fresher&quot; your cookies are, the less chance they
+have of being thrown away.
+<P>
+One easy way to ensure freshness is to reset your cookies each
+time the user visits his or her home page.
+<H3><A NAME="ImplementingtheDesign">
+Implementing the Design</A></H3>
+<P>
+With the limitations and workarounds covered thus far in mind,
+it's time to start designing the &quot;virtual home page.&quot;
+The first step is to get a general idea of what the page will
+look like, and the easiest way to do that is to write out the
+page in straight HTML first, <I>then</I> convert it to JavaScript.
+<P>
+Listing 5.1 shows the HTML that creates the simple home page shown
+in figure 5.1.
+<P>
+<A HREF="f5-1.gif"><B>Figure 5.1 :</B> <I>Building a dynamic home page is easiest
+if you first design the page with straight HTML then rewrite the
+dynamic parts into JavaScript. This method of &quot;lay it out
+first, then code it,&quot; also works for developing Perl-based
+dynamic pages</I>.</A>
+<HR>
+<BLOCKQUOTE>
+<B>Listing 5.1&nbsp;&nbsp;A Simple Home Page<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;HTML&gt;
+&lt;HEAD&gt;
+   &lt;TITLE&gt;Welcome to Scotty's Place&lt;/TITLE&gt;
+&lt;/HEAD&gt;
+&lt;BODY BGCOLOR=#ffffff&gt;
+
+&lt;CENTER&gt;
+   &lt;H1&gt;Welcome to Scotty's Place&lt;/H1&gt;
+&lt;/CENTER&gt;
+
+&lt;HR&gt;
+
+&lt;H2&gt;Favorite Hang-outs:&lt;/H2&gt;
+
+&lt;UL&gt;
+   &lt;LI&gt;&lt;A HREF=&quot;http://www.microsoft.com/&quot;&gt;Microsoft&lt;/A&gt;&lt;/LI&gt;
+   &lt;LI&gt;&lt;A HREF=&quot;http://home.netscape.com/&quot;&gt;Netscape&lt;/A&gt;&lt;/LI&gt;
+   &lt;LI&gt;&lt;A HREF=&quot;http://www.cnet.com/&quot;&gt;C|Net Central&lt;/A&gt;&lt;/LI&gt;
+   &lt;LI&gt;&lt;A HREF=&quot;http://www.shareware.com/&quot;&gt;Shareware.com&lt;/A&gt;&lt;/LI&gt;
+&lt;/UL&gt;
+
+&lt;HR&gt;
+
+&lt;A HREF=&quot;mailto:sjwalter@visi.com&quot;&gt;Send Scotty email&lt;/A&gt;
+
+&lt;/BODY&gt;
+&lt;/HTML&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Looking at the HTML, you'll see that there are several different
+places for customization:
+<UL>
+<LI>The user's name in the <TT>&lt;TITLE&gt;</TT> tag
+<LI>One or more favorite links
+<LI>The user's e-mail address at the bottom of the page
+</UL>
+<P>
+From this list, you can generate an HTML table/form structure
+that retrieves the data from the user and saves it as cookie information.
+The trick is that this table needs to be in the same physical
+file as the user's actual home page. In other words, the virtual
+home page document does double duty:
+<OL>
+<LI>If the page hasn't been &quot;configured,&quot; meaning no
+cookies are present, a default configuration page is displayed.
+<LI>If the page <I>has</I> been configured (and cookies exist),
+the actual home page is shown.
+</OL>
+<P>
+This requires a little dynamic program control, and is best handled
+by structuring your page so that virtually all of the HTML is
+written by JavaScript. Listing 5.2 demonstrates the basic structure
+of the page. Note that listing 5.2 uses the <TT>GetCookie()</TT>
+function that was introduced in chapter 4, &quot;Saving Configurations
+with Cookies.&quot;
+<HR>
+<BLOCKQUOTE>
+<B>Listing 5.2&nbsp;&nbsp;Using JavaScript to Conditionally Display
+a Page<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;HTML&gt;
+&lt;HEAD&gt;
+&lt;SCRIPT LANGUAGE=&quot;JavaScript&quot;&gt;
+&lt;!--
+...
+if (GetCookie(&quot;Title&quot;) != null) {
+   HomePage();
+} else {
+   ConfigurationPage();
+}
+// --&gt;
+&lt;/SCRIPT&gt;
+&lt;/HEAD&gt;
+&lt;/HTML&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The <TT>HomePage()</TT> and <TT>ConfigurationPage()</TT> functions
+do the dirty work of formatting the HTML code for the two possible
+HTML &quot;documents&quot; this page will create. Because the
+basic structure of the home page has already been presented (back
+in listing 5.1), the <TT>HomePage()</TT> function will be looked
+at first. This also helps to define what the various cookies are
+going to be called, which is necessary information when coding
+the <TT>ConfigurationPage()</TT> function.
+<P>
+<B>The </B><I>HomePage() </I><B>Function&nbsp;&nbsp;</B>The <TT>HomePage()</TT>
+function, as shown in listing 5.3, pulls the various information
+from the cookies stored with the document and translates the data
+into a personal home page.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 5.3&nbsp;&nbsp;The </B><I>HomePage()</I> <B>Function
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function HomePage() {
+   var tStr = &quot;&lt;HEAD&gt;\n&quot; + 
+              GetCookie(&quot;Title&quot;) + &quot;&lt;/TITLE&gt;&quot; +
+              &quot;&lt;/HEAD&gt;&quot; +
+              &quot;&lt;BODY&gt;&quot; +
+              &quot;&lt;H1&gt;&quot; + GetCookie(&quot;Title&quot;) + &quot;&lt;/H1&gt;&quot; +
+              &quot;&lt;HR&gt;&lt;UL&gt;&quot;;
+
+   for(var i=1; i&lt;=3; i++) {
+      tStr += &quot;&lt;LI&gt;&quot; + '&lt;A HREF=&quot;' +
+              GetCookie(&quot;URL&quot; + i) + '&quot;&gt;' +
+              GetCookie(&quot;Link&quot; + i) + '&lt;/A&gt;&lt;/LI&gt;';
+   }
+
+   tStr += &quot;&lt;/UL&gt;&quot; +
+           &quot;&lt;HR&gt;&quot; +
+           '&lt;A HREF=&quot;mailto:' + GetCookie(&quot;Email&quot;) +
+           '&quot;&gt;Send me email&lt;/A&gt;';
+
+   document.write(tStr);
+   document.write(&quot;&lt;/BODY&gt;&lt;/HTML&gt;&quot;);
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+One thing to keep in mind when building dynamic HTML like this: If you have any attributes within your tags that have &quot;quoted&quot; data (the value of the attribute being enclosed in quotation marks), you should probably use single quotes (') around 
+the JavaScript string and double quotes (&quot;) around the value data.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+<B>The </B><I>ConfigurationPage()</I><B> Function&nbsp;&nbsp;</B>For
+cookie data to be available to the <TT>HomePage()</TT> function,
+you need to have the user enter the information and &quot;configure&quot;
+the page. This is handled by the <TT>ConfigurationPage()</TT>
+function (listing 5.4).
+<HR>
+<BLOCKQUOTE>
+<B>Listing 5.4&nbsp;&nbsp;The</B> <I>ConfigurationPage()</I> <B>Function
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function ConfigurationPage() {
+   var tStr = '&lt;FORM&gt;'
+            + '   Title &lt;INPUT TYPE=TEXT NAME=&quot;Title&quot; SIZE=40&gt;'
+            + '   &lt;P&gt;'
+            + '   Email &lt;INPUT TYPE=TEXT NAME=&quot;Email&quot; SIZE=40&gt;'
+            + '   &lt;P&gt;';
+
+   for(var i=1; i&lt;=3; i++) {
+      tStr += 'Link #' + i +
+              '&lt;INPUT TYPE=TEXT NAME=&quot;Link' + i + 
+              '&quot; SIZE=30&gt;&lt;BR&gt;' +
+              'URL  &lt;INPUT TYPE=TEXT NAME=&quot;URL' + i +
+              '&quot; SIZE=40&gt;&lt;P&gt;';
+   }
+
+   tStr += '&lt;INPUT TYPE=BUTTON VALUE=&quot;Configure&quot;' +
+           'ONCLICK=&quot;Configure(this.form)&quot;&gt;' +
+           '&lt;INPUT TYPE=RESET  VALUE=&quot;Reset&quot;&gt;' +
+           '&lt;/FORM&gt;';
+
+   document.write(&quot;&lt;HTML&gt;&lt;HEAD&gt;&quot; + 
+                  &quot;&lt;TITLE&gt;Configuration&lt;/TITLE&gt;&quot; +
+                  &quot;&lt;HEAD&gt;&lt;BODY&gt;&quot;);
+   document.write(&quot;&lt;H2&gt;Configure your page&lt;/H2&gt;&quot;);
+   document.write(tStr);
+   document.write(&quot;&lt;/BODY&gt;&lt;/HTML&gt;&quot;);
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+All this function really does is build (through JavaScript) a
+document that contains an HTML form with all the fields necessary
+to create the appropriate cookies. Because this information isn't
+being sent to the server, you don't need to specify an <TT>ACTION</TT>
+attribute or a <TT>SUBMIT</TT> button; however, you do need to
+utilize the <TT>onClick</TT> event of a button on the form to
+fire another JavaScript function that actually sets the cookie
+data. This function, <TT>Configure()</TT>, is shown in listing
+5.5.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 5.5&nbsp;&nbsp;The</B> <I>Configure()</I> <B>function
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function Configure(form) {
+   SetCookie(&quot;Title&quot;, form.Title.value);
+   SetCookie(&quot;Email&quot;, form.Email.value);
+
+   for(var i=1; i&lt;=3; i++) {
+      var tTmp = eval(&quot;form.Link&quot; + i + &quot;.value&quot;)
+               + &quot;*&quot;
+               + eval(&quot;form.URL&quot; + i + &quot;.value&quot;);
+
+      SetCookie(&quot;Link&quot; + i, tTmp);
+   }
+
+   window.location.href = &quot;index.htm&quot;;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME="AddingaLittlePersonality">
+Adding a Little Personality</A></H3>
+<P>
+You can give your virtual home page builder a little personality
+(or attitude, if you will) by using JavaScript to dynamically
+change the page each time the user drops by. One way to accomplish
+this is to take advantage of the JavaScript <TT>Date</TT> object
+to dynamically display a message to the user depending on the
+time of day he or she stops by. Listing 5.6 demonstrates this
+simple enhancement.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 5.6&nbsp;&nbsp;A Time-Varying Display<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+d = new Date();
+hour = d.getHours();
+
+if(hour &lt; 5) {
+   document.write(&quot;Doing a little late-night surfing, eh?&quot;);
+} else if(hour &lt; 6) {
+   document.write(&quot;Up early, I see!  Do you have your coffee?&quot;);
+} else if(hour &lt; 12) {
+   document.write(&quot;Good morning!&quot;);
+} else if(hour &lt; 18) {
+   document.write(&quot;Good afternoon!&quot;);
+} else {
+   document.write(&quot;Good evening!&quot;);
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<H2><A NAME="HomemadePerl"><FONT SIZE=5 COLOR=#FF0000>
+Homemade Perl</FONT></A></H2>
+<P>
+The cookie-based home page has the beauty of not requiring any
+fancy server-side manipulation because the entire process can
+be done within the browser through JavaScript. However, as you've
+seen, the limitations of the cookie specification, coupled with
+the paranoia about cookies that has spread through the Web community
+recently, make such an implementation only practical for a couple
+of reasons:
+<OL>
+<LI>Casual surfers-those who don't visit too many sites.
+<LI>A company Intranet where surfing is restricted to the company
+server, as in a site that uses the browser as a server front-end
+application for employees.
+</OL>
+<P>
+If you want to make your home-page service available to the general
+public, a means is needed to store more information than can be
+kept in cookies and store it more permanently. This means Perl
+and a little server-side database work.
+<P>
+The Perl version of the page, available on the CD-ROM, isn't much
+different from the JavaScript version, except that instead of
+storing <I>everything</I> as a collection of cookies, it only
+stores one cookie: a unique file name that corresponds with a
+database file on the server containing the user's configuration
+information.
+<H2><A NAME="EnhancingVirtualHomePages"><FONT SIZE=5 COLOR=#FF0000>
+Enhancing Virtual Home Pages</FONT></A></H2>
+<P>
+The virtual home page designs presented here are simple, yet they
+should give you some ideas as to how to easily expand on their
+structure. 
+<P>
+Here are some hints:
+<BLOCKQUOTE>
+Extend the database to allow the user to specify a background
+image, perhaps from a collection of textures you keep on your
+site.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Let the user embed graphics within the page from a collection
+of images you provide.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Add a &quot;quote of the day&quot; or similar option, where you
+pull data at the time the user loads the page from another database
+and add it to the page.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Add the user's birthdate to the database, and have his or her
+home page wish him or her &quot;Happy Birthday.&quot;
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Extend the database to hold important dates and reminders.
+</BLOCKQUOTE>
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+This chapter took the tools from chapter 4, &quot;Saving Configurations
+with Cookies,&quot; and extended them to create a &quot;no-memory
+required&quot; home page for your visitors.
+<P>
+For additional tips and tricks using these techniques, check out:
+<UL>
+<LI><A HREF="ch15.htm" >Chapter 15</A>, &quot;Managing a Database,&quot; demonstrates
+how to create and maintain a database.
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch4.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch6.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

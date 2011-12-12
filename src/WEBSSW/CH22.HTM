@@ -1,0 +1,745 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 22 -- Creating Groupware Calendars</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;22</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Creating Groupware Calendars</FONT>
+</H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#IntroductiontoGroupwareConcepts">
+Introduction to Groupware Concepts</A>
+<LI><A HREF="#BasicFunctionsNeededinaCalendarProgram">
+Basic Functions Needed in a Calendar Program</A>
+<LI><A HREF="#DesigningaWebBasedCalendar">
+Designing a Web-Based Calendar</A>
+<LI><A HREF="#ControllingAccesstoCalendarFeatures">
+Controlling Access to Calendar Features</A>
+<UL>
+<LI><A HREF="#DisplayingaMonth">
+Displaying a Month</A>
+<LI><A HREF="#DisplayingaDay">
+Displaying a Day</A>
+<LI><A HREF="#PerformingCalendarMaintenance">
+Performing Calendar Maintenance</A>
+</UL>
+<LI><A HREF="#AddingCalendarEnhancements">
+Adding Calendar Enhancements</A>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+One of the latest interests on the business-oriented side of the
+Internet community is the utilization of Internet technology for
+the creation of <I>groupware</I> applications-programs that allow
+people, across a network, to share information.
+<H2><A NAME="IntroductiontoGroupwareConcepts"><FONT SIZE=5 COLOR=#FF0000>
+Introduction to Groupware Concepts</FONT></A></H2>
+<P>
+<I>Groupware</I> is the term used to define computer applications
+that enable people to share information over a distributed environment-a
+network. By this definition, current Internet mechanisms such
+as e-mail and the Web <I>could</I> be considered rudimentary groupware,
+because they do permit communication and dissemination of data.
+However, the general groupware concept extends beyond any existing
+Internet protocol and, in fact, encompasses multiple protocols
+simultaneously.
+<P>
+The key to groupware is focused on the ability for a collection
+of users to work with, add to, and modify a collection of data,
+with the changes taking place <I>in real time</I>. To affect this,
+a <I>server</I> application, which serves up the data from the
+database, and a <I>client</I> program, which interprets the data
+for display, need to work in tandem. In the past, creating groupware
+applications involved the development of complex and expensive
+server-  and client-side applications, as well as having to port
+these applications to every operating system where a client or
+server was needed.
+<P>
+Because groupware relies on client-server communications, using
+the Web as the underlying protocol is a logical choice. The browser
+and Web server already have the necessary connection mechanism.
+All that's needed is some programming to handle data stored in
+a manner other than HTML. The Web White Board plug-ins for Netscape
+Navigator and Internet Explorer are examples of such programming:
+users all work on the same graphic on the board, with each user's
+changes being reflected to the others. In addition, the white
+board supports a text-based chat channel that permits typed messages
+to be reflected to all members in the group. Figure 22.1 is an
+example of CoolTalk, Netscape's Internet phone plug-in that includes
+a Web-based white board.
+<P>
+<A HREF="f22-1.gif"><B>Figure 22.1 :</B> <I>Netscape's CoolTalk allows users to work on
+the same white board graphics, making notations and exchanging
+information in real time</I>.</A>
+<P>
+With this in mind, you may recognize the guestbook and graffiti
+wall scripts (covered back in chapter 12, &quot;Guestbook/Grafitti
+Wall&quot;) as examples of groupware. In fact, the basic script
+concepts presented there can be adapted to yet another application:
+a groupware calendar.
+<H2><A NAME="BasicFunctionsNeededinaCalendarProgram"><FONT SIZE=5 COLOR=#FF0000>
+Basic Functions Needed in a Calendar Program</FONT></A></H2>
+<P>
+Hard-core calendar programs usually require a copy of the software
+to be installed on every computer that needs access to the calendar,
+as well as a copy on the server, in the case of client-server
+systems. Maintenance, at this point, can become a major headache,
+which is why the Web's flexibility is such a boon. With a Web-based
+calendar, no additional software (apart from the browser) is required
+on the user's workstation, nor is any special software needed
+on the server. All maintenance and manipulation can be taken care
+of through a collection of CGI scripts and the familiar Web interface.
+<P>
+The basic requirements of any calendar program are the following:
+<UL>
+<LI>The capability to add, edit, reschedule, and delete events
+<LI>The capability to display a block of time, such as a month,
+in a convenient manner
+<LI>A way to easily move from one time-block, such as a month,
+to another
+<LI>The capability to print out copies of the calendar, which
+is taken care of automatically through the browser's printing
+interface
+</UL>
+<P>
+With these things in mind, the construction of the calendar itself
+becomes somewhat academic.
+<H2><A NAME="DesigningaWebBasedCalendar"><FONT SIZE=5 COLOR=#FF0000>
+Designing a Web-Based Calendar</FONT></A></H2>
+<P>
+The toughest part of calendar design is trying to decide how to
+structure the database. The event database needs to be both flexible
+and space-conscious-it must not take up enormous quantities of
+disk space.
+<P>
+A clean, logical structure would be the following:
+<UL>
+<LI>One directory for each year
+<LI>Within each year's directory, individual directories for each
+month
+<LI>Within the individual month directories, individual files
+for each day store the events for that day
+</UL>
+<P>
+To make the system even simpler, let the directory names correspond
+to what they contain. In that manner, you can use the data returned
+from parsing dates to point directly to the correct folder. Figure
+22.2 is an example of such a directory tree.
+<P>
+<A HREF="f22-2.gif"><B>Figure 22.2 :</B> <I>By using the calendar year and month as
+directory names, you create a structure that makes sorting and
+maintaining the calendar much easier</I>.</A>
+<P>
+You'll notice that the top-level directory &quot;calendar&quot;
+isn't at the root of the file system (<TT>/</TT>), meaning that
+it can be placed anywhere. Two good possible locations are:
+<OL>
+<LI>As a directory below the <TT>cgi-bin</TT> directory of your
+Web server. That way, the CGI script can be placed within the
+&quot;calendar&quot; directory to help organize your CGI directory,
+and can access the database relative to where the script is located.
+<LI>In a separate directory kept somewhere in conjunction with
+the Web server document tree (that is, in the same directory the
+server's &quot;htdocs&quot; directory is located). This is beneficial
+if you're running a site that hosts multiple domains, as it gives
+each domain its own calendar database without having to customize
+the database structure further.
+</OL>
+<P>
+Because each file-such as <TT>calendar/1996/January/22.dat</TT>
+for January 22, 1996-has events for only one day, storing the
+information can be done using the same database tricks shown in
+previous chapters-use a flat text file for the database file,
+one record per line, with individual fields separated by a delimeter.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+For more background on databases, check out chapter 15, &quot;Managing a Database.&quot;</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="ControllingAccesstoCalendarFeatures"><FONT SIZE=5 COLOR=#FF0000>
+Controlling Access to Calendar Features</FONT></A></H2>
+<P>
+Those who utilize the calendar can be divided into the following
+two groups:
+<OL>
+<LI><I>Administrators</I>-Those who have permission to schedule,
+reschedule, or delete individual events.
+<LI><I>End users</I>-Those who only have permission to view the
+stored data.
+</OL>
+<P>
+In some situations, it's feasible to give end users administrator
+access and let them maintain the calendar themselves. However,
+in most cases, having someone ultimately responsible for maintaining
+the group's information is preferable. This is especially important
+when individuals within the group depend on the central calendar
+to set their own calendars. If you want to restrict administrative
+access to a few select people, the easiest way is to utilize password
+control. With server-level password control, you create a server
+control file, such as <TT>.htaccess</TT>, which points to a file,
+like <TT>.htpasswd</TT>, that contains authorized user names and
+passwords.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+For more information on password access control, check out chapter 6, &quot;Controlling User Access.&quot;</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Regardless of whether you choose to assign an administrator or
+let everyone collectively maintain the calendar, the underlying
+mechanism is basically the same, as follows:
+<UL>
+<LI>View an overview of a given month
+<LI>View the scheduled activities for a given day
+</UL>
+<H3><A NAME="DisplayingaMonth">
+Displaying a Month</A></H3>
+<P>
+The simplest way to display a month is as a table, like the calendar
+in figure 22.3 from the University of Dayton Student Government
+Association (<B><A HREF="http://www.udayton.edu/~sga/Calendar/calendar.cgi?calendar=sga">http://www.udayton.edu/~sga/Calendar/calendar.cgi?calendar=sga</A></B>).
+The hardest parts of creating the display are determining the
+following:
+<P>
+<A HREF="f22-3.gif"><B>Figure 22.3 :</B> <I>An example of a Web-generated calendar
+in action. The day values in each table cell are hyperlinks that
+take the surfer to a page that lists the day's activities and
+allows for adding/changing entries</I>.</A>
+<BLOCKQUOTE>
+How many days are there in a given month? (Remember to account
+for Leap Year, if necessary.)<BR>
+What day of the week does the first of the month fall on?<BR>
+What days within the given month have associated events?
+</BLOCKQUOTE>
+<P>
+<B>Leap Year&nbsp;&nbsp;</B>Testing for Leap Year is straightforward,
+after you realize that Leap Years happen in years that are evenly
+divisible by 4. The Perl modulus operator (<TT>%</TT>), which
+returns the remainder of an integer division, can therefore be
+used to determine if February has 28 or 29 days:
+<BLOCKQUOTE>
+<PRE>
+if (!($year % 4)) {
+   // 29 days
+} else {
+   // only 28
+}
+</PRE>
+</BLOCKQUOTE>
+<P>
+The rest of the year is most easily handled by an array:
+<BLOCKQUOTE>
+<PRE>
+@Days = ( 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 );
+</PRE>
+</BLOCKQUOTE>
+<P>
+To associate a particular element in <TT>NumDays</TT> to the corresponding
+month, you can either convert the month to a numeric value-0 for
+January, 1 for February, and so on-or you can convert the list
+to a named list. Simply define an array:
+<BLOCKQUOTE>
+<PRE>
+@Months = (&quot;January&quot;, &quot;February&quot;, &quot;March&quot;, ...);
+</PRE>
+</BLOCKQUOTE>
+<P>
+and search the list for a month match. The index of the month
+is the index into the <TT>Days</TT> array:
+<BLOCKQUOTE>
+<PRE>
+for ($month=0; $month&lt;12; $month++) {
+   if ($strMonth =~ /$Months[$month]/) {
+      $numDays = $Days[$month];
+      break;
+   }
+}
+</PRE>
+</BLOCKQUOTE>
+<P>
+A side effect of this loop is that <TT>$month</TT> now holds the
+numeric equivalent of the given month-0 for January, 1 for February,
+and so on.
+<P>
+<B>Julian Dates&nbsp;&nbsp;</B>Identifying where the first of
+a month falls in the week is best done by converting the date
+to <I>Julian</I> format, where a particular date is converted
+to the number of days since January 1, 4713 B.C., which is demonstrated
+in listing 22.2.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 22.2&nbsp;&nbsp;Julian Dates<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+sub Julian {
+   local($m, $d, $y) = @_;
+   local($ya, $c);
+
+   $y = (localtime(time))[5] + 1900  if ($y eq '');
+
+   if ($m &gt; 2) {
+      $m -= 3;
+   } else {
+      $m += 9;
+      --$y;
+   }
+
+   $c  = int($y/100);
+   $ya = $y - (100 * $c);
+   $jd =  int((146097 * $c) / 4) +
+          int((1461 * $ya) / 4) +
+          int((153 * $m + 2) / 5) +
+          $d + 1721119;
+
+   $jd;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+From this function, the day of the week for September 7, 1970
+would be computed by:
+<BLOCKQUOTE>
+<PRE>
+$dayofWeek = &amp;Julian(9, 7, 1970);
+</PRE>
+</BLOCKQUOTE>
+<P>
+<B>Locating Event Files&nbsp;&nbsp;</B>Each day's events are stored
+in a separate file within the appropriate month's directory. To
+see if a particular day has any associated events, you can use
+Perl to test for the existence of the day's event file:
+<BLOCKQUOTE>
+<PRE>
+if (-e &quot;calendar/$year/$strMonth/$day.dat&quot;) {
+   // Day has events
+} else {
+   // No events for given day
+}
+</PRE>
+</BLOCKQUOTE>
+<P>
+<B>Building the Table&nbsp;&nbsp;</B>Putting this all together
+yields the code fragment in listing 22.3, which generates a month
+display. Days that have associated events are hyperlinks to an
+Events for the Day display. A counter, <TT>$currDOW</TT>, is used
+to keep track of what day of the week is being formatted, and
+to start a new row when necessary.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 22.3&nbsp;&nbsp;Displaying a Month<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+print &quot;&lt;TABLE BORDER=2&gt;\n&quot;;
+print &quot;&lt;TR&gt;\n&quot;;
+print &quot;&lt;TH COLSPAN=7&gt;$strMonth $year&lt;/TH&gt;\n&quot;;
+print &quot;&lt;/TR&gt;&lt;TR&gt;\n&quot;;
+print &quot;   &lt;TH&gt;Su&lt;/TH&gt;&lt;TH&gt;Mo&lt;/TH&gt;&lt;TH&gt;Tu&lt;/TH&gt;&lt;TH&gt;We&lt;/TH&gt;\n&quot;;
+print &quot;   &lt;TH&gt;Th&lt;/TH&gt;&lt;TH&gt;Fr&lt;/TH&gt;&lt;TH&gt;Sa&lt;/TH&gt;\n&quot;;
+print &quot;&lt;/TR&gt;\n&quot;;
+
+$firstDay = (&amp;Julian($month, &quot;1&quot;, $year) + 1) % 7;
+
+print &quot;&lt;TR&gt;\n&quot;;
+
+for($currDOW=0; $currDOW&lt;$firstDay; $currDOW++) {
+   print &quot;&lt;TD&gt;&lt;/TD&gt;\n&quot;;
+}
+
+for ($day=1; $day&lt;=$numDays; $day++) {
+   if($currDOW &gt; 6) {
+      print &quot;&lt;/TR&gt;\n&lt;TR&gt;&quot;;
+      $currDOW = 0;
+   }
+
+   $hasEvents = (-e &quot;calendar/$year/$strMonth/$day.dat&quot;);
+
+   print &quot;&lt;/TD&gt;&quot;;
+
+   if ($hasEvents) {
+      print &quot;&lt;A HREF=\&quot;/cgi-bin/calendar\.pl?$year+$strMonth+$day\&quot;&gt;&quot;;
+   }
+
+   print &quot;$day&quot;;
+
+   if($hasEvents) {
+      print &quot;&lt;/A&gt;&quot;;
+   }
+
+   print &quot;&lt;/TD&gt;&quot;;
+
+   $curDOW++;
+}
+
+print &quot;&lt;/TR&gt;&lt;/TABLE&gt;&quot;;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<H3><A NAME="DisplayingaDay">
+Displaying a Day</A></H3>
+<P>
+With the month displayed to the user, displaying the events for
+a given date is no different from displaying the contents of a
+guestbook. Each line in a date file has one event, <BR>
+consisting of the following:
+<UL>
+<LI>The time of the event
+<LI>A description of the event
+</UL>
+<P>
+Which day to display is controlled by the way the calendar script
+is called. Remember the link created in listing 22.3:
+<BLOCKQUOTE>
+<PRE>
+&lt;A HREF=&quot;/cgi-bin/calendar.pl?$year+$month+$day&quot;&gt;$day&lt;/A&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+The Perl variables <TT>$year</TT>, <TT>$month</TT>, and <TT>$day</TT>
+are replaced with their contents, as in:
+<BLOCKQUOTE>
+<PRE>
+&lt;A HREF=&quot;/cgi-bin/calendar.pl?1970+September+7&quot;&gt;7&lt;/A&gt;
+</PRE>
+</BLOCKQUOTE>
+<P>
+The values <TT>1970</TT>, <TT>September</TT>, and <TT>7</TT> are
+passed to the <TT>calendar.pl</TT> script as parameters, and can
+be retrieved using the Perl <TT>$ARGV[]</TT>, as in:
+<BLOCKQUOTE>
+<PRE>
+$year     = $ARGV[0];
+$strMonth = $ARGV[1];
+$day      = $ARGV[2];<BR>
+</PRE>
+</BLOCKQUOTE>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+This technique can be used with the month script from listing 22.3 by checking whether <TT>$ARGV[2]</TT> is defined. If it isn't defined, only the month is formatted:
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>if($day) {</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>   // display day</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>} else {</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>   // display month</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>}</TT>
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+After the date information has been retrieved, simply open the
+file and display the day's events. Listing 22.4 is an example
+of formatting a day's activities.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 22.4&nbsp;&nbsp;A Day's Schedule<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+print &quot;&lt;UL&gt;\n&quot;;
+
+open (DAY, &quot;calendar/$year/$strMonth/$day.dat&quot;);
+
+while (&lt;DAY&gt;) {
+   ($time, $desc) = split (/\|/, $_);
+   print &quot;&lt;LI&gt;&lt;B&gt;$time:&lt;/B&gt; $desc&lt;/LI&gt;\n&quot;;
+}
+
+close (DAY);
+
+print &quot;&lt;/UL&gt;\n&quot;;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+While the code in listing 22.4 only displays the time and description
+of each event, you can get as fancy as you want with your pages.
+For example, if you are letting users submit their own events
+to the calendar, you may want to display the name of the poster
+as well (see figure 22.4).
+<P>
+<A HREF="f22-4.gif"><B>Figure 22.4 :</B> <I>With a little creative table formatting-the
+event header line in the middle of the page uses colored table
+cells, and some added information from the poster-you can create
+as visually exciting a calendar as you want</I>.</A>
+<H3><A NAME="PerformingCalendarMaintenance">
+Performing Calendar Maintenance</A></H3>
+<P>
+Displaying a calendar of events is only part of the job-the other
+half being maintaining (add, deleting, and editing events) the
+calendar. Extending the scripts demonstrated so far to permit
+maintenance can be broken down into the following three distinct
+functions:
+<OL>
+<LI>Adding new events
+<LI>Editing existing events
+<LI>Deleting events
+</OL>
+<P>
+All of these functions can be easily modeled after the guestbook/graffiti
+wall scripts from chapter 12. One way of handling deletion simply
+is to wrap the day's events display within a form, associating
+a check box with each event. 
+<P>
+Listing 22.5 is an example of a Perl script, called <TT>maintain.pl</TT>
+on the companion CD-ROM, that handles deleting events.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 22.5&nbsp;&nbsp;Deleting Events (Part 1)<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+print &quot;Content-type: text/html\n\n&quot;;
+
+print &quot;&lt;FORM METHOD=POST ACTION=\&quot;/cgi-bin/maintain.pl\&quot;&gt;\n&quot;;
+
+print &quot;&lt;INPUT TYPE=HIDDEN NAME=\&quot;year\&quot; VALUE=\&quot;$year\&quot;&gt;\n&quot;;
+print &quot;&lt;INPUT TYPE=HIDDEN NAME=\&quot;month\&quot; VALUE=\&quot;$strMonth\&quot;&gt;\n&quot;;
+print &quot;&lt;INPUT TYPE=HIDDEN NAME=\&quot;day\&quot; VALUE=\&quot;$day\&quot;&gt;\n&quot;;
+
+print &quot;&lt;CENTER&gt;&lt;TABLE BORDER=3&gt;\n&quot;;
+print &quot;&lt;TR&gt;&lt;TH&gt;Delete&lt;/TH&gt;&lt;TH&gt;Event&lt;/TH&gt;&lt;/TR&gt;\n&quot;;
+
+open (DAY, &quot;calendar/$year/$strMonth/$day.dat&quot;);
+
+$i = 1;
+
+while (&lt;DAY&gt;) {
+   ($time, $desc) = split (/\|/, $_);
+   print &quot;&lt;TR&gt;\n&quot;;
+   print &quot;&lt;TD&gt;&lt;INPUT TYPE=CHECKBOX NAME=\&quot;Kill-$i\&quot; VALUE=\&quot;yes\&quot;&gt;&lt;/TD&gt;\n&quot;;
+   print &quot;&lt;TD&gt;&lt;B&gt;$time:&lt;/B&gt; $desc&lt;/TD&gt;&lt;/TR&gt;\n&quot;;
+
+   $i++;
+}
+
+close (DAY);
+
+print &quot;&lt;/TABLE&gt;\n&quot;;
+print &quot;&lt;INPUT TYPE=SUBMIT Value=\&quot;Delete Selected Items\&quot;&gt;&quot;;
+print &quot;&lt;INPUT TYPE=RESET Value=\&quot;Clear Fields\&quot;&gt;&quot;;
+print &quot;&lt;/CENTER&gt;&lt;/FORM&gt;&quot;;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+This script works a bit differently from the previous listings
+in this chapter. When dealing with form transmittal, the data
+that comes through is passed as part of the <TT>CONTENT_LENGTH</TT>
+environment variable. Therefore, it's necessary to define three
+hidden fields to identify the day, month, and year, so that when
+the script goes into maintenance mode, it knows which file to
+edit.
+<P>
+When the form is submitted, any events flagged for deletion are
+indicated by the presence of a <TT>kill-i</TT> field within <TT>CONTENT_LENGTH</TT>,
+where <TT>i</TT> is a number from 1 to the number of events. For
+example, if the fourth event of the day was flagged for deletion,
+<TT>CONTENT_LENGTH</TT> would contain the following somewhere
+within its length:
+<BLOCKQUOTE>
+<PRE>
+...Kill-4=yes...
+</PRE>
+</BLOCKQUOTE>
+<P>
+The other side of the delete handler is what happens after the
+form is submitted. Then, in sequence:
+<OL>
+<LI>Retrieve the form data from <TT>CONTENT_LENGTH</TT>.
+<LI>Determine the correct event file and open it.
+<LI>Load its data into memory.
+<LI>Write the data back out to disk, omitting the events flagged
+for deletion.
+</OL>
+<P>
+Listing 22.6 demonstrates this part of the process.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 22.6&nbsp;&nbsp;Deleting Events (Part 2)<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+# retrieve the form fields
+#
+if ($ENV{'REQUEST_METHOD'} eq 'POST') {
+   read(STDIN, $buffer, $ENV{'CONTENT_LENGTH'});
+   @pairs = split(/&amp;/, $buffer);
+
+   foreach $pair (@pairs) {
+      ($name, $value)  = split(/=/, $pair, 2);
+      $tname = $name;
+
+      $contents{$name} = $value;
+   }
+}
+
+# determine the correct event file
+#
+$dayFile = &quot;calendar/$contents{'year'}/$contents{'month'}/$contents{'day').dat&quot;;
+
+# open the event file and load it's contents into memory.
+#
+open(DAY, &quot;$dayFile&quot;);
+$i = 1;
+while(&lt;DAY&gt;) {
+   chop;
+   $events{$i} = $_;
+   $i++;
+}
+close(DAY);
+
+# Now, open the file for writing and write out the non-deleted
+# fields.
+#
+open(DAY, &quot;&gt;$dayFile&quot;);
+
+for($j=1; $j&lt;=$i; $j++) {
+
+   # check for the presence of a kill-flag (rather, the 
+   # absence of one).
+   #
+   if(!(defined $contents{&quot;Kill-$j&quot;})) {
+      print DAY &quot;$list{$j}\n&quot;;
+   } 
+} 
+
+close(DAY);
+
+exit;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+The testing for this block actually works in reverse: if a line
+<I>isn't</I> flagged for deletion, it's written out.
+<P>
+This system can be extended to enable easy maintenance of months
+or years, simply by adjusting the form and checking for the presence
+of the various hidden fields. For example, to edit the schedule
+at the month level, perhaps to delete an entire day, follow these
+steps:
+<OL>
+<LI>Modify the month display script to include Delete This checkboxes
+for days with events.
+<LI>Omit the <TT>day</TT> hidden field within the form.
+<LI>Test for the existence of the <TT>day</TT> field within the
+script. If the field is missing, you want to edit a month. If
+the field exists, you want to edit a day.
+</OL>
+<P>
+Follow these same guidelines to extend this up to include months.
+<H2><A NAME="AddingCalendarEnhancements"><FONT SIZE=5 COLOR=#FF0000>
+Adding Calendar Enhancements</FONT></A></H2>
+<P>
+While the calendar system presented here is a simple one, it provides
+a basis on which you can easily expand in a variety of directions.
+For example, the following are a few ideas:
+<BLOCKQUOTE>
+Both Navigator and Explorer support setting the background color
+of individual table cells through the <TT>BGCOLOR</TT> attribute
+of the <TT>&lt;TD&gt;</TT> tag. This feature can be used to color
+code the displayed calendar to highlight important dates.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+If the amount of information you store within the calendar is
+relatively small, it may be worthwhile to format an entire month's
+data into a JavaScript array that's passed back to the browser
+for processing and display. This speeds up the user's browsing
+through a given month's activities.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+Extend the administrative interface to support &quot;multi-day&quot;
+events, such as holidays or week-long seminars, perhaps by having
+a separate file for events that extend over a range, or by entering
+the event in each day's database. A multi-day event is one that
+extends over several days.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+By referencing a database within the user's personal directory,
+the calendar interface can be extended to include a user's own
+data files. This allows users to maintain their own schedules
+within the context of the company as a whole, without directly
+interfering with the main database.
+</BLOCKQUOTE>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><BLOCKQUOTE>
+<B>TIP</B>
+</BLOCKQUOTE>
+</TD>
+</TR>
+<TR><TD><BLOCKQUOTE>
+If you need a &quot;kick in the right direction&quot; on implementing some of these ideas, check the CD-ROM. You'll find examples of each of these and other tricks</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+For more information on the underlying constructs that control
+the groupware calendar, and to look at related examples of groupware
+scripting, check out the following:
+<UL>
+<LI><A HREF="ch9.htm" >Chapter 9</A> &quot;Bulletin Boards,&quot; examines Web-based
+bulletin boards.
+<LI><A HREF="ch10.htm" >Chapter 10</A>, &quot;Implementing Web Chat,&quot; teaches you
+how to create a chat system through scripting.
+<LI><A HREF="ch12.htm" >Chapter 12</A>, &quot;Guestbook/Graffiti Wall,&quot; explains
+how to create a guestbook where visitors sign in, and a graffiti
+wall visitors can leave messages on for others.
+<LI><A HREF="ch15.htm" >Chapter 15</A>, &quot;Managing a Database,&quot; shows you how
+to create and maintain a database.
+<LI><A HREF="ch16.htm" >Chapter 16</A>, &quot;Searching the Database,&quot; is your guide
+to understanding index files and speeding up data access.
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch21.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch23.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

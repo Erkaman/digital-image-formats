@@ -1,0 +1,497 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 3 -- Tracking Hit Counts</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;3</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Tracking Hit Counts</FONT></H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#ServerAccessLogs">
+Server Access Logs</A>
+<LI><A HREF="#MoreEfficientCounting">
+More Efficient Counting</A>
+<LI><A HREF="#GraphicCounters">
+Graphic Counters</A>
+<LI><A HREF="#GeneratingServerStatisticswithIwusageI">
+Generating Server Statistics with <I>wusage</I></A>
+<LI><A HREF="#UserSpecificAccessTracking">
+User-Specific Access Tracking</A>
+<UL>
+<LI><A HREF="#BakingUpaBatchofCookies">
+Baking Up a Batch of Cookies</A>
+</UL>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+Now that you've started building &quot;the ultimate site,&quot;
+you'll probably want to sate your ego by knowing exactly how many
+or how few people are bothering to stop by your little corner
+of the Web. If you're running a commercial site and get funding
+from advertisers, you'll need demographic information to prove
+to the people paying you that their money is well spent. In short,
+you'll need to track <I>hits</I>, or accesses, to your Web pages.
+<H2><A NAME="ServerAccessLogs"><FONT SIZE=5 COLOR=#FF0000>
+Server Access Logs</FONT></A></H2>
+<P>
+When someone's browser requests your Web page, that page is said
+to be <I>hit</I>, or <I>accessed</I>. Web servers track, in varying
+degrees, these hits and the information stores in the <I>access
+log</I> somewhere within the server's directory structure. From
+the information in the access log, you can identify what pages
+on your site have been requested, how many times, and by whom.
+<BR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><BLOCKQUOTE>
+<B>Hit or Miss?</B>
+</BLOCKQUOTE>
+
+</TD></TR>
+<TR><TD><BLOCKQUOTE>
+In current Web parlance, the term <I>hit</I> has a somewhat broader definition than <I>access</I>. While <I>hit</I> corresponds to the loading of a page and all the embedded objects it may contain, <I>access</I> corresponds to the loading of <I>one 
+object</I> within a page. 
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+For example, if you have a page with 10 graphics, a <I>hit</I> on that particular page generates <I>11</I> access entries in the log-one for the page itself and one for each graphic. For highly complex pages with multiple graphics, frames, server-side 
+includes, and so on, the total <I>access count</I> inflates by the number of individual objects within the page. If 100 people visit your page and you have 10 graphics on that page, then you have 100 <I>hits</I>, but <I>1,000 accesses</I>. Naturally, from 
+
+an advertising standpoint, talking about <I>accesses</I> makes a site sound much more popular than it actually is.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+In previous years, this was a closely guarded secret, known only to the Web administrators. It allowed unscrupulous administrators and marketers to claim incredible activity on their sites just by listing the accesses instead of individual user visits. 
+However, in recent years the word's gotten out, advertisers are more savvy, CGI scripters have gotten smarter, and access statistics are more in line with actual user visits.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<BLOCKQUOTE>
+</BLOCKQUOTE>
+<P>
+The easiest way to count hits is to utilize the log files kept
+by your Web server. As with any other piece of software, <I>what</I>
+the file is named and <I>where</I> it's located varies. For example,
+the NCSA servers create a log file called <TT>access_log</TT>,
+which is, by default, stored in a <TT>logs/</TT> subdirectory
+off the server's root. A sample of the information written to
+<TT>access_log</TT> is shown in listing 3.1, although the exact
+amount of information maintained can be configured. Consult the
+documentation for your server for more information on how to do
+this.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 3.1&nbsp;&nbsp;Sample from </B><I>access_log<BR>
+</I>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+px1.mel.aone.net.au - - [24/Jun/1996:00:02:46 -0500]
+&quot;GET /~sjwalter/javascript/ HTTP/1.0&quot; 200 5245
+px1.mel.aone.net.au - - [24/Jun/1996:00:02:50 -0500]
+&quot;GET /~sjwalter/javascript/nn/index.html HTTP/1.0&quot; 200 2793
+px1.mel.aone.net.au - - [24/Jun/1996:00:02:55 -0500]
+&quot;GET /~sjwalter/javascript/nn/index2.html HTTP/1.0&quot; 200 666
+px1.mel.aone.net.au - - [24/Jun/1996:00:02:57 -0500]
+&quot;GET /~sjwalter/javascript/nn/que.html HTTP/1.0&quot; 200 523
+px1.mel.aone.net.au - - [24/Jun/1996:00:02:58 -0500]
+&quot;GET /~sjwalter/javascript/nn/index.html HTTP/1.0&quot; 200 2293
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+As you can see, the amount of information available in the access
+log is rather extensive. The times specified for each page's request
+are close because this is a <I>framed</I> site. Each individual
+HTML document generates another access entry. If more of the log
+were printed here, you'd also see an access entry for each graphic
+displayed on each page.
+<P>
+One thing worth noting is the <TT>GET</TT> request in the first
+line:
+<BLOCKQUOTE>
+<PRE>
+GET /~sjwalter/javascript/ HTTP/1.0
+</PRE>
+</BLOCKQUOTE>
+<P>
+No file is specified because the user accessed the main page using
+<I>aliasing.</I> If the server is configured for it, specifying
+a URL with only a path and no file name causes a default file,
+(often <TT>default.htm</TT>, <TT>index.htm</TT>, or <TT>index.html)</TT>,
+to be handed back to the browser, like this:
+<BLOCKQUOTE>
+<PRE>
+http://www.visi.com/~sjwalter/
+</PRE>
+</BLOCKQUOTE>
+<P>
+Because of this, if you want to scan the access log for hits,
+you need to look both for a specific page (your home page, for
+instance) and for an alias reference. To actually scan the log,
+use the UNIX <TT>grep</TT> command, which searches one or more
+files for a particular string. The general syntax for <TT>grep</TT>
+is:
+<BLOCKQUOTE>
+<PRE>
+grep pattern fileName
+</PRE>
+</BLOCKQUOTE>
+<P>
+The string to search for is <I>pattern </I>and the file to search<I>
+</I>for<I> </I>is<I> </I>&quot;fileName<I>.&quot; </I>By default,
+<TT>grep</TT> prints out every matching line it finds in the specified
+file with the addition of the -<TT>c</TT> parameter. You can instruct
+<TT>grep</TT> to suppress the normal output and just print a <I>count
+</I>of the matching lines. The simple CGI program that follows
+takes advantage of this and counts the number of home-page accesses
+in the specified directory (see listing 3.2). This listing assumes
+that the home page is named <TT>index.html</TT>.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 3.2&nbsp;&nbsp;A Simple Access Counter<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+#!/usr/local/bin/perl
+
+$homePage = &quot;/%7Esjwalter&quot;;
+$logFile  = &quot;/var/httpd/logs/access.log&quot;;
+
+print &quot;Content-type: text/html\n\n&quot;;
+$num  = 'grep -c 'GET $homePageURL/ HTTP'      $logFile';
+$num += 'grep -c 'GET $homePageURL/index.html' $logFile';
+print &quot;$num\n&quot;;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+In listing 3.2, the <TT>$homePage</TT> variable contains the sequence <TT>%7E</TT>. This is the ASCII equivalent of the <I>tilde</I> (~) and is used because special characters, like the tilde, are often <I>encoded</I>. This means that they convert to their 
+
+ASCII numeric representation when written out.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+This is different from <I>escaping</I> text, where the character is preceded by a backslash (\) in order to render it as normal text, instead of a Perl metacharacter.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+To use this program, include it in your home page as a Server-Side
+include file, which listing 3.3 demonstrates. The result is a
+count similar to that shown at the bottom of figure 3.1.
+<P>
+<A HREF="f3-1.gif"><B>Figure 3.1 :</B> <I>A simple CGI script can be implemented to
+create a text-based access counter</I>.</A><BR>
+<HR>
+<BLOCKQUOTE>
+<B>Listing 3.3&nbsp;&nbsp;Implementing a Simple Counter in HTML
+<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+&lt;html&gt;
+&lt;head&gt;&lt;title&gt;Welcome to My Home Page&lt;/title&gt;&lt;/head&gt;
+&lt;body&gt;
+This page has been accessed
+&lt;!--#exec cgi=&quot;access1.cgi&quot; --&gt;
+times.
+&lt;/body&gt;
+&lt;/html&gt;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Lack of efficiency is a problem with grepping the server's access
+log. It takes several seconds to read through the log file of
+an active server and most servers do not want to wait the additional
+seconds just to learn the access count. A more efficient technique
+is to maintain a separate file on the server that contains the
+access count.
+<H2><A NAME="MoreEfficientCounting"><FONT SIZE=5 COLOR=#FF0000>
+More Efficient Counting</FONT></A></H2>
+<P>
+To circumvent the additional overhead of having to scan an entire
+server log file to compute each access, store the access count
+in a temporary file on the server. Then, using a slightly different
+script, follow these steps:
+<OL>
+<LI>Open the file.
+<LI>Read the current counter value from the file.
+<LI>Increment the counter value.
+<LI>Write the new value back to the file, overwriting the old
+value.
+<LI>Close the file.
+<LI>Write the new value back through the server so it appears
+on the page in the user's browser.
+</OL>
+<P>
+The process of opening, reading, writing, and closing a file is
+easily done with Perl. One additional factor, however, now comes
+into play. Because it's possible for more than one user to be
+accessing your site at any given time, it's possible for the counter
+file to be accessed from different connections simultaneously.
+If 10 users hit your page at the same time, each one would see
+the same access count and whoever is the last one to write the
+file out is the one who sets the value for the next user. This
+can skew the access count unless some method can signal each simultaneous
+access as a new <I>hit, </I>so<I> s</I>ome form of <I>locking
+mechanism</I> is necessary.
+<P>
+Sometimes referred to as a <I>semaphore</I>, a lock is a file
+that signals that something is happening. In the case of counter
+access, whoever opens the counter file first writes out a <I>lock
+file</I>. Anyone else attempting to access the counter has to
+wait until the lock file is deleted (a matter of seconds). Once
+the lock file disappears, anyone can quickly establish his or
+her own lock and then the process continually repeats up to the
+last access. This maintains an accurate access count. An example
+of simple locking is shown in listing 3.4.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 3.4&nbsp;&nbsp;Implementing File Locking<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+while (-e lockFile) {
+   select(undef, undef, undef, 0, 1);
+}
+
+open(LOCKFILE, &quot;&gt;lockFile&quot;);
+... # retrieve and increment the counter
+close(LOCKFILE);
+unlink(lockFile);
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+The <TT>while()</TT> loop in Listing 3.4 keeps checking for the existence of <TT>lockFile</TT> and, if found, meaning that someone else is accessing the counter log, performs a dummy buffer select, which is a relatively fast process. This means that the 
+loop will cycle very quickly, minimizing the wait a user would encounter on a busy site.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+However, because this loop executes so fast (and continuously), it also takes its toll on system response, especially if your site is <I>extremely</I> busy. An alternative loop that isn't as hard on the system would be:
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>while (-e lockFile) {<BR>
+   sleep(1);<BR>
+}</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+This puts the process (the script, in this case) to sleep for 1 second, thus not using any system resources. While this loop executes more slowly (once each second), a one-second wait is unnoticed for the normal, modem-based user.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="GraphicCounters"><FONT SIZE=5 COLOR=#FF0000>
+Graphic Counters</FONT></A></H2>
+<P>
+In the multimedia world of the Web, text-based access counters
+are somewhat bland. More often than not, the counters you find
+on pages are graphic, providing a more visually appealing display.
+<P>
+Converting your counter from a text-only to a graphic counter
+is simple. All you need is a collection of 10 image files-one
+for each digit from 0 through 9. Then, instead of printing out
+the number you read from the access log, you'd step through the
+number digit-by-digit and &quot;print&quot; out the corresponding
+image file. Listing 3.5 demonstrates a Perl fragment that handles
+this type of counter in a rather unusual way.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 3.5&nbsp;&nbsp;A Graphic Access Counter<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+...
+# $count is assumed to have the current access count
+print &quot;&lt;TABLE CELLPADDING=0 CELLSPACING=0 BORDER=0&gt;&quot;;
+print &quot;&lt;TR&gt;&quot;;
+
+for ($i=0; $i&lt;length($count); $i++) {
+   $digit = substr($count, i, 1);
+   print &quot;&lt;TD&gt;&lt;IMG SRC=\&quot;$imagedir/$digit\.gif\&quot;&gt;&lt;/TD&gt;&quot;;
+}
+
+print &quot;&lt;/TR&gt;&lt;/TABLE&gt;&quot;;
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+What's different about listing 3.5 from many graphic counters
+is that it doesn't construct a bit map dynamically. Rather, it
+generates HTML code that formats the individual digits into a
+table, and lets the browser do the work of requesting the appropriate
+images from the server.<BR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>TIP</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+While this technique is not as efficient as having your Perl code generate the entire count as a single bit map, it permits you to do special visual tricks with your counter. For example, each individual graphic could be a small animated GIF.</BLOCKQUOTE>
+<BLOCKQUOTE>
+If, however, you'd rather have Perl do <I>all</I> the work in generating your counter, you'll find examples of bit-map construction on the companion CD-ROM.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="GeneratingServerStatisticswithIwusageI"><FONT SIZE=5 COLOR=#FF0000>
+Generating Server Statistics with <I>wusage</I></FONT></A></H2>
+<P>
+While access counters track the number of hits a page takes, often
+it's more valuable to be able to analyze the hit counts to look
+for patterns. What times of day are the most hits recorded, from
+what domains, what pages are hit the most in a site, and so on,
+are some examples. For those not interested in writing their own
+Web activity analysis program from the ground up, there is a wonderfully
+robust tool for generating server statistics-<TT>wusage</TT>.
+Available from <B><A HREF="http://www.boutell.com/wusage/">http://www.boutell.com/wusage/</A></B>, <TT>wusage</TT>
+generates weekly usage statistics of the following information:
+<BLOCKQUOTE>
+Total server usage<BR>
+Response to Isindex pages, or Index&quot; usage<BR>
+The top 10 sites by frequency of access<BR>
+The top 10 documents accessed<BR>
+A graph of server usage over many weeks<BR>
+An icon version of the graph for your home page<BR>
+Pie charts showing the usage of your server by domain
+</BLOCKQUOTE>
+<P>
+The only major requirement is that the program needs to be run
+on a periodic basis, usually once per week through a server maintenance
+script. An example of the output <TT>wusage</TT> can generate
+is shown in figure 3.2.
+<P>
+<A HREF="f3-2.gif"><B>Figure 3.2 :</B> <I>The </I><TT>wusage</TT><I> statistics program
+generates a visual display of the activity of your Web server</I>.</A>
+<H2><A NAME="UserSpecificAccessTracking"><FONT SIZE=5 COLOR=#FF0000>
+User-Specific Access Tracking</FONT></A></H2>
+<P>
+The techniques covered so far in this chapter deal with how many
+times your site has been accessed. You can also track how many
+times a particular user visited through the use of <I>cookies</I>.
+While server tracking relies on logs stored on the server, <I>cookies</I>
+are stored with the user's browser.
+<H3><A NAME="BakingUpaBatchofCookies">
+Baking Up a Batch of Cookies</A></H3>
+<P>
+Cookies (or <I>Persistent Client State HTTP Objects</I>) are a
+mechanism which both the server (and client, through JavaScript)
+stores and retrieves information from the client side of the connection.
+Every cookie has the following components:
+<UL>
+<LI><TT>NAME=VALUE</TT>-the only required component of a cookie,
+this is a sequence of characters that assign a name and value
+to the cookie. Neither the <TT>NAME</TT> nor <TT>VALUE</TT> part
+contains semicolons. Semicolons, commas, or white space are used
+to separate cookie components. If there's a need to use these
+characters, use escape coding as an ASCII value.
+<LI><TT>expires=DATE</TT>-option which defines the lifespan of
+the cookie. An example <TT>DATE</TT> string is:<BR>
+<TT>Mon, 10-Jun-1996 23:14:25 GMT<BR>
+</TT>If not specified, the cookie only exists until the browser
+is shut down.
+<LI><TT>domain=DOMAIN_NAME</TT>-identifies the valid cookie domain.
+By default, this is the domain of the server which generates the
+cookie response.
+<LI><TT>path=PATH</TT>-identifies the path and subdirectories
+within the valid cookie domain. By default, this is the path of
+the document associated with the cookie.
+<LI><TT>secure</TT>-an optional flag that indicates that the cookie
+only transmits if the connection between server and browser is
+a secure one. This can be done by utilizing SSL, the Secure Sockets
+Layer. By default, cookies are not secure.
+</UL>
+<P>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><BLOCKQUOTE>
+<B>CAUTION</B>
+</BLOCKQUOTE>
+
+</TD></TR>
+<TR><TD><BLOCKQUOTE>
+There are several limits imposed on cookies:</BLOCKQUOTE>
+<UL>
+<LI>A maximum of 20 cookies can be created for any given domain. Any attempt to set additional cookies will cause the oldest cookies in the file to be overwritten.
+<LI>A given client (browser) can only store a maximum of 300 cookies. Like the 20-cookie domain limit, exceeding the 300-cookie limit will result in old cookies being overwritten.
+<LI>Each cookie cannot exceed 4K (4096 bytes) in size.
+</UL>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+Originally limited to server-side manipulation, JavaScript makes
+accessing cookies from within the browser a snap. The process
+for updating a cookie counter is similar to that of updating a
+server-side counter:
+<OL>
+<LI>Read the cookie value or assume a value of <TT>0</TT> if the
+particular cookie doesn't exist.
+<LI>Increment the counter value.
+<LI>Write the cookie back out.
+</OL>
+<P>
+The full source code for a cookie-based counter is available on
+the CD-ROM.<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Currently, client-side cookie manipulation (via JavaScript) is supported within Netscape Navigator, but <I>not</I> Internet Explorer.
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+For a trick that creates &quot;pseudo-cookies&quot; that work in both Navigator and Explorer, check out <A HREF="ch27.htm" >Chapter 27</A>, &quot;Power Scripting Toolkit.&quot;</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+This chapter introduces the principles behind <I>hits</I> and
+<I>access counters</I> and how to implement them within your site.
+The techniques discussed can be extended in a variety of different
+ways, such as customizing your access monitoring to create a special
+page for the one millionth user access and using user-specific
+tracking, customize your site to display a special message (or
+link) with the user who visited for the 50th time. 
+<UL>
+<LI><A HREF="ch8.htm" >Chapter 8</A> &quot;Advertising with Billboards,&quot; demonstrates
+attaching a counter to an advertising banner to see how many times
+a particular advertisement is viewed.
+</UL>
+<HR>
+
+<CENTER><P><A HREF="ch2.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch4.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>

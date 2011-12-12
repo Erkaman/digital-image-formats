@@ -1,0 +1,956 @@
+<HTML>
+<HEAD>
+<TITLE>Chapter 27 -- Power Scripting Toolkit</TITLE>
+
+<META NAME="GENERATOR" CONTENT="Internet Assistant for Microsoft Word 2.0z">
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#CE2910">
+<H1><FONT SIZE=6 COLOR=#FF0000>Chapter&nbsp;27</FONT></H1>
+<H1><FONT SIZE=6 COLOR=#FF0000>Power Scripting Toolkit</FONT>
+</H1>
+<HR>
+<P>
+<CENTER><B><FONT SIZE=5><A NAME="CONTENTS">CONTENTS</A></FONT></B></CENTER>
+<UL>
+<LI><A HREF="#PerlTools1">
+Perl Tools</A>
+<UL>
+<LI><A HREF="#cgilibpl">
+cgi-lib.pl</A>
+<LI><A HREF="#IlibwwwperlI">
+<I>libwww-perl</I></A>
+<LI><A HREF="#IcookielibI">
+<I>cookie.lib</I></A>
+<LI><A HREF="#PerlTools2">
+Perl 5 Tools</A>
+</UL>
+<LI><A HREF="#JavaScriptTools">
+JavaScript Tools</A>
+<UL>
+<LI><A HREF="#BrowserIdentification">
+Browser Identification</A>
+<LI><A HREF="#ObjectBrowsing">
+Object Browsing</A>
+<LI><A HREF="#Arrays">
+Arrays</A>
+<LI><A HREF="#UserDefinedObjects">
+User-Defined Objects</A>
+<LI><A HREF="#Databases">
+Databases</A>
+<LI><A HREF="#CommonHTMLCreation">
+Common HTML Creation</A>
+<LI><A HREF="#StatusBarControl">
+Status Bar Control</A>
+<LI><A HREF="#Cookies">
+Cookies</A>
+</UL>
+<LI><A HREF="#FromHere">
+From Here&#133;</A>
+</UL>
+
+<HR>
+<P>
+Now that you've made it to the end of this book, you've probably
+started recognizing patterns in the script code. Many operations,
+such as reading from files, writing HTML, and so on, are done
+over and over to such a level of repetition that you may want
+to build a library of commonly used functions.
+<H2><A NAME="PerlTools1"><FONT SIZE=5 COLOR=#FF0000>
+Perl Tools</FONT></A></H2>
+<P>
+The Perl examples presented throughout the book focused on the
+underlying mechanisms for various operations-reading files, parsing
+databases, and so on, which would lead to tedious coding if not
+for pre-existing collections of functions that have been developed
+by a variety of Perl gurus around the Web. What follows is an
+overview of several of the more popular libraries and what they
+offer.
+<P>
+All libraries and source files covered here are available on the
+companion CD-ROM or from any Perl Web site on the Internet. If
+you want to make sure you've got the latest version of any package,
+three of the best sites to check out are:
+<OL>
+<LI>Matt's Script Archive (<B><A HREF="http://www.worldwidemart.com/scripts/">http://www.worldwidemart.com/scripts/</A>)</B>
+<LI>Selena Sol's Public Domain CGI Script Archive and Resource
+Library <BR>
+(<B><A HREF="http://www.eff.org/~erict/Scripts/">http://www.eff.org/~erict/Scripts/</A>)</B>
+<LI>The Perl Language Home Page (<B><A HREF="http://www.perl.com/perl/">http://www.perl.com/perl/</A></B>)
+</OL>
+<H3><A NAME="cgilibpl">
+cgi-lib.pl</A></H3>
+<P>
+Probably one of the most commonly used Perl libraries today is
+the <TT>cgi-lib</TT> collection, written by Steven E. Brenner.
+<TT>cgi-lib</TT> is a collection of routines that make manipulation
+of HTML extremely simple. Table 27.1 lists the functions available
+in the library.<BR>
+<P>
+<CENTER><B>Table 27.1&nbsp;&nbsp;cgi-lib.pl Functions</B></CENTER>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=151><B>Function</B></TD><TD WIDTH=439><B>Purpose</B>
+</TD></TR>
+<TR><TD WIDTH=151><TT>ReadParse</TT></TD><TD WIDTH=439>Reads in data (from standard input for <TT>POST</TT> requests, <TT>QUERY_STRING</TT> for <TT>GET</TT> requests), unescapes the text, and builds a list <TT>%in</TT> containing the key/value pairs.
+</TD></TR>
+<TR><TD WIDTH=151><TT>PrintHeader</TT></TD><TD WIDTH=439>Prints the <TT>Content-type:</TT> line and blank line that identify the end of an HTML header.
+</TD></TR>
+<TR><TD WIDTH=151><TT>HtmlTop</TT></TD><TD WIDTH=439>Returns the <TT>&lt;HEAD&gt;</TT> of a document and opens the <TT>&lt;BODY&gt;</TT> tag. You can specify the document title and a <TT>&lt;H1&gt;</TT> header as a parameter.
+</TD></TR>
+<TR><TD WIDTH=151><TT>HtmlBot</TT></TD><TD WIDTH=439>Closes the document by returning the closing <TT>&lt;/BODY&gt;</TT> and <TT>&lt;/HTML&gt;</TT> tags.
+</TD></TR>
+<TR><TD WIDTH=151><TT>SplitParam</TT></TD><TD WIDTH=439>Splits a multi-valued parameter into a list of the constituent parameters. Optionally, the list will be converted into an array.
+</TD></TR>
+<TR><TD WIDTH=151><TT>MethGet</TT></TD><TD WIDTH=439>Returns <TT>true</TT> if this CGI script was executed through a <TT>GET</TT> request, <TT>false</TT> if otherwise.
+</TD></TR>
+<TR><TD WIDTH=151><TT>MethPost</TT></TD><TD WIDTH=439>Returns <TT>true</TT> if this CGI script was executed through a <TT>POST</TT> request, <TT>false</TT> if otherwise.
+</TD></TR>
+<TR><TD WIDTH=151><TT>MyBaseUrl</TT></TD><TD WIDTH=439>Returns the base URL to the script (no path or query information).
+</TD></TR>
+<TR><TD WIDTH=151><TT>MyFullUrl</TT></TD><TD WIDTH=439>Returns the full URL to the script, including path and query information.
+</TD></TR>
+<TR><TD WIDTH=151><TT>MyURL</TT></TD><TD WIDTH=439>Returns the same information as <TT>MyBaseUrl</TT>.
+</TD></TR>
+<TR><TD WIDTH=151><TT>CgiError</TT></TD><TD WIDTH=439>Formats and prints out an error message with HTML markup for a prettier look.
+</TD></TR>
+<TR><TD WIDTH=151><TT>CgiDie</TT></TD><TD WIDTH=439>Calls <TT>CgiError</TT> to print an error message, then quits the script.
+</TD></TR>
+<TR><TD WIDTH=151><TT>PrintVariables</TT></TD><TD WIDTH=439>Prints out the variables aquired through <TT>ReadParse</TT>.
+</TD></TR>
+<TR><TD WIDTH=151><TT>PrintEnv</TT></TD><TD WIDTH=439>Prints out all environment variables in HTML format.
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="IlibwwwperlI">
+<I>libwww-perl</I></A></H3>
+<P>
+Originally written by Roy Fielding, <TT>libwww-perl</TT> started
+as a backend for MOMspider, a robot designed to help maintain
+wide-area webs. Since then, contributions from individuals around
+the world have helped this library evolve and ported it into versions
+for both Perl 4 and Perl 5.
+<P>
+The libwww-perl package is actually a collection of several different
+libraries, together providing a consistent programming interface
+to the World Wide Web. Among the packages included are:
+<UL>
+<LI>A simple tool for making <TT>GET</TT> requests from the command
+line.
+<LI>A package for implementing the <I>robot exclusion protocol</I>.
+</UL>
+<P>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Because of the popularity of robots and search engines on the Web, a standard has been proposed to control how deep a search engine from one site will be allowed into another. This standard is called the <I>robot exclusing protocol</I>.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<UL>
+<LI>A package for manipulating dates as used on the Web.
+<LI>A package for doing local file requests (from localhost) and
+making them look as though they came from a Web server.
+<LI>A collection of routines for reading, manipulating, and creating
+HTML documents.
+<LI>Library utilities for handling MIME files and spawning off
+the proper viewers (based on content-type).
+<LI>Utilities for manipulating URLS, such as parsing, creating,
+manipulating, canonicalizing, and so on.
+</UL>
+<H3><A NAME="IcookielibI">
+<I>cookie.lib</I></A></H3>
+<P>
+Written by Matt Wright, <TT>cookie.lib</TT> is a collection of
+Perl routines for manipulating cookies. Table 27.2 lists the available
+functions.<BR>
+<P>
+<CENTER><B>Table 27.2&nbsp;&nbsp;</B><I>cookie.lib</I><B> Functions</B></CENTER>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD WIDTH=157><B>Function</B></TD><TD WIDTH=433><B>Purpose</B>
+</TD></TR>
+<TR><TD WIDTH=157><TT>GetCookies</TT></TD><TD WIDTH=433>Retrieves all cookies for the associated document.
+</TD></TR>
+<TR><TD WIDTH=157><TT>PrepareCookie</TT></TD><TD WIDTH=433>Makes a cookie ready for setting.
+</TD></TR>
+<TR><TD WIDTH=157><TT>SetCookieExpDate</TT></TD><TD WIDTH=433>Sets a cookie's expiration date.
+</TD></TR>
+<TR><TD WIDTH=157><TT>SetCookiePath</TT></TD><TD WIDTH=433>Sets a cookie's path.
+</TD></TR>
+<TR><TD WIDTH=157><TT>SetCookieDomain</TT></TD><TD WIDTH=433>Sets a cookie's domain.
+</TD></TR>
+<TR><TD WIDTH=157><TT>SetSecureCookie</TT></TD><TD WIDTH=433>Identifies a cookie as secure.
+</TD></TR>
+<TR><TD WIDTH=157><TT>SetCookies</TT></TD><TD WIDTH=433>Writes out the updated cookie information.
+</TD></TR>
+</TABLE></CENTER>
+<H3><A NAME="PerlTools2">
+Perl 5 Tools</A></H3>
+<P>
+Perl 5, the latest version of this popular language, has shifted
+its focus toward an object-oriented design. To that end, many
+of the libraries and function collections are being ported to
+the new structure, and are found as <I>packages</I> on the various
+Perl archives.
+<P>
+The following sections look at some of the more popular packages.
+<P>
+<I>CGI.pm</I><B>&nbsp;&nbsp;</B>Lincoln D. Stein took the <TT>cgi-lib.pl</TT>
+concept and ported its functionality to the object-oriented environment
+of Perl 5. For those doing Perl 5 scripting, this library is a
+<I>must</I>. This library is unique in that it has its documentation
+built into the script. You can create formatted documentation
+by feeding the library through <TT>pod2man</TT> or <TT>pod2html</TT>,
+both of which come with Perl 5.
+<P>
+<I>http_lib.pl</I>&nbsp;&nbsp;Written by Gunther Birznieks, <TT>http_lib.pl</TT>
+is a collection of routines allowing your script to connect to
+<I>another</I> Web site as a browser, retrieve information, and
+return that data to the original user. 
+<P>
+<I>sendmail_lib.pl</I>&nbsp;&nbsp;Also written by Gunther Birznieks,
+<TT>smtpmail_lib.pl</TT> simplifies connecting to a mail server
+and sending e-mail from within Perl. The code is UNIX specific,
+and is designed to interface with the <TT>sendmail</TT> program.
+<P>
+<I>smtpmail_lib.pl</I>&nbsp;&nbsp;Another of Gunther Birznieks'
+packages, <TT>smtpmail_lib.pl</TT> provides another route to connecting
+to <TT>sendmail</TT>, this one by way of directly utilizing TCP/IP
+sockets to communicate via SMTP (<I>Simple Network Mail Protocol</I>).
+<P>
+<I>date.pl</I>&nbsp;&nbsp;A nice little date-manipulation package
+that works with dates by converting them to and from Julian format.
+<H2><A NAME="JavaScriptTools"><FONT SIZE=5 COLOR=#FF0000>
+JavaScript Tools</FONT></A></H2>
+<P>
+Even though JavaScript tends to be highly customized to the type
+and content of a given HTML document, there is still a standard
+collection of things you'll always find yourself doing. Just as
+with the Perl libraries discussed previously, you can find all
+the JavaScript routines covered here on the companion CD-ROM as
+well as on one of several JavaScript central sites on the Web.
+<P>
+If you're looking for new and different implementations of JavaScript
+to add to your tool chest, check out &quot;The JavaScript Index&quot;
+at the following sites:
+<UL>
+<LI>The JavaScript Index (<B><A HREF="http://www.c2.org/~andreww/javascript/">http://www.c2.org/~andreww/javascript/</A></B>)
+<LI>Cut-N-Paste JavaScript (<B>http://www.infohiway.com/javascript/</B>)
+<LI>The <I>Web Scripting Secret Weapons</I> HomeSite (<B>http://www.visi.com/~sjwalter/webscripting/</B>)
+</UL>
+<H3><A NAME="BrowserIdentification">
+Browser Identification</A></H3>
+<P>
+Because of the differences between Navigator and Explorer, it's
+often necessary to know which browser (or which browser version)
+is being used. Listing 27.1 presents a set of functions that provide
+that information.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.1&nbsp;&nbsp;Browser Identification<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+// All functions return true or false.
+//
+function isNetscape() {
+   return (navigator.appName.indexOf(&quot;Netscape&quot;) != -1);
+}
+
+function isNav2() {
+   return (navigator.appName.indexOf(&quot;Netscape&quot;) != -1) &amp;&amp;
+          (navigator.appVersion.indexOf(&quot;2.&quot;) != -1);
+}
+
+function isNav3() {
+   return (navigator.appName.indexOf(&quot;Netscape&quot;) != -1) &amp;&amp;
+          (navigator.appVersion.indexOf(&quot;3.&quot;) != -1);
+}
+
+function isExplorer() {
+   return (navigator.appName.indexOf(&quot;Microsoft&quot;) != -1);
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+The necessity for testing the version of Navigator comes from the additional features Navigator 3.0 supports in JavaScript 1.1 that aren't supported in JavaScript 1.0 (the Navigator 2.0) version.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="ObjectBrowsing">
+Object Browsing</A></H3>
+<P>
+New additions to JavaScript tend to come out faster than the documentation
+explaining them. Sometimes, you have to do your own digging to
+figure out what a new object is made of. Listing 27.2 is an example
+of an <TT>object-dump</TT> function that shows all the properties
+of an object and their contents.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.2&nbsp;&nbsp;Browsing the Object Tree<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function Browse(strObject, maxNest) {
+   var nest = 1;
+
+   if(Browse.arguments.length == 3) {
+      nest = parseInt(Browse.arguments[2]);
+   }
+
+   if(nest &gt; maxNest) {
+      return &quot;&quot;;
+   }
+
+   var theObject = eval(strObject);
+
+   var tStr = &quot;&lt;UL&gt;\n&quot;;
+
+   for (propName in theObject) {
+      tStr += &quot;&lt;LI&gt;&quot; + propName;
+
+      var tTmp  = eval(strObject + &quot;.&quot; + propName);
+      var isObj = false;
+
+      if(tTmp != null) {
+         isObj = (tTmp.toString().indexOf(&quot;[obj&quot;) != -1);
+      }
+
+      if(!isObj) {
+         tStr += &quot; = &quot; + eval(&quot;theObject.&quot; + propName);
+      } else {
+         if(tTmp.toString().indexOf(&quot;Array&quot;) != -1) {
+            tStr += &quot;[]&quot;;
+         }
+      }
+
+      tStr += &quot;&lt;/LI&gt;\n&quot;;
+
+      if(isObj) {
+         tStr += Browse(strObject + &quot;.&quot; + propName,
+                        maxNest, nest + 1);
+      }
+   }
+
+   tStr += &quot;&lt;/UL&gt;\n&quot;;
+
+   return tStr;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+This is also an example of a <I>recursive function</I> in that,
+whenever a property is encountered that is also an object, <TT>Browse()</TT>
+is called again to further explore down the tree. Because recursion
+chews up more and more memory as it searches farther and farther
+down, it's necessary to define the maximum number of levels to
+search; otherwise, you'll generate an error when JavaScript runs
+out of memory.
+<P>
+Nonetheless, this is a nice function to go exploring through the
+various JavaScript objects. Once you find an object that you're
+curious about, you can always explore it further by making it
+the &quot;root&quot; of your search. An example that would explore
+the <TT>window</TT> object to 4 levels is:
+<BLOCKQUOTE>
+<PRE>
+document.write(&quot;&lt;H2&gt;window&lt;/H2&gt;&quot; + Browse(&quot;window&quot;, 4));
+<BR>
+</PRE>
+</BLOCKQUOTE>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+This function won't work in Internet Explorer, as it doesn't support the <TT>for...in</TT> statement.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="Arrays">
+Arrays</A></H3>
+<P>
+JavaScript 1.1 has its own <TT>Array</TT> object that handles
+much of the behind-the-scenes construction. However, if you want
+to be as compatible as possible with the current mix of browsers
+on the Web, you'll want to at least account for the existence
+of Navigator 2.02. Listing 27.3 shows the standard Array creation
+functions that work in all versions of JavaScript (both Navigator
+and Explorer).
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.3&nbsp;&nbsp;Arrays<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function _MakeArray(size) {
+   this.length = size;
+
+   for(var i=1; i&lt;=size; i++) {
+      this[i] = null;
+   }
+
+   return this;
+}
+
+function MakeArray(size) {
+   return new _MakeArray(size);
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+By wrapping the <TT>new _MakeArray()</TT> statement within its
+own function, you place these functions in a parent document (for
+code centralization). Using them becomes as simple as this:
+<BLOCKQUOTE>
+<PRE>
+myArray = parent.MakeArray(5);<BR>
+</PRE>
+</BLOCKQUOTE>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+The <TT>new</TT> operator can't recognize an object generation function that's located in another document, such as when you're doing code centralization. Therefore,
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>myArray = new parent.MakeArray(...);</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+wouldn't work. This makes the &quot;wrapper&quot; function both necessary and nice.</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+To explore the contents of an array, you can use the function
+from listing 27.4.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.4&nbsp;&nbsp;Array Browsing<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function BrowseArray(strArray, maxNest) {
+   var nest = 1;
+
+   if(maxNest == null) {
+      maxNest = 1;
+   }
+
+   if(BrowseArray.arguments.length == 3) {
+      nest = parseInt(BrowseArray.arguments[2]);
+   }
+
+   if(nest &gt; maxNest) {
+      return &quot;&quot;;
+   }
+
+   var tTmp    = eval(strArray);
+   var isArray = false;
+
+   if(tTmp != null) {
+      isArray = (tTmp.toString().indexOf(&quot;Array&quot;) != -1);
+   }
+
+   if(!isArray) {
+      return &quot;&quot;;
+   }
+
+   var tStr = &quot;&lt;UL&gt;\n&quot;;
+
+   for(var i=0; i&lt;eval(strArray+&quot;.length&quot;); i++) {
+      tStr += &quot;&lt;LI&gt;Element &quot; + i + &quot;&lt;/LI&gt;\n&quot;;
+      tStr += Browse(strArray + &quot;[&quot; + i + &quot;]&quot;, 1);
+   }
+
+   tStr += &quot;&lt;/UL&gt;\n&quot;;
+
+   return tStr;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+Many predefined JavaScript arrays start their indexing at <TT>0</TT> rather than <TT>1</TT>, which is the recommended starting point for user-defined arrays. To browse a user-defined array, the <TT>for</TT> loop needs to be modified to:
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>   for(var i=1; i&lt;=eval(strArray+&quot;.length&quot;); i++) {</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+keeping in mind that the end condition needs to change (as shown) to <TT>&lt;=</TT> instead of just <TT>&lt;</TT>, or you won't access the last element of the array.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="UserDefinedObjects">
+User-Defined Objects</A></H3>
+<P>
+As discussed in chapter 8, &quot;Advertising with Billboards,&quot;
+user-defined objects let you create and manipulate your own object
+constructions. Generally, for each different type of object, you
+have to create its own unique construction function. However,
+listing 27.5 demonstrates a way to have one function that creates
+<I>any</I> kind of object.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.5&nbsp;&nbsp;User-Defined Objects<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+// parameters are defined in pairs, the first
+// being the property name, the second it's
+// value.
+//
+function Object() {
+   var argc = Object.arguments.length;
+   var argv = Object.arguments;
+
+   for(var i=0; i&lt;argc; i+=2) {
+      var strInit = &quot;this.&quot; + argv[i]
+                  + &quot; = \&quot;&quot; + argv[i+1] + &quot;\&quot;;&quot;;
+
+      eval(strInit);
+   }
+
+   return this;
+}
+As an example, the Billboard object creation function from Chapter 8:
+function Billboard(strImageURL, strLinkURL) {
+   this.imageURL = strImageURL;
+   this.linkURL  = strLinkURL;
+   return this;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+and its corresponding object initializer:
+<BLOCKQUOTE>
+<PRE>
+myBillboard = new Billboard('ad.gif', 'http://mysite.com/');
+</PRE>
+</BLOCKQUOTE>
+<P>
+could be replaced by:
+<BLOCKQUOTE>
+<PRE>
+myBillboard = new Object(&quot;imageURL&quot;, &quot;ad.gif&quot;, 
+                         &quot;linkURL&quot;, &quot;http://mysite.com/&quot;);
+<BR>
+</PRE>
+</BLOCKQUOTE>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><BLOCKQUOTE>
+<B>CAUTION</B>
+</BLOCKQUOTE>
+
+</TD></TR>
+<TR><TD><BLOCKQUOTE>
+Internet Explorer 3.0 currently doesn't correctly handle a reference to <TT>this</TT> within the <TT>eval()</TT> function, and generates an error.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="Databases">
+Databases</A></H3>
+<P>
+User-defined objects and arrays are the basis for JavaScript databases.
+Using the same <TT>eval()</TT> function trick from the previous
+section, listing 27.6 shows how to combine the entire database
+setup process into one function by building on various functions
+from the previous sections.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.6&nbsp;&nbsp;Database Creation<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+// the first parameter is the number of fields/record,
+// followed by the field names, then the individual
+// records.
+//
+function Database() {
+   var argc = Database.arguments.length;
+   var argv = Database.arguments;
+
+   var nFields  = parseInt(argv[0]);
+   var nRecords = (argc - 1 - nFields) / nFields;
+
+   this = MakeArray(nRecords);
+
+   for(var i=1; i&lt;=nRecords; i++) {
+      var which  = nFields + 1 + (i - 1) * nFields;
+      var strCmd = &quot;this[&quot; + i + &quot;] = new Object(&quot;;
+
+      for(var j=1; j&lt;=nFields; j++) {
+         strCmd += '&quot;' + argv[j] + '&quot;,' +
+                   '&quot;' + argv[which + j - 1] + '&quot;';
+
+         if(j &lt; nFields) {
+            strCmd += ',';
+         }
+      }
+
+      eval(strCmd);
+   }
+
+   return this;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+As an example of this function, in chapter 8, &quot;Advertising
+with Billboards,&quot; you created a billboard database as follows:
+<BLOCKQUOTE>
+<PRE>
+Billboards    = new Array(3);
+Billboards[i] = new BillBoard('ad.gif', 'http://mysite.com/');
+...
+</PRE>
+</BLOCKQUOTE>
+<P>
+With <TT>Database()</TT>, all you need do is:
+<BLOCKQUOTE>
+<PRE>
+BBoards = Database(2, // number of fields
+                   'imageURL', 'linkURL', // properties
+                   'ad.gif', 'http://mysite.com/',
+                   ... // additional records as needed
+                   );<BR>
+</PRE>
+</BLOCKQUOTE>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+When creating complex arrays-arrays whose elements are objects themselves, not simple strings-<I>always</I> start the array indexing from <TT>1</TT>, <I>not</I> <TT>0</TT>.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H3><A NAME="CommonHTMLCreation">
+Common HTML Creation</A></H3>
+<P>
+If you find yourself creating a lot of dynamic HTML documents,
+as is done in the online catalog scripts in chapter 17, &quot;Creating
+Online Catalogs,&quot; you may find the functions in listing 27.7
+useful.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.7&nbsp;&nbsp;Commonly Used HTML<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function HTMLHeader(strTitle) {
+   return '&lt;HTML&gt;&lt;TITLE&gt;' + strTitle + '&lt;/TITLE&gt;&lt;/HEAD&gt;';
+}
+
+// an optional third parameter specifies a default
+// selection.  objList is a simple array of strings.
+//
+function HTMLSelect(strName, objList) {
+   var tStr = &quot;&lt;SELECT NAME=\&quot;&quot; + strName + &quot;\&quot;&gt;&quot;;
+
+   if(HTMLSelect.arguments.length == 3) {
+      tStr += &quot;&lt;OPTION SELECTED&gt;&quot; + 
+              HTMLSelect.arguments[2];
+   }
+
+   for(var i=1; i&lt;=objList.length; i++) {
+      tStr += &quot;&lt;OPTION&gt;&quot; + objList[i];
+   }
+
+   tStr += &quot;&lt;/SELECT&gt;&quot;;
+
+   return tStr;
+}
+
+// The optional 3rd argument indicates which
+// radio button is the default (1 == first,
+// 2 == second, etc.).
+//
+function HTMLRadio(strName, objList) {
+   var tStr  = &quot;&quot;;
+   var which = 0;
+
+   if(HTMLRadio.arguments.length == 3) {
+      which = parseInt(HTMLRadio.arguments[2]);
+   }
+
+   for(var i=1; i&lt;=objList.length; i++) {
+      tStr += '&lt;INPUT TYPE=RADIO NAME=&quot;'
+            + strName + '&quot; VALUE=&quot;'
+            + objList[i] + '&quot;';
+
+      if(i == which) {
+         tStr += ' CHECKED';
+      }
+ 
+      tStr += '&gt;\n';
+   }
+
+   return tStr;
+}
+
+//  objList is assumed to be an array of strings
+//
+function HTMLList(objList) {
+   var tStr = '&lt;UL&gt;\n';
+
+   for(var i=1; i&lt;=objList.length; i++) {
+      tStr += '&lt;LI&gt;' + objList[i] + '&lt;/LI&gt;\n';
+   }   
+
+   tStr += '&lt;/UL&gt;\n';
+
+   return tStr;
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+Other HTML tags can be wrapped in much the same way.
+<H3><A NAME="StatusBarControl">
+Status Bar Control</A></H3>
+<P>
+Displaying messages in the status bar at the bottom of the browser
+is a popular alternative to displaying the hyperlink's URL. Listing
+27.8 provides a function that makes managing this easy.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.8&nbsp;&nbsp;Status Bar Control<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+var statusBarID = 0;
+
+// an optional second parameter specifies the
+// time (in milliseconds) the message should
+// remain before it's cleared.
+//
+function StatusBar(strMessage) {
+   if(statusBarID) {
+      clearTimeout(statusBarID);
+      statusBarID  = 0;
+   }
+
+
+   var iDelay = 5000;
+
+   if(StatusBar.arguments.length == 2) {
+      iDelay = parseInt(StatusBar.arguments[1]);
+   }
+
+   var strCmd = &quot;self.status = '&quot;;
+
+   // Netscape displays &quot;Document: Done&quot; while
+   // Explorer simply displays &quot;Done&quot; by default
+   //
+   if(isNetscape()) {
+      strCmd += &quot;Document: &quot;;
+   }
+
+   strCmd += &quot;Done'&quot;;
+
+   self.status = strMessage;
+   statusBarID = setTimeout(strCmd, iDelay);
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+It's necessary to implement a timer in the status bar control to turn <I>off</I> your special status message after a period of time.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<P>
+This function is most often used in conjunction with the <TT>onMouseOver</TT>
+event of a hyperlink, which provides a &quot;context-sensitive
+help&quot; feature for your site.
+<H3><A NAME="Cookies">
+Cookies</A></H3>
+<P>
+Cookies were explored in several chapters. Listing 27.9 presents
+the cookie manipulation routine set, with additional code to make
+cookies behave under Internet Explorer.
+<HR>
+<BLOCKQUOTE>
+<B>Listing 27.9&nbsp;&nbsp;Cookies<BR>
+</B>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+<PRE>
+function _getCookieVal(offset) {
+   var iEnd  = document.cookie.indexOf(&quot;;&quot;,offset);
+
+   if(iEnd == -1) {
+      iEnd = document.cookie.length;
+   }
+  return unescape(document.cookie.substring(offset, iEnd));
+}
+
+function GetCookie(name) {
+   if(isNavigator()) {
+      var arg  = name + &quot;=&quot;;
+      var alen = arg.length;
+      var clen = document.cookie.length;
+      var i    = 0;
+
+      while(i &lt; clen) {
+         j = i + alen;
+
+         if(document.cookie.substring(i, j) == arg) {
+            return _getCookieVal(j);
+
+         }
+
+         i = document.cookie.indexOf(&quot; &quot;, i) + 1;
+
+         if(i == 0) {
+            break;
+         }
+      }
+
+      return null;
+   } else {
+      return eval(name);
+   }
+}
+
+function SetCookie(name, value) {
+   if(isNetscape()) {
+      var argv    = SetCookie.arguments;
+      var argc    = SetCookie.arguments.length;
+      var expires = (argc &gt; 3) ? new Date(argv[3]) : null;
+      var path    = (argc &gt; 4) ? argv[4] : null;
+      var domain  = (argc &gt; 5) ? argv[5] : null;
+      var secure  = (argc &gt; 6) ? argv[6] : false;
+
+      document.cookie = name + &quot;=&quot; + escape(value)
+         + ((expires == null) ? &quot;&quot; : (&quot;; expires=&quot; + 
+                             expires.toGMTString()))
+         + ((path == null) ? &quot;&quot; : (&quot;; path=&quot; + path))
+         + ((domain == null) ? &quot;&quot; : (&quot;; domain=&quot; + domain))
+         + ((secure == true) ? &quot;; secure&quot; : &quot;&quot;);
+   } else {
+      eval(name + &quot; = '&quot; + value + &quot;'&quot;);
+   }
+}
+
+function DeleteCookie(name) {
+   if(isNetscape()) {
+      document.cookie = name + &quot;=&quot; 
+         + escape(GetCookie(name))
+         + &quot;; expires=01-Jan-70 GMT&quot;;
+   } else {
+      eval(name + &quot; = ''&quot;);
+   }
+}
+</PRE>
+</BLOCKQUOTE>
+<HR>
+<P>
+<CENTER>
+<TABLE BORDERCOLOR=#000000 BORDER=1 WIDTH=80%>
+<TR><TD><B>NOTE</B></TD></TR>
+<TR><TD>
+<BLOCKQUOTE>
+The Internet Explorer &quot;cookie patch&quot; relies on having a collection of global variables that matches your cookie names. For example, if you have a &quot;CIGJSPage'' cookie, you'll need to define a global variable:</BLOCKQUOTE>
+<BLOCKQUOTE>
+<TT>var CIGJSPage = &quot;0&quot;;</TT>
+</BLOCKQUOTE>
+<BLOCKQUOTE>
+in your JavaScript code.</BLOCKQUOTE>
+<BLOCKQUOTE>
+Remember, also, that this patch has no <I>persistence</I>. The &quot;cookie&quot; values will only remain as long as the page that contains the global variables stays in memory. Once the page is unloaded (when the user leaves your site) the data is lost, 
+making this technique good for framed sites, where the code can be centralized within the parent document.
+</BLOCKQUOTE>
+
+</TD></TR>
+</TABLE></CENTER>
+<P>
+<H2><A NAME="FromHere"><FONT SIZE=5 COLOR=#FF0000>
+From Here&#133;</FONT></A></H2>
+<P>
+The code presented in this chapter came from various sources and
+authors across the Internet. In many cases, a basic function was
+posted by one person, and has been adapted and expanded for the
+purpose of this book. As with all other code in this book, you'll
+find full source for all these functions (and much more) on the
+companion CD-ROM, including detailed comments within the code
+to help you better understand what tricks are being used. You'll
+also find a collection of links to the various online resources
+that spawned many of the ideas presented here, and they will probably
+send you off on a few new avenues of your own.
+<P>
+Congratulations, you've made it! You now have a collection of
+scripts and scripting tricks in Perl and JavaScript that you can
+use to do the following:
+<UL>
+<LI>Use &quot;out of the box&quot; to implement guest books, visitor
+tracking, database access, and much more.
+<LI>Use as a basis for ideas not discussed or even thought of.
+</UL>
+<P>
+What you do now is entirely up to you.
+<P>
+<I>Happy scripting!</I>
+<HR>
+
+<CENTER><P><A HREF="ch26.htm"><IMG SRC="pc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="#CONTENTS"><IMG SRC="cc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="index.htm"><IMG SRC="hb.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<A HREF="ch28.htm"><IMG SRC="nc.gif" BORDER=0 HEIGHT=88 WIDTH=140></A>
+<HR WIDTH="100%"></P></CENTER>
+</BODY>
+</HTML>
