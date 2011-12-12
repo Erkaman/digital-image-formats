@@ -56,7 +56,6 @@
 
 #define tIME "tIME"
 
-
 #define GREYSCALE_COLOR 0
 #define TRUECOLOR_COLOR 2
 #define INDEXED_COLOR 3

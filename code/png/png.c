@@ -84,6 +84,9 @@ PNG_Image loadPNG(FILE * in)
         else if(isChunkType(chunk, tIME))
             image.timeStamp = loadTimeStamp(stream);
 
+        else if(isChunkType(chunk, bKGD))
+            image.backgroundColor = loadBackgroundColor(image.header, stream);
+
         else {
             if(!isCriticalChunk(chunk)){
                 printWarning("Unknown ancillary chunk %s found, skipping chunk.\n",
@@ -414,4 +417,29 @@ void writeTimeStamp(TimeStamp * timeStamp, FILE * out)
                 timeStamp->second
             );
     }
+}
+
+Color * loadBackgroundColor(ImageHeader header, DataStream stream)
+{
+    Color * backgroundColor;
+
+    backgroundColor = malloc(sizeof(Color));
+
+    if(header.colorType == GREYSCALE_COLOR){
+	backgroundColor->greyscale = read16BitsNumber(&stream);
+    } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
+	backgroundColor->greyscaleAlpha.greyscale = read16BitsNumber(&stream);
+	backgroundColor->greyscaleAlpha.alpha = max;
+    }
+/* convert -size 1x1 xc:transparent -fill 'rgba(180, 180, 180, 0.8)' -draw 'rectangle 0,0 1,1' bgbox.png
+*/
+/*    read16BitsNumber(&stream);
+    readStreamByte(&stream); */
+
+    return backgroundColor;
+}
+
+INT32 getMaximumValue(ImageHeader header)
+{
+    return pow(header.bitDepth,8) - 1;
 }

@@ -34,3 +34,6 @@ src/
 
 code/png/img/
 code/deflate/zpipe/
+
+# executables
+code/png/png

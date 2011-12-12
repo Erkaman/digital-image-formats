@@ -213,8 +213,10 @@ void writeImageGamma(INT32 * imageGamma, FILE * out);
 TimeStamp * loadTimeStamp(DataStream stream);
 void writeTimeStamp(TimeStamp * timeStamp, FILE * out);
 
-PixelDimensions * loadPixelDimensions(DataStream stream);
+PixelDimensions * loadPixelDimensions(DataStream streamn);
 void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out);
+
+Color * loadBackgroundColor(ImageHeader header, DataStream stream);
 
 void writePNG(PNG_Image image, FILE * out);
 void freePNG_Image(PNG_Image image);
@@ -233,6 +235,8 @@ int isCriticalChunk(Chunk chunk);
 int isChunkType(Chunk chunk, char * chunkType);
 
 FixedDataList readBytes(size_t count, FILE * in);
+
+INT32 getMaximumValue(ImageHeader header);
 
 #endif /* _PNG_H_ */
 
