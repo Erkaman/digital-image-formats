@@ -1,6 +1,5 @@
 #include "common.h"
 #include <string.h>
-#include <stdarg.h>
 
 void assertFile(FILE * fp,char * errorStr)
 {
@@ -96,16 +95,6 @@ char * strncpyBack( char * destination, const char * source, size_t num )
     return destination;
 }
 
-void verbosePrint(const char * format, ...)
-{
-    va_list vl;
-
-    if(verbose){
-        va_start(vl, format);
-        vprintf(format, vl);
-        va_end(vl);
-    }
-}
 
 void freeDataContainer(DataContainer data)
 {
@@ -127,27 +116,6 @@ DataContainer allocateDataContainer(unsigned long size)
     return data;
 }
 
-void printWarning(const char * format, ...)
-{
-    va_list vl;
-
-    printf("Warning: ");
-
-    va_start(vl, format);
-    vprintf(format, vl);
-    va_end(vl);
-}
-
-void printError(const char * format, ...)
-{
-    va_list vl;
-
-    printf("ERROR: ");
-
-    va_start(vl, format);
-    vprintf(format, vl);
-    va_end(vl);
-}
 
 BYTE readNextByte(DataContainer data)
 {

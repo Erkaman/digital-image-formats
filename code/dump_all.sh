@@ -20,8 +20,8 @@ do
     echo "Dumping $file ..."
     if $val
     then
-	valgrind ./tga "$file" "$file".dmp
+	valgrind ./"$1" "$file" "$file".dmp
     else
-	./tga "$file" "$file".dmp
+	./"$1" "$file" "$file".dmp
     fi
 done

@@ -151,7 +151,7 @@ typedef struct {
 
 void printHelp(void);
 
-void loadGIF(char * file);
+void loadGIF(FILE * in, FILE * out);
 
 void loadImageData(FILE * in,FILE * out);
 
@@ -210,5 +210,8 @@ void debugPrint(const char * format, ...);
 void printDisposalMethod(GIFGraphicControl graphicControl,FILE * out);
 
 char * subBlocksDataToString(GIFDataSubBlocks subBlocks);
+
+UNSIGNED readUnsigned(FILE * fp);
+
 #endif /* _GIF_H_ */
 

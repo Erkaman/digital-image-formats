@@ -2,8 +2,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "util.h"
+
 #include "gif.h"
+
 #include <stdarg.h>
 
 /* Implement command line parsing and -v flag. */
@@ -40,6 +41,9 @@ GIFImageDescriptor imageDescriptor;
 
 int main(int argc, char *argv[])
 {
+    FILE * in;
+    FILE * out;
+
     if(argc == 1){
         printf("No file was specified for loading\n");
         printf("Try --help for more information.\n");
@@ -47,34 +51,34 @@ int main(int argc, char *argv[])
     } else
         if(!strcmp("--help",argv[1]))
             printHelp();
-    loadGIF(argv[1]);
+
+    in = fopen(argv[1],"rb");
+    assertFileOpened(in);
+
+    out = fopen(argv[2],"wb");
+    assertFileOpened(out);
+
+    loadGIF(in, out);
+
+    fclose(in);
+    fclose(out);
 
     return 0;
 }
 
 void printHelp(void)
 {
-    printf("Usage: gif IN\n");
+    printf("Usage: gif IN OUT\n");
     printf("Dump the information and color data of a GIF file.\n");
     printf("  --help\tDisplay this help message.\n");
 }
 
-void loadGIF(char * file)
+void loadGIF(FILE * in, FILE * out)
 {
     GIFHeader header;
     GIFLogicalScreenDescriptor logicalScreenDescriptor;
-    FILE * in;
-    FILE * out;
-
-    in = fopen(file,"rb");
-    assertFileOpened(in);
-
-    file = changeExtension(file,"dmp");
-    out = fopen(file,"wb");
-    assertFileOpened(out);
 
     /* load and print the beginning blocks of the GIF format */
-
 
     debugPrint("HEADER\n");
 
@@ -105,10 +109,6 @@ void loadGIF(char * file)
         free(globalColorTable);
     }
 
-    fclose(in);
-    fclose(out);
-    free(file);
-    file = NULL;
 }
 
 GIFColor * loadColorTable(int colorTableSize,FILE * in)
@@ -117,7 +117,7 @@ GIFColor * loadColorTable(int colorTableSize,FILE * in)
     int i;
     GIFColor * colorTable;
 
-    realGlobalColorTableSize = pow(2,1 + colorTableSize);
+    realGlobalColorTableSize = pow(2.0,1.0 + colorTableSize);
 
     colorTable = (GIFColor *) malloc(sizeof(GIFColor) * realGlobalColorTableSize);
 
@@ -200,10 +200,11 @@ void loadImageData(FILE * in,FILE * out)
             if(imageDescriptor.localColorTableFlag)
                 free(localColorTable);
 
+            free(colorIndexTable);
+
             localColorTable = NULL;
             colorIndexTable = NULL;
 
-            free(colorIndexTable);
             break;
         }
 
@@ -891,4 +892,11 @@ void printPlainTextExtension(GIFPlainTextExtension plainText,FILE * out)
     fprintf(out,"Block Terminator: %d\n",plainText.blockTerminator);
 
     free(plainText.plainTextData);
+}
+
+UNSIGNED readUnsigned(FILE * fp)
+{
+    UNSIGNED s;
+    fread(&s,sizeof(UNSIGNED),1,fp);
+    return s;
 }
