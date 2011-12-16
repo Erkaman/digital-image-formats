@@ -8,7 +8,7 @@
 typedef struct {
     INT32 length;
     char type[5];
-    FixedDataList data;
+    DataList data;
     INT32 CRC;
 } Chunk;
 
@@ -48,7 +48,7 @@ typedef struct{
      See http://www.w3.org/TR/PNG/#11iCCP
      and
     http://www.color.org/ICC1V42.pdf*/
-    FixedDataList profile;
+    DataList profile;
 } ICC_Profile;
 
 /* How this structures should be interpreted depends on the color type used. */
@@ -123,7 +123,7 @@ typedef INT32 Greyscale;
 typedef struct {
     Greyscale greyscale;
     Channel alpha;
-} GrayscaleAlpha;
+} GreyscaleAlpha;
 
 typedef union {
 
@@ -135,7 +135,7 @@ typedef union {
 
     Greyscale greyscale;
 
-    GrayscaleAlpha grayscaleAlpha;
+    GreyscaleAlpha greyscaleAlpha;
 
 } Color;
 
@@ -165,9 +165,9 @@ typedef struct {
     /* Put in the proper order. */
     /* The compressed datastream is then the concatenation of the
      * contents of the data fields of all the IDAT chunks. */
-    FixedDataList colorData;
+    DataList colorData;
 
-    FixedDataList * palette;
+    DataList * palette;
 
     /* Suggested palettes */
 
@@ -227,16 +227,21 @@ void freeChunk(Chunk chunk);
 void writeSignature(BYTE * signature, FILE * out);
 void writeHeader(ImageHeader header, FILE * out);
 
-unsigned int crc32(FixedDataList data);
+unsigned int crc32(DataList data);
 
 void validateCRC(Chunk chunk);
 
 int isCriticalChunk(Chunk chunk);
 int isChunkType(Chunk chunk, char * chunkType);
 
-FixedDataList readBytes(size_t count, FILE * in);
+DataList readBytes(size_t count, FILE * in);
 
 INT32 getMaximumValue(ImageHeader header);
+
+void * copyByte(void * bptr);
+
+void addByteToDataList(DataList * list, BYTE b);
+
 
 #endif /* _PNG_H_ */
 

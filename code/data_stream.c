@@ -1,7 +1,7 @@
 #include "data_stream.h"
 #include <math.h>
 
-DataStream getNewDataStream(FixedDataList list, int endian)
+DataStream getNewDataStream(DataList list, int endian)
 {
     DataStream stream;
 

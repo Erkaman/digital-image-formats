@@ -8,7 +8,6 @@
 
 #define SIGNATURE_LENGTH 8
 
-
 /* An unsigned 4 byte number.*/
 #define INT32 uint32_t
 

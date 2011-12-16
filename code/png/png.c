@@ -2,8 +2,22 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdlib.h>
+#include <math.h>
 #include "../print_funcs.h"
 #include "../data_stream.h"
+
+void * copyByte(void * vptr)
+{
+    BYTE * copy;
+    BYTE b;
+
+    b = *(BYTE *)vptr;
+
+    copy = malloc(sizeof(BYTE));
+    *copy = b;
+
+    return copy;
+}
 
 void dumpPNG(FILE * in, FILE * out)
 {
@@ -58,7 +72,6 @@ PNG_Image loadPNG(FILE * in)
     image = getEmptyPNG_Image();
 
     loadSignature(image.signature, in);
-    /* TODO: Validate signature. */
 
     image.header = loadImageHeader(in);
 
@@ -110,7 +123,7 @@ int isChunkType(Chunk chunk, char * chunkType)
 
 void freeChunk(Chunk chunk)
 {
-    freeFixedDataList(chunk.data,1);
+    freeDataList(chunk.data,1);
 }
 
 void writePNG(PNG_Image image, FILE * out)
@@ -222,7 +235,7 @@ Chunk loadChunk(FILE * in)
     chunk.data = readBytes(chunk.length, in);
 
     verbosePrint("data:\n");
-    printFixedDataList(chunk.data, printByte);
+    printDataList(chunk.data, printByte);
 
     fread(&chunk.CRC, sizeof(INT32), 1, in);
     chunk.CRC = htonl(chunk.CRC);
@@ -233,39 +246,42 @@ Chunk loadChunk(FILE * in)
     return chunk;
 }
 
-FixedDataList readBytes(size_t count, FILE * in)
+DataList readBytes(size_t count, FILE * in)
 {
-    FixedDataList list;
+    DataList list;
     size_t i;
-    BYTE * b;
 
-    list = getNewFixedDataList(sizeof(void *), count);
+    list = getNewDataList(NULL, copyByte);
 
-    for(i = 0; i < count; ++i){
-        b = malloc(sizeof(BYTE));
-        *b = getc(in);
-        list.list[i] = b;
-    }
+    for(i = 0; i < count; ++i)
+	addByteToDataList(&list, (BYTE)getc(in));
 
     return list;
 }
 
+/* Some kind of copying routine is needed! */
 void validateCRC(Chunk chunk)
 {
-    FixedDataList checkData;
-    size_t i;
+    DataList checkData;
+
     INT32 calcCRC;
+    BYTE b;
+    size_t i;
 
-    checkData = getNewFixedDataList(sizeof(void *),chunk.length + 4);
+    checkData = getNewDataList(NULL, copyByte);
 
-    for(i = 0; i < 4; ++i)
-        checkData.list[i] = &chunk.type[i];
+    /* Convert the chunk type string to an array of bytes. */
 
-    for(i = i; i < (chunk.length + 4); ++i)
-        checkData.list[i] = chunk.data.list[i-4];
+    for(i = 0; i < 4; ++i){
+	b = chunk.type[i];
+	addByteToDataList(&checkData, b);
+    }
 
+    copyAppendToDataList(&checkData, chunk.data);
 
     calcCRC = crc32(checkData);
+
+    freeDataList(checkData, 1);
 
     if(calcCRC != chunk.CRC){
         printError("Chunk has invalid checksum: chunk %d != calc %d\n", chunk.CRC, calcCRC );
@@ -273,11 +289,6 @@ void validateCRC(Chunk chunk)
     } else
         verbosePrint("Chunk has valid checksum!\n");
 
-    /* Figure out how to free this memory. */
-/*    freeFixedDataList(checkData, 0);
-      for(i = 0; i < 4; ++i){
-      free(checkData.list[i]);
-      }*/
 }
 
 int isCriticalChunk(Chunk chunk)
@@ -302,6 +313,8 @@ ImageHeader loadImageHeader(FILE * in)
     header.filterMethod = readStreamByte(&stream);
     header.interlaceMethod = readStreamByte(&stream);
 
+    freeChunk(headerChunk);
+
     return header;
 }
 
@@ -318,7 +331,7 @@ BYTE * loadRenderingIntent(DataStream stream)
 
 #define CRC32_POLY 0xEDB88320
 
-unsigned int crc32(FixedDataList data){
+unsigned int crc32(DataList data){
 
     unsigned long reminder = 0xFFFFFFFF; /* standard initial value in CRC32 */
     unsigned long i;
@@ -429,7 +442,8 @@ Color * loadBackgroundColor(ImageHeader header, DataStream stream)
 	backgroundColor->greyscale = read16BitsNumber(&stream);
     } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
 	backgroundColor->greyscaleAlpha.greyscale = read16BitsNumber(&stream);
-	backgroundColor->greyscaleAlpha.alpha = max;
+	/* continue working here. */
+/*	backgroundColor->greyscaleAlpha.alpha = max; */
     }
 /* convert -size 1x1 xc:transparent -fill 'rgba(180, 180, 180, 0.8)' -draw 'rectangle 0,0 1,1' bgbox.png
 */
@@ -442,4 +456,13 @@ Color * loadBackgroundColor(ImageHeader header, DataStream stream)
 INT32 getMaximumValue(ImageHeader header)
 {
     return pow(header.bitDepth,8) - 1;
+}
+
+void addByteToDataList(DataList * list, BYTE b)
+{
+    BYTE * bp;
+
+    bp = malloc(sizeof(BYTE));
+    *bp = b;
+    addToDataList(list, bp);
 }

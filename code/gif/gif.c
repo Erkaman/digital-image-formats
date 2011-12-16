@@ -7,7 +7,8 @@
 
 #include <stdarg.h>
 
-/* Implement command line parsing and -v flag. */
+/* Implement command line parsing and -v flag. Clean up debug messages and verbose
+ messages. */
 
 int subBlockIndex;
 
@@ -186,8 +187,6 @@ void loadImageData(FILE * in,FILE * out)
             colorIndexTable = (unsigned int *)malloc(sizeof(unsigned int) *
                                                      imageDescriptor.imageWidth
                                                      * imageDescriptor.imageHeight);
-
-
 
 	    debugPrint("IMAGE COLOR DATA\n");
 

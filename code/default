@@ -1,6 +1,6 @@
 CC = gcc
 
-objects = ../data_list.o ../fixed_data_list.o ../print_funcs.o \
+objects = ../data_list.o ../print_funcs.o \
 ../data_stream.o ../common.o
 
 WARNINGS = -Wall -Wextra -Werror -Wdeclaration-after-statement \
