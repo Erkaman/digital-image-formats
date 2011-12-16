@@ -45,9 +45,9 @@ typedef struct{
 
     /* I'm not really sure how the data is stored here.
 
-     See http://www.w3.org/TR/PNG/#11iCCP
-     and
-    http://www.color.org/ICC1V42.pdf*/
+       See http://www.w3.org/TR/PNG/#11iCCP
+       and
+       http://www.color.org/ICC1V42.pdf*/
     DataList profile;
 } ICC_Profile;
 
@@ -67,15 +67,8 @@ typedef struct{
     char keyword[80];
 
     char * str;
+
 } TextualData;
-
-typedef struct{
-    char keyword[80];
-
-    BYTE compressionMethod;
-
-    char * str;
-} CompressedTextualData;
 
 typedef struct {
     char keyword[80];
@@ -95,34 +88,21 @@ typedef struct {
 } InternationalTextualData;
 
 typedef struct {
-
-    TextualData * pairsList;
-
-    InternationalTextualData * internationalText;
-
-} textDataList;
-
-typedef INT32 Channel;
-
-typedef struct {
-    Channel R;
-    Channel G;
-    Channel B;
+    INT32 R;
+    INT32 G;
+    INT32 B;
 } RGB;
 
 typedef struct {
-    Channel R;
-    Channel G;
-    Channel B;
-    Channel A;
+    INT32 R;
+    INT32 G;
+    INT32 B;
+    INT32 A;
 } RGBA;
 
-typedef INT32 Index;
-typedef INT32 Greyscale;
-
 typedef struct {
-    Greyscale greyscale;
-    Channel alpha;
+    INT32 greyscale;
+    INT32 alpha;
 } GreyscaleAlpha;
 
 typedef union {
@@ -131,9 +111,9 @@ typedef union {
 
     RGBA rgba;
 
-    Index index;
+    INT32 index;
 
-    Greyscale greyscale;
+    INT32 greyscale;
 
     GreyscaleAlpha greyscaleAlpha;
 
@@ -193,6 +173,13 @@ typedef struct {
 
     TimeStamp * timeStamp;
 
+    /* Of type TextualData */
+    DataList textDataList;
+
+    /* Of type InternationalTextualData */
+    DataList internationalTextDataList;
+
+
 } PNG_Image;
 
 void dumpPNG(FILE * in, FILE * out);
@@ -217,6 +204,21 @@ PixelDimensions * loadPixelDimensions(DataStream streamn);
 void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out);
 
 Color * loadBackgroundColor(ImageHeader header, DataStream stream);
+void writeBackgroundColor(
+    ImageHeader header,
+    Color * backgroundColor,
+    FILE * out);
+
+void writeColor(ImageHeader header,
+                Color color,
+                FILE * out);
+
+TextualData * loadTextualData(
+    DataStream stream,
+    int compressed,
+    INT32 chunkLength);
+
+void freeTextualData(void * textualData);
 
 void writePNG(PNG_Image image, FILE * out);
 void freePNG_Image(PNG_Image image);
@@ -227,6 +229,8 @@ void freeChunk(Chunk chunk);
 void writeSignature(BYTE * signature, FILE * out);
 void writeHeader(ImageHeader header, FILE * out);
 
+void writeTextDataList(DataList textDataList, FILE * out);
+
 unsigned int crc32(DataList data);
 
 void validateCRC(Chunk chunk);
@@ -236,12 +240,10 @@ int isChunkType(Chunk chunk, char * chunkType);
 
 DataList readBytes(size_t count, FILE * in);
 
-INT32 getMaximumValue(ImageHeader header);
+INT32 getMaximumChannelValue(ImageHeader header);
 
 void * copyByte(void * bptr);
 
 void addByteToDataList(DataList * list, BYTE b);
 
-
 #endif /* _PNG_H_ */
-

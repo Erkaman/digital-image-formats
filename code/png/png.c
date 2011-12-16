@@ -38,6 +38,15 @@ void freePNG_Image(PNG_Image image)
 
     if(image.timeStamp != NULL)
         free(image.timeStamp);
+
+    if(image.backgroundColor != NULL)
+        free(image.backgroundColor);
+
+    if(image.pixelDimensions != NULL)
+        free(image.pixelDimensions);
+
+    freeDataList(image.textDataList,1);
+
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -60,7 +69,21 @@ PNG_Image getEmptyPNG_Image(void)
     image.pixelDimensions = NULL;
     image.timeStamp = NULL;
 
+    image.textDataList = getNewDataList(freeTextualData, copyByte);
+
     return image;
+}
+
+void freeTextualData(void * textualData)
+{
+    TextualData * data;
+
+    data = (TextualData *) textualData;
+
+    if(data->str != NULL)
+        free(data->str);
+
+    free(data);
 }
 
 PNG_Image loadPNG(FILE * in)
@@ -100,6 +123,11 @@ PNG_Image loadPNG(FILE * in)
         else if(isChunkType(chunk, bKGD))
             image.backgroundColor = loadBackgroundColor(image.header, stream);
 
+        else if(isChunkType(chunk, tEXt))
+            addToDataList(
+                &image.textDataList,
+                loadTextualData(stream, 0, chunk.length));
+
         else {
             if(!isCriticalChunk(chunk)){
                 printWarning("Unknown ancillary chunk %s found, skipping chunk.\n",
@@ -135,6 +163,9 @@ void writePNG(PNG_Image image, FILE * out)
     writeImageGamma(image.imageGamma, out);
     writePixelDimensions(image.pixelDimensions, out);
     writeTimeStamp(image.timeStamp, out);
+    writeBackgroundColor(image.header, image.backgroundColor, out);
+
+    writeTextDataList(image.textDataList, out);
 }
 
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
@@ -197,9 +228,9 @@ void writeHeader(ImageHeader header, FILE * out)
     fprintf(out, "Interlace Method:");
 
     if(header.interlaceMethod == NO_INTERLACE)
-	fprintf(out,"No interlacing");
+        fprintf(out,"No interlacing");
     else if(header.interlaceMethod == ADAM7_INTERLACE)
-	fprintf(out,"Adam7 interlacing");
+        fprintf(out,"Adam7 interlacing");
 
     fprintf(out, "(%u)\n",header.interlaceMethod);
 }
@@ -254,7 +285,7 @@ DataList readBytes(size_t count, FILE * in)
     list = getNewDataList(NULL, copyByte);
 
     for(i = 0; i < count; ++i)
-	addByteToDataList(&list, (BYTE)getc(in));
+        addByteToDataList(&list, (BYTE)getc(in));
 
     return list;
 }
@@ -273,8 +304,8 @@ void validateCRC(Chunk chunk)
     /* Convert the chunk type string to an array of bytes. */
 
     for(i = 0; i < 4; ++i){
-	b = chunk.type[i];
-	addByteToDataList(&checkData, b);
+        b = chunk.type[i];
+        addByteToDataList(&checkData, b);
     }
 
     copyAppendToDataList(&checkData, chunk.data);
@@ -438,24 +469,37 @@ Color * loadBackgroundColor(ImageHeader header, DataStream stream)
 
     backgroundColor = malloc(sizeof(Color));
 
+    /*
+
+      "The background colour given by the bKGD chunk is not to be
+      considered transparent"
+
+      And therefore, the value of the alpha channel will always
+      be its maximum value.
+
+    */
+
     if(header.colorType == GREYSCALE_COLOR){
-	backgroundColor->greyscale = read16BitsNumber(&stream);
+
+        backgroundColor->greyscale = read16BitsNumber(&stream);
+
     } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
-	backgroundColor->greyscaleAlpha.greyscale = read16BitsNumber(&stream);
-	/* continue working here. */
-/*	backgroundColor->greyscaleAlpha.alpha = max; */
+
+        backgroundColor->greyscaleAlpha.greyscale = read16BitsNumber(&stream);
+
+        backgroundColor->greyscaleAlpha.alpha =
+            getMaximumChannelValue(header);
     }
+
 /* convert -size 1x1 xc:transparent -fill 'rgba(180, 180, 180, 0.8)' -draw 'rectangle 0,0 1,1' bgbox.png
-*/
-/*    read16BitsNumber(&stream);
-    readStreamByte(&stream); */
+ */
 
     return backgroundColor;
 }
 
-INT32 getMaximumValue(ImageHeader header)
+INT32 getMaximumChannelValue(ImageHeader header)
 {
-    return pow(header.bitDepth,8) - 1;
+    return pow(2, header.bitDepth) - 1;
 }
 
 void addByteToDataList(DataList * list, BYTE b)
@@ -465,4 +509,102 @@ void addByteToDataList(DataList * list, BYTE b)
     bp = malloc(sizeof(BYTE));
     *bp = b;
     addToDataList(list, bp);
+}
+
+void writeBackgroundColor(
+    ImageHeader header,
+    Color * backgroundColor,
+    FILE * out)
+{
+    if(backgroundColor != NULL){
+        fprintf(out,"Background color: ");
+        writeColor(header,*backgroundColor, out);
+        fprintf(out,"\n");
+    }
+}
+
+void writeColor(ImageHeader header,
+                Color color,
+                FILE * out)
+{
+
+    if(header.colorType == GREYSCALE_COLOR){
+
+        fprintf(out, "(%d,%d,%d)",
+                color.greyscale,
+                color.greyscale,
+                color.greyscale);
+
+    } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
+
+        fprintf(out, "(%d,%d,%d,%d)",
+                color.greyscaleAlpha.greyscale,
+                color.greyscaleAlpha.greyscale,
+                color.greyscaleAlpha.greyscale,
+                color.greyscaleAlpha.alpha);
+    }
+}
+
+TextualData * loadTextualData(
+    DataStream stream,
+    int compressed,
+    INT32 chunkLength)
+{
+    TextualData * data;
+    char ch;
+    int i;
+    int textLength;
+
+
+    data = malloc(sizeof(TextualData));
+    data->str = NULL;
+
+    /* Read the keyword. */
+    i = 0;
+    do{
+        ch = (char)readStreamByte(&stream);
+
+        data->keyword[i++] = ch;
+
+    } while(ch != '\0');
+
+
+    if(compressed){
+        /* Uncompress the data.*/
+    } else{
+        /* Simply read the data.
+
+         */
+
+        textLength = chunkLength - i;
+
+        /* +1 makes space for the null character. */
+        data->str = malloc(sizeof(char) * (textLength + 1));
+
+        for(i = 0; i < (textLength); ++i){
+	    data->str[i] = (char)readStreamByte(&stream);
+	}
+
+	data->str[i] = '\0';
+    }
+
+    return data;
+}
+
+void writeTextDataList(DataList textDataList, FILE * out)
+{
+    size_t i;
+    TextualData * data;
+    if(textDataList.count > 0){
+        verbosePrint("holy shit:%d", textDataList.count);
+
+        for(i = 0; i < textDataList.count; ++i){
+            fprintf(out, "Textual data %ld:\n", i+1);
+            data = (TextualData *)textDataList.list[i];
+            fprintf(out, "Keyword: %s\n", data->keyword);
+
+            fprintf(out, "Text: %s\n", data->str);
+
+        }
+    }
 }
