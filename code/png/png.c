@@ -3,21 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <math.h>
-#include "../print_funcs.h"
-#include "../data_stream.h"
 
-void * copyByte(void * vptr)
-{
-    BYTE * copy;
-    BYTE b;
-
-    b = *(BYTE *)vptr;
-
-    copy = malloc(sizeof(BYTE));
-    *copy = b;
-
-    return copy;
-}
 
 void dumpPNG(FILE * in, FILE * out)
 {
@@ -277,18 +263,6 @@ Chunk loadChunk(FILE * in)
     return chunk;
 }
 
-DataList readBytes(size_t count, FILE * in)
-{
-    DataList list;
-    size_t i;
-
-    list = getNewDataList(NULL, copyByte);
-
-    for(i = 0; i < count; ++i)
-        addByteToDataList(&list, (BYTE)getc(in));
-
-    return list;
-}
 
 /* Some kind of copying routine is needed! */
 void validateCRC(Chunk chunk)
@@ -502,14 +476,6 @@ INT32 getMaximumChannelValue(ImageHeader header)
     return pow(2, header.bitDepth) - 1;
 }
 
-void addByteToDataList(DataList * list, BYTE b)
-{
-    BYTE * bp;
-
-    bp = malloc(sizeof(BYTE));
-    *bp = b;
-    addToDataList(list, bp);
-}
 
 void writeBackgroundColor(
     ImageHeader header,

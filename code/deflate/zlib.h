@@ -1,8 +1,9 @@
 #ifndef _ZLIB_H_
 #define _ZLIB_H_
 
-#include "../common.h"
-#include "deflate.h"
+#include "../defs.h"
+#include "../io.h"
+#include "../data_list.h"
 
 typedef struct{
     BYTE CM; /* Compression Method */
@@ -26,7 +27,7 @@ typedef struct{
 #define FLEVEL_DEFAULT_ALGORITHM 2
 #define FLEVEL_SLOWEST_ALGORITHM 3
 
-DataContainer ZLIB_Decompress(DataContainer data);
+DataList ZLIB_Decompress(DataList data);
 
 int multipleOf(int n,int mult);
 
@@ -38,9 +39,9 @@ void printZLIB_CMF(ZLIB_CMF cmf);
 ZLIB_FLG readZLIB_FLG(BYTE flgByte);
 void printZLIB_FLG(ZLIB_FLG flg);
 
-unsigned long adler32(DataContainer data);
+unsigned long adler32(DataList data);
 
-void validateCheckSum(DataContainer data, DataContainer decompressed);
+void validateCheckSum(DataList data, DataList decompressed);
 
 
 #endif /* _ZLIB_H_ */

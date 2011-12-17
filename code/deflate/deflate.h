@@ -2,14 +2,12 @@
 #define _DEFLATE_H_
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include <stdarg.h>
-#include "../common.h"
-#include "deflate.h"
-#include "main.h"
+#include "../data_list.h"
+#include "../data_stream.h"
 
-DataContainer deflateDecompress(DataContainer data);
+
+DataList deflateDecompress(DataList data);
 
 #define HUFFMAN_CODES 288
 #define DISTANCE_CODES 30
@@ -37,10 +35,10 @@ typedef struct {
     unsigned short size;
 } CodesList;
 
-typedef struct{
+/*typedef struct{
     DataContainer stream;
     unsigned long position;
-} DataStream;
+} DataStream; */
 
 typedef struct{
     unsigned short extraBits;
@@ -60,11 +58,9 @@ typedef struct {
 
 CodesList loadCodeLengthCodes(unsigned short HCLEN,DataStream * compressedStream);
 
-
 CodesList loadDistanceCodes(unsigned short HDIST,
     CodesList codeLengthCodes,
     DataStream * compressedStream);
-
 
 void repeatZeroLengthCode(
     BYTE * codeLengths,
@@ -84,7 +80,6 @@ CodesList loadUsingCodeLengthCodes(
     CodesList codeLengthCodes,
     DataStream * compressedStream);
 
-
 #define CODE_LENGTH_CODES 19
 
 CodesList translateCodes(BYTE * codeLengths, int alphabetSize);
@@ -103,7 +98,6 @@ void printDEFLATE_DynamicBlockHeader(DEFLATE_DynamicBlockHeader  blockHeader);
 
 #define DATA_STREAM_GROW_FACTOR 2
 
-void addElementToStream(DataStream * stream, BYTE element);
 
 void setFixedHuffmanCodes(void);
 void setFixedDistanceCodes(void);
@@ -150,27 +144,26 @@ unsigned int inputCodeLSBRev(int codeSize, DataStream * stream);
 
 unsigned int inputCodeLSB(int codeSize, DataStream * stream);
 
-void readNonCompresedBlock(DataStream * compressedStream, DataStream * decompressedStream);
+void readNonCompresedBlock(DataStream * compressedStream, DataList * decompressedList);
 
 void readCompresedBlock(
     CodesList huffmanCodes,
     CodesList distanceCodes,
     DataStream * compressedStream,
-    DataStream * decompressedStream);
+    DataList * decompressedList);
 
 DEFLATE_BlockHeader readDEFLATE_BlockHeader(DataStream * stream);
-
 
 void decodeLengthDistancePair(
     HuffmanCode lengthCode,
     CodesList distanceCodes,
     DataStream * compressedStream,
-    DataStream * decompressedStream);
+    DataList * decompressedList);
 
 void outputLengthDistancePair(
     unsigned short lengthCode,
     unsigned short distanceCode,
-    DataStream * decompressedStream);
+    DataList * decompressedList);
 
 void printCodesList(CodesList codes);
 

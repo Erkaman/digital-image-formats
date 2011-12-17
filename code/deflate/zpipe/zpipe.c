@@ -8,6 +8,7 @@
    Avoid some compiler warnings for input and output buffers
 */
 
+
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
@@ -33,7 +34,6 @@ int def(FILE *source, FILE *dest, int level)
     strm.zalloc = Z_NULL;
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
-/*    ret = deflateInit2(&strm, level, Z_DEFLATED, 15, 9, Z_FIXED); */
     ret = deflateInit(&strm, level);
     if (ret != Z_OK)
         return ret;
@@ -177,4 +177,3 @@ int main(int argc, char **argv)
         zerr(ret);
     return ret;
 }
-

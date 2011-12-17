@@ -1,7 +1,9 @@
 #ifndef _PNG_H_
 #define _PNG_H_
 
-#include "../common.h"
+#include "../io.h"
+#include "../data_list.h"
+#include "../data_stream.h"
 
 #include "png_defs.h"
 
@@ -238,12 +240,9 @@ void validateCRC(Chunk chunk);
 int isCriticalChunk(Chunk chunk);
 int isChunkType(Chunk chunk, char * chunkType);
 
-DataList readBytes(size_t count, FILE * in);
 
 INT32 getMaximumChannelValue(ImageHeader header);
 
-void * copyByte(void * bptr);
 
-void addByteToDataList(DataList * list, BYTE b);
 
 #endif /* _PNG_H_ */

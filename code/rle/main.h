@@ -1,7 +1,7 @@
 #ifndef _RLE_H_
 #define _RLE_H_
 
-#include "../common.h"
+#include "../io.h"
 #include <stdio.h>
 #include <string.h>
 

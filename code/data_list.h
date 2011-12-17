@@ -2,6 +2,8 @@
 #define _DATA_LIST_H_
 
 #include <stdlib.h>
+#include <stdio.h>
+#include "defs.h"
 
 typedef struct {
 
@@ -40,5 +42,11 @@ DataList growDataListCount(DataList oldList);
 void addToDataList(DataList * list, void * newElement);
 
 void copyAppendToDataList(DataList * destination, DataList appendee);
+
+DataList readBytes(size_t count, FILE * in);
+void addByteToDataList(DataList * list, BYTE b);
+void * copyByte(void * bptr);
+
+void writeData(DataList data, FILE * out);
 
 #endif /* _DATA_LIST_H_ */

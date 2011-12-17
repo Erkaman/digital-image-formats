@@ -2,7 +2,8 @@
 #define _GIF_H_
 
 #include <stdint.h>
-#include "../common.h"
+#include "../io.h"
+#include "../bitwise.h"
 
 #define DEBUG 1
 

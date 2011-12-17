@@ -1,9 +1,9 @@
-def good_bin(n):
+def bin_pad(n):
    s = bin(n)[2:]
 
    pad = 8
    while True:
-       if pad > len(s):
+       if pad >= len(s):
            break
        pad += 8
 
@@ -17,3 +17,6 @@ def good_bin(n):
        r += s[i:i+8] + ' '
        i += 8
    return r[:-1]
+
+def bin_pad_hex(h):
+    return bin_pad(int(h,16))

@@ -74,7 +74,7 @@ DataList accommodateDataListCount(DataList oldList, size_t newCount)
         newCount,
         oldList.count,
         oldList.freeFunction,
-	oldList.copyFunction);
+        oldList.copyFunction);
 
     /* If all of the data in the old container fit into the new. */
     if(oldList.count <= newCount)
@@ -122,6 +122,50 @@ void copyAppendToDataList(DataList * destination, DataList appendee)
     size_t i;
 
     for(i = 0; i < appendee.count; ++i){
-	addToDataList(destination,destination->copyFunction(appendee.list[i]));
+        addToDataList(destination,destination->copyFunction(appendee.list[i]));
     }
 }
+
+DataList readBytes(size_t count, FILE * in)
+{
+    DataList list;
+    size_t i;
+
+    list = getNewDataList(NULL, copyByte);
+
+    for(i = 0; i < count; ++i)
+        addByteToDataList(&list, (BYTE)getc(in));
+
+    return list;
+}
+
+void addByteToDataList(DataList * list, BYTE b)
+{
+    BYTE * bp;
+
+    bp = malloc(sizeof(BYTE));
+    *bp = b;
+    addToDataList(list, bp);
+}
+
+void * copyByte(void * vptr)
+{
+    BYTE * copy;
+    BYTE b;
+
+    b = *(BYTE *)vptr;
+
+    copy = malloc(sizeof(BYTE));
+    *copy = b;
+
+    return copy;
+}
+
+void writeData(DataList data, FILE * out)
+{
+    size_t i;
+
+    for(i = 0; i < data.count; ++i)
+        putc(*(BYTE *)data.list[i],out);
+}
+

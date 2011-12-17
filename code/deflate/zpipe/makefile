@@ -1,2 +1,8 @@
-zpipe.exe : zpipe.c
-	gcc zpipe.c -lz
+PROG = zpipe
+
+objects = zpipe.o
+
+$(PROG) : $(objects)
+	gcc $(objects) -o $(PROG) -lz
+
+zpipe.o : zpipe.c

@@ -1,11 +1,15 @@
 #include "zlib.h"
 #include <math.h>
+#include "deflate.h"
+
 
 void checkCheckBits(BYTE cmfByte,BYTE flgByte,ZLIB_FLG flg)
 {
     if(!multipleOf(cmfByte * 256 + flgByte,31)){
         printWarning("cmf * 256 + flg is not a multiple of 31;\n"
                      "FCHECK is invalid and CMF and/or FLG data is possibly corrupt.");
+    } else {
+	verbosePrint("FLG checkbits are correct.\n");
     }
 
     flg = flg;
@@ -16,7 +20,7 @@ int multipleOf(int n,int mult)
     return (n % mult) == 0;
 }
 
-DataContainer ZLIB_Decompress(DataContainer data)
+DataList ZLIB_Decompress(DataList data)
 {
     ZLIB_CMF cmf;
     ZLIB_FLG flg;
@@ -24,11 +28,11 @@ DataContainer ZLIB_Decompress(DataContainer data)
     BYTE cmfByte;
     BYTE flgByte;
 
-    DataContainer decompressed;
+    DataList decompressed;
 
     /* the first byte is the CMF byte */
-    cmfByte = data.data[0];
-    flgByte = data.data[1];
+    cmfByte = *(BYTE *)data.list[0];
+    flgByte = *(BYTE *)data.list[1];
 
     cmf = readZLIB_CMF(cmfByte);
     printZLIB_CMF(cmf);
@@ -53,7 +57,7 @@ DataContainer ZLIB_Decompress(DataContainer data)
     return decompressed;
 }
 
-void validateCheckSum(DataContainer data, DataContainer decompressed)
+void validateCheckSum(DataList data, DataList decompressed)
 {
     /* Does this work for computers of different Endian? */
     unsigned long calcChecksum;
@@ -62,16 +66,20 @@ void validateCheckSum(DataContainer data, DataContainer decompressed)
     calcChecksum = adler32(decompressed);
 
     dataChecksum =
-	data.data[data.size - 4] * pow(256,3) +
-	data.data[data.size - 3] * pow(256,2) +
-	data.data[data.size - 2] * pow(256,1) +
-	data.data[data.size - 1] * pow(256,0);
+	*(BYTE *)data.list[data.count - 4] * pow(256,3) +
+	*(BYTE *)data.list[data.count - 3] * pow(256,2) +
+	*(BYTE *)data.list[data.count - 2] * pow(256,1) +
+	*(BYTE *)data.list[data.count - 1] * pow(256,0);
 
     verbosePrint("checkSums: calculated = %ld. Proper = %ld\n",calcChecksum,dataChecksum);
 
     if(calcChecksum != dataChecksum){
 	printError("ZLIB decompressed data check does not match, corrupted data!");
 	exit(1);
+    } else {
+
+	verbosePrint("Correct ZLIB checksum!\n");
+
     }
 }
 
@@ -100,6 +108,8 @@ ZLIB_CMF readZLIB_CMF(BYTE cmfByte)
     return cmf;
 }
 
+
+
 void printZLIB_CMF(ZLIB_CMF cmf)
 {
     verbosePrint("CMF:\n");
@@ -107,6 +117,8 @@ void printZLIB_CMF(ZLIB_CMF cmf)
     verbosePrint("CINFO(Compression Info): %d\n",cmf.CINFO);
     verbosePrint("\n");
 }
+
+
 
 ZLIB_FLG readZLIB_FLG(BYTE flgByte)
 {
@@ -123,6 +135,8 @@ ZLIB_FLG readZLIB_FLG(BYTE flgByte)
 
     return flg;
 }
+
+
 void printZLIB_FLG(ZLIB_FLG flg)
 {
     verbosePrint("FLG:\n");
@@ -151,17 +165,18 @@ void printZLIB_FLG(ZLIB_FLG flg)
 
 #define MOD_ADLER 65521
 
-unsigned long adler32(DataContainer data)
+unsigned long adler32(DataList data)
 {
     /* also: check first implementation of this algorithm. */
     unsigned long a = 1, b = 0;
     unsigned long index;
 
-    for (index = 0; index < data.size; ++index)
+    for (index = 0; index < data.count; ++index)
     {
-        a = (a + data.data[index]) % MOD_ADLER;
+        a = (a + *(BYTE *)data.list[index]) % MOD_ADLER;
         b = (b + a) % MOD_ADLER;
     }
 
     return (b << 16) | a;
 }
+

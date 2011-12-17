@@ -1,8 +1,5 @@
 CC = gcc
 
-objects = ../data_list.o ../print_funcs.o \
-../data_stream.o ../common.o
-
 WARNINGS = -Wall -Wextra -Werror -Wdeclaration-after-statement \
 -Wshadow -Wstrict-overflow=5 -Wpointer-arith -Wcast-qual \
 -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations \

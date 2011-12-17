@@ -1,7 +1,7 @@
 #ifndef _TGA_H_
 #define _TGA_H_
 
-#include "../common.h"
+#include "../io.h"
 
 #include <stdlib.h>
 #include <string.h>

@@ -1,7 +1,8 @@
 #include "deflate.h"
-#include "../common.h"
 #include <stdlib.h>
 #include <ctype.h>
+#include "../io.h"
+#include "../bitwise.h"
 
 int remainingPacketBits;
 
@@ -112,11 +113,6 @@ int getMinimumCodeLength(CodesList codes)
     return min;
 }
 
-BYTE getNextByte(DataStream * stream)
-{
-    return stream->stream.data[++stream->position];
-}
-
 void setFixedHuffmanCodes(void)
 {
     int i;
@@ -136,7 +132,6 @@ void setFixedHuffmanCodes(void)
         code.litteralValue = i;
         code.codeLength = 8;
         fixedHuffmanCodes.codes[codesI++] = code;
-
     }
 
     /* Literal values 144-255 are given the codes
@@ -191,21 +186,24 @@ void setFixedDistanceCodes(void)
     }
 }
 
-void readNonCompresedBlock(DataStream * compressedStream, DataStream * decompressedStream)
+void readNonCompresedBlock(DataStream * compressedStream, DataList * decompressedList)
 {
     BYTE b1;
     BYTE b2;
     unsigned long uncompressedBlockSize;
     unsigned long i;
-
+    BYTE next;
 /* if dynaic codes are used a new table is read in before the decompression
    of the data. */
 
     remainingPacketBits = 8;
 
+    compressedStream->position++;
+
     /* FIXME: does this handle big and little endian? */
-    b1 = getNextByte(compressedStream);
-    b2 = getNextByte(compressedStream);
+    /* Implement a routine for doing this. */
+    b1 = readStreamByte(compressedStream);
+    b2 = readStreamByte(compressedStream);
 
     verbosePrint("b1:%d\n",b1);
     verbosePrint("b2:%d\n",b2);
@@ -213,73 +211,47 @@ void readNonCompresedBlock(DataStream * compressedStream, DataStream * decompres
     uncompressedBlockSize = (b1 + b2 * 256);
 
     /* Skip NLEN */
-    getNextByte(compressedStream);
-    getNextByte(compressedStream);
+    readStreamByte(compressedStream);
+    readStreamByte(compressedStream);
 
     for(i = 0; i < uncompressedBlockSize; ++i){
 /*        decompressedStream->stream.data[decompressedStream->position++] =
           getNextByte(compressedStream);*/
 
-        addElementToStream(decompressedStream, getNextByte(compressedStream));
+        next = readStreamByte(compressedStream);
+        addByteToDataList(decompressedList , next);
+/*      verbosePrint("byte:%c:%d\n",next,next); */
 
-        verbosePrint("%c",decompressedStream->stream.data[decompressedStream->position-1]);
+        /* Print out each byte in the block. */
     }
 }
 
-void addElementToStream(DataStream * stream, BYTE element)
-{
-    unsigned long newSize;
-
-
-    verbosePrint("size test: %d = %d\n",
-                 stream->position,
-                 stream->stream.size);
-
-    /* accommodate the size of the output stream of needed. */
-    if( stream->position == stream->stream.size){
-
-        newSize = DATA_STREAM_GROW_FACTOR *
-            ( stream->stream.size > 0 ? stream->stream.size : 1);
-
-        verbosePrint("new decompressed stream size allocated: %d\n",newSize);
-        stream->stream =
-            accommodateDataContainer(
-                stream->stream,
-                newSize);
-    }
-
-    verbosePrint("Added to decompressed stream:%d=%c\n",element,element);    stream->stream.data[stream->position++] = element;
-    verbosePrint("new stream position:%d\n", stream->position);
-}
-
-
-DataContainer deflateDecompress(DataContainer data)
+DataList deflateDecompress(DataList data)
 {
     DEFLATE_BlockHeader header;
     DataStream compressedStream;
-    DataStream decompressedStream;
+    DataList decompressedList;
 
     CodesList huffmanCodes;
     CodesList distanceCodes;
 
-/*    translateCodesTest();
-      return decompressedStream.stream; */
+    translateCodesTest();
+/*      return decompressedStream.stream;  */
 
-    compressedStream.stream = data;
+    /* TODO: ???? correct endianess?  */
+    compressedStream = getNewDataStream(data, ENDIAN_BIG);
 
-    /* Remember, the first to bytes of the compressed stream were headers bytes, and
-       we have already read them, and so we skip them. */
-    compressedStream.position = 2;
+    /* the first two bytes of the compressed stream were headers bytes, which
+       we have already read, so skip them. */
+    readStreamByte(&compressedStream);
+    readStreamByte(&compressedStream);
 
     /* No decompressed data has so far been read. */
-    decompressedStream.position = 0;
-    decompressedStream.stream.size = 0;
+    decompressedList = getNewDataList(NULL, copyByte);
 
     /* Put this into a preparatory function? */
     setFixedHuffmanCodes();
     setFixedDistanceCodes();
-
-    decompressedStream.stream = getEmptyDataContainer();
 
     remainingPacketBits = 8;
 
@@ -291,13 +263,7 @@ DataContainer deflateDecompress(DataContainer data)
 
         if(header.BTYPE == BTYPE_NO_COMPRESSION){
 
-
-            readNonCompresedBlock(&compressedStream, &decompressedStream);
-
-	    /* ?????  */
-            if(decompressedStream.position > 2){
-                ++compressedStream.position;
-            }
+            readNonCompresedBlock(&compressedStream, &decompressedList);
 
         } else{
 
@@ -317,14 +283,13 @@ DataContainer deflateDecompress(DataContainer data)
                 huffmanCodes,
                 distanceCodes,
                 &compressedStream,
-                &decompressedStream);
+                &decompressedList);
         }
     }while(header.BFINAL == 0);
 
-    verbosePrint("final size: %d", decompressedStream.position);
-    decompressedStream.stream.size = decompressedStream.position;
+    verbosePrint("final decompressed size: %d\n", decompressedList.count);
 
-    return decompressedStream.stream;
+    return decompressedList;
 }
 
 void loadDynamicTables(
@@ -336,9 +301,13 @@ void loadDynamicTables(
 
     CodesList codeLengthCodes;
 
+    verbosePrint("Loading dynamic tables.\n");
+
+    verbosePrint("Loading block header.\n");
     blockHeader = loadDEFLATE_DynamicBlockHeader(compressedStream);
     printDEFLATE_DynamicBlockHeader(blockHeader);
 
+    verbosePrint("Loading code length codes.\n");
     codeLengthCodes = loadCodeLengthCodes(blockHeader.HCLEN, compressedStream);
 
     verbosePrint("code length codes:\n");
@@ -400,9 +369,8 @@ CodesList loadUsingCodeLengthCodes(
 
     codesLenI = 0;
 
-    for(i = 0; i < alphabetLength; ++i){
+    for(i = 0; i < HUFFMAN_CODES; ++i)
         codeLengths[i] = 0;
-    }
 
     while(1){
         code = readCode(codeLengthCodes, compressedStream);
@@ -411,9 +379,9 @@ CodesList loadUsingCodeLengthCodes(
 
         if(/*code.litteralValue >= 0 &&*/ code.litteralValue <= 15){
 
-	    verbosePrint("outputting simple code %d at index %d\n",
-                     code.litteralValue,
-                     codesLenI);
+            verbosePrint("outputting simple code %d at index %d\n",
+                         code.litteralValue,
+                         codesLenI);
 
             codeLengths[codesLenI++] = code.litteralValue;
 
@@ -444,6 +412,14 @@ void repeatPreviousLengthCode(
     int previousCode;
     int j;
 
+    /* Repeat codes are recursive!!!!
+
+       Example:
+       Codes 8, 16 (+2 bits 11),
+       16 (+2 bits 10) will expand to
+       12 code lengths of 8 (1 + 6 + 5)*/
+
+
     repeatLength =  3 + inputCodeLSB(2, compressedStream);
 
     previousCode = codeLengths[(*i) - 1];
@@ -452,7 +428,7 @@ void repeatPreviousLengthCode(
         verbosePrint("outputting repeat code length %d at index %d\n",
                      previousCode,
                      *i);
-        codeLengths[*i] = 0;
+        codeLengths[*i] = previousCode;
         (*i)++;
     }
 }
@@ -467,12 +443,6 @@ void repeatZeroLengthCode(
     int realLength;
     int j;
 
-    /* Repeat codes are recursive!!!!
-
-     Example:
-Codes 8, 16 (+2 bits 11),
-16 (+2 bits 10) will expand to
-12 code lengths of 8 (1 + 6 + 5)*/
 
     realLength =  minCodeLength + inputCodeLSB(extraBits,compressedStream);
 
@@ -482,7 +452,6 @@ Codes 8, 16 (+2 bits 11),
         codeLengths[*i] = 0;
         (*i)++;
     }
-
 }
 
 CodesList loadCodeLengthCodes(unsigned short HCLEN,DataStream * compressedStream)
@@ -532,7 +501,7 @@ void readCompresedBlock(
     CodesList huffmanCodes,
     CodesList distanceCodes,
     DataStream * compressedStream,
-    DataStream * decompressedStream)
+    DataList * decompressedList)
 {
     HuffmanCode code;
 
@@ -546,7 +515,7 @@ void readCompresedBlock(
         if(code.litteralValue <= LITTERAL_VALUES_MAX){
             /* */
             verbosePrint("Decoded:%d=%c\n",code.litteralValue,code.litteralValue);
-            addElementToStream(decompressedStream, code.litteralValue);
+            addByteToDataList(decompressedList, (BYTE)code.litteralValue);
 
         }
         else if(code.litteralValue == END_OF_BLOCK){
@@ -560,21 +529,19 @@ void readCompresedBlock(
                 code,
                 distanceCodes,
                 compressedStream,
-                decompressedStream);
+                decompressedList);
         } else{
             printError("Invalid code found:\n");
             printCode(code);
         }
     }
-
-    decompressedStream = decompressedStream;
 }
 
 void decodeLengthDistancePair(
     HuffmanCode lengthCode,
     CodesList distanceCodes,
     DataStream * compressedStream,
-    DataStream * decompressedStream)
+    DataList * decompressedList)
 {
     unsigned short fullLengthCode;
 
@@ -603,13 +570,13 @@ void decodeLengthDistancePair(
     verbosePrint("beginning distance code value:%d\n", distanceCode.litteralValue);
     verbosePrint("real distance code value:%d\n",fullDistanceCode);
 
-    outputLengthDistancePair(fullLengthCode, fullDistanceCode, decompressedStream);
+    outputLengthDistancePair(fullLengthCode, fullDistanceCode, decompressedList);
 }
 
 void outputLengthDistancePair(
     unsigned short lengthCode,
     unsigned short distanceCode,
-    DataStream * decompressedStream)
+    DataList * decompressedList)
 {
     unsigned short i;
     BYTE toAdd;
@@ -620,11 +587,11 @@ void outputLengthDistancePair(
 
     for(i = 0; i < lengthCode; ++i){
 
-        toAdd = decompressedStream->stream.data[decompressedStream->position - distanceCode];
+        toAdd = *(BYTE *)decompressedList->list[decompressedList->count - distanceCode];
 
         verbosePrint("Decoded:%d=%c\n",toAdd,toAdd);
 
-        addElementToStream(decompressedStream, toAdd);
+        addByteToDataList(decompressedList, toAdd);
     }
 }
 
@@ -718,10 +685,13 @@ int findCode(CodesList codes,unsigned short codeValue, unsigned short codeLength
 {
     int i;
 
-    verbosePrint("codes size:%d",codes.size);
+    verbosePrint("codes size:%d\n",codes.size);
     for(i = 0; i < codes.size; ++i)
-        if(codes.codes[i].codeValue == codeValue && codes.codes[i].codeLength == codeLength)
-            break;
+        if(codes.codes[i].codeLength != 0)
+            if(
+                codes.codes[i].codeValue == codeValue &&
+                codes.codes[i].codeLength == codeLength)
+                break;
 
     if(i == codes.size){
         return -1;
@@ -733,8 +703,10 @@ int findCode(CodesList codes,unsigned short codeValue, unsigned short codeLength
 
 unsigned int inputCodeLSB(int codeSize, DataStream * stream)
 {
+
     unsigned int returnValue;
     int shift;
+    int cs = codeSize;
 
     returnValue = 0;
     shift = 0;
@@ -747,13 +719,16 @@ unsigned int inputCodeLSB(int codeSize, DataStream * stream)
 
             /* read in what's left of the current byte */
             returnValue |=
-                (firstNBits(stream->stream.data[stream->position],remainingPacketBits) << shift);
+                firstNBits(
+                    *(BYTE*)stream->list.list[stream->position],
+                    remainingPacketBits) << shift;
             /* increase the shift */
             shift += remainingPacketBits;
             codeSize -= remainingPacketBits;
             stream->position++;
             remainingPacketBits = 8;
-            verbosePrint("Starting new byte: %x\n", stream->stream.data[stream->position]);
+            verbosePrint("Starting new byte: %x\n",
+                         *(BYTE*)stream->list.list[stream->position]);
 
         }else{
             /* if remainingPacketBits > codeSize */
@@ -762,9 +737,12 @@ unsigned int inputCodeLSB(int codeSize, DataStream * stream)
                get rid of the bytes read in. */
 
             returnValue |=
-                (firstNBits(stream->stream.data[stream->position], codeSize) << shift);
+                firstNBits(
+                    *(BYTE*)stream->list.list[stream->position]
+                    , codeSize) << shift;
 
-            stream->stream.data[stream->position] >>= codeSize;
+            *(BYTE*)stream->list.list[stream->position] >>= codeSize;
+
             remainingPacketBits -= codeSize;
 
             /* enough bits of data has been read in. This line thus causes the loop to terminate
@@ -773,7 +751,7 @@ unsigned int inputCodeLSB(int codeSize, DataStream * stream)
         }
     }
 
-    verbosePrint("inputcodeLSB:%d\n",returnValue);
+    verbosePrint("inputcodeLSB:val=%d, codesize=%d\n",returnValue, cs);
     return returnValue;
 }
 
@@ -822,9 +800,9 @@ void printCode(HuffmanCode code)
     int i;
 
     if(isprint(code.litteralValue))
-	verbosePrint("Code literal value:%d = %c.",code.litteralValue,code.litteralValue);
+        verbosePrint("Code literal value:%d = %c.",code.litteralValue,code.litteralValue);
     else
-	verbosePrint("Code literal value:%d.",code.litteralValue);
+        verbosePrint("Code literal value:%d.",code.litteralValue);
 
     if(code.codeLength == 0){
         verbosePrint("zero length code.");
@@ -855,6 +833,11 @@ CodesList translateCodes(BYTE * codeLengths, int alphabetSize)
     int bits;
     int len;
 
+    verbosePrint("code lengths: \n");
+    for(i = 0; i < alphabetSize; ++i){
+	verbosePrint("%d,", codeLengths[i]);
+    }
+
     /* Step 1. */
     codeLengthFreqs = getCodeLengthFreqs(codeLengths, alphabetSize);
 
@@ -864,6 +847,9 @@ CodesList translateCodes(BYTE * codeLengths, int alphabetSize)
             verbosePrint("N:%d | %d\n",i,codeLengthFreqs[i]);
 
     /* Step 2*/
+
+    /* Find maxBits. Find the highest possible bits length
+     whose frequency is not zero. */
 
     maxBits = 0;
 
@@ -880,13 +866,14 @@ CodesList translateCodes(BYTE * codeLengths, int alphabetSize)
 
     for(bits = 1; bits <= maxBits; ++bits){
         code = (code + codeLengthFreqs[bits - 1]) << 1;
+	verbosePrint("verbcode:%d\n", code);
         nextCode[bits] =  code;
     }
 
     verbosePrint("Printing next code:\n");
-    for(i = 1; i <= maxBits; ++i){
+
+    for(i = 1; i <= maxBits; ++i)
         verbosePrint("N:%d | %d\n",i,nextCode[i]);
-    }
 
     /* Step 3 */
     translatedCodes.size = alphabetSize;
@@ -906,7 +893,6 @@ CodesList translateCodes(BYTE * codeLengths, int alphabetSize)
 
             nextCode[len]++;
         }
-
     }
 
     free(codeLengthFreqs);
@@ -926,7 +912,8 @@ int * getCodeLengthFreqs(BYTE * codeLengths, int alphabetSize)
         freqs[i] = 0;
 
     for(i = 0; i < alphabetSize; ++i)
-        ++freqs[codeLengths[i]];
+	if(codeLengths[i] != 0)
+	    ++freqs[codeLengths[i]];
 
     return freqs;
 }
@@ -936,7 +923,6 @@ void translateCodesTest(void)
     int i;
     int alphabetLength = 8;
     BYTE codeLengths[8] = /*{2,1,3,3}; */
-
         {3,3,3,
          3,3,
          2,4,4};
@@ -958,3 +944,4 @@ void printCodesList(CodesList codes)
         printCode(codes.codes[i]);
 
 }
+

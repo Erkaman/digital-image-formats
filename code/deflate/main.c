@@ -63,35 +63,33 @@ void printHelp(void)
 
 void ZLIB_DecompressFile(FILE * in, FILE * out)
 {
-    DataContainer decompressed, compressed;
-
-
+    DataList decompressed, compressed;
 
     compressed = getCompressedData(in);
 
-
-    verbosePrint("Read in compressed data, size: %ld\n",compressed.size);
+    verbosePrint("Read in compressed data, size: %ld\n",compressed.count);
 /*    printData(compressed); */
 
     decompressed = ZLIB_Decompress(compressed);
 
-
-    freeDataContainer(compressed);
+    decompressed = decompressed;
+    out = out;
 
     writeData(decompressed,out);
 
-    freeDataContainer(decompressed);
+    freeDataList(decompressed, 1);
+    freeDataList(compressed, 1);
 
     /* print compressed data. */
 }
 
-DataContainer getCompressedData(FILE * in)
+DataList getCompressedData(FILE * in)
 {
     fpos_t begDataPointer;
-    long begData;
-    long endData;
-    DataContainer data;
-    long dataSize;
+    size_t begData;
+    size_t endData;
+    DataList data;
+    size_t dataSize;
 
     begData = ftell(in);
 
@@ -108,9 +106,7 @@ DataContainer getCompressedData(FILE * in)
 
     dataSize = endData - begData;
 
-    data = allocateDataContainer(dataSize);
-
-    fread(data.data,sizeof(BYTE),data.size,in);
+    data = readBytes(dataSize, in);
 
     return data;
 }
