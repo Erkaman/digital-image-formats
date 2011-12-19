@@ -1,6 +1,15 @@
-#include "main.h"
 #include <string.h>
 #include <stdlib.h>
+#include "zlib.h"
+#include "../data_list.h"
+#include "../io.h"
+
+void printHelp(void);
+
+void ZLIB_DecompressFile(FILE * in, FILE * out);
+
+DataList getCompressedData(FILE * in);
+
 
 int main(int argc, char *argv[])
 {

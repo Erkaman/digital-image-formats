@@ -1,5 +1,7 @@
 CC = gcc
 
+commonobjects = ../data_list.o ../data_stream.o ../io.o ../bitwise.o
+
 WARNINGS = -Wall -Wextra -Werror -Wdeclaration-after-statement \
 -Wshadow -Wstrict-overflow=5 -Wpointer-arith -Wcast-qual \
 -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations \

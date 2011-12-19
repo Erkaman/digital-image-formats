@@ -15,6 +15,7 @@ typedef struct {
     /* the maximum number of elements in the list. */
     size_t maxCount;
 
+
     void (*freeFunction) (void *);
     void * (*copyFunction) (void *);
 
@@ -51,4 +52,6 @@ void writeData(DataList data, FILE * out);
 
 BYTE getByteAt(DataList data, size_t i);
 
+
 #endif /* _DATA_LIST_H_ */
+

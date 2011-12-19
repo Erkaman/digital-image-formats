@@ -257,6 +257,9 @@ INT32 getMaximumChannelValue(ImageHeader header);
 
 DataList unfilter(DataList data, ImageHeader header);
 
+DataList splitUpColorData(DataList data, ImageHeader header);
+
+
 ColorInfo getColorInfo(ImageHeader header);
 
 BYTE compute_a(size_t i, size_t bpp, DataList unfiltered);
@@ -271,5 +274,9 @@ BYTE compute_c(
     DataList unfiltered);
 
 unsigned int paethPredictor(unsigned int a, unsigned int b, unsigned int c);
+
+unsigned long readNextChannel(DataStream * stream, ImageHeader header);
+
+void addColorToDataList(DataList * list, Color color);
 
 #endif /* _PNG_H_ */

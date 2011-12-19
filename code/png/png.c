@@ -501,19 +501,32 @@ void writeColor(ImageHeader header,
 
     if(header.colorType == GREYSCALE_COLOR){
 
-        fprintf(out, "(%d,%d,%d)",
-                color.greyscale,
-                color.greyscale,
-                color.greyscale);
+        fprintf(out, "(%d)",color.greyscale);
+    }
 
-    } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
+    else if(header.colorType == GREYSCALE_ALPHA_COLOR){
+
+        fprintf(out, "(%d,%d)",color.greyscaleAlpha.greyscale,color.greyscaleAlpha.alpha);
+    }
+
+    else if(header.colorType == TRUECOLOR_COLOR){
+
+        fprintf(out, "(%d,%d,%d)",
+                color.rgb.R,
+                color.rgb.G,
+                color.rgb.B);
+
+    }
+
+    else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
 
         fprintf(out, "(%d,%d,%d,%d)",
-                color.greyscaleAlpha.greyscale,
-                color.greyscaleAlpha.greyscale,
-                color.greyscaleAlpha.greyscale,
-                color.greyscaleAlpha.alpha);
+                color.rgba.R,
+                color.rgba.G,
+                color.rgba.B,
+		color.rgba.A);
     }
+
 }
 
 TextualData * loadTextualData(
@@ -581,39 +594,49 @@ void writeTextDataList(DataList textDataList, FILE * out)
 DataList loadColorData(DataList data, ImageHeader header)
 {
     int former;
-    DataList decompressed, unfiltered;
+    DataList decompressed, unfiltered, colorData;
 
     former = verbose;
 
-    verbose = 0;
+    verbose = 1;
     decompressed = ZLIB_Decompress(data);
     verbose = former;
 
     /* Unfilter. */
 
     unfiltered = unfilter(decompressed, header);
-    freeDataList(decompressed , 1);
 
-    unfiltered = unfiltered;
+    freeDataList(decompressed, 1);
+
+    /* Undo the Scanline serialization; that is, split up the bytes into colors. */
+
+    colorData = splitUpColorData( unfiltered, header);
+    freeDataList(unfiltered, 1);
 
     /* Split up the bytes in pixels. . */
-    return unfiltered;
+    return colorData;
 }
 
 void writeColorData(DataList colorData, ImageHeader header, FILE * out)
 {
-    size_t i;
-
-    header = header;
+    size_t row,col;
 
     fprintf(out,"Color Data:\n");
 
-    for(i = 0; i < colorData.count; ++i){
-        fprintf(out, "%d,", *(BYTE *)colorData.list[i]);
+    for(row = 0; row < header.height; ++row){
+
+        for(col = 0; col < header.width; ++col){
+
+	    writeColor(header,*(Color *)colorData.list[row * header.width + col], out);
+	    fprintf(out,",");
+        }
+
+	fprintf(out,"\n\n");
     }
 
 }
 
+/* See: http://www.w3.org/TR/PNG-Filters.html*/
 DataList unfilter(DataList data, ImageHeader header)
 {
     DataList unfiltered;
@@ -700,16 +723,16 @@ DataList unfilter(DataList data, ImageHeader header)
 
             } else if(filterType == PAETH_FILTER){
 
-		a = compute_a(i, bpp, unfiltered);
+                a = compute_a(i, bpp, unfiltered);
                 b = compute_b(scanline, width, unfiltered);
-		c = compute_c(i, bpp, scanline, width, unfiltered);
+                c = compute_c(i, bpp, scanline, width, unfiltered);
 
-		verbosePrint("a=%d,b=%d,c=%d\n", a , b , c);
+                verbosePrint("a=%d,b=%d,c=%d\n", a , b , c);
 
-		unfilteredByte = (BYTE)((unsigned int)x +
-					paethPredictor(a,b,c)) % 256;
+                unfilteredByte = (BYTE)((unsigned int)x +
+                                        paethPredictor(a,b,c)) % 256;
 
-	    }
+            }
 
             /* Add it.*/
             verbosePrint("unfiltered:%d\n", unfilteredByte);
@@ -786,9 +809,75 @@ unsigned int paethPredictor(unsigned int a, unsigned int b, unsigned int c)
     pc = abs(p - c);
 
     if (pa <= pb && pa <= pc)
-	return a;
+        return a;
     else if (pb <= pc)
-	return b;
+        return b;
     else
-	return c;
+        return c;
+}
+
+DataList splitUpColorData(DataList data, ImageHeader header)
+{
+    size_t i;
+    DataList colorData;
+    Color color;
+    DataStream colorStream;
+
+    colorData = getNewDataList(NULL, NULL);
+
+    colorStream = getNewDataStream(data, PNG_ENDIAN);
+
+    for(i = 0; i < (header.width * header.height); ++i){
+
+        if(header.colorType == GREYSCALE_COLOR){
+            color.greyscale = readNextChannel(&colorStream, header);
+        }
+
+        else if(header.colorType == INDEXED_COLOR){
+
+        }
+
+        else if(header.colorType == TRUECOLOR_COLOR){
+	    color.rgb.R = readNextChannel(&colorStream, header);
+	    color.rgb.G = readNextChannel(&colorStream, header);
+	    color.rgb.B = readNextChannel(&colorStream, header);
+        }
+
+        else if(header.colorType == GREYSCALE_ALPHA_COLOR){
+
+        }
+
+        else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
+
+        }
+
+        addColorToDataList(&colorData, color);
+    }
+
+    return colorData;
+}
+
+unsigned long readNextChannel(DataStream * stream, ImageHeader header)
+{
+    unsigned long channel;
+
+    if(header.bitDepth == 8){
+        channel = readStreamByte(stream);
+    } else if(header.bitDepth == 16){
+	channel = read16BitsNumber(stream);
+    } else if(header.bitDepth < 8)
+	/* Handle bit depths 1, 2 and 4*/
+	channel = readBits(stream, header.bitDepth);
+
+
+    return channel;
+}
+
+void addColorToDataList(DataList * list, Color color)
+{
+    Color * cp;
+
+    cp = malloc(sizeof(Color));
+    *cp = color;
+    addToDataList(list, cp);
 }
