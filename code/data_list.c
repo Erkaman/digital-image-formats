@@ -169,3 +169,7 @@ void writeData(DataList data, FILE * out)
         putc(*(BYTE *)data.list[i],out);
 }
 
+BYTE getByteAt(DataList data, size_t i)
+{
+    return *(BYTE *)data.list[i];
+}

@@ -6,6 +6,8 @@
 #include "../data_stream.h"
 
 #include "png_defs.h"
+#include "../deflate/zlib.h"
+
 
 typedef struct {
     INT32 length;
@@ -26,6 +28,13 @@ typedef struct {
     BYTE interlaceMethod;
 
 } ImageHeader;
+
+typedef struct {
+
+    int numChannels;
+    int channelBitDepth;
+
+} ColorInfo;
 
 typedef struct {
     INT32 whitePointX;
@@ -231,6 +240,9 @@ void freeChunk(Chunk chunk);
 void writeSignature(BYTE * signature, FILE * out);
 void writeHeader(ImageHeader header, FILE * out);
 
+DataList loadColorData(DataList data, ImageHeader header);
+void writeColorData(DataList colorData, ImageHeader header, FILE * out);
+
 void writeTextDataList(DataList textDataList, FILE * out);
 
 unsigned int crc32(DataList data);
@@ -243,6 +255,21 @@ int isChunkType(Chunk chunk, char * chunkType);
 
 INT32 getMaximumChannelValue(ImageHeader header);
 
+DataList unfilter(DataList data, ImageHeader header);
 
+ColorInfo getColorInfo(ImageHeader header);
+
+BYTE compute_a(size_t i, size_t bpp, DataList unfiltered);
+
+BYTE compute_b(size_t scanline, size_t width, DataList unfiltered);
+
+BYTE compute_c(
+    size_t i,
+    size_t bpp,
+    size_t scanline,
+    size_t width,
+    DataList unfiltered);
+
+unsigned int paethPredictor(unsigned int a, unsigned int b, unsigned int c);
 
 #endif /* _PNG_H_ */

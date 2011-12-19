@@ -49,4 +49,6 @@ void * copyByte(void * bptr);
 
 void writeData(DataList data, FILE * out);
 
+BYTE getByteAt(DataList data, size_t i);
+
 #endif /* _DATA_LIST_H_ */

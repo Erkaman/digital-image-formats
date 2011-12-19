@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-
 void dumpPNG(FILE * in, FILE * out)
 {
     PNG_Image image;
@@ -32,7 +31,7 @@ void freePNG_Image(PNG_Image image)
         free(image.pixelDimensions);
 
     freeDataList(image.textDataList,1);
-
+    freeDataList(image.colorData,1);
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -94,6 +93,10 @@ PNG_Image loadPNG(FILE * in)
             break;
         else if(isChunkType(chunk, IDAT)){
 
+            /* Load rest of idats. */
+
+            image.colorData = loadColorData(chunk.data, image.header);
+
         }else if(isChunkType(chunk, sRGB))
             image.renderingIntent = loadRenderingIntent(stream);
 
@@ -152,6 +155,8 @@ void writePNG(PNG_Image image, FILE * out)
     writeBackgroundColor(image.header, image.backgroundColor, out);
 
     writeTextDataList(image.textDataList, out);
+
+    writeColorData(image.colorData, image.header, out);
 }
 
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
@@ -548,10 +553,10 @@ TextualData * loadTextualData(
         data->str = malloc(sizeof(char) * (textLength + 1));
 
         for(i = 0; i < (textLength); ++i){
-	    data->str[i] = (char)readStreamByte(&stream);
-	}
+            data->str[i] = (char)readStreamByte(&stream);
+        }
 
-	data->str[i] = '\0';
+        data->str[i] = '\0';
     }
 
     return data;
@@ -562,7 +567,6 @@ void writeTextDataList(DataList textDataList, FILE * out)
     size_t i;
     TextualData * data;
     if(textDataList.count > 0){
-        verbosePrint("holy shit:%d", textDataList.count);
 
         for(i = 0; i < textDataList.count; ++i){
             fprintf(out, "Textual data %ld:\n", i+1);
@@ -570,7 +574,221 @@ void writeTextDataList(DataList textDataList, FILE * out)
             fprintf(out, "Keyword: %s\n", data->keyword);
 
             fprintf(out, "Text: %s\n", data->str);
-
         }
     }
+}
+
+DataList loadColorData(DataList data, ImageHeader header)
+{
+    int former;
+    DataList decompressed, unfiltered;
+
+    former = verbose;
+
+    verbose = 0;
+    decompressed = ZLIB_Decompress(data);
+    verbose = former;
+
+    /* Unfilter. */
+
+    unfiltered = unfilter(decompressed, header);
+    freeDataList(decompressed , 1);
+
+    unfiltered = unfiltered;
+
+    /* Split up the bytes in pixels. . */
+    return unfiltered;
+}
+
+void writeColorData(DataList colorData, ImageHeader header, FILE * out)
+{
+    size_t i;
+
+    header = header;
+
+    fprintf(out,"Color Data:\n");
+
+    for(i = 0; i < colorData.count; ++i){
+        fprintf(out, "%d,", *(BYTE *)colorData.list[i]);
+    }
+
+}
+
+DataList unfilter(DataList data, ImageHeader header)
+{
+    DataList unfiltered;
+    DataStream stream;
+    size_t scanline;
+    int filterType;
+    size_t i;
+    size_t width;
+
+    size_t bpp;
+
+    BYTE unfilteredByte;
+
+    ColorInfo info;
+
+    /* The byte being filtered. */
+    BYTE x;
+
+    /* The previous pixel channel pixel value. */
+    BYTE a;
+
+    /* The upper byte in the previous scanline. */
+    BYTE b;
+
+    BYTE c;
+
+    info = getColorInfo(header);
+
+    bpp =  (int)ceil((double)(info.numChannels * info.channelBitDepth) / 8.0);
+
+    for(i = 0; i < data.count; ++i){
+        verbosePrint("%d,", getByteAt(data, i));
+    }
+    verbosePrint("\n");
+
+    width = (data.count / header.height) - 1;
+
+    stream = getNewDataStream(data, PNG_ENDIAN);
+    unfiltered = getNewDataList(NULL, copyByte);
+
+    /* Read scanline after scanline*/
+    for(scanline = 0; scanline < header.height; ++scanline){
+
+        /* Read the filter type. */
+        filterType = readStreamByte(&stream);
+
+        verbosePrint("Filtertype: %d\n", filterType);
+
+        for(i = 0; i < width; ++i){
+
+            x = readStreamByte(&stream);
+
+            /* Unfilter byte according to a, b, c and x*/
+
+            if(filterType == NO_FILTER)
+                unfilteredByte = x;
+
+            else if(filterType == SUB_FILTER){
+
+                a = compute_a(i, bpp, unfiltered);
+
+                unfilteredByte = (BYTE)((unsigned int)x + (unsigned int)a) % 256;
+            }
+
+            else if(filterType == UP_FILTER){
+
+                /* "On the first scanline of an image (or of a pass of
+                   an interlaced image), assume Prior(x) = 0 for all x." */
+                b = compute_b(scanline, width, unfiltered);
+
+                unfilteredByte = (BYTE)((unsigned int)x + (unsigned int)b) % 256;
+            }
+
+            else if(filterType == AVERAGE_FILTER){
+
+                a = compute_a(i, bpp, unfiltered);
+                b = compute_b(scanline, width, unfiltered);
+
+                /* FIXME? Another mod 256 needed here? */
+                unfilteredByte = (BYTE)((unsigned int)x +
+
+                                        floor(((unsigned int)a + (unsigned int)b) / 2)
+                    )% 256;
+
+            } else if(filterType == PAETH_FILTER){
+
+		a = compute_a(i, bpp, unfiltered);
+                b = compute_b(scanline, width, unfiltered);
+		c = compute_c(i, bpp, scanline, width, unfiltered);
+
+		verbosePrint("a=%d,b=%d,c=%d\n", a , b , c);
+
+		unfilteredByte = (BYTE)((unsigned int)x +
+					paethPredictor(a,b,c)) % 256;
+
+	    }
+
+            /* Add it.*/
+            verbosePrint("unfiltered:%d\n", unfilteredByte);
+
+            addByteToDataList(&unfiltered, unfilteredByte);
+        }
+    }
+
+    return unfiltered;
+}
+
+ColorInfo getColorInfo(ImageHeader header)
+{
+    ColorInfo info;
+
+    info.channelBitDepth = header.bitDepth;
+
+    if(header.colorType == GREYSCALE_COLOR ||
+       header.colorType == INDEXED_COLOR)
+        info.numChannels = 1;
+    if(header.colorType == TRUECOLOR_COLOR)
+        info.numChannels = 3;
+    if(header.colorType == GREYSCALE_ALPHA_COLOR)
+        info.numChannels = 2;
+    if(header.colorType == TRUECOLOR_ALPHA_COLOR)
+        info.numChannels = 4;
+
+    return info;
+}
+
+BYTE compute_a(size_t i, size_t bpp, DataList unfiltered)
+{
+    if(i >= bpp)
+        return getByteAt(unfiltered , unfiltered.count - bpp);
+    else
+        return 0;
+}
+
+BYTE compute_b(size_t scanline, size_t width, DataList unfiltered)
+{
+    if(scanline == 0)
+        return 0;
+    else
+        return getByteAt(unfiltered , unfiltered.count - width);
+}
+
+BYTE compute_c(
+    size_t i,
+    size_t bpp,
+    size_t scanline,
+    size_t width,
+    DataList unfiltered)
+{
+    if(scanline == 0)
+        return 0;
+    else {
+
+        if(i >= bpp)
+            return getByteAt(unfiltered , unfiltered.count - width - bpp);
+        else
+            return 0;
+
+    }
+}
+
+unsigned int paethPredictor(unsigned int a, unsigned int b, unsigned int c)
+{
+    unsigned int pa, pb, pc, p;
+
+    p = a + b - c;
+
+    pa = abs(p - a);
+    pb = abs(p - b);
+    pc = abs(p - c);
+
+    if (pa <= pb && pa <= pc)
+	return a;
+    else if (pb <= pc)
+	return b;
+    else
+	return c;
 }
