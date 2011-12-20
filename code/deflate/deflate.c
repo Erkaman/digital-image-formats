@@ -213,6 +213,8 @@ LengthTableEntry lengthTable[LENGTH_CODES] = {
     {5,163},
     {5,195},
     {5,227},
+
+    {0, 258}
 };
 
 DistanceTableEntry distanceTable[DISTANCE_CODES] = {
@@ -753,6 +755,8 @@ void outputLengthDistancePair(
     verbosePrint("Decoding length distance pair:\n");
 
     verbosePrint("length code:%d\n",lengthCode);
+    verbosePrint("distance code:%d\n",distanceCode);
+    verbosePrint("outputted thus far:%d\n",decompressedList->count);
 
     for(i = 0; i < lengthCode; ++i){
 
