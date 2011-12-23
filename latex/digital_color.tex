@@ -7,327 +7,410 @@
 
 \cite{niederst1999webdesign}
 
-
 % Charles Poynton - Color technology. list of poyntons writings on color
-%http://www.poynton.com/Poynton-color.html
+% http://www.poynton.com/Poynton-color.html
 
+% great source of papers.
+% http://www.student.cs.uwaterloo.ca/~cs781/
+
+% ``The colour gamut of a sample monitor (an HP A1097C)''
+% http://www.w3.org/Conferences/WWW4/Papers/53/hp3.png
+
+% the trichromatics color theory
+% the opponent theory.
+
+% GREAT walkthough of the trichromatic color theory, the eye, and the
+% CIE color spaces.
+
+\cite{Cotton95colour}
+
+\section{Red, Blue and Green}
+\label{sec:color-models}
+
+\subsection{What Is Color?}
+\label{sec:what-color}
+
+\newcommand{\bluewave}{\ensuremath{\SI{400}{\nano\meter}}}
+
+Light is composed of tiny particles traveling at different
+wavelengths\index{wavelength} \cite{neider93:_openg_progr_guide}.
+Different colors are light traveling at different wavelengths. For
+example, blue has a wavelength of \bluewave
+\cite{ohlsson99:_digit_bild_kreat}.
+
+But how do our eyes \textit{see} these light waves? In our eyes,
+there are cells for perceiving three different kinds of wavelengths
+of light: red, blue and green. When these cells absorb red, green or
+blue light, we see color. And when these cells absorb mixed amounts
+of red, blue and green light, we are able to perceive all the other
+possible colors.
+
+\subsection{RGB}
+\label{sec:rgb}
+
+Color models\index{color model} are ways of specifying colors
+numerically \cite{fadgi11:color_model}. A very widely used color
+model for representing color in computers is RGB.
+
+\begin{figure}
+  \centering
+  \inputtikz{rgb.tex}
+  \caption{The RGB color model}
+  \label{fig:rgb}
+\end{figure}
+
+The RGB color model is based on how our eyes perceive color, which
+we discussed in section \ref{sec:what-color}. As it can be seen in
+figure \ref{fig:rgb}, the colors cyan ,magenta and yellow can be
+achieved by mixing either red, blue and green. Also note that white
+is achieved by mixing all of three colors. Black is represented by
+no light at all. The rest of the colors can be achieved by mixing
+different amounts of red,green and blue.
+
+The RGB color model is called an additive\index{additive color model}
+because it makes different colors by adding together light.
+
+The different amounts of red, green and blue in a color, are called
+their respective color channels\index{color channel}.
+
+\subsection{RGBA}
+
+But there is actually even more to RGB. There is an extended color
+model of RGB that's called RGBA. In this model, a new channel is
+added: the alpha channel\index{alpha channel}. This new channel
+represents the opacity of a color. Opacity is simply the opposite of
+transparency \cite{porter84_compos_dig_img}.
+
+Take a good look at figure \ref{fig:alpha}. This figure demonstrates
+how a the color blue gets a lower and lower value of its alpha
+channel until it turns fully transparent. In the leftmost part of
+the image, the color fully has its maximum possible alpha channel
+value, meaning that it's fully visible. On the other hand, the
+leftmost color has its lowest possible alpha value, $0$, and as a
+result is fully transparent.
+
+\begin{figure}
+  \centering
+  \inputtikz{alpha.tex}
+  \caption{The color blue with an increasingly lower alpha channel.}
+  \label{fig:alpha}
+\end{figure}
+
+\section{Color Depth}
+\label{sec:color-depth}
+
+But up until now, I have said nothing about how the computer
+represents these color models.
+
+\subsection{24-bit Color}
+\label{sec:24-bit-color}
+
+In the RGB color model, each color is just a combination red,green
+and blue channels. So, let us represent colors as a triple of three
+numbers, like this: \rgbtrip{123}{21}{91}, which is
+\textcolor[RGB]{123,21,91}{this color}.
+
+An 8-bit number has, as you should be familiar with, only $2^8 =
+256$ possible values. If we assign an 8-bit number to each color
+channel, the total size of a single color will be 24-bits. This way
+of representing color is called 24-bit color. You also refer to
+24-bit colors as having a color depth\index{color depth} of
+24-bits. This is also called the pixel depth\index{pixel depth} of
+the color.
+
+\newcommand{\selfcolor}[1]{\textcolor{#1}{#1}}
+
+A full \selfcolor{red} color is represented by the triple \rgbtrip{255}{0}{0}. In
+that case, have a guess at what color is represented by
+\rgbtrip{255}{0}{255}. If haven't guessed it already, please study
+figure \ref{fig:rgb}. As you probably already have guessed, this color
+is \selfcolor{yellow}. And in the same number mixing and matching way, many other
+colors can be represented. See table \ref{tab:color-examples} for
+examples of other color values.
+
+\begin{table}
+  \newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
+    \textcolor[RGB]{#1,#2,#3}{#4} \\}
+  \centering
+  \begin{tabular}{lr}
+    \toprule
+    RGB triple & Resulting color \\
+    \midrule
+    \colorrow{255}{215}{0}{Gold}
+    \colorrow{165}{42}{42}{Brown}
+    \colorrow{255}{0}{255}{Purple}
+    \colorrow{255}{192}{203}{Pink}
+    \colorrow{255}{165}{0}{Orange}
+    \colorrow{0}{0}{139}{Dark Blue}
+    \colorrow{105}{105}{105}{Dim Grey}
+    \colorrow{0}{100}{0}{Dark Green}
+    \colorrow{205}{92}{92}{Indian Red}
+    \bottomrule
+  \end{tabular}
+  \caption{Colors}
+  \label{tab:color-examples}
+\end{table}
+
+But of course, not all colors can be represented using just
+24 bits. The number of \textit{all} possible colors is infinite. But you can still
+represent an awful lot colors with only 24-bits. How many? Well, every
+color channel can have $256$ different values. There are $3$
+channels. Hence, there are $256^3 = 16777216$ different colors that
+can represented using only 24-bits!
 
 I was unable to find any good numbers of how many different colors us
 humans can, but according to \cite{roth:_tetrachromat} we can see
 about a million different colors, assuming  that we can pick 100
 different gradations of red, blue and green.
 
-  \section{Color Models}
-  \label{sec:color-models}
+As I stated in the introduction, raster graphics is going to be the
+main subject of this book. And images represented as raster graphics
+is simply just a grid of colors. Therefore, in this chapter well
+discuss how these color are represented.
 
-  \subsection{What Is Color?}
-  \label{sec:what-color}
 
-  \newcommand{\bluewave}{\ensuremath{\SI{400}{\nano\meter}}}
+\newcommand{\rgbaquad}[4]{
+  \mbox{(\textcolor{red}{#1},\textcolor{green}{#2},\textcolor{blue}{#3},\textcolor{gray}{#4})}}
 
-  Light is composed of tiny particles traveling at different
-  wavelengths\index{wavelength} \cite{neider93:_openg_progr_guide}.
-  Different colors are light traveling at different wavelengths. For
-  example, blue has a wavelength of \bluewave
-  \cite{ohlsson99:_digit_bild_kreat}.
+Adding alpha channels to this color representation is trivial, just
+add a fourth channel and 8-bit number. The only real
+difference is that a color will require 32-bits of storage if an
+alpha channel is needed.
 
-  But how do our eyes \textit{see} these light waves? In our eyes,
-  there are cells for perceiving three different kinds of wavelengths
-  of light: red, blue and green. When these cells absorb red, green or
-  blue light, we see color. And when these cells absorb mixed amounts
-  of red, blue and green light, we are able to perceive all the other
-  possible colors.
+\subsection{Grayscale Color}
 
-  \subsection{RGB}
-  \label{sec:rgb}
+\newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
+\newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
 
-  Color models\index{color model} are ways of specifying colors
-  numerically \cite{fadgi11:color_model}. A very widely used color
-  model for representing color in computers is rgb.
+If every color channel of a RGB color is set to the same value, the
+resulting color will be a grayscale color. Using 24-bit color, we can for example make the following
+grayscales:
+\selfrgbtripgray{100},\selfrgbtripgray{210},\selfrgbtripgray{60}. Using
+24-bits you can really only represent 256 different possible
+grayscale colors because $256$ is how many different values can be
+represented by an 8-bit number. So if we assign each of these RGB
+triples to an 8-bit number, we have thus invented 8-bit
+grayscale\index{8-bit grayscale}! So in this system, the number 80
+would represent the color \selfrgbtripgray{80}, 180 would represent
+\selfrgbtripgray{180}, and so on \cite{puglia00:_handbook_dig_proj}.
 
-  \begin{figure}
-    \centering
-    \inputtikz{rgb.tex}
-    \caption{The RGB color model}
-    \label{fig:rgb}
-  \end{figure}
+8-bit grayscale means that we have $2^8=256$ different shades of
+gray. This system is actually applicable to any bit count, as is
+demonstrated in table \ref{tab:grayscale}. You will probably meet at least one of
+these grayscale color depths out in the wild.
 
-  The RGB color model is based on how our eyes perceive color, which
-  we discussed in section \ref{sec:what-color}. As it can be seen in
-  figure \ref{fig:rgb}, the colors cyan ,magenta and yellow can be
-  achieved by mixing either red, blue and green. Also note that white
-  is achieved by mixing all of three colors. Black is represented by
-  no light at all. The rest of the colors can be achieved by mixing
-  different amounts of red,green and blue.
+\begin{table}
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    Bit count & Possible shades of gray \\
+    \midrule
+    $2$ & $2^2 = 4$ \\
+    $4$ & $2^4 = 16$ \\
+    $8$ & $2^8 = 256$ \\
+    $16$ & $2^{16} = 65536$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Different bit counts of grayscale}
+  \label{tab:grayscale}
+\end{table}
 
-  The RGB color model is called an additive\index{additive color model}
-  because it makes different colors by adding together light.
+\section{Parsing Color Data}
+\label{sec:parsing-color-data}
 
-  The different amounts of red, green and blue in a color, are called
-  their respective color channels\index{color channel}.
+The number $26$ as a 8-bit number could be written as a string of
+ones and zeroes, 00011010. From now on we will refer to such a
+string as a bit pattern\index{bit pattern}.
 
-  \subsection{CMYK}
-  \label{sec:cmyk}
+Color is specified by bit ranges in numbers of certain
+sizes. So how do we extract these bits? That is what are going to
+discuss in the section.
 
-  Instead of mixing light,we can spread color out on paper to make all
-  the different colors. Doing this, we have created a new color model:
-  \textbf{CMYK}. It stands for \textbf{C}yan,
-  \textbf{M}agenta, \textbf{Y}ellow and blac\textbf{K}.
+\subsection{Grayscale}
 
-  It is subtractive\index{subtractive color model}, meaning that
-  instead of adding light, we subtract the light by adding more and
-  more ink to the paper.
+The most trivial color type to parse is grayscale color. Since a
+grayscale color is specified by just one number, there's no need to
+do any parsing. As we discussed before, the number $x$ specifies the
+grayscale color \mbox{($x,x,x$)}. \todo{discuss different bit depths
+  of grayscale}
 
-  \subsection{RGBA}
+\subsection{RGB(A) Color}
 
-  But there is actually even more to RGB. There is an extended color
-  model of RGB that's called RGBA. In this model, a new channel is
-  added: the alpha channel\index{alpha channel}. This new channel
-  represents the opacity of a color. Opacity is simply the opposite of
-  transparency \cite{porter84_compos_dig_img}.
+Things do however become more interesting when we try to parse RGB
+and RGBA color. There are several bit depths possible for RGB
+color but we'll only be covering some of the most common ones.
 
-  Take a good look at figure \ref{fig:alpha}. This figure demonstrates
-  how a the color blue gets a lower and lower value of its alpha
-  channel until it turns fully transparent. In the leftmost part of
-  the image, the color fully has its maximum possible alpha channel
-  value, meaning that it's fully visible. On the other hand, the
-  leftmost color has its lowest possible alpha value, $0$, and as a
-  result is fully transparent.
+\subsubsection{24-bit color}
 
-  \begin{figure}
-    \centering
-    \inputtikz{alpha.tex}
-    \caption{The color blue with an increasingly lower alpha channel.}
-    \label{fig:alpha}
-  \end{figure}
-
-  \section{Color Depth}
-  \label{sec:color-depth}
-
-  But up until now, I have said nothing about how the computer
-  represents these color models.
-
-  \subsection{24-bit Color}
-  \label{sec:24-bit-color}
-
-  In the RGB color model, each color is just a combination red,green
-  and blue channels. So, let us represent colors as a triple of three
-  numbers, like this: \rgbtrip{123}{21}{91}, which is
-  \textcolor[RGB]{123,21,91}{this color}.
-
-  An 8-bit number has, as you should be familiar with, only $2^8 =
-  256$ possible values. If we assign an 8-bit number to each color
-  channel, the total size of a single color will be 24-bits. This way
-  of representing color is called 24-bit color. You also refer to
-  24-bit colors as having a color depth\index{color depth} of
-  24-bits. This is also called the pixel depth\index{pixel depth} of
-  the color.
-
-  \newcommand{\selfcolor}[1]{\textcolor{#1}{#1}}
-
-  A full \selfcolor{red} color is represented by the triple \rgbtrip{255}{0}{0}. In
-  that case, have a guess at what color is represented by
-  \rgbtrip{255}{0}{255}. If haven't guessed it already, please study
-  figure \ref{fig:rgb}. As you probably already have guessed, this color
-  is \selfcolor{yellow}. And in the same number mixing and matching way, many other
-  colors can be represented. See table \ref{tab:color-examples} for
-  examples of other color values.
-
-  \begin{table}
-    \newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
-      \textcolor[RGB]{#1,#2,#3}{#4} \\}
-    \centering
-    \begin{tabular}{lr}
-      \toprule
-      RGB triple & Resulting color \\
-      \midrule
-      \colorrow{255}{215}{0}{Gold}
-      \colorrow{165}{42}{42}{Brown}
-      \colorrow{255}{0}{255}{Purple}
-      \colorrow{255}{192}{203}{Pink}
-      \colorrow{255}{165}{0}{Orange}
-      \colorrow{0}{0}{139}{Dark Blue}
-      \colorrow{105}{105}{105}{Dim Grey}
-      \colorrow{0}{100}{0}{Dark Green}
-      \colorrow{205}{92}{92}{Indian Red}
-      \bottomrule
-    \end{tabular}
-    \caption{Colors}
-    \label{tab:color-examples}
-  \end{table}
-
-  But of course, not all colors can be represented using just
-  24 bits. The number of \textit{all} possible colors is infinite. But you can still
-  represent an awful lot colors with only 24-bits. How many? Well, every
-  color channel can have $256$ different values. There are $3$
-  channels. Hence, there are $256^3 = 16777216$ different colors that
-  can represented using only 24-bits!
-
-  \newcommand{\rgbaquad}[4]{
-    \mbox{(\textcolor{red}{#1},\textcolor{green}{#2},\textcolor{blue}{#3},\textcolor{gray}{#4})}}
-
-  Adding alpha channels to this color representation is trivial, just
-  add a fourth channel and 8-bit number. The only real
-  difference is that a color will require 32-bits of storage if an
-  alpha channel is needed.
-
-  \subsection{Grayscale Color}
-
-  \newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
-  \newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
-
-  If every color channel of a RGB color is set to the same value, the
-  resulting color will be a grayscale color. Using 24-bit color, we can for example make the following
-  grayscales:
-  \selfrgbtripgray{100},\selfrgbtripgray{210},\selfrgbtripgray{60}. Using
-  24-bits you can really only represent 256 different possible
-  grayscale colors because $256$ is how many different values can be
-  represented by an 8-bit number. So if we assign each of these RGB
-  triples to an 8-bit number, we have thus invented 8-bit
-  grayscale\index{8-bit grayscale}! So in this system, the number 80
-  would represent the color \selfrgbtripgray{80}, 180 would represent
-  \selfrgbtripgray{180}, and so on \cite{puglia00:_handbook_dig_proj}.
-
-  8-bit grayscale means that we have $2^8=256$ different shades of
-  gray. This system is actually applicable to any bit count, as is
-  demonstrated in table \ref{tab:grayscale}. You will probably meet at least one of
-  these grayscale color depths out in the wild.
-
-  \begin{table}
-    \centering
-    \begin{tabular}{ll}
-      \toprule
-      Bit count & Possible shades of gray \\
-      \midrule
-      $2$ & $2^2 = 4$ \\
-      $4$ & $2^4 = 16$ \\
-      $8$ & $2^8 = 256$ \\
-      $16$ & $2^{16} = 65536$ \\
-      \bottomrule
-    \end{tabular}
-    \caption{Different bit counts of grayscale}
-    \label{tab:grayscale}
-  \end{table}
-
-  \section{Parsing Color Data}
-  \label{sec:parsing-color-data}
-
-  The number $26$ as a 8-bit number could be written as a string of
-  ones and zeroes, 00011010. From now on we will refer to such a
-  string as a bit pattern\index{bit pattern}.
-
-  Color is specified by bit ranges in numbers of certain
-  sizes. So how do we extract these bits? That is what are going to
-  discuss in the section.
-
-  \subsection{Grayscale}
-
-  The most trivial color type to parse is grayscale color. Since a
-  grayscale color is specified by just one number, there's no need to
-  do any parsing. As we discussed before, the number $x$ specifies the
-  grayscale color \mbox{($x,x,x$)}. \todo{discuss different bit depths
-    of grayscale}
-
-  \subsection{RGB(A) Color}
-
-  Things do however become more interesting when we try to parse RGB
-  and RGBA color. There are several bit depths possible for RGB
-  color but we'll only be covering some of the most common ones.
-
-  \subsubsection{24-bit color}
-
-  \begin{figure}
-    \centering
-    {\huge\textcolor{red}{10001011}\textcolor{green}{01010010}\textcolor{blue}{\fullbyte}
+\begin{figure}
+  \centering
+  {\huge\textcolor{red}{10001011}\textcolor{green}{01010010}\textcolor{blue}{\fullbyte}
     = \textcolor[HTML]{8B52FF}{purple}}
-    \caption{The RGB bit pattern for a purplish color.}
-    \label{fig:24-bit-colors-bits}
-  \end{figure}
+  \caption{The RGB bit pattern for a purplish color.}
+  \label{fig:24-bit-colors-bits}
+\end{figure}
 
-  The number 24-bit \textcolor{red}{1000 1011}\textcolor{green}{0101
-    0010}\textcolor{blue}{\fullbyte} represents a purplish color. The
-  separate values of the color channels of this number can trivivally
-  be pased by reading them byte for byte. Because, remember, the each
-  color channel in 24-bit number is stored in a separate
-  byte. Algorithm \ref{alg:read-24-bit-rgb} demonstrates how to read
-  all the separate color channels.
+The number 24-bit \textcolor{red}{1000 1011}\textcolor{green}{0101
+  0010}\textcolor{blue}{\fullbyte} represents a purplish color. The
+separate values of the color channels of this number can trivivally
+be pased by reading them byte for byte. Because, remember, the each
+color channel in 24-bit number is stored in a separate
+byte. Algorithm \ref{alg:read-24-bit-rgb} demonstrates how to read
+all the separate color channels.
 
-  \todo{discuss endianess}
+\todo{discuss endianess}
 
-  \begin{algorithm}[H]
-    \caption{Reading the color channels of RGB 24-bit number.}
-    \label{alg:read-24-bit-rgb}
-    \begin{algorithmic}[1]
-      \Let{$R$}{\VoidCall{ReadByte}}
-      \Let{$G$}{\VoidCall{ReadByte}}
-      \Let{$B$}{\VoidCall{ReadByte}}
-    \end{algorithmic}
-  \end{algorithm}
+\begin{algorithm}[H]
+  \caption{Reading the color channels of RGB 24-bit number.}
+  \label{alg:read-24-bit-rgb}
+  \begin{algorithmic}[1]
+    \Let{$R$}{\VoidCall{ReadByte}}
+    \Let{$G$}{\VoidCall{ReadByte}}
+    \Let{$B$}{\VoidCall{ReadByte}}
+  \end{algorithmic}
+\end{algorithm}
 
-  \subsubsection{32-bit color}
+\subsubsection{32-bit color}
 
-  32-bit color is very much like 24-bit color. But the alpha channel
-  can either come before the RGB color values, ARGB\index{ARGB}, or
-  they can occur after the RGB color values, RGBA\index{RGBA}. Figure
-  \ref{fig:32-bit-colors-bits} shows both the variants. The first one
-  is ARGB och the second one RGBA. The separate alpha channel can be
-  parsed in the same way the separate color channels are parsed in
-  algorithm \ref{alg:read-24-bit-rgb}.
+32-bit color is very much like 24-bit color. But the alpha channel
+can either come before the RGB color values, ARGB\index{ARGB}, or
+they can occur after the RGB color values, RGBA\index{RGBA}. Figure
+\ref{fig:32-bit-colors-bits} shows both the variants. The first one
+is ARGB och the second one RGBA. The separate alpha channel can be
+parsed in the same way the separate color channels are parsed in
+algorithm \ref{alg:read-24-bit-rgb}.
 
-  \begin{figure}
-    \centering
-    {\Large%
-      \textcolor{gray}{11110000}%
-      \textcolor{red}{10001011}%
-      \textcolor{green}{01010010}%
-      \textcolor{blue}{\fullbyte}
+\begin{figure}
+  \centering
+  {\Large%
+    \textcolor{gray}{11110000}%
+    \textcolor{red}{10001011}%
+    \textcolor{green}{01010010}%
+    \textcolor{blue}{\fullbyte}
 
-      \textcolor{red}{10001011}%
-      \textcolor{green}{01010010}%
-      \textcolor{blue}{\fullbyte}%
-      \textcolor{gray}{11110000}%
-    }
+    \textcolor{red}{10001011}%
+    \textcolor{green}{01010010}%
+    \textcolor{blue}{\fullbyte}%
+    \textcolor{gray}{11110000}%
+  }
 
-    \caption{The ARGB and RGBA variants of 24-bit color depth. The
-      gray color represents the alpha channel }
-    \label{fig:32-bit-colors-bits}
-  \end{figure}
+  \caption{The ARGB and RGBA variants of 24-bit color depth. The
+    gray color represents the alpha channel }
+  \label{fig:32-bit-colors-bits}
+\end{figure}
 
-  \subsubsection{16-bit color}
+\subsubsection{16-bit color}
 
-  Colors can also be stored in 16 bits, but it is relatively
-  rare. There are several variants of 16-bit color storage, so we'll
-  be covering some of them here.
+Colors can also be stored in 16 bits, but it is relatively
+rare. There are several variants of 16-bit color storage, so we'll
+be covering some of them here.
 
-  \paragraph{TGA version}
+\paragraph{TGA version}
 
-  The kind of 16-bit color used in the TGA format is shown in figure
-  \ref{fig:tga-16-bit-colors-bits}. It can be trivially parsed as is
-  shown in algorithm \ref{alg:read-16-bit-rgb}. What is unsual here is
-  that the values of the color channel's are stored in 5-bit number,
-  meaning that the maximum value of a color channel in this case is
-  $2^5 - 1 = 31$. However, here only one bit is reserved for the alpha
-  channel. A better name for this bit would a flag. And what this flag
-  is specify whether a color is visible or not.
+The kind of 16-bit color used in the TGA format is shown in figure
+\ref{fig:tga-16-bit-colors-bits}. It can be trivially parsed as is
+shown in algorithm \ref{alg:read-16-bit-rgb}. What is unsual here is
+that the values of the color channel's are stored in 5-bit number,
+meaning that the maximum value of a color channel in this case is
+$2^5 - 1 = 31$. However, here only one bit is reserved for the alpha
+channel. A better name for this bit would a flag. And what this flag
+is specify whether a color is visible or not.
 
-  \begin{figure}
-    \centering
-    {\huge\textcolor{gray}{0}%
-      \textcolor{red}{10101}\textcolor{green}{11100}\textcolor{blue}{01010}}
-    \caption{Sample 16-bit color.}
-    \label{fig:tga-16-bit-colors-bits}
-  \end{figure}
+\begin{figure}
+  \centering
+  {\huge\textcolor{gray}{0}%
+    \textcolor{red}{10101}\textcolor{green}{11100}\textcolor{blue}{01010}}
+  \caption{Sample 16-bit color.}
+  \label{fig:tga-16-bit-colors-bits}
+\end{figure}
 
-  \todo{discuss the bit patterns}
+\todo{discuss the bit patterns}
 
-  \begin{algorithm}[H]
-    \caption{Reading TGA 16-bit number.}
-    \label{alg:read-16-bit-rgb}
-    \begin{algorithmic}[1]
-      \Let{$B$}{$data \BitAnd 31$}
-      \Let{$G$}{$(data \BitAnd (31 \ShiftLeft 5)) \ShiftRight 5$}
-      \Let{$R$}{$(data \BitAnd (31 \ShiftLeft 10)) \ShiftRight 10$}
-      \Let{$A$}{$(data \BitAnd (1 \ShiftLeft 16)) \ShiftRight 16$}
-    \end{algorithmic}
-  \end{algorithm}
+\begin{algorithm}[H]
+  \caption{Reading TGA 16-bit number.}
+  \label{alg:read-16-bit-rgb}
+  \begin{algorithmic}[1]
+    \Let{$B$}{$data \BitAnd 31$}
+    \Let{$G$}{$(data \BitAnd (31 \ShiftLeft 5)) \ShiftRight 5$}
+    \Let{$R$}{$(data \BitAnd (31 \ShiftLeft 10)) \ShiftRight 10$}
+    \Let{$A$}{$(data \BitAnd (1 \ShiftLeft 16)) \ShiftRight 16$}
+  \end{algorithmic}
+\end{algorithm}
+
+\section{Gamma}
+
+\cite{roelofs99:_png}
+\cite{boutel:_png_portab_networ_graph_specif_version11}
+\cite{boutel:_png_portab_networ_graph_specif_version1}
+\cite{boutel:_png_portab_networ_graph_specif_version12}
+\cite{Pascale2003_ReviewRGBColourSpaces}
+\cite{srgb}
+
+\cite{lilley:_not_just_decor}
+
+\cite{motta1991analytical_crt}
+
+% poynton book
+\cite{poynton2003digital}
+
+In computer and television screens the color from them was output
+using a technology known as a CRT(cathode-ray tube). Although they are
+now getting replaced by LCDs(Liciud Crytal Displays). But while in the
+following discussion we'll be refering to CRT, all of things said
+about CRTs can also be said about CRT
+\cite{hearn1997computer_graphics,roelofs99:_png}.
+
+For the CRT to light out a color of certain luminance, say a very dim
+red color, it has to be given a certain voltage $V$. After it is given
+a certain voltage, a corresponding luminance $L$ is shone out from the
+CRT. Now, it turns that the luminance $L$ is \textit{not} directly
+proportional to the voltage $V$. That is, there exists no constant $k$
+such that $L = kV$. It rather turns out that the relationship between
+these two can be expressed in the form of a power law. A power law is
+any function $f(x)$ that can be written on the form
+
+\begin{equation*}
+  f(x) = Cx^k
+\end{equation*}
+
+Where $C$ and $k$ are arbitrary constants (negative sign necessary?)\cite{newman05power,easley2010networks_powerlaw}.
+
+So the relationship between $L$ and $V$ is \textit{not} $L = kL$ for
+some constant $k$, but it is $L = CV^k$ for two constant $k$ and
+$C$. It turns out that the value of the constant $C$ is $0$, so the
+expression can be written on an simple form as $L =
+V^k$. \cite{motta1991analytical_crt,Pascale2003_ReviewRGBColourSpaces,boutel:_png_portab_networ_graph_specif_version1,boutel:_png_portab_networ_graph_specif_version11,boutel:_png_portab_networ_graph_specif_version12,roelofs99:_png}.
+
+In practically all digital image literature the constant $k$ is
+assigned the letter $\gamma$, so we'll be using that letter from now
+on. Our final expression for describing the relationship the emitted
+luminosity $L$ and the inputted voltage $V$ is thus:
+
+\begin{equation}
+  \label{eq:gamma}
+  L = V^\gamma
+\end{equation}
+
+The rest of this section is now spend on discussing the significance
+of equation (\ref{eq:gamma}).
+
+Real imaging systems will have several components, and more than one
+of these can be nonlinear. If all of the components have transfer
+characteristics that are power functions, then the transfer function
+of the entire system is also a power function. The exponent (gamma) of
+the whole system's transfer function is just the product of all of the
+individual exponents (gammas) of the separate stages in the system.
+
+Also, stages that are linear pose no problem, since a power function
+with an exponent of 1.0 is really a linear function. So a linear
+transfer function is just a special case of a power function, with a
+gamma of 1.0.
+
+Thus, as long as our imaging system contains only stages with linear
+and power-law transfer functions, we can meaningfully talk about the
+gamma of the entire system. This is indeed the case with most real
+imaging systems.
+
+crt gamma = 2.5
+
 
