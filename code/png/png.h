@@ -148,6 +148,14 @@ typedef struct {
     BYTE second;
 } TimeStamp;
 
+typedef union {
+
+    Color color;
+
+    DataList transparentIndices;
+
+} Transparency;
+
 typedef struct {
     BYTE signature[SIGNATURE_LENGTH];
 
@@ -190,6 +198,7 @@ typedef struct {
     /* Of type InternationalTextualData */
     DataList internationalTextDataList;
 
+    Transparency * transparency;
 
 } PNG_Image;
 
@@ -205,6 +214,9 @@ ImageHeader loadImageHeader(FILE * in);
 BYTE * loadRenderingIntent(DataStream stream);
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out);
 
+DataList * loadPalette(DataStream stream);
+void writePalette(PNG_Image image,FILE * out);
+
 INT32 * loadImageGamma(DataStream stream);
 void writeImageGamma(INT32 * imageGamma, FILE * out);
 
@@ -216,11 +228,11 @@ void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out);
 
 Color * loadBackgroundColor(ImageHeader header, DataStream stream);
 void writeBackgroundColor(
-    ImageHeader header,
+    PNG_Image image,
     Color * backgroundColor,
     FILE * out);
 
-void writeColor(ImageHeader header,
+void writeColor(PNG_Image image,
                 Color color,
                 FILE * out);
 
@@ -241,9 +253,14 @@ void writeSignature(BYTE * signature, FILE * out);
 void writeHeader(ImageHeader header, FILE * out);
 
 DataList loadColorData(DataList data, ImageHeader header);
-void writeColorData(DataList colorData, ImageHeader header, FILE * out);
+
+Transparency * loadTransparency(ImageHeader header, DataStream stream);
+
+void writeColorData(PNG_Image image, FILE * out);
+
 
 void writeTextDataList(DataList textDataList, FILE * out);
+
 
 unsigned int crc32(DataList data);
 
@@ -278,5 +295,7 @@ unsigned int paethPredictor(unsigned int a, unsigned int b, unsigned int c);
 unsigned long readNextChannel(DataStream * stream, ImageHeader header);
 
 void addColorToDataList(DataList * list, Color color);
+
+DataList uninterlace(DataList data, ImageHeader header);
 
 #endif /* _PNG_H_ */

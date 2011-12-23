@@ -5,34 +5,35 @@
 \chapter{Graphics Interchange Format}
 \label{cha:gif}
 
-\begin{refsection}
 
   \section{History}
+  \label{sec:gif-history}
+
+  The information in the following section(the entire section
+  \ref{sec:gif-history}) will be based on the references
+  \cite{welch85:_u,roelofs09:_histor_portab_networ_graph_png_format,battilana:_gif_contr,caie:_sad,roelofs99:_png}.
 
   % http://netghost.narod.ru/gff/graphics/book.htm
 
   \subsection{Troublesome Patents}
 
   As you may remember from chapter \ref{cha:lzw}, the LZW algorithm
-  was invented by Terry Welch. He also filed a software patent for the
-  algorithm. This patent was U.S. Patent 4,558,302
-  \cite{welch85:_u,roelofs09:_histor_portab_networ_graph_png_format}.
+  was invented by Terry Welch. Welch filed a software patent for the
+  algorithm; this patent was U.S. Patent 4,558,302
 
   \newcommand{\compus}{CompuServe\xspace}
 
   In 1987 \compus started designing a new \textit{portable and
     compressed} image format called \textit{Graphics Interchange
-    Format}, abbreviated GIF. To do all the data-compression in this
-  new format, \compus chose to use a small variation of the
-  compression algorithm LZW. Then \compus released this fresh image
-  format to the general public
-  \cite{roelofs09:_histor_portab_networ_graph_png_format}.
+    Format}, abbreviated GIF. \compus chose to use a small variation
+  of the compression algorithm LZW for compressing the data in the GIF
+  format. Then \compus released this fresh image format out to the
+  general public
 
   But at the time they released it, they and the rest of the world had
   no idea that Unisys was pursuing a patent for the LZW compression
   algorithm. And once Unisys had gained the patent and informed the
-  rest of the world of this, the GIF format had already been released
-  \cite{roelofs09:_histor_portab_networ_graph_png_format}!
+  rest of the world of this, the GIF format had already been released.
 
   But it wasn't until 1993 that Unisys seriously started pursuing
   companies that were selling software using the LZW algorithm. And
@@ -41,22 +42,20 @@
   finally came to an agreement: all companies writing software that
   creates or reads GIF images will have to purchase a license from
   Unisys for using the LZW algorithm
-  \cite{roelofs09:_histor_portab_networ_graph_png_format,caie:_sad}.
 
-  This of course caused an uproar in the graphics developer community
-  at the time. Some of these upset developers formed a group that
-  would develop a new, \textit{free} graphics format that would replace
-  GIF. This new graphics format was PNG, which we shall discuss in
-  chapter \ref{cha:png}
-  \cite{roelofs09:_histor_portab_networ_graph_png_format,caie:_sad}.
+  This, of course, caused an uproar in the graphics developer
+  community at the time. Some of these upset developers formed a group
+  that would develop a new, \textit{free} graphics format that would
+  serve as a better replacement to GIF. This new graphics format was
+  PNG, which we shall discuss in chapter \ref{cha:pang}.
 
-  \subsection{Freedom at last!}
+  \subsection{Freedom}
 
   But since 2006 all LZW related patents have expired. Software
   developers are in other words finally free to use the LZW algorithm
   just as they please without having to request a license for doing so
-  from Unisys. And this also means that the GIF format is finally free
-  from the shackles of Unisys. \cite{caie:_sad}.
+  from Unisys. And this also meant that the GIF format was finally
+  free from the shackles of Unisys.
 
   \section{Introduction to the GIF format}
 
@@ -871,6 +870,3 @@
     \label{fig:gif-grammar}
   \end{figure}
 
-  \printbibliography[heading=subbibliography]
-
-\end{refsection}

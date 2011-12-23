@@ -5,25 +5,34 @@
 \chapter{LZW}
 \label{cha:lzw}
 
-\begin{refsection}
-
-  In this chapter, we will discuss the data compression algorithm LZW
-  as it is described in
-  \cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}. We
-  will first discuss the history behind the algorithm, then the
-  compression algorithm itself, after this we will describe the
-  decompression algorithm and in the end we will discuss the
-  efficiency and compression ratio of this algorithm.
+In this chapter, we will discuss the data compression algorithm LZW as
+it is defined and described in
+\cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}. We
+will first discuss the history behind the algorithm, then the
+compression algorithm itself, after this we will describe the
+decompression algorithm and in the end we will discuss the efficiency
+and compression ratio of this algorithm.
 
 \section{The History Behind}
 
-LZW stands for \textbf{L}empel, \textbf{Z}iv, \textbf{W}elch. Lempel
-and Ziv are the two researches who developed the two compression
-methods \lzseven and \lzeight. These two algorithms became the basis
-for many other LZ variations, including LZMA \cite{palov11}, LZW and
-LZSS \cite{Salomon:2004:DCC}. LZW is the variation that we will
-discuss in this chapter. And finally, Welch is the guy the developed
-this LZ variation.
+In the years 1977 to 1978 the two Israeli researchers published two
+papers; in the first of these papers \cite{Ziv77auniversal}, they
+described the algorithm that came to be known as LZ77(sometimes also
+known as LZ1) and the second of these papers \cite{Ziv78compressionof}
+they defined the algorithm LZ78(also known as LZ2). LZ obviously
+stands for their initials,\textbf{L}empel and \textbf{Z}iv, and the
+number is the years in which the algorithm was published. These two
+methods started the family of compression algorithms that is today
+known as the \textit{dictionary methods}\index{ḑictionary methods}
+\cite{Salomon:2004:DCC,roelofs99:_png,winters:_us_paten_adapt}.
+
+Examples of algorithms in the family of dictionary methods are LZMA
+\cite{palov11}, LZW and LZSS \cite{Salomon:2004:DCC}. LZW is the
+method that we will discuss in this chapter. It was invented by Terry
+Welch during his research at Sperry and was based on the LZ78
+method. He published the algorithm in \cite{welch85:_u}, which is
+going to be the main source of reference for this entire
+chapter. \cite{roelofs99:_png}
 
 \section{Description of the Compression algorithm}
 \label{sec:lzw-comp-desc}
@@ -924,8 +933,3 @@ enough to actually make use of the extra bits the larger code sizes
 added.
 
 \FloatBarrier
-
-\printbibliography[heading=subbibliography]
-
-\end{refsection}
-

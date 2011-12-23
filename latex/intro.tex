@@ -1,5 +1,75 @@
 
-\chapter{Introduction}
+\chapter{Introduction and Background}
+
+\section{Introduction}
+
+One day a couple of years ago, I accidentally opened an executable
+file(.exe) on my computer in a text editor. In front of my eyes, I saw
+an absolutely incomprehensible mess of characters and numbers that no
+matter how much you examined it, you could see no structure in the
+chaos. This event really got me thinking about one thing: how exactly
+are all the data stored in the computer actually stored?
+
+A couple of months after this, I learned about the concept of a hex
+dump.A hex dump is a hexadecimal representation of the data in a
+file. It was at this point I finally realized something that should
+have been obvious to me: since the language that the computer talks in
+is just a bunch of ones and zeroes, then obviously all the data stored
+in a computer is also just a bunch of ones and zeroes. And
+furthermore, saying that a computer speaks in ones and zeroes, is just
+another way of saying that it speaks in \textit{numbers}. Since I have
+always been very much fascinated by mathematics, this got me even more
+interested in how data is stored in a computer.
+
+Ever since I came upon this realization, I very often started to make
+hexdumps of the files on the computer and start examining their
+contents, and trying to figure out exactly how they work. But I
+quickly realize that doing this would require great knowledge of how
+different kinds of data worked, something which I did not yet have.
+
+Every kind of way of storing a kind of data is called a \textit{file
+  format}. How these formats are structured is almost always defined
+in their respective specifications. But alas, reading these documents
+often required the reader already being knowledgeable in the kinds of
+data that the formats stores to begin with.
+
+So I realized that it would require a great ammount of research in
+order to truly understand how image formats work. In the summer of
+2011, s small part was spent trying to understand how image of and
+sound formats work. It was very much fun learning how these kinds of
+formats work, but at the same time I realized that time was running
+out, and that I needed to quickly come up with an idea of what kinds
+school project I should do for the next term.
+
+And then it suddenly struck me: exploring how file formats work would
+be a great idea for a school project! But since image formats are very
+complex and often require a great of ammount research in order to be
+understood, I realized that I needed to limit myself to one specific
+area of image formats, in order to make the project more manageable.
+
+In the end, image formats seemed to be the most manageable choice and
+that is how this text came to be.
+
+\section{Background}
+
+Designing an image format is not as easy it seems to be; first of all,
+you need decide in how flexible you want your format to be, that is,
+how many different kind of color storage you want your format to
+support. And second, you need to decide on what compression scheme to
+use. Compression schemes are for making sure that the image doesn't
+take up as much space as it usually would. If images were never
+compressed, they would up way too much space and we would be unable
+store but a few on our harddrives. The method used does not only have
+to be efficient, it has to be fast. The restoration of the compressed
+data to its original form has to be fast.???
+
+There are other miscellaneous things image formats are often expected
+to support. Some kind of gamma suppot for example??
+
+Another useful thing are checksums. A checksum doesn't necessaly have
+to be sum, but it has to be computed from the numerical color data to
+be one. Checksums are very useful for veryfying that the image is not
+corrupt and that it is in it's original form.
 
 \section{Sample source code}
 

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+/* FIXME: Check the output of basn3p04.png in ./png and netpbm. Fix it. */
+
 void dumpPNG(FILE * in, FILE * out)
 {
     PNG_Image image;
@@ -30,8 +32,18 @@ void freePNG_Image(PNG_Image image)
     if(image.pixelDimensions != NULL)
         free(image.pixelDimensions);
 
+    if(image.transparency != NULL){
+        freeDataList(image.transparency->transparentIndices, 1);
+        free(image.transparency);
+    }
+
     freeDataList(image.textDataList,1);
     freeDataList(image.colorData,1);
+
+    if(image.palette != NULL){
+        freeDataList(*image.palette,1);
+        free(image.palette);
+    }
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -43,7 +55,6 @@ PNG_Image getEmptyPNG_Image(void)
 {
     PNG_Image image;
 
-    image.palette = NULL;
     image.profile = NULL;
     image.chromaticities = NULL;
     image.imageGamma = NULL;
@@ -53,6 +64,8 @@ PNG_Image getEmptyPNG_Image(void)
     image.imageHistogram = NULL;
     image.pixelDimensions = NULL;
     image.timeStamp = NULL;
+    image.transparency = NULL;
+    image.palette = NULL;
 
     image.textDataList = getNewDataList(freeTextualData, copyByte);
 
@@ -91,9 +104,14 @@ PNG_Image loadPNG(FILE * in)
 
         if(isChunkType(chunk, IEND))
             break;
+
+        else if(isChunkType(chunk, PLTE)){
+            image.palette = loadPalette(stream);
+        }
+
         else if(isChunkType(chunk, IDAT)){
 
-            /* Load rest of idats. */
+            /* Load the rest of the idat chunk, if there are any.. */
 
             image.colorData = loadColorData(chunk.data, image.header);
 
@@ -111,6 +129,9 @@ PNG_Image loadPNG(FILE * in)
 
         else if(isChunkType(chunk, bKGD))
             image.backgroundColor = loadBackgroundColor(image.header, stream);
+
+        else if(isChunkType(chunk, tRNS))
+            image.transparency = loadTransparency(image.header, stream);
 
         else if(isChunkType(chunk, tEXt))
             addToDataList(
@@ -152,11 +173,13 @@ void writePNG(PNG_Image image, FILE * out)
     writeImageGamma(image.imageGamma, out);
     writePixelDimensions(image.pixelDimensions, out);
     writeTimeStamp(image.timeStamp, out);
-    writeBackgroundColor(image.header, image.backgroundColor, out);
+    writeBackgroundColor(image, image.backgroundColor, out);
 
     writeTextDataList(image.textDataList, out);
 
-    writeColorData(image.colorData, image.header, out);
+    writePalette(image, out);
+
+    writeColorData(image, out);
 }
 
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
@@ -458,6 +481,8 @@ Color * loadBackgroundColor(ImageHeader header, DataStream stream)
 
     */
 
+    /* REDUNDANT CODE.*/
+
     if(header.colorType == GREYSCALE_COLOR){
 
         backgroundColor->greyscale = read16BitsNumber(&stream);
@@ -465,6 +490,7 @@ Color * loadBackgroundColor(ImageHeader header, DataStream stream)
     } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
 
         backgroundColor->greyscaleAlpha.greyscale = read16BitsNumber(&stream);
+        backgroundColor->greyscaleAlpha.alpha = read16BitsNumber(&stream);
 
         backgroundColor->greyscaleAlpha.alpha =
             getMaximumChannelValue(header);
@@ -483,33 +509,52 @@ INT32 getMaximumChannelValue(ImageHeader header)
 
 
 void writeBackgroundColor(
-    ImageHeader header,
+    PNG_Image image,
     Color * backgroundColor,
     FILE * out)
 {
     if(backgroundColor != NULL){
         fprintf(out,"Background color: ");
-        writeColor(header,*backgroundColor, out);
+        writeColor(image,*backgroundColor, out);
         fprintf(out,"\n");
     }
 }
 
-void writeColor(ImageHeader header,
+void writeColor(PNG_Image image,
                 Color color,
                 FILE * out)
 {
+    Color indexedColor;
+    BYTE alpha;
 
-    if(header.colorType == GREYSCALE_COLOR){
+    verbosePrint("colorType:%d\n", image.header.colorType);
 
-        fprintf(out, "(%d)",color.greyscale);
+    if(image.header.colorType == GREYSCALE_COLOR){
+
+        if(image.transparency != NULL){
+
+            if(image.transparency->color.greyscale == color.greyscale)
+                fprintf(out, "(transparent)");
+            else
+                fprintf(out, "(%d)",color.greyscale);
+
+
+        } else
+            fprintf(out, "(%d)",color.greyscale);
     }
 
-    else if(header.colorType == GREYSCALE_ALPHA_COLOR){
+    else if(image.header.colorType == GREYSCALE_ALPHA_COLOR){
 
         fprintf(out, "(%d,%d)",color.greyscaleAlpha.greyscale,color.greyscaleAlpha.alpha);
     }
 
-    else if(header.colorType == TRUECOLOR_COLOR){
+    else if(image.header.colorType == TRUECOLOR_COLOR){
+
+        if(image.transparency != NULL){
+            printf("To be implemented, bitch.\n");
+            exit(1);
+        }
+
 
         fprintf(out, "(%d,%d,%d)",
                 color.rgb.R,
@@ -518,13 +563,38 @@ void writeColor(ImageHeader header,
 
     }
 
-    else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
+    else if(image.header.colorType == TRUECOLOR_ALPHA_COLOR){
 
         fprintf(out, "(%d,%d,%d,%d)",
                 color.rgba.R,
                 color.rgba.G,
                 color.rgba.B,
-		color.rgba.A);
+                color.rgba.A);
+    }
+
+    else if(image.header.colorType == INDEXED_COLOR){
+
+        indexedColor = *(Color *)image.palette->list[color.index];
+
+        if(image.transparency != NULL){
+
+            /* If the color is not there, it is 255 by default? check png spec*/
+            alpha = *(BYTE*)image.transparency->transparentIndices.list[color.index];
+
+            fprintf(out, "(%d,%d,%d,%d)",
+                    indexedColor.rgb.R,
+                    indexedColor.rgb.G,
+                    indexedColor.rgb.B,
+                    alpha);
+
+
+        } else {
+            fprintf(out, "(%d,%d,%d)",
+                    indexedColor.rgb.R,
+                    indexedColor.rgb.G,
+                    indexedColor.rgb.B);
+
+        }
     }
 
 }
@@ -594,11 +664,11 @@ void writeTextDataList(DataList textDataList, FILE * out)
 DataList loadColorData(DataList data, ImageHeader header)
 {
     int former;
-    DataList decompressed, unfiltered, colorData;
-
+    DataList decompressed, unfiltered, colorData, interlaced;
+    size_t i;
     former = verbose;
 
-    verbose = 1;
+    verbose = 0;
     decompressed = ZLIB_Decompress(data);
     verbose = former;
 
@@ -613,25 +683,45 @@ DataList loadColorData(DataList data, ImageHeader header)
     colorData = splitUpColorData( unfiltered, header);
     freeDataList(unfiltered, 1);
 
+    0,0,0,0,0,0,0,0,
+    0,0,0,0,0,1,0,0,
+    0,0,0,0,0,0,0,0,
+    3,2,0,0,0,0,0,0,
+    0,3,3,2,0,2,2,2,
+    0,0,0,0,0,0,0,0,
+    2,3,3,0,0,0,0,0,
+    2,1,3,0,2,2,2,0,
+
+    if(header.interlaceMethod == ADAM7_INTERLACE){
+	for(i = 0; i < colorData.count; ++i){
+		verbosePrint("%d,", (*(Color *)colorData.list[i]).index);
+	    }
+        interlaced = uninterlace(colorData, header);
+        freeDataList(colorData, 0); /* 0 ? */
+    }
+
     /* Split up the bytes in pixels. . */
-    return colorData;
+    if(header.interlaceMethod == ADAM7_INTERLACE)
+        return interlaced;
+    else
+        return colorData;
 }
 
-void writeColorData(DataList colorData, ImageHeader header, FILE * out)
+void writeColorData(PNG_Image image, FILE * out)
 {
     size_t row,col;
 
     fprintf(out,"Color Data:\n");
 
-    for(row = 0; row < header.height; ++row){
+    for(row = 0; row < image.header.height; ++row){
 
-        for(col = 0; col < header.width; ++col){
+        for(col = 0; col < image.header.width; ++col){
 
-	    writeColor(header,*(Color *)colorData.list[row * header.width + col], out);
-	    fprintf(out,",");
+            writeColor(image,*(Color *)image.colorData.list[row * image.header.width + col], out);
+            fprintf(out,",");
         }
 
-	fprintf(out,"\n\n");
+        fprintf(out,"\n\n");
     }
 
 }
@@ -825,6 +915,8 @@ DataList splitUpColorData(DataList data, ImageHeader header)
 
     colorData = getNewDataList(NULL, NULL);
 
+    /* Read the row by row. Because what happens when the row 1 1 1 of length 3 is processed in a single byte? */
+
     colorStream = getNewDataStream(data, PNG_ENDIAN);
 
     for(i = 0; i < (header.width * header.height); ++i){
@@ -834,20 +926,27 @@ DataList splitUpColorData(DataList data, ImageHeader header)
         }
 
         else if(header.colorType == INDEXED_COLOR){
-
+            color.index = readNextChannel(&colorStream, header);
         }
 
         else if(header.colorType == TRUECOLOR_COLOR){
-	    color.rgb.R = readNextChannel(&colorStream, header);
-	    color.rgb.G = readNextChannel(&colorStream, header);
-	    color.rgb.B = readNextChannel(&colorStream, header);
+            color.rgb.R = readNextChannel(&colorStream, header);
+            color.rgb.G = readNextChannel(&colorStream, header);
+            color.rgb.B = readNextChannel(&colorStream, header);
         }
 
         else if(header.colorType == GREYSCALE_ALPHA_COLOR){
 
+            color.greyscaleAlpha.greyscale = readNextChannel(&colorStream, header);
+            color.greyscaleAlpha.alpha = readNextChannel(&colorStream, header);
         }
 
         else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
+
+            color.rgba.R = readNextChannel(&colorStream, header);
+            color.rgba.G = readNextChannel(&colorStream, header);
+            color.rgba.B = readNextChannel(&colorStream, header);
+            color.rgba.A = readNextChannel(&colorStream, header);
 
         }
 
@@ -864,10 +963,10 @@ unsigned long readNextChannel(DataStream * stream, ImageHeader header)
     if(header.bitDepth == 8){
         channel = readStreamByte(stream);
     } else if(header.bitDepth == 16){
-	channel = read16BitsNumber(stream);
+        channel = read16BitsNumber(stream);
     } else if(header.bitDepth < 8)
-	/* Handle bit depths 1, 2 and 4*/
-	channel = readBits(stream, header.bitDepth);
+        /* Handle bit depths 1, 2 and 4*/
+        channel = readBits(stream, header.bitDepth);
 
 
     return channel;
@@ -880,4 +979,136 @@ void addColorToDataList(DataList * list, Color color)
     cp = malloc(sizeof(Color));
     *cp = color;
     addToDataList(list, cp);
+}
+
+DataList * loadPalette(DataStream stream)
+{
+    DataList * palette;
+    size_t size;
+    size_t i;
+    Color color;
+
+    palette = malloc(sizeof(DataList));
+    *palette = getNewDataList(NULL, NULL);
+
+    verbosePrint("size:%d\n",stream.list.count);
+    size = stream.list.count / 3;
+
+    verbosePrint("loading palette\n");
+    for(i = 0; i < size; ++i){
+        color.rgb.R = readStreamByte(&stream);
+        color.rgb.G = readStreamByte(&stream);
+        color.rgb.B = readStreamByte(&stream);
+
+        verbosePrint("(%d,%d,%d)\n",
+                     color.rgb.R,
+                     color.rgb.G,
+                     color.rgb.B);
+
+        addColorToDataList(palette, color);
+    }
+
+    return palette;
+}
+
+void writePalette(PNG_Image image,FILE * out)
+{
+    image = image;
+    out = out;
+/*    size_t i;
+
+      if(image.palette.count > 0){
+      fprintf(out, "Image Palette:\n");
+
+      for(i = 0; i < image.palette.count; ++i){
+      fprintf(out, "%ld:", i);
+      writeColor(image, *(Color *)image.palette.list[i], out);
+      fprintf(out, "\n");
+      }
+
+      fprintf(out, "\n");
+
+      }*/
+}
+
+Transparency * loadTransparency(ImageHeader header, DataStream stream)
+{
+    Transparency * transparency;
+    size_t i;
+
+    transparency = malloc(sizeof(Transparency));
+
+    if(header.colorType == GREYSCALE_COLOR)
+        transparency->color.greyscale = read16BitsNumber(&stream);
+    else if(header.colorType == TRUECOLOR_COLOR){
+        /* TODO: Proper order? */
+        transparency->color.rgb.R = read16BitsNumber(&stream);
+        transparency->color.rgb.B = read16BitsNumber(&stream);
+        transparency->color.rgb.G = read16BitsNumber(&stream);
+    } else if(header.colorType == INDEXED_COLOR){
+
+
+        transparency->transparentIndices = getNewDataList(NULL, NULL);
+
+        for(i = 0; i < stream.list.count; ++i){
+            addByteToDataList(
+                &transparency->transparentIndices,
+                readStreamByte(&stream)
+                );
+        }
+
+    }
+
+    return transparency;
+}
+
+DataList uninterlace(DataList data, ImageHeader header)
+{
+    DataList images[7];
+    DataList uninterlaced;
+    size_t i,j;
+    size_t col,row;
+    void * color;
+
+    int adam7[8][8] = {
+        {1, 6, 4, 6, 2, 6, 4, 6},
+        {7, 7, 7, 7, 7, 7, 7, 7},
+        {5, 6, 5, 6, 5, 6, 5, 6},
+        {7, 7, 7, 7, 7, 7, 7, 7},
+        {3, 6, 4, 6, 3, 6, 4, 6},
+        {7, 7, 7, 7, 7, 7, 7, 7},
+        {5, 6, 5, 6, 5, 6, 5, 6},
+        {7, 7, 7, 7, 7, 7, 7, 7},
+    };
+
+    for(i = 0; i < 7; ++i){
+        /* copy functions needed here.*/
+        images[i] = getNewDataList(NULL, NULL);
+    }
+
+    for(row = 0; row < header.height; ++row)
+        for(col = 0; col < header.width; ++col){
+
+	    verbosePrint("row:%d,col=%d, i = %d\n", row,col, header.width * row + col);
+            color = data.list[header.width * row + col];
+
+            addToDataList(&images[adam7[row % 8][col % 8] - 1], color);
+        }
+
+    uninterlaced = getNewDataList(NULL, NULL);
+
+    for(i = 0; i < 7; ++i){
+
+	for(j = 0; j < images[i].count; ++j){
+	    verbosePrint("i:%d,j=%d\n", i, j);
+
+	    addToDataList(&uninterlaced, images[i].list[j]);
+	}
+    }
+
+    for(i = 0; i < 7; ++i){
+        freeDataList(images[i], 0);
+    }
+
+    return uninterlaced;
 }
