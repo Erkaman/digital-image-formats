@@ -10,20 +10,19 @@ int main(void)
 
     data = getNewDataList(NULL, NULL);
 
-    addByteToDataList(&data, 0xd3);
-    addByteToDataList(&data, 0xb0);
+    addByteToDataList(&data, 0x57);
 
-    printf("%lx\n", crc(data ,0x0b));
+    printf("%lx\n", crc(data ,0x107));
 
     freeDataList(data, 1);
 
     return 0;
 }
 
+/* Take single byte, from paint less explanation, then calculate the checksum. */
 unsigned long crc(DataList data, unsigned long poly)
 {
-
-    unsigned long reminder = 0xFFFF; /* standard initial value in CRC32 */
+    unsigned long reminder = 0; /* standard initial value in CRC32 */
     unsigned long i;
     unsigned long bit;
     BYTE b;
@@ -38,5 +37,5 @@ unsigned long crc(DataList data, unsigned long poly)
                 reminder >>= 1;
     }
 
-    return reminder ^ 0xFFFF;
+    return reminder;
 }

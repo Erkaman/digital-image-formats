@@ -2,8 +2,67 @@
   \bibliography{project.bib}
 \end{comment}
 
-\chapter{CRC}
+\chapter{cyclic redundancy check}
 \label{cha:crc}
+
+\section{Checksums and error detection}
+
+Say I have an image file on my computer. Now imagine that I fiddled
+around with this file and changed a couple of numbers in the file
+using a hex editor. Now the file is no longer the orginal image, but
+how would the computer \textit{know} this? Well, say before saving
+this image the program producing this image calculated a number using
+all of the numberical data in the image. This number is then added at
+the end of the image data. Now, say I try to open this image in any
+arbirtary image viewer. As a quick way of checking the validity of the
+image to viewer recalculates this number on the numberical data and
+compares it with the data at the end of the image. And since I fiddled
+with the image, the same number would no longer be produced and in
+this way the computer can see that the image data is invalid.
+
+But how would the computer calculate this sum? Imagine, for the sake
+of example, that the image data consists of the simple byte numbers
+$32,12,241$. That sort of number can we calculate from these? A simply
+answer would simply be to sum
+them\cite{Williams_1993_crc_painless}. Then the computed sum modulo
+256 is added as another byte at the end of the data: $32 + 12 + 241
+\bmod 256 = 29$. Modulo 256 is necessary, because otherwise the sum
+wouldn't be able to fit in a 8-bit byte. But this has one big flaw:
+what if changed these numbers to $33,11,241$, because this sum also
+calculates to 29: $(33 + 11 + 241) \bmod = 29$. The main problem this
+method is thus that since there are only $256$ for a byte, there is a
+only $\frac{1}{2^8} = \frac{1}{256}$ change that an error would go undetected.
+
+We could of course make this sum stronger by giving it a less change
+of failure. Instead of storing the numbers in 8-bit bytes we could for
+example store them in larger 16-bit numbers. This would mean a much
+lower probability of failure to detect errors, namely
+$\frac{1}{2^{16}} =
+\frac{1}{65536}$ \cite{Williams_1993_crc_painless}.
+
+Both of these to methods are algorithms known as
+\textit{checksums}\index{checksum}. A checksum is this simply a value
+calculated from a sequence of numerical data that is used to verify
+that it is error free. They are more generally known as
+error-detection codes. There is also a class of codes known as
+detection codes known as \textit{error-correction} codes. These codes
+on the other are other for fixing error in corrupted data
+\cite{tanenbaum2003computernetworks_crc}. The reader who wants to know
+more on error-correction codes is reffered to \cite{tanenbaum2003computernetworks_crc,1950hamming_codes_crc_parity}.
+
+Error detection are used for many different things. As their name
+implies, rarely are they used for correcting errors, but only for
+detecting them. They are for example useful for checking if a file has
+not been corrupted, also known as verification as is discussed in
+\cite{Nelson:1992:FVU:135011.135017_crc32}. They are also used when
+transmitting data over through copper wire and optical fibers. Since
+the error rates of these are so low, it is more efficent to
+retransmitt corruptet messages over these than error correting
+them\cite{tanenbaum2003computernetworks_crc}.
+
+\section{CRC}
+
+One very well used way of detecting
 
 \cite{Ritter:1986:GCM:12647.12648}
 % Polynomials are classified by their highest non-zero digit (or place) which is termed the degree of the polynomial
@@ -20,3 +79,9 @@
 % good crc implemenation explanation: SAR-PR-2006-05_.pdf
 \cite{Stigge06reversingcrc}
 
+% crc original paper
+\cite{Peterson_Brown_1961_crc_orig}
+
+\cite{gailly96:_zlib_compr_data_format_specif}
+
+\cite{1950hamming_codes_crc_parity}
