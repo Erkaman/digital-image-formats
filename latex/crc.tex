@@ -62,26 +62,237 @@ them\cite{tanenbaum2003computernetworks_crc}.
 
 \section{CRC}
 
-One very well used way of detecting
+One very well used method of computing error-detection codes are
+Cyclic Redundancy Checks, or simply CRCs, which is what we'll call them from now
+on \cite{tanenbaum2003computernetworks_crc}
 
-\cite{Ritter:1986:GCM:12647.12648}
-% Polynomials are classified by their highest non-zero digit (or place) which is termed the degree of the polynomial
+The following description of CRC is based on the references \cite{Ritter:1986:GCM:12647.12648,Williams_1993_crc_painless,tanenbaum2003computernetworks_crc,Nelson:1992:FVU:135011.135017_crc32,Stigge06reversingcrc}
 
-% painless guide crc
-\cite{Williams_1993_crc_painless}
+I won't dicuss the mathematisc behind CRC in depth nor
+rigorously in this text, so I refer the reader who want such to a
+discussion to the texts
+\cite{Stigge06reversingcrc,tanenbaum2003computernetworks_crc,Peterson_Brown_1961_crc_orig,press2007numerical_recipes,Ramabadran:1988:TCC:623224.623360_crc_tutorial}. I
+especially refer such a reader to \cite{Peterson_Brown_1961_crc_orig}
+where the concept of a CRC was first invented.
 
-% networks
-\cite{tanenbaum2003computernetworks_crc}
+Now I am to explain how CRCs are calculated. To understand the
+following explanation the reader is required to understand long
+polynomial division only on a basic level and the modulo operation.
 
-% good reasons to use crc32 by mark nelson:
-\cite{Nelson:1992:FVU:135011.135017_crc32}
+As I stated before, the data in a file could just be seen as a
+sequence of bytes. The number $200$ is for example the binary number
+$1100 1000$. However, in the world CRCs this binary string is instead
+seen as a polynomial. For $1100 1000$ this polynomial is $1x^7 + 1x^6
++ 0x^5 + 0x^4 + 1x^3 + 0x^2 + 0x^1 + 0x^0 = x^7 + x^6 + x^3$. And in
+the same way, the number $7$ is seen as the polynomial $x^2 + x^1 +
+x^0 = x^2 + x + 1$. From now on, the width of such a polynomial is
+defined as the value of the highest exponent. So for the number $110$,
+represented by the polynomial $x^2 + x^1$, the width of this numbers
+is $2$, and not $3$. The width could also be said to be the value
+position of the highest toggled bit, if the lowest bit is considered
+to be at position $0$. Stated more generally, this means that the
+polynomial
 
-% good crc implemenation explanation: SAR-PR-2006-05_.pdf
-\cite{Stigge06reversingcrc}
+\begin{equation*}
+  P(x) = a_wx^w + a_{w-1}x^{w-1} + \dots + a_{1}x + a_{0}
+  % this correct?
+\end{equation*}
 
-% crc original paper
-\cite{Peterson_Brown_1961_crc_orig}
+has a width of $w$, despite the fact that the numbers is $w + 1$ bits
+long.
+
+But in the world CRCs yet another property holds for these bytes: all
+operations are done under modulo 2. To demonstrate this property, I'll
+introduce the concepts of addition and subtraction in the world of CRC
+polynomials. And to make things simpler and cleaner, I'll write these
+polynomials as binary numbers, meaning that the polynomial $P(x)$ of
+width $w$
+
+\begin{equation*}
+  P(x) = a_wx^w + a_{w-1}x^{w-1} + \dots + a_{1}x + a_{0}
+\end{equation*}
+
+is from the now on represented by the binary number
+
+\begin{equation*}
+  P(x) = a_wa_{w-1} \dots a_{1} a_{0}
+\end{equation*}
+
+To give an example, the polynomial $x^3 + x^1 + 1$ is from now on written as
+$1011$.
+
+So first off we describe addition. While the ordinary relationships $0 + 0 =
+0$, $1 + 0 = 0 + 1 = 0$ hold true in the world is CRC polynomials, the
+relationship $1 + 1 = 2$ does not. Why? This is because in this form
+of polynomial addition is done modulo 2, and $(1 + 1) \bmod 2 = 2
+\bmod 2 = 0$. So this makes sense. Put another way, this means there
+is no carry. So means that the sum of the numbers $1100$ and $0101$
+is:
+
+\begin{center}
+  \begin{tabular}{lr}
+    & 1100  \\
+    $+$ & 0101 \\
+    \hline
+    & 1001 \\
+  \end{tabular}
+\end{center}
+
+As summary of the addition operation is given in table
+\ref{tab:poly-add}. Studying this table and the above addition you may
+discover something very interesting: polynomial addition under modulo
+2 the same thing as the bitwise XOR operation, $\BitXor$. This
+discovery is something that will make implementing CRCs essentially
+trivial. The reader is reccomended to, as an exercise, add the three
+numbers $1100$, $1001$ and $1111$() together.
+
+\begin{table}
+  \centering
+  \begin{tabular}{|c|c|c|}
+    \hline
+    \textbf{+} & \textbf{0} & \textbf{1} \\ \hline
+    \textbf{0} & 0 & 1 \\ \hline
+    \textbf{1} & 1 & 0 \\ \hline
+  \end{tabular}
+  \caption{Polynomial addition under modulo 2}
+  \label{tab:poly-add}
+\end{table}
+
+Polynomial subtraction is defined in the exact same thing as
+polynomial addition: $1 - 1 = 0 - 0 = 0$, $1 - 0 = $ and $0 - 1 =
+0$. The relation expression holds true, because in modulo 2 negative
+numbers wrap around.
+
+And so it turns that polynomial subtraction and addition and bitwise
+XOR are all equal operations. This also means that the only possible
+numbers to be used within this system are $0$ and $1$. So for any
+polynomial
+
+\begin{equation*}
+  P(x) = a_wx^w + a_{w-1}x^{w-1} + \dots + a_{1}x + a_{0}
+\end{equation*}
+
+It holds true for any number $n$ in the range of $0 \le n \le w$ that
+$a_n \in \{0,1\}$. And this all makes sense, since remember, we are
+just dealing with binary data that we have rewritten on a polynomial
+form. It is left as an exercise to the reader to solve for the
+polynomial $a$ in the following equation $1001 - a = 1110 +
+1001$(0111).
+
+Next up is polynomial multiplication, which is defined just like normal
+multiplication, with the exception that it uses polynomial addition in
+the last step. (show multiplication of $1011$ and $0011$)
+
+Having defined addition, subtraction, and multiplication, we can now
+easily define division. Here is the division of the number $10011$ by
+$10$:
+
+\begin{equation*}
+  \newcommand{\divline}{\cline{3-8}}
+  \renewcommand\arraystretch{1.2}
+  \begin{array}{*2r @{\hskip\arraycolsep}c@{\hskip\arraycolsep} *5r}
+    &    &&    &  1 &  0 & 0 & 1\\
+    \divline
+    1 & 0 &\big)& 1 &  0 & 0 & 1 & 1 \\
+    &&& 1 & 0 \\
+
+    \divline
+
+    &&&& 0 & 0 \\
+    &&&& 0 & 0 \\
+
+    \divline
+
+    &&&&& 0 & 1 \\
+    &&&&& 0 & 0 \\
+
+    \divline
+
+    &&&&&& 1 & 1 \\
+    &&&&&& 1 & 0 \\
+
+    \divline
+
+    &&&&&&& 1 \\
+
+  \end{array}
+\end{equation*}
+
+The end result is $1001$, with a remainder of $1$.
+
+The polynomial division operation is especially interesting for our
+purposes because it turns out that the CRC computation is simply a
+polynomial division!
+
+To compute the CRC of some binary data, first you need to consider all
+the data a long sequence of ones and zeroes, meaning that the numbers
+16($10000$) and 2($10$) would form the sequence $1000010$. This
+sequence of binary digits will now have to be divided by something
+known as the generator polynomial. The generator polynomial is the key
+parameter is the key part of the algorithm and there are many
+different to chose from. the only requirement that a this polynomial
+has to satisfy, is that it has to begin and end with a $1$. So $1001$
+is a valid generator polynomial, while $0001$ is not because while it
+end with a $1$ it doesn't begin with a $1$. In this example we'll use
+the artibrariyl chosen polynomial $1101$, but keep in mind that we
+could have chosen any arbitrary polynomial to use a divisor. To the
+sequence we want to compute the CRC of we now add $w=3$ zeroes at the
+end of it, where $w$ is the width of generator polynomial. $w=3$, so
+the sequence we want to operate on becomes $1000010000$. Having done
+all of the prepartory steps, we now perform the final calculation: the
+changed sequence of binary digits is by the generator polynomial, and
+the reminder of this division is the checksum:
+
+% \begin{equation*}
+%   \newcommand{\divline}{\cline{3-8}}
+%   \renewcommand\arraystretch{1.2}
+%   \begin{array}{*4r @{\hskip\arraycolsep}c@{\hskip\arraycolsep} *10r}
+%     % &&&&  1 &  0 & 0 & 1\\
+%     % \divline
+%     1 & 1 & 0 & 1 &\big)& 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+%     \divline
+%   \end{array}
+% \end{equation*}
+
+To get a feel for this new technique, I'd advise the reader to now
+experiment with choosing generator polynomials and performing
+polynonial division. One last thing, the generator polynomial has to
+begin and end with a $1$.
+
+Now we are to discuss how to implement this polynomial division in
+code. But first I will note that there are many different kinds of
+generator polynomials. But we'll only discuss polynomial generators
+whores width is dividable by 8, since these much easier to implement
+polnominal division for, and because they're are much more used than
+generator polynomials whose width is not dividable by $8$.
+
+Authors like to write out generator polynomials as hexadecimal
+numbers. So for example the polynominal $x^3 + x^2 + x^0$ is
+represented by the hexadecimal number \hex{d}($=1101$). However, since
+the last highest and lowest bits are mandatory, and could therefore be
+seen as implicit, several authors like to leave them out. The authors
+of \cite{Koopman04cyclicredundancy_embedded_networks} would for
+example have written that polynomial as \hex{c}($=1100$), because they
+considered the lowest bit implicit; on the other hand, the people
+behind \cite{press2007numerical_recipes} would have written it as
+\hex{9}($=1010$), and they did it because they first reversed the
+polynominal and then left out the lowest bit!
+
+considered the highest bit implicit! I will in this text refrain from
+using such confusing conventions and will \textit{always} write out
+all the coefficients of the generator polynomials in their hexadecimal
+and binary representations.
+
+% checm make table and compare crcs also, check tutorial on crc
+% espically
+
+
+% CRC32 has a reminder of, but it's length is 33 bits. It's highest term
+% is x^32, thus it has 33 bits(down to x^0, 0-32) and since its width is
+% 32 the reminder has a size of 32.
+
+% it is necessary that the last bit 1, becuasee otherwhise polynomial
+% division wouldn't be possible.
 
 \cite{gailly96:_zlib_compr_data_format_specif}
 
-\cite{1950hamming_codes_crc_parity}
