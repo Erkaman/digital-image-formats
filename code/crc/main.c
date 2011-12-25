@@ -10,9 +10,9 @@ int main(void)
 
     data = getNewDataList(NULL, NULL);
 
-    addByteToDataList(&data, 0x57);
+    addByteToDataList(&data, 0x0e);
 
-    printf("Final CRC: %lx\n", crc8(data, 0x107, 0));
+    printf("Final CRC: %lx\n", crc8(data, 0x07, 0));
 
     freeDataList(data, 1);
 
@@ -80,7 +80,7 @@ unsigned long crc8(DataList list, unsigned long polynom, unsigned long initial)
 
             if (result & 0x80){
 		printf("if branch\n");
-                result = (result) ^ polynom;
+                result = (result << 1) ^ polynom;
 	    }
             else{
 		printf("else branch\n");
@@ -90,6 +90,6 @@ unsigned long crc8(DataList list, unsigned long polynom, unsigned long initial)
 	    printf("result: %lx\n", result);
         }
     }
-
+    
     return result & 0xff;
 }

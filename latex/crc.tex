@@ -48,7 +48,7 @@ error-detection codes. There is also a class of codes known as
 detection codes known as \textit{error-correction} codes. These codes
 on the other are other for fixing error in corrupted data
 \cite{tanenbaum2003computernetworks_crc}. The reader who wants to know
-more on error-correction codes is reffered to \cite{tanenbaum2003computernetworks_crc,1950hamming_codes_crc_parity}.
+more on error-correction codes is reffered to \cite{tanenbaum2003computernetworks_crc,1950hamming_codes_crc_parity,hamming1986coding_information_theory_detection_correction}.
 
 Error detection are used for many different things. As their name
 implies, rarely are they used for correcting errors, but only for
@@ -74,6 +74,8 @@ discussion to the texts
 \cite{Stigge06reversingcrc,tanenbaum2003computernetworks_crc,Peterson_Brown_1961_crc_orig,press2007numerical_recipes,Ramabadran:1988:TCC:623224.623360_crc_tutorial}. I
 especially refer such a reader to \cite{Peterson_Brown_1961_crc_orig}
 where the concept of a CRC was first invented.
+
+\subsection{Polynomial arithmetic}
 
 Now I am to explain how CRCs are calculated. To understand the
 following explanation the reader is required to understand long
@@ -220,6 +222,8 @@ $10$:
 
 The end result is $1001$, with a remainder of $1$.
 
+\subsection{The CRC computation}
+
 The polynomial division operation is especially interesting for our
 purposes because it turns out that the CRC computation is simply a
 polynomial division!
@@ -233,33 +237,60 @@ parameter is the key part of the algorithm and there are many
 different to chose from. the only requirement that a this polynomial
 has to satisfy, is that it has to begin and end with a $1$. So $1001$
 is a valid generator polynomial, while $0001$ is not because while it
-end with a $1$ it doesn't begin with a $1$. In this example we'll use
-the artibrariyl chosen polynomial $1101$, but keep in mind that we
-could have chosen any arbitrary polynomial to use a divisor. To the
-sequence we want to compute the CRC of we now add $w=3$ zeroes at the
-end of it, where $w$ is the width of generator polynomial. $w=3$, so
-the sequence we want to operate on becomes $1000010000$. Having done
-all of the prepartory steps, we now perform the final calculation: the
-changed sequence of binary digits is by the generator polynomial, and
-the reminder of this division is the checksum:
+end with a $1$ it doesn't begin with a $1$. I was unfortunately unable
+to understand why this is, but an explanation, which I didn't
+understand, can be found in \cite{press2007numerical_recipes}.
 
-% \begin{equation*}
-%   \newcommand{\divline}{\cline{3-8}}
-%   \renewcommand\arraystretch{1.2}
-%   \begin{array}{*4r @{\hskip\arraycolsep}c@{\hskip\arraycolsep} *10r}
-%     % &&&&  1 &  0 & 0 & 1\\
-%     % \divline
-%     1 & 1 & 0 & 1 &\big)& 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
-%     \divline
-%   \end{array}
-% \end{equation*}
+In this example we'll use the artibrariyl chosen polynomial $1101$,
+but keep in mind that we could have chosen any arbitrary polynomial to
+use a divisor. To the sequence we want to compute the CRC of we now
+add $w=3$ zeroes at the end of it, where $w$ is the width of generator
+polynomial. $w=3$, so the sequence we want to operate on becomes
+$1000010000$. Having done all of the prepartory steps, we now perform
+the final calculation: the changed sequence of binary digits is by the
+generator polynomial, and the reminder of this division is the
+checksum:
 
-To get a feel for this new technique, I'd advise the reader to now
-experiment with choosing generator polynomials and performing
-polynonial division. One last thing, the generator polynomial has to
-begin and end with a $1$.
+\begin{equation*}
+  \newcommand{\divline}{\cline{5-15}}
+  \renewcommand\arraystretch{1.2}
+  \begin{array}{*4r @{\hskip\arraycolsep}c@{\hskip\arraycolsep} *{10}r}
+    &&&&&&&& 1 & 1 & 1 & 0 & 1 & 1 & 1 \\
 
-Now we are to discuss how to implement this polynomial division in
+    \divline
+    1 & 1 & 0 & 1 & \big) & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+    &&&&& 1 & 1 & 0 & 1 && \\
+    \divline
+    &&&&&& 1 & 0 & 1 & 0 \\
+    &&&&&& 1 & 1 & 0 & 1 \\
+    \divline
+    &&&&&&& 1 & 1 & 1 & 1 \\
+    &&&&&&& 1 & 1 & 0 & 1 \\
+    \divline
+    &&&&&&&& 0 & 1 & 0 & 0 \\
+    &&&&&&&& 0 & 0 & 0 & 0 \\
+    \divline
+    &&&&&&&&& 1 & 0 & 0 & 0 \\
+    &&&&&&&&& 1 & 1 & 0 & 1 \\
+    \divline
+    &&&&&&&&&& 1 & 0 & 1 & 0 \\
+    &&&&&&&&&& 1 & 1 & 0 & 1 \\
+    \divline
+    &&&&&&&&&&& 1 & 1 & 1 & 0 \\
+    &&&&&&&&&&& 1 & 1 & 0 & 1 \\
+    \divline
+    &&&&&&&&&&& 0 & 0 & 1 & 1 \\
+  \end{array}
+\end{equation*}
+
+And in this case the checksum is $0011$, or simply $3$. To get a feel
+for this new technique, I'd advise the reader to now experiment with
+choosing generator polynomials and performing polynonial division. One
+last thing, the generator polynomial has to begin and end with a $1$.
+
+\subsection{Generator Polynomials}
+
+Next we are to discuss how to implement this polynomial division in
 code. But first I will note that there are many different kinds of
 generator polynomials. But we'll only discuss polynomial generators
 whores width is dividable by 8, since these much easier to implement
@@ -267,24 +298,163 @@ polnominal division for, and because they're are much more used than
 generator polynomials whose width is not dividable by $8$.
 
 Authors like to write out generator polynomials as hexadecimal
-numbers. So for example the polynominal $x^3 + x^2 + x^0$ is
-represented by the hexadecimal number \hex{d}($=1101$). However, since
-the last highest and lowest bits are mandatory, and could therefore be
-seen as implicit, several authors like to leave them out. The authors
-of \cite{Koopman04cyclicredundancy_embedded_networks} would for
-example have written that polynomial as \hex{c}($=1100$), because they
-considered the lowest bit implicit; on the other hand, the people
-behind \cite{press2007numerical_recipes} would have written it as
-\hex{9}($=1010$), and they did it because they first reversed the
-polynominal and then left out the lowest bit!
+numbers. In this text the polynominal $x^3 + x^2 + x^0$ is represented
+by the hexadecimal number \hex{d}($=1101$). However, since the last
+highest and lowest bits are mandatory, and could therefore be seen as
+implicit, several authors like to leave them out. The authors of
+\cite{press2007numerical_recipes} would for example have written that
+polynomial as \hex{5}($=0101$), because they considered the highest
+bit($x^{3}$) implicit; on the other hand, the people behind
+\cite{Koopman04cyclicredundancy_embedded_networks} would have written
+it as \hex{9}($=101$), because they first considered the lowest bit
+implicit, and to make things even more confusing they decided to leave
+out the first bit altogether on the binary numbers and start the
+number from the second bit! And some authors, like
+\cite{boutel:_png_portab_networ_graph_specif_version12}, like to start
+the bits from the highest bit to the lowest, also leaving out the
+highest bit,meaning the aforementioned polynominal would be
+represented like \hex{3}($=0011$)
 
-considered the highest bit implicit! I will in this text refrain from
-using such confusing conventions and will \textit{always} write out
-all the coefficients of the generator polynomials in their hexadecimal
-and binary representations.
+I will in this text refrain from using such confusing conventions and
+will \textit{always} write out all the coefficients of the generator
+polynomials in their hexadecimal and binary representations.
 
-% checm make table and compare crcs also, check tutorial on crc
-% espically
+In table \cite{Koopman04cyclicredundancy_embedded_networks} some of
+the most common generator polynomials are listed. The table uses the
+references
+\cite{cook:_catal_crc,Koopman04cyclicredundancy_embedded_networks,press2007numerical_recipes,Ramabadran:1988:TCC:623224.623360_crc_tutorial,boutel:_png_portab_networ_graph_specif_version12}.Keep
+in mind that these are but a few of the many different CRC
+polynomials. The reader should as an exercise convert these
+hexadecimal numbers to polynomials.
+
+note that the names of these polynomials tend to be very inconsistent
+and that you should be very careful when guessing what polynominals
+authors in actuality refer to. According to \cite{cook:_catal_crc}
+there are around 16 different CRC-16 polynomials! To give you an
+example of how confusing this can be,in
+\cite{inc05:_epctm_radio_frequen_ident_protoc} the polynomial $x^{16}
++ x^{12} + x^5 + 1$ is refered to as CRC-16, but this name is awfully
+vauge since, as stated before, there are around 16 such
+polynomials. And furthermore, the polynomial they wanted to refer to
+was, according to
+\cite{cook:_catal_crc,Koopman04cyclicredundancy_embedded_networks},
+CCITT-16.
+
+\begin{table}
+  \centering
+  \begin{tabular}{llll}
+    \toprule
+    Name & Width & Polynomial(hex) \\
+    \midrule
+    CRC-16-CCITT & 16 & \hex{11021} \\ %& $x^{16} + x^{12} + x^5 + 1$ \\
+
+    CRC-32(also known as  Ethernet by
+    \cite{Ramabadran:1988:TCC:623224.623360_crc_tutorial}) & 32 &
+    \hex{84C11DB7} \\ %$x^{32} + x^{26} + x^{23} + x^{22} + x^{16} +
+                      %x^{12} + x^{11} + \\x^{10} +    x^{8} + x^{7} +
+                      %x^{5} + x^{4} + x^2 + x + 1$ \\
+
+    CRC-8/ITU & 8 & \hex{107}\\
+
+    \bottomrule
+  \end{tabular}
+  \caption{Table of common CRC polynomial generators.}
+  \label{tab:common-poly-gens}
+\end{table}
+
+\subsection{Implementation}
+
+Now we will finally discuss how to implement the CRC computation in
+code.
+
+First note that it is very common to implement the CRC algorithm in
+pure hardware. But we will in this text only discuss the software
+implementation and readers who want to know how to implement it in
+hardware are referred to
+\cite{Ramabadran:1988:TCC:623224.623360_crc_tutorial,Ritter:1986:GCM:12647.12648}.
+
+Let is first consider how to implement to CRC algorithm with the
+generator polynomial CRC-8 from table \ref{tab:common-poly-gens}. So
+we are going to consider for the polynomial $x^8 + x^2 + x + 1$. Let's
+say we want to calculate the checksum for the numbers $14,2$ using
+this generator polynomial. This means we want to calculate the
+polynominal for the binary sequence $???$, right? We put concatenated the
+binary sequences of the two numbers, then added ($w=$)8 zeroes add the
+end of the sequence, forming it. What follows is a start of the CRC
+computation:
+
+\begin{equation*}
+  \newcommand{\divline}{\cline{10-26}}
+  \renewcommand\arraystretch{1.2}
+  \begin{array}{*9r @{\hskip\arraycolsep}c@{\hskip\arraycolsep}
+      *{16}r}
+    &&&&&&&&&&&&&&&&&& 0 & 0 & 0 & 0 \\
+    \divline
+    1 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & \big) & 0 & 0 & 0 & 0 & 1 & 1 &
+    1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+
+    &&&&&&&&&& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+    \divline
+
+    &&&&&&&&&&& 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 &&&&&& \\
+    &&&&&&&&&&& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &&&&&& \\
+    \divline
+
+    &&&&&&&&&&&& 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 &&&&& \\
+    &&&&&&&&&&&& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &&&&& \\
+    \divline
+
+    &&&&&&&&&&&&& 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 &&&& \\
+    &&&&&&&&&&&&& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &&&& \\
+    \divline
+
+    &&&&&&&&&&&&&& 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 &&& \\
+    &&&&&&&&&&&&&& 1 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 &&& \\
+    \divline
+
+    &&&&&&&&&&&&&&& 1 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 && \\
+    &&&&&&&&&
+    \dots & \dots & \dots & \dots & \dots & \dots & \dots & \dots & \\
+    \divline
+    00101010
+  \end{array}
+\end{equation*}
+
+% http://miscel.dk/MiscEl/CRCcalculations.html#CRC8
+
+The entire computation is not shown because it is so long. Now please
+inspect algorithm \ref{alg:crc8-comp}. It implements polynomial
+division for generator polynomials of width 8.
+
+\begin{algorithm}[H]
+  \caption{The CRC computation for CRCs of width 8.}
+  \label{alg:crc8-comp}
+  \begin{algorithmic}[1]
+    \Require  $bytes$ is an array containing all the bytes to compute the
+    checksum for, and $len$ is the length of this zero indexed array
+    and $G(x)$ is the generator polynomial.
+
+    \Function{crc8}{$bytes, len, G(x)$}
+    \Let{result}{$0$}
+
+    \ForEach{$byte$}{$bytes$}
+      \Let{$result$}{$result \BitXor byte$}
+
+      \Repeatn{$n$}
+        \If{$result \BitAnd \hex{80}$}
+          \Let{$result$}{$(result \ShiftLeft 1) \BitXor G(x)$}
+        \Else
+          \Let{$result$}{$result \ShiftLeft 1$}
+        \EndIf
+      \EndRepeatn
+
+    \EndForEach
+
+    \State \textbf{return}  $result \BitAnd \hex{FF}$
+    \EndFunction
+
+  \end{algorithmic}
+\end{algorithm}
 
 
 % CRC32 has a reminder of, but it's length is 33 bits. It's highest term
@@ -295,4 +465,3 @@ and binary representations.
 % division wouldn't be possible.
 
 \cite{gailly96:_zlib_compr_data_format_specif}
-
