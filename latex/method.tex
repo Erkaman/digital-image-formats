@@ -5,31 +5,59 @@
 \chapter{Method}
 \label{cha:method}
 
-To explore how image formats works, I decided to write small programs
-that would analyse the numbers that digital images consists. My
-programmign language of choice for this was C and the compiler I used
-to compile the programs was GCC. For doing the memory debugging that
-is often necesary in C programming, I used
-Valgrind\footnote{\url{http://valgrind.org/}}, which at times was a real
-life saver. For tests and atomization tasks Bash and Python were
+\section{Tools and sources}
+
+To explore how the aforementioned image formats works, I decided to
+write small programs that would analyze the numbers that a image
+format consists. My programming language of choice for this was C and
+the compiler I used to compile the programs was
+GCC\footnote{\url{http://gcc.gnu.org/}}. For doing the memory debugging that
+is often necessary in C programming, I used
+Valgrind\footnote{\url{http://valgrind.org/}}, which at times was a
+real life saver. For tests and automatizing tasks Bash and Python were
 used. My editor of choice was \textsc{Emacs}.
 
-This document was created and typeset using
-\LaTeXe{}\footnote{\url{http://www.latex-project.org/}}. \textsc{Biber} was
-used for reference management. \textit{MakeIndex} was used for index
-management. The typesetting software used was pdf\LaTeX{}.
+To get the theory necessary to write these programs, I had to read
+several books on the subjects. I also read a lot of articles.
 
-The text is typeset in the fonts Charter(main Body text) and
-\texttt{inconsolata}(monospace). The \LaTeX{} source files were edited
-in \textsc{Emacs} with the AUC\TeX{} package.
+Also, this document was created and typeset using
+\LaTeXe{}\footnote{\url{http://www.latex-project.org/}}. I did not
+chose to use word, because I, as a programmer, prefer \LaTeX{} over
+words for several reasons:
 
-The following \LaTeX{} packages were used to produce this document:
+\begin{itemize}
+\item The default output o \LaTeX{} is almost always typographically
+  superior to that of word.
+\item It makes references management a breeze.
+\item It makes creating indexes trivial.
+\end{itemize}
+
+The text is typeset in the fonts Charter(main body text) and
+\texttt{inconsolata}(links). The \LaTeX{} source files were edited in
+\textsc{Emacs} with the AUC\TeX{} package.
+
+And the following \LaTeX{} packages were used to produce this document:
 
 \texttt{inconsolata}, fontenc, mathdesign, charter, microtype,
 makeidx, xcolor, float, verbatim, siunitx, todonotes, placeins,
 booktabs, graphicx, caption, biblatex, \tikzname, \pgf , algorithms,
 algorithmicx, fancyhdr, tocbibind.
 
-All the source files in the project were managed with \textsc{Git},
-the version control system.
+All the source files in the of this entire project were managed with
+\textsc{Git}, the version control system.
 
+\section{Sample source code}
+
+All the source code of the programs that I wrote during this project
+can be found at the following address:
+\url{https://github.com/Erkaman/digital-image-formats}. In the
+\path|code| directory the C source files for the programs that
+analyzes image formats can be found. The \path|log| directory contains
+the log book for this project. And in the \path|latex| directory you
+can find the \LaTeX{} source files that were used to produce this
+document. But if you don't understand anything of the contents of the
+\path|code| folder, don't worry, because this text was written to
+explain the concepts behind image formats as intuitively as possible,
+without you having to understand the source files for the programs
+that demonstrates them. But it is of course not a bad thing if you do
+understand the source files in the \path|code| directory.

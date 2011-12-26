@@ -1,10 +1,79 @@
-\chapter{Pseudocode Conventions}
+\begin{comment}
+  \bibliography{project.bib}
+\end{comment}
+
+\chapter{Conventions}
 \label{cha:pseudocode-convent}
+
+In this chapter, We'll establish all the conventions and glossary that
+will be used throughout his text.
+
+\section{Glossary}
+
+\begin{description}
+\item[Binary numbers] A binary number is simply a numbers of base
+  2. For example, the number $139$ is represented by the binary number
+  $1000\ 1011$ since $1 \cdot  2^7 + 0 \cdot 2^6 + 0 \cdot 2^5 + 0
+  \cdot 2^4 + 1 \cdot 2^3 + 0 \cdot 2^2 + 1 \cdot 2^1 + 1 \cdot 2^0 =
+  2^7 + 2^3 + 2^1 + 2^0 = 128 + 8 + 2 + 1 = 139 $
+
+\item[bit] The separate digits of a binary numbers are reffered to as
+  bits. If we say that a bit is \textit{toggled}, we mean that the bit has a
+  value of $1$. Controversially, if a bit has the value $0$, then we say
+  that the bit is \textit{cleared}.
+\item[Highest and Lowest bit] In the numbers $1100$ the highest bit is
+  $1$ and has a value of $2^3 = 8$. In order words, the highest bit is
+  the bit that has the highest digit position in the number. The
+  lowest bit in this number is $0$ and has a value of $0$. We may also
+  can the highest bit the 4:th bit, and the lowest bit the 1:st
+  bit. So we start counting the bits from one to the position of the
+  highest bit.
+\item[Most sigficant bit] Alternative name for the highest bit.
+\item[Least sigficant bit] Alternative name for the lowest bit.
+
+\item[Byte] A byte is simply a binary number with 8 digits/bits. The
+  max value of a byte is $2^8 - 1 = 255$ and there are $2^8$ different
+  values that a byte can have. We'll often be referring to bytes
+  throughout the entire text, since, as we shall soon see, an image
+  represented digitally is just a sequence of bytes.
+
+
+\item[Hexadecimal] We'll also be using the hexadecimal numeral system
+  in this text a lot. Here the numbers 0-9 are given their usual
+  values, while the letters A-F are assigned to the values 10-15, so
+  that the hexadecimal number \hex{D3} has the value $13 \cdot 16^1 + 3 \cdot
+  16^0 ? 13 \cdot 16 + 3 = 208 + 3 =  211$.
+
+\end{description}
+
+\begin{itemize}
+
+\item What is the values of the 2:nd, 4:th and highest bits in the
+  number $01001$?
+
+  1, 1 and 0
+
+\item If a binary number has $n$ bits, then what is its the maximum value?
+
+   $2^n - 1$
+
+\item Given a number $x$ find a function $c(x)$ that will count the
+  number of bits in that number if it is rewritten on binary form. So
+  that, for example, the following holds true: $c(23) = 4$
+
+  (Hint: use the binary logarithm, $\log_2$)
+
+  Now find the another such a function for the hexadecimal system, and
+  then find it for \textit{any} number is base n.
+
+\end{itemize}
+
+\section{Pseudocode Conventions}
 
 Instead of showing code examples in some random programming language,
 we'll be using pseudocode to explain the algorithms in this book. This
 will keep things as general as possible, and not force the reader into
-knowing a specific programming language before reading this book.
+knowing a specific programming language before reading this text.
 
 The pseudocode will be kept as traditional as possible, but we'll
 still need to establish several conventions for it, which is what
@@ -15,14 +84,14 @@ we're going to do for the rest of the chapter.
 \begin{description}
 \item[Keywords] will use \textbf{bold} font.
 \item[functions] will be signified by \textbf{uppercase}.
-\item[variables] can noticed by their $cursive$ style.
+\item[variables] can noticed by their $cursive\ slant$.
 \end{description}
 
 \section{Boolean Operators}
 \label{sec:boolean-operators}
 
-To signify the boolean operators we'll be using the following
-symbols:
+To signify the boolean operators, or logical operators as we'll often
+also refer them to, we'll be using the following symbols:
 
 \begin{description}
 \item[$\NOT$] logical \textit{not}
@@ -30,29 +99,179 @@ symbols:
 \item[$\OR$] logical \textit{or}
 \end{description}
 
-Boolean truth is represented by \True{}, and falseness is represented by
-\False{}.
+Logical truth is represented by \True, and falseness is represented by
+\False.
+
+The truth tables for these operators are presented in the
+tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
+\ref{tab:log-not-table}.
+
+\begin{table}
+  \centering
+    \begin{tabular}{|c|c|c|}
+      \hline
+      $\mathbf{\AND}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+      $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\False}$ \\ \hline
+      $\mathbf{\True}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+    \end{tabular}
+  \caption{Logical and truth table.}
+  \label{tab:log-and-table}
+\end{table}
+
+\begin{table}
+  \centering
+    \begin{tabular}{|c|c|c|}
+      \hline
+      $\mathbf{\OR}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+      $\mathbf{\False}$ & $\False$ & $\True$ \\ \hline
+      $\mathbf{\True}$ & $\True$ & $\True$ \\ \hline
+    \end{tabular}
+  \caption{Logical or truth table.}
+  \label{tab:log-or-table}
+\end{table}
+
+\begin{table}
+  \centering
+    \begin{tabular}{|c|c|}
+      \hline
+      $\mathbf{p}$ & $\mathbf{\NOT p}$ \\ \hline
+      $\True$ & $\False$ \\ \hline
+      $\False$ & $\True$ \\ \hline
+    \end{tabular}
+  \caption{Logical not truth table.}
+  \label{tab:log-not-table}
+\end{table}
 
 \section{Bitwise Operators}
 \label{sec:bitwise-operators}
 
-If you are not familiar with bitwise operators, I highly recommend you
-to look up them and study them on your own, because we are going to
-use them a lot in this book. We will be using the notation used in \C
-to represent them in pseudocode:
+\subsection{Notation}
+
+Bitwise operators will be used a lot in this text. We will be using
+the notation used in \C{}\cite{kernighan1988c} to represent them in pseudocode:
 
 \begin{description}
-\item[$\BitNeg$] Bitwise \textit{NOT}
 \item[$\BitAnd$] Bitwise \textit{AND}
 \item[$\BitOr$] Bitwise \textit{OR}
 \item[$\BitXor$] Bitwise \textit{XOR}
+\item[$\BitNeg$] Bitwise \textit{NOT}
 \item[$\ShiftLeft$] Left bit shift
 \item[$\ShiftRight$] Right bit shift
 \end{description}
 
 Notice that we are using $\BitXor$ for representing bitwise
-\textit{XOR} rather than the traditional \C notation. This is due to
+\textit{XOR} rather than the traditional \C notation $\AND$. This is due to
 the fact that we'd otherwise confuse it with logical and, $\AND$.
+
+What follows is a short introduction to the very simple bitwise
+operators.
+
+\subsection{Bitwise and, or and xor}
+
+Bitwise AND is just like logical and, except for the fact that it
+operates on the on the bit level. Let us for demonstrative consider
+the result of the expression $23 \BitAnd 12$. Since the bitwise and
+operates on the bit level we first must convert the two numbers to the
+binary numeral system: $10110 \BitAnd 01100$. Then the calculation of
+now simply done like this:
+
+\begin{center}
+  \begin{tabular}{lr}
+    & 10110  \\
+    $\BitAnd$ & 01100 \\
+    \hline
+    & 00100 \\
+  \end{tabular}
+\end{center}
+
+And so the result of the operation $23 \BitAnd 12$ is $00100=4$. So as
+you can see, the bitwise operators do boolean logic on the bit level
+by considering a toggled bit as truth, and a cleared as falsity
+
+Bitwise OR is in the same way logical OR on the bit level. Let us
+perform the former calculation using bitwise or instead of and to
+illustrate the difference between them:
+
+\begin{center}
+  \begin{tabular}{lr}
+             & 10110  \\
+    $\BitOr$ & 01100 \\
+    \hline
+    & 11110 \\
+  \end{tabular}
+\end{center}
+
+\begin{table}
+  \centering
+    \begin{tabular}{|c|c|c|}
+      \hline
+      $\mathbf{\BitXor}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+      $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+      $\mathbf{\True}$ & $\mathbf{\True}$ & $\mathbf{\False}$ \\ \hline
+    \end{tabular}
+  \caption{Logical exclusive or truth table.}
+  \label{tab:log-exlusive-or-table}
+\end{table}
+
+Bitwise xor on the other hand, operates on bits by using logical
+exclusive or. The truth table of logical exclusive or is given in
+table \ref{tab:log-exlusive-or-table}. Using this table, we can easily
+understand how bitwise xor works and calculate the value of the
+expression $10110 \BitXor 01100$:
+
+\begin{center}
+  \begin{tabular}{lr}
+              & 10110  \\
+    $\BitXor$ & 01100 \\
+    \hline
+              & 11010 \\
+  \end{tabular}
+\end{center}
+
+\subsection{Bitwise not}
+
+When dealing with bitwise not, it is important that we consider the
+size of the variable that we are storing the number we are to perform
+the operation on. If for example $b=10$ and $b$ the variable $b$ is of
+type byte, then $b=0000\ 1010$. What bitwise not does is that it
+inverts the number, so that at all toggled bits gets cleared, and all
+cleared bits gets toggled, so $\BitNeg b = 1111\ 0101$. Now you should
+see it was important that we considered the size of the variable data
+type. Since if for example the variable $b$ instead was of size 4-bits
+isntead of 8-bits, then $b = 1010$ and  the end result of the operation $\BitNeg$
+would have been $0101$ instead of $1111\ 0101$.
+
+\subsection{Bitwise shifting}
+
+It is also in bitwise shifting important that we consider the size of
+the numbers. Bitwise shifting is actually very simple. All the $b
+\ShiftLeft n$ really does, is that it shifts the bit pattern in the
+variable $b$ $n$ steps to the right. For the 4-bit number $0011$, this
+means that $0011 \ShiftLeft 2 = 1100$. But what would have happened if
+the bit pattern was shifted 3 steps. Then one bit is going fall of the
+bit boundary and disappear, so $0011 \ShiftLeft 3 = 1000$.
+
+And bitwise left shifting works in pretty much the same way, expect
+for the fact that the bit shifting are done to the right instead of
+left, so that for the 4-bit number $0110 \ShiftRight 2 = 0001$.
+
+\begin{enumerate}
+\item For the byte $b = 1101\ 0001$ calculate the value of the
+  expression
+
+  \begin{equation*}
+    ((b \ShiftLeft 3) \BitAnd b) \BitXor ((b \ShiftRight 4) \BitOr b)
+  \end{equation*}
+
+\item Using the bitwise operators, try to devise an algorithm for
+  counting the numbers of toggled bits in a byte. It should for
+  example give the end result of $4$ for the numbers $147 = 1001\
+  0011$
+
+\item Try to make an algorithm for reversing the bits in a byte. For
+  $32=0000\ 0111$ is should give the result $224 = 1110\ 0000$.
+
+\end{enumerate}
 
 \section{Functions}
 \label{sec:pseudocode}
@@ -105,7 +324,7 @@ control structure called \algorithmicrepeat\index{Repeat Control
   \label{alg:repeat}
   \begin{algorithmic}[1]
     \Repeatn{$n$}
-      \State $actions$ \Comment{$actions$ are repeated $n$ times.}
+    \State $actions$ \Comment{$actions$ are repeated $n$ times.}
     \EndRepeatn
   \end{algorithmic}
 \end{algorithm}

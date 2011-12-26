@@ -7,36 +7,46 @@
 \section{Purpose}
 
 So the main purpose of this project is to explore how image formats
-works, and how color is stored digitally. But only image formats
-itself is a very broad area. Finding out exactly how many image
-formats there are in existence is a very difficult, almost impossible,
-task. Imagemagick, a software project whose main purpose could be said
-to be to support the maximum amount if image formats, supports well
-over 100 formats \cite{11:imagemagick_home}. And according to the open
-directory project there are at this time about 170 different graphics
-formats \cite{10:opendirectory_data_formats}.
+works. But only the area of image formats itself is a very broad area
+since there are \textit{so many} of them. Finding out exactly how
+many image formats there are in existence is a very difficult, almost
+impossible, task. Imagemagick, an open source project whose main purpose
+could be said to be to support the maximum amount of image formats,
+supports well over 100 formats \cite{11:imagemagick_home}. And
+according to the open directory project there are at this time about
+170 different graphics formats \cite{10:opendirectory_data_formats}.
 
-So there are many different kinds of image formats. Furthermore, image
-formats are divided into two main categories: vector and raster
-graphics. Vector graphics consists of lines, rectangles and other
-geometric forms, while raster graphics could be described as a grid of
+Indeed there are many different kinds of image formats. And
+furthermore, image formats are generally divided into two main
+categories: \textit{vector and raster
+graphics}\cite{murray1996encyclopedia,roelofs99:_png}. Vector graphics
+consists of only lines, rectangles, polygons and other geometric
+forms, while raster graphics could be described as a grid, matrix, of
 colors. Neither of these is really simpler than the other, but in this
-project I will focus only on raster graphics. Some author like,
-\cite{murray1996encyclopedia}, also refer raster graphics to as bitmap
-images \cite{murray1996encyclopedia,roelofs99:_png}.
+project I will focus only on raster graphics. Some author like
+\cite{murray1996encyclopedia} also refer raster graphics to as \textit{bitmap
+images}.
 
-There are many different raster formats. But they are all of them very
-similar to each and tend to have the same general structure. So to
-make the project more manageable, I will only focus on three specific
-raster formats known as TGA, GIF and PNG. I will cover these formats
-in the order of their complexity, that is, first I will cover TGA,
-then GIF and last PNG, which is significantly more complex than the
-former two.
+There are also many different raster formats. Yet all of them are very
+similar in their overall structure. So to make the project even more
+manageable, I will only cover the three specific raster formats that
+are known as TGA, GIF and PNG. The simplest formats will be covered
+first, and the most the complex format will be covered last, meaning
+that I will explore TGA, then GIF and last PNG, which is significantly
+more complex than the former two.
 
-By exploring these 3 formats, I will have gotten a quite good view of
-how image formats are built and structured. So this is main purpose of
-this project:
+By exploring these 3 formats, I will have gotten a good general view
+of how image formats are built and structured. So this is main purpose
+of this project:
 
 \begin{quote}
-  To explore how images are \textit{numerically} represented.
+  To explore how images are \textit{numerically} represented and
+  structured digitally.
 \end{quote}
+
+And by this I mean that this project will go on until I have fully
+understood the specifications of the 3 image formats TGA, GIF and PNG,
+which by no means is as easy as it sounds, considering how terse these
+documents are. By understanding the specification of an image format
+you have fully understood that image format. Then you know about and
+understand every single image of that format.
