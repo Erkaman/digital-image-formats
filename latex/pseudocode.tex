@@ -46,27 +46,25 @@ will be used throughout his text.
 
 \end{description}
 
-\begin{itemize}
-
-\item What is the values of the 2:nd, 4:th and highest bits in the
+\begin{Exercise}[label={bits-value-order}]
+  What is the values of the 2:nd, 4:th and highest bits in the
   number $01001$?
+\end{Exercise}
 
-  1, 1 and 0
+\begin{Exercise}[label={n-bits-max-val}]
+  If a binary number has $n$ bits, then what is its the maximum value?
+\end{Exercise}
 
-\item If a binary number has $n$ bits, then what is its the maximum value?
-
-   $2^n - 1$
-
-\item Given a number $x$ find a function $c(x)$ that will count the
-  number of bits in that number if it is rewritten on binary form. So
-  that, for example, the following holds true: $c(23) = 4$
+\begin{Exercise}[label={count-bits-func}]
+  Given a number $x$ find a function $c(x)$ that will count the number
+  of bits in that number if it is rewritten on binary form. So that,
+  for example, the following holds true: $c(23) = 4$
 
   (Hint: use the binary logarithm, $\log_2$)
 
   Now find the another such a function for the hexadecimal system, and
   then find it for \textit{any} number is base n.
-
-\end{itemize}
+\end{Exercise}
 
 \section{Pseudocode Conventions}
 
@@ -108,36 +106,36 @@ tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
 
 \begin{table}
   \centering
-    \begin{tabular}{|c|c|c|}
-      \hline
-      $\mathbf{\AND}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-      $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\False}$ \\ \hline
-      $\mathbf{\True}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-    \end{tabular}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    $\mathbf{\AND}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+    $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\False}$ \\ \hline
+    $\mathbf{\True}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+  \end{tabular}
   \caption{Logical and truth table.}
   \label{tab:log-and-table}
 \end{table}
 
 \begin{table}
   \centering
-    \begin{tabular}{|c|c|c|}
-      \hline
-      $\mathbf{\OR}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-      $\mathbf{\False}$ & $\False$ & $\True$ \\ \hline
-      $\mathbf{\True}$ & $\True$ & $\True$ \\ \hline
-    \end{tabular}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    $\mathbf{\OR}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+    $\mathbf{\False}$ & $\False$ & $\True$ \\ \hline
+    $\mathbf{\True}$ & $\True$ & $\True$ \\ \hline
+  \end{tabular}
   \caption{Logical or truth table.}
   \label{tab:log-or-table}
 \end{table}
 
 \begin{table}
   \centering
-    \begin{tabular}{|c|c|}
-      \hline
-      $\mathbf{p}$ & $\mathbf{\NOT p}$ \\ \hline
-      $\True$ & $\False$ \\ \hline
-      $\False$ & $\True$ \\ \hline
-    \end{tabular}
+  \begin{tabular}{|c|c|}
+    \hline
+    $\mathbf{p}$ & $\mathbf{\NOT p}$ \\ \hline
+    $\True$ & $\False$ \\ \hline
+    $\False$ & $\True$ \\ \hline
+  \end{tabular}
   \caption{Logical not truth table.}
   \label{tab:log-not-table}
 \end{table}
@@ -194,7 +192,7 @@ illustrate the difference between them:
 
 \begin{center}
   \begin{tabular}{lr}
-             & 10110  \\
+    & 10110  \\
     $\BitOr$ & 01100 \\
     \hline
     & 11110 \\
@@ -203,12 +201,12 @@ illustrate the difference between them:
 
 \begin{table}
   \centering
-    \begin{tabular}{|c|c|c|}
-      \hline
-      $\mathbf{\BitXor}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-      $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-      $\mathbf{\True}$ & $\mathbf{\True}$ & $\mathbf{\False}$ \\ \hline
-    \end{tabular}
+  \begin{tabular}{|c|c|c|}
+    \hline
+    $\mathbf{\BitXor}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+    $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+    $\mathbf{\True}$ & $\mathbf{\True}$ & $\mathbf{\False}$ \\ \hline
+  \end{tabular}
   \caption{Logical exclusive or truth table.}
   \label{tab:log-exlusive-or-table}
 \end{table}
@@ -221,10 +219,10 @@ expression $10110 \BitXor 01100$:
 
 \begin{center}
   \begin{tabular}{lr}
-              & 10110  \\
+    & 10110  \\
     $\BitXor$ & 01100 \\
     \hline
-              & 11010 \\
+    & 11010 \\
   \end{tabular}
 \end{center}
 
@@ -341,3 +339,19 @@ algorithm \ref{alg:assign} is used.
     \Let{$var$}{$n$}
   \end{algorithmic}
 \end{algorithm}
+
+\begin{Answer}[ref={bits-value-order}]
+  $1$, $1$ and $0$
+\end{Answer}
+
+\begin{Answer}[ref={n-bits-max-val}]
+  $2^n - 1$
+\end{Answer}
+
+\begin{Answer}[ref={count-bits-func}]
+  $x(x) = log_2$
+
+  floor function?
+
+  Where $log_2 = log_{10} / log_{10}2$
+\end{Answer}

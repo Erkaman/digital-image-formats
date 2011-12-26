@@ -1,3 +1,6 @@
+\begin{comment}
+  \bibliography{project.bib}
+\end{comment}
 
 \chapter{Introduction and Background}
 
@@ -68,21 +71,125 @@ theory.
 
 \section{Background}
 
-Designing an image format is not as easy it seems to be; first of all,
-you need decide in how flexible you want your format to be, that is,
-how many different kind of color storage you want your format to
-support. And second, you need to decide on what compression scheme to
-use. Compression schemes are for making sure that the image doesn't
-take up as much space as it usually would. If images were never
-compressed, they would up way too much space and we would be unable
-store but a few on our harddrives. The method used does not only have
-to be efficient, it has to be fast. The restoration of the compressed
-data to its original form has to be fast.???
+The cover picture of this project was made to illustrate the main
+point of this project: the representation of images in a computer is
+just a list of numbers. The cover image is a very simplified model of
+all image formats are built and I will spend the rest of this section
+on explaining the numbers that this image consists of. I will here
+write a specifciation of the image format on the front page,that will
+from now on be known as IM, the \textit{IM}aginary image format; that
+is to say, it is a made up format that was designed for me for
+illustrative purposes.
 
-There are other miscellaneous things image formats are often expected
-to support. Some kind of gamma suppot for example??
+\subsection{Image Header}
 
-Another useful thing are checksums. A checksum doesn't necessaly have
-to be sum, but it has to be computed from the numerical color data to
-be one. Checksums are very useful for veryfying that the image is not
-corrupt and that it is in it's original form.
+The first gray section of the image is known as the image header of
+the image. Let us go through to parts of the header number by number:
+
+\subsubsection{Magic Numbers}
+
+The first two numbers are the two letters IM. Even letters are
+represented by numbers in a computer. How these letters are mapped to
+different numers is determined by the encoding of these letters. An
+encoding is basically a table that maps all the letters and
+miscellaneous symbols of the human language to respective numbers. One
+common encoding for is known as ASCII \cite{rfc20}, and in ASCII the
+letter I is represented by the number 73 and the letter I is mapped to
+the number 77. So if these letters where encoded in ASCII a better way
+to represent them would have been to use the numbers 73 and 77. But I
+did not do this because it is much easier for the reader to understand
+letters than numbers.
+
+Another reason why I used letters instead of number is that there are
+so many different encoding. ASCII only has support for english
+language character, and there are other encodign that ar designed to
+support all the symbols for all human languages, the most of example
+is Unicode\cite{allen2007unicode}. But since it would have been
+bothersome for the reader to guess the encoding, I prefered to simply
+use letters instead.
+
+So these two first numbers are known as magic numbers \index{magic
+  numbers}. At the beginning of every image file, there are a couple
+bytes called magic numbers that are common to all images of that
+type. They are sort like file name extensions, meaning that they help
+you identify the type of the file you are currently reading.
+
+\subsubsection{Measurements}
+
+And following the magic number is the width and the height of this
+image. In practically every image format this information is
+included.
+
+\subsubsection{Metadata}
+
+But images can not only contain image data. They can also contain
+something known as metadata. Metadata is simply data that describes
+the image data. It contains no data that is necessary to understand
+how the image data within image is represented, it rather gives
+informtion about things like:
+
+\begin{itemize}
+\item The program used to create the image
+\item A descriptive name for the image.
+\item The creator/producer of the image.
+\item The creation date of the image.
+\item The camera that was used to take the image.
+\end{itemize}
+
+One relatively well known method for embedding metadata about the
+camera used to take an image is known as
+Exif\cite{camera:_cipa_dc_trans_exchan}. But since Exif is a quite
+complex method for storing such data, we will not discuss it in this
+text. We will only be concerned in exploring how to extract simple
+metadata, like the creation date of the image and the producer of the
+image.
+
+\subsection{Color Palette}
+
+Color palettes \index{color palette} are also very common, but not all
+images out in the wild use them, but as good all image formats support
+them, hence why they are included in this imaginary format. A color
+palette is basically an array or list of colors that is to be used by
+the image. The colors themselves are represented numerically using a
+so called color model. Color models are something we will discus much
+in depth in chapter \ref{cha:color}. The numbers in the palette is the
+numbers that the color will be represented by in the color data. In
+reality, only the color data is stored in the palette, and no numbers
+are they given. They are only written to make the image easier to
+understand, and not something that is found in ordinary images.
+
+\subsection{The Color Data}
+
+Following the header and the optional color palette is the actual
+color data. Now let us talk about how the colors are stored as an
+image.
+
+An image is simply a grid of colors. As you can see on the front cover
+image, an image really only consists of a lot of colored
+squares. These squares as referred to as pixels
+\index{pixel}\cite{murray1996encyclopedia}.
+
+So as we can see from our sample image format, IM, the flower image
+is just a couple of colored pixels. But in this case a color palette
+is used. This means the image indexes the color palette like an
+array or list. So instead of the image containing its actual color,
+it in this case just contains a bunch of index numbers.
+
+If a color palette were not to be used in this case, the image would
+just contain a grid of raw colors. The color would in that case have
+represened like they were in the palette; that is, using a color
+model.
+
+\subsection{Done\dots?}
+
+But it's not really that simple. A majority of all image format have
+had some sort of compression applied to their color data. Compression
+is necessary because the raw color data usually tends to take up a lot
+of space. And performing the decompression of that image data is
+usually the most difficult part of understanding an image format. So
+most time of this text will be dedicated on understanding how these
+compression algorithms work. Compression algorithm is a major part of
+the area of \textit{information theory}, which will be the main topic
+of this text. To understand color models however, you will some
+knowledge of the area of \textit{color science}, which is what chapter
+\ref{cha:color} of this text will be dedicated to.
