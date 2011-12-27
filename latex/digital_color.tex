@@ -2,12 +2,37 @@
   \bibliography{project.bib}
 \end{comment}
 
-% http://www.w3.org/Conferences/WWW4/Papers/53/gq-gamut.html#fncol
-
 \chapter{Digital Color}
 \label{cha:color}
 
-\cite{niederst1999webdesign}
+% standard rgb color spaces.pdf for color spaces, values xy whitepoint
+
+% cotton color!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
+% important quote in section 1.2
+% mention rgb amd the color space that artists use a example of this.
+
+% http://www.w3.org/Conferences/WWW4/Papers/53/gq-gamut.html#fncol
+
+% file:///home/eric/Dropbox/freebooks/netghost.narod.ru/gff/graphics/book/ch02_01.htm
+
+% file:///home/eric/Dropbox/freebooks/netghost.narod.ru/gff/graphics/book/ch02_02.htm
+
+% Here, the extra bit is given to the green component, because the
+% human eye is more sensitive to green than it is to red and blue. The
+% color component order is arbitrary, and the order and interpretation
+% of the color components within a pixel value varies from format to
+% format. Thus, components of a 16-bit pixel value may be interpreted
+% as (G,B,R) just as readily as (R,G,B) and (B,R,G). Specifying RGB
+% colors in the sequence (R,G,B) has some appeal, because the colors
+% are arranged by electromagnetic frequency, establishing their order
+% in the physical spectrum.
+
+% file:///home/eric/Dropbox/freebooks/netghost.narod.ru/gff/graphics/book/ch02_03.htm
+
+% alpha%
+% file:///home/eric/Dropbox/freebooks/netghost.narod.ru/gff/graphics/book/ch02_04.htm
+
+%\cite{niederst1999webdesign}
 
 % useful glossary.
 % http://tigger.uic.edu/~hilbert/Glossary.html#Brightness
@@ -26,39 +51,104 @@
 
 % GREAT walkthough of the trichromatic color theory, the eye, and the
 % CIE color spaces.
-
-\cite{Cotton95colour}
-
-\section{Red, Blue and Green}
-\label{sec:color-models}
+%\cite{Cotton95colour}
 
 % encylopedia.
 % http://netghost.narod.ru/gff/graphics/book/ch02_02.htm
 
-\subsection{What Is Color?}
-\label{sec:what-color}
+% There are two theories of how color is represented: the theory of the
+% trichromacy of color and the opponent theory. This chapter deals with
+% both of these theories and then explains how these theories are
+% applied in the digital representation of color.
+
+As I stated in the introduction, raster graphics is going to be the
+main subject of this book. And images represented as raster graphics
+is simply a grid of colors. Therefore, in this chapter well discuss
+how these color are represented. First I'll discuss color in more
+scientific and biological perspective, then I'll explain how color is
+represented digitally and last I'll cover how to properly interpret
+and parse these numbers.
+
+\section{What is color?}
+
+\subsection{A biological sensation}
 
 \newcommand{\bluewave}{\ensuremath{\SI{400}{\nano\meter}}}
 
+Color is unlike temperature not a physical property we can assign
+things in the world. While it may seem easy for you to call a lamp
+red, you must also consider the color this lamp from the view of
+non-humans. Animals like dogs, squirrels and rabbits have a whole
+different perception of color than we do. In \cite{dog_color_vision}
+it was shown that dogs do indeed have a form color vision known as
+dichromatic color vision. And for a Deuteranopic person(red-green
+color blind person), it may be close to impossible to differentiate a
+red from a green lamp, while it is to you obvious that one lamp is red
+and the other is green
+\cite{thompson:ways_of_coloring,schanda97:_colorimetry}.
+
+To continue our temperate argument, I'll state that if dog and a human
+both walk into fire they're both going to get burned. But on the other
+hand, the color of the fire is going to be experienced differently by
+these to animals. This is because color not a physical property we can
+assign to objects but rather a \textit{biological
+  sensation}\cite{boutel:_png_portab_networ_graph_specif_version12}. A
+sensation caused by light, which is something we'll discuss in the
+following section.
+
+\subsection{The theory of the trichromacy of color}
+
+The theory of the trichromacy of color, also known as the
+Young-Helmotz theory of Trichromacy, could in plain English be stated
+as: \cite{Cotton95colour,Pascale2003_ReviewRGBColourSpaces}
+
+\begin{quote}
+  Any color that can be seen by humans is a combination of three
+  primary colors. Not all triplets of colors are acceptable as
+  primaries , and they must satisfy the following law: none of the
+  three primaries must be a combination or mixture of the other two
+  primaries.
+\end{quote}
+
+The main point of this theory is that all colors us humans can see is
+a combination of three base primary colors. However, do note that this
+law does not apply do colorblind humans nor animals that are not
+humans. We'll discuss this little detail more in depth after we have
+discussed a bit theory.
+
+\subsection{Light as color}
+
 Light is composed of tiny particles traveling at different
-wavelengths\index{wavelength} \cite{neider93:_openg_progr_guide}.
-Different colors are light traveling at different wavelengths. For
-example, blue has a wavelength of \bluewave
+wavelengths\index{wavelength} \cite{neider93:_openg_progr_guide}. When
+light of different wavelengths hit out eyes, out eyes process these
+wavelengths so that we \textit{perceive} these as colors. Notice how I
+said perceive, because saying that we see these colors would imply
+that it is a physical property and not a biological property.
+
+Different colors we perceive as traveling at different
+wavelengths. For example, blue has a wavelength of \bluewave
 \cite{ohlsson99:_digit_bild_kreat}.
 
-But how do our eyes \textit{see} these light waves? In our eyes,
-there are cells for perceiving three different kinds of wavelengths
-of light: red, blue and green. When these cells absorb red, green or
-blue light, we see color. And when these cells absorb mixed amounts
-of red, blue and green light, we are able to perceive all the other
-possible colors.
+Now, how do our eyes \textit{see} these light waves? In our eyes,
+there are cone cells for perceiving three different kinds of
+wavelengths of light: red, blue and green. When these cells absorb
+red, green or blue light, we see color. And when these cells absorb
+mixed amounts of red, blue and green light, we are able to perceive
+all the possible colors. People who are color blind typically lack one
+or several of these cone cells
+\cite{schanda97:_colorimetry,neider93:_openg_progr_guide}. People who
+have a normal color vision has all the three cone cells, and these are
+called to be standard observers and majority of ways of representing
+colors are aimed at the standard observer.
 
 \subsection{RGB}
 \label{sec:rgb}
 
 Color models\index{color model} are ways of specifying colors
-numerically \cite{fadgi11:color_model}. A very widely used color
-model for representing color in computers is RGB.
+numerically
+\cite{hearn1997computer_graphics,Pascale2003_ReviewRGBColourSpaces}. A
+very widely used color model for representing color in computers is
+RGB.
 
 \begin{figure}
   \centering
@@ -67,19 +157,21 @@ model for representing color in computers is RGB.
   \label{fig:rgb}
 \end{figure}
 
-The RGB color model is based on how our eyes perceive color, which
-we discussed in section \ref{sec:what-color}. As it can be seen in
-figure \ref{fig:rgb}, the colors cyan ,magenta and yellow can be
-achieved by mixing either red, blue and green. Also note that white
-is achieved by mixing all of three colors. Black is represented by
-no light at all. The rest of the colors can be achieved by mixing
+The RGB color model is based on how our eyes perceive color, which we
+previous discussed in section ?. As it can be seen in figure
+\ref{fig:rgb}, the colors cyan ,magenta and yellow can in this model
+be achieved by mixing either red, blue and green. Also note that white
+is achieved by mixing all of three colors. Black is represented by no
+light at all. The rest of the colors can be achieved by mixing
 different amounts of red,green and blue.
 
 The RGB color model is called an additive\index{additive color model}
 because it makes different colors by adding together light.
 
 The different amounts of red, green and blue in a color, are called
-their respective color channels\index{color channel}.
+their respective color channels\index{color channel}. These values are
+represented in numbers, and how exactly this is done is discussed in
+section \ref{sec:color-depth}.
 
 \subsection{RGBA}
 
@@ -90,15 +182,16 @@ But there is actually even more to RGB. There is an extended color
 model of RGB that's called RGBA. In this model, a new channel is
 added: the alpha channel\index{alpha channel}. This new channel
 represents the opacity of a color. Opacity is simply the opposite of
-transparency \cite{porter84_compos_dig_img}.
+transparency \cite{porter84_compos_dig_img,murray1996encyclopedia,niederst1999webdesign}.
 
-Take a good look at figure \ref{fig:alpha}. This figure demonstrates
-how a the color blue gets a lower and lower value of its alpha
-channel until it turns fully transparent. In the leftmost part of
-the image, the color fully has its maximum possible alpha channel
-value, meaning that it's fully visible. On the other hand, the
-leftmost color has its lowest possible alpha value, $0$, and as a
-result is fully transparent.
+Take a good look at figure \ref{fig:alpha}. This demonstrates how a
+color with the same values for its red, blue and green channel, get
+lower and lower value for its alpha channel. In the leftmost part of
+the image the value of the alpha channel is at its maximum, so the
+color is full opaque. The more to the right we get in the figure the
+lower and value the alpha channel gets, and the more transparent the
+color becomes as a consequence. And when the value of the alpha
+channel becomes its minimum value the color turns fully transparent.
 
 \begin{figure}
   \centering
@@ -107,86 +200,150 @@ result is fully transparent.
   \label{fig:alpha}
 \end{figure}
 
+\subsection{Device dependency and in-dependency}
+
+RGB has the problem that it is device dependent. This is because
+different devices, like printers, screens, and cameras, all define the
+RGB color space differently. One screen might for example define the
+maximum red as color much more red than the maximum red of another
+device. It is not problem if a color is used on one single device,
+because here all color is defined eqully, but since color interchange
+is so extremely common it is pretty much impossible to avoid this
+problem
+\cite{Pascale2003_ReviewRGBColourSpaces,boutel:_png_portab_networ_graph_specif_version12}.
+
+What is needed is a so called color management system. A color
+management system a way of assuring that color is perceived the same
+way on all devices. One color space that is device independent is
+CIEXYZ. This color space is one of many techniques used assuring the
+preservation of color appearance. But this is one convoluted color
+space and the math behind it is way beyond, unfortunately. I will for
+these reasons not discuss it in this text, but refer the reader who is
+interested in knowing more to the sources
+\cite{schanda97:_colorimetry,Pascale2003_ReviewRGBColourSpaces,boutel:_png_portab_networ_graph_specif_version12,kerr:_cie_xyz_color_spaces,Fairman_Brill_Hemmendinger_1997}.
+
+We will also for these reasons only discuss RGB in the following
+sections.
+
+
+\newcommand{\rgbtrip}[3]{\mbox{(#1,#2,#3)}}
+
 \section{Color Depth}
 \label{sec:color-depth}
 
 But up until now, I have said nothing about how the computer
-represents these color models.
+numerically represents these color models. In the following section,
+this is discussed for the RGB color model. The majority of the
+discussion is based on \cite{murray1996encyclopedia,neider93:_openg_progr_guide,niederst1999webdesign}
 
 \subsection{24-bit Color}
 \label{sec:24-bit-color}
 
-In the RGB color model, each color is just a combination red,green
-and blue channels. So, let us represent colors as a triple of three
-numbers, like this: \rgbtrip{123}{21}{91}, which is
-\textcolor[RGB]{123,21,91}{this color}.
+\subsubsection{RGB triplets}
 
-An 8-bit number has, as you should be familiar with, only $2^8 =
-256$ possible values. If we assign an 8-bit number to each color
-channel, the total size of a single color will be 24-bits. This way
-of representing color is called 24-bit color. You also refer to
-24-bit colors as having a color depth\index{color depth} of
-24-bits. This is also called the pixel depth\index{pixel depth} of
-the color.
+In the RGB color model, each color is just a combination red, green
+and blue color channels, So every color can be represented as a RGB
+triplet: $(R, G, B)$. Since RGB triplet are specified by numbers they
+are quite difficult to imagine visually, but they are on the other
+hand very easy for the computer to interpret. It can trivially display
+a RGB triplet on the screen by combining different ammounts of red,
+blue and green light.
 
-\newcommand{\selfcolor}[1]{\textcolor{#1}{#1}}
+An 8-bit, often also called a byte number has $2^8 = 256$ different
+possible values. If we assign an 8-bit number to each color channel in
+the RGB triplet, the total size of a single color will be
+24-bits.
 
-A full \selfcolor{red} color is represented by the triple \rgbtrip{255}{0}{0}. In
-that case, have a guess at what color is represented by
-\rgbtrip{255}{0}{255}. If haven't guessed it already, please study
-figure \ref{fig:rgb}. As you probably already have guessed, this color
-is \selfcolor{yellow}. And in the same number mixing and matching way, many other
-colors can be represented. See table \ref{tab:color-examples} for
-examples of other color values.
+This way of representing color is called 24-bit color. You also refer
+to 24-bit colors as having a color depth\index{color depth} of
+24-bits. This is also called the pixel depth\index{pixel depth} of the
+color. Many different names have been used to refer to this value, but
+we'll use the terminology color depth for the rest of this text.
 
-\begin{table}
-  \newcommand{\colorrow}[4]{  \rgbtrip{#1}{#2}{#3} &
-    \textcolor[RGB]{#1,#2,#3}{#4} \\}
-  \centering
-  \begin{tabular}{lr}
-    \toprule
-    RGB triple & Resulting color \\
-    \midrule
-    \colorrow{255}{215}{0}{Gold}
-    \colorrow{165}{42}{42}{Brown}
-    \colorrow{255}{0}{255}{Purple}
-    \colorrow{255}{192}{203}{Pink}
-    \colorrow{255}{165}{0}{Orange}
-    \colorrow{0}{0}{139}{Dark Blue}
-    \colorrow{105}{105}{105}{Dim Grey}
-    \colorrow{0}{100}{0}{Dark Green}
-    \colorrow{205}{92}{92}{Indian Red}
-    \bottomrule
-  \end{tabular}
-  \caption{Colors}
-  \label{tab:color-examples}
-\end{table}
+Using this color depth, the maximum value of a channel will be $2^8 -
+1 = 255$. So reddest of red is represented by the RGB triplet $(255,0,0)$
 
-But of course, not all colors can be represented using just
-24 bits. The number of \textit{all} possible colors is infinite. But you can still
-represent an awful lot colors with only 24-bits. How many? Well, every
-color channel can have $256$ different values. There are $3$
-channels. Hence, there are $256^3 = 16777216$ different colors that
-can represented using only 24-bits!
+\begin{Exercise}[label={rgb-triplet}]
+  What color does each of these RGB triplets represent: (use figure
+  \ref{fig:rgb})
 
-I was unable to find any good numbers of how many different colors us
-humans can, but according to \cite{roth:_tetrachromat} we can see
-about a million different colors, assuming  that we can pick 100
-different gradations of red, blue and green.
+  \begin{enumerate}[(a)]
+  \item $(0,0,255)$
+  \item $(0, 255, 0)$
+  \item $(255,255,0)$
+  \item $(255,255,255)$
+  \item $(0,0,0)$
+  \item $(0,255,255)$
+  \item $(255,0,255)$
 
-As I stated in the introduction, raster graphics is going to be the
-main subject of this book. And images represented as raster graphics
-is simply just a grid of colors. Therefore, in this chapter well
-discuss how these color are represented.
+  \end{enumerate}
+\end{Exercise}
 
+\subsubsection{Number instead of triplet}
 
-\newcommand{\rgbaquad}[4]{
-  \mbox{(\textcolor{red}{#1},\textcolor{green}{#2},\textcolor{blue}{#3},\textcolor{gray}{#4})}}
+the way this RGB triplet is stored in a file is simple: since every
+channel in the triplet is a byte, it is stored as a sequence of 3
+bytes. Since a file on a computer essentially just a sequence of
+bytes, reading a byte from a file is trivial operation that is
+supported by virtually every programming language in existence.
+
+But you can also see this another way: the triplet is stored as a
+24-bit number. Then the triplet $(R,G,B)$ would be stored as the
+24-bit number $R \cdot 256^2 + G \cdot 256 + B$. Here the highest bits
+of the number stores the red channel, the 8 middle bits store the
+green channel, and the 8 lowest bits stores the blue channel, so that
+the color yellow could be represented as: $(255,255,0) 255 \cdot 256^2
++ 255 \cdot 256 + 0 = 16776960$, which is equal to the binary number
+$11111111\ 11111111\ 00000000$. The separate color channels can then
+be extracted by using the bitwise operators. We will discuss this
+later in the text, but please, try doing this on you own in the
+exercise below.
+
+n\begin{Exercise}
+  Try to use the bitwise operators for extracting the separate color
+  channels from a 24-bit number representing a color.
+
+\end{Exercise}
+
+\begin{Exercise}
+
+  Now use the method you designed in the previous exercise for
+  extracting the separate color channels out of the following 24-bit
+  numbers:
+
+\end{Exercise}
+
+\subsubsection{Channel ordering}
+
+As is stated in \cite{murray1996encyclopedia}, there's nothing from
+stopping you from storing the color channels in another than order R,G then
+B. B,G,R is order that is also commonly used. The specification of the
+image format usually specifies in which order the color channels are
+stored, so do remember to read the specification carefully.
+
+\subsubsection{Good enough?}
+
+So how many different colors can you represent using 24-bit color?
+Every color channel can have $2^8 = 256$ different values and there
+are $3$ channels; hence, $256^3 = 16777216 \approx 16\ 000\ 000$ different colors
+can represented using 24-bits.
+
+Then how many different colors can us humans see? Scientists do not
+really know yet how many different colors us humans can see. Popular
+guesses include one million \cite{roth:_tetrachromat} and $2^{24} =
+256^3$ \cite{murray1996encyclopedia}. But 24 bits tends to be good
+enough for most purposes.
+
+\subsection{RGBA}
 
 Adding alpha channels to this color representation is trivial, just
-add a fourth channel and 8-bit number. The only real
-difference is that a color will require 32-bits of storage if an
-alpha channel is needed.
+add a fourth channel by adding another 8-bit channel. So RGBA color
+data is in other words stored as a quadruplet: $(R,G,B,A)$. And as I
+stated before, there is absolutely nothing stopping you from storing these
+channels in a different order. The $(A,R,G,B)$ and $(A,B,G,R)$ order are also
+used in certain formats, to give an example.
+
+\subsection{Other channel sizes}
 
 \subsection{Grayscale Color}
 
@@ -423,4 +580,20 @@ and power-law transfer functions, we can meaningfully talk about the
 gamma of the entire system. This is indeed the case with most real
 imaging systems.
 
-crt gamma = 2.5
+\begin{Answer}[ref={rgb-triplet}]
+  \begin{enumerate}[(a)]
+  \item Blue
+  \item Green
+  \item Yellow
+  \item White
+  \item Black
+  \item Cyan(light blue)
+  \item Magenta(purplish red)
+  \end{enumerate}
+\end{Answer}
+
+% crt gamma = 2.5
+
+% endianess sources:
+%file:///home/eric/Dropbox/freebooks/netghost.narod.ru/gff/graphics/book/ch06_01.htm
+%http://www.ietf.org/rfc/ien/ien137.txt

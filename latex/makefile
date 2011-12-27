@@ -3,22 +3,21 @@ TARGETFILES = $(wildcard *.tex) $(wildcard tikz_img/*.tex)
 
 all: ${TARGET}.pdf
 
-${TARGET}.bcf: ${TARGET}.bib
+${TARGET}.bbl: ${TARGET}.bib
 	pdflatex ${TARGET}.tex
-	biber ${TARGET}
+	bibtex ${TARGET}
 
-${TARGET}.pdf: ${TARGET}.bcf ${TARGETFILES}
+${TARGET}.pdf: ${TARGETFILES} ${TARGET}.bbl
 	@pdflatex ${TARGET}.tex
-	makeindex ${TARGET}.idx
-	@pdflatex ${TARGET}.tex
+# comment to make index
+#	makeindex ${TARGET}.idx
+#	@pdflatex ${TARGET}.tex
 
 clean:
 	rm -f *.bbl
-	rm -f *.bcf
 	rm -f *.blg
 	rm -f *.log
 	rm -f *.pdf
-	rm -f *.idx
 	rm -f *.idx
 	rm -f *.log
 	rm -f *.aux
@@ -31,3 +30,4 @@ clean:
 	rm -f *.out
 	rm -f *.toc
 	rm -f *.stackdump
+	rm -f *-blx.bib
