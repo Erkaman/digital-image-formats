@@ -24,6 +24,7 @@ latex/project.pdf
 *.bcf
 *.lof
 *.lot
+*-blx.bib
 
 *.stackdump
 

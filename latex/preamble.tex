@@ -24,9 +24,12 @@
 \usepackage{graphicx}
 \usepackage{etoolbox}
 \usepackage{path}
-\usepackage{enumitem}
+%\usepackage{enumitem}
 \usepackage{xspace}
 \usepackage{amsmath}
+
+%\usepackage{enumerate}
+\usepackage[shortlabels]{enumitem}
 
 % exercises.
 \usepackage{exercise,chngcntr}
@@ -44,7 +47,7 @@
 }
 
 % references
-\usepackage[backend=biber,sorting=none]{biblatex}
+\usepackage[sorting=none]{biblatex}
 
 
 % tikz
@@ -160,7 +163,4 @@
 \newcommand{\lzseven}{LZ77\xspace}
 \newcommand{\lzeight}{LZ78\xspace}
 
-
-\newcommand{\rgbtrip}[3]{\mbox{(
-    \textcolor{red}{#1},\textcolor{green}{#2},\textcolor{blue}{#3})}}
 \newcommand{\hex}[1]{\ensuremath{\mathrm{0x#1}}}
