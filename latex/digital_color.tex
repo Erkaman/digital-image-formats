@@ -66,8 +66,8 @@
 
 As I stated in the introduction, raster graphics is going to be the
 main subject of this book. And images represented as raster graphics
-is simply a grid of colors. Therefore, in this chapter well discuss
-how these color are represented. First I'll discuss color in more
+is simply a grid of colors. Therefore, in this chapter we'll discuss
+how these color are represented. First I'll discuss color out of a
 scientific and biological perspective, then I'll explain how color is
 represented digitally and last I'll cover how to properly interpret
 and parse these numbers.
@@ -237,7 +237,7 @@ sections.
 But up until now, I have said nothing about how the computer
 numerically represents these color models. In the following section,
 this is discussed for the RGB color model. The majority of the
-discussion is based on \cite{murray1996encyclopedia,neider93:_openg_progr_guide,niederst1999webdesign}
+discussion is based on \cite{murray1996encyclopedia,neider93:_openg_progr_guide,niederst1999webdesign,sitts2000handbook}
 
 \subsection{24-bit Color}
 \label{sec:24-bit-color}
@@ -302,20 +302,6 @@ be extracted by using the bitwise operators. We will discuss this
 later in the text, but please, try doing this on you own in the
 exercise below.
 
-n\begin{Exercise}
-  Try to use the bitwise operators for extracting the separate color
-  channels from a 24-bit number representing a color.
-
-\end{Exercise}
-
-\begin{Exercise}
-
-  Now use the method you designed in the previous exercise for
-  extracting the separate color channels out of the following 24-bit
-  numbers:
-
-\end{Exercise}
-
 \subsubsection{Channel ordering}
 
 As is stated in \cite{murray1996encyclopedia}, there's nothing from
@@ -348,6 +334,8 @@ used in certain formats, to give an example.
 
 \subsection{Other channel sizes}
 
+\subsubsection{48- and 64-bit color}
+
 Other kinds of numbers than 8-bit numbers can be assigned to the
 separate channels as well. Assigning a 16-bit number to each channel
 is also common, and is supported by the PNG
@@ -360,126 +348,80 @@ In 48-bit the miaxmum value of a color channel is obvious $2^{16} - 1
 = 65535$, meaning that the reddest of red is represented by the
 triplet $(65535, 0, 0)$
 
-\subsection{Grayscale Color}
-
-\newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
-\newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
-
-If every color channel of a RGB color is set to the same value, the
-resulting color will be a grayscale color. Using 24-bit color, we can for example make the following
-scalwes of grey :
-\selfrgbtripgray{100},\selfrgbtripgray{210},\selfrgbtripgray{60}. Using
-24-bits you can really only represent 256 different possible
-grayscale colors because $256$ is how many different values can be
-represented by an 8-bit number. So if we assign each of these RGB
-triples to an 8-bit number, we have thus invented 8-bit
-grayscale\index{8-bit grayscale}! So in this system, the number 80
-would represent the color \selfrgbtripgray{80}, 180 would represent
-\selfrgbtripgray{180}, and so on \cite{puglia00:_handbook_dig_proj}.
-
-8-bit grayscale means that we have $2^8=256$ different shades of
-gray. This system is actually applicable to any bit count, as is
-demonstrated in table \ref{tab:grayscale}. You will probably meet at least one of
-these grayscale color depths out in the wild.
-
-\begin{table}
-  \centering
-  \begin{tabular}{ll}
-    \toprule
-    Bit count & Possible shades of gray \\
-    \midrule
-    $2$ & $2^2 = 4$ \\
-    $4$ & $2^4 = 16$ \\
-    $8$ & $2^8 = 256$ \\
-    $16$ & $2^{16} = 65536$ \\
-    \bottomrule
-  \end{tabular}
-  \caption{Different bit counts of grayscale}
-  \label{tab:grayscale}
-\end{table}
-
-\section{Parsing Color Data}
-\label{sec:parsing-color-data}
-
-The number $26$ as a 8-bit number could be written as a string of
-ones and zeroes, 00011010. From now on we will refer to such a
-string as a bit pattern\index{bit pattern}.
-
-Color is specified by bit ranges in numbers of certain
-sizes. So how do we extract these bits? That is what are going to
-discuss in the section.
-
-\subsection{Grayscale}
-
-The most trivial color type to parse is grayscale color. Since a
-grayscale color is specified by just one number, there's no need to
-do any parsing. As we discussed before, the number $x$ specifies the
-grayscale color \mbox{($x,x,x$)}. \todo{discuss different bit depths
-  of grayscale}
-
-\subsection{RGB(A) Color}
-
-Things do however become more interesting when we try to parse RGB
-and RGBA color. There are several bit depths possible for RGB
-color but we'll only be covering some of the most common ones.
-
-\subsubsection{24-bit color}
-
-\begin{figure}
-  \centering
-  {\huge\textcolor{red}{10001011}\textcolor{green}{01010010}\textcolor{blue}{\fullbyte}
-    = \textcolor[HTML]{8B52FF}{purple}}
-  \caption{The RGB bit pattern for a purplish color.}
-  \label{fig:24-bit-colors-bits}
-\end{figure}
-
-The number 24-bit \textcolor{red}{1000 1011}\textcolor{green}{0101
-  0010}\textcolor{blue}{\fullbyte} represents a purplish color. The
-separate values of the color channels of this number can trivivally
-be pased by reading them byte for byte. Because, remember, the each
-color channel in 24-bit number is stored in a separate
-byte. Algorithm \ref{alg:read-24-bit-rgb} demonstrates how to read
-all the separate color channels.
-
-\todo{discuss endianess}
-
 \subsubsection{16-bit color}
 
-Colors can also be stored in 16 bits, but it is relatively
-rare. There are several variants of 16-bit color storage, so we'll
-be covering some of them here.
+A color depths of 16 is also used sometimes. TGA format supports
+16-bit color \cite{91:_truev_tga_file_format_specif}. Note that there
+are actually several ways of representing 16-bit color, but in this
+section we'll only discuss how this is done in the TGA format.
 
-\paragraph{TGA version}
+In the TGA version of 16-bit color, the single highest bit number 15 is used to
+store transparency information. If this bit is toggled, the color is
+visible, otherwise it is fully invisible.
 
-The kind of 16-bit color used in the TGA format is shown in figure
-\ref{fig:tga-16-bit-colors-bits}. It can be trivially parsed as is
-shown in algorithm \ref{alg:read-16-bit-rgb}. What is unsual here is
-that the values of the color channel's are stored in 5-bit number,
-meaning that the maximum value of a color channel in this case is
-$2^5 - 1 = 31$. However, here only one bit is reserved for the alpha
-channel. A better name for this bit would a flag. And what this flag
-is specify whether a color is visible or not.
+The RGB color channel are given 5 of storage bits each. Bits 0-4 are
+reserved for blue, 5-9 are given to green, and 10-14 are assigned to red.
 
-\begin{figure}
-  \centering
-  {\huge\textcolor{gray}{0}%
-    \textcolor{red}{10101}\textcolor{green}{11100}\textcolor{blue}{01010}}
-  \caption{Sample 16-bit color.}
-  \label{fig:tga-16-bit-colors-bits}
-\end{figure}
+In algorithm \ref{alg:read-16-bit-rgb} it shown how to extract the
+separate channel values out of a 16-bit color that has been stored in
+a variable named $color$.
 
-\todo{discuss the bit patterns}
+Also, in 16-bit color the maximum value of a color channel is $2^5 - 1
+= 31$.
 
 \begin{algorithm}[H]
   \caption{Reading TGA 16-bit number.}
   \label{alg:read-16-bit-rgb}
   \begin{algorithmic}[1]
-    \Let{$B$}{$data \BitAnd 31$}
-    \Let{$G$}{$(data \BitAnd (31 \ShiftLeft 5)) \ShiftRight 5$}
-    \Let{$R$}{$(data \BitAnd (31 \ShiftLeft 10)) \ShiftRight 10$}
-    \Let{$A$}{$(data \BitAnd (1 \ShiftLeft 16)) \ShiftRight 16$}
+    \Let{$R$}{\Call{getbits}{$color, 10,14$}}
+    \Let{$R$}{\Call{getbits}{$color, 5,9$}}
+    \Let{$B$}{\Call{getbits}{$color, 0,4$}}
+    \Let{$A$}{\Call{getbits}{$color, 15,15$}}
   \end{algorithmic}
 \end{algorithm}
+
+\begin{Exercise}[label={tga-16-bit}]
+
+  In a TGA image file the following 16-bit color values were found:
+
+  \begin{enumerate}[(a)]
+  \item $64435$
+  \item $31744$
+  \item $31775$
+  \end{enumerate}
+
+  what color does these numbers represent? Also, indicate whether
+  these colors are transparent or opaque.
+
+  Hint: write out these numbers in binary.
+
+\end{Exercise}
+
+\todo{discuss endianess}
+
+\subsection{Grayscale Color}
+
+\newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
+\newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
+
+Using 24-bit as an example, if a color is grayscale that means that
+the color is represented by a RGB triplet $(n,n,n)$, where $0 \le n
+\le 255$; that is, a shade of gray is a mixture of equal amounts of
+all the color channels. In 8-bit color it is recognized the triplet
+$(n,n,n)$ is fully of redundancies and is much more space efficiently
+simply represented by the 8-bit number $n$. So in this new system, the
+number $43$ will in reality represent the triplet $(43,43,43)$, $12$
+is really the triplet $(12,12,12)$ and so on.
+
+In 8-bit grayscale there are $2^8 = 256$ different shades of gray. In
+1-bit grayscale, which is also quite common, there are only $2^1 = 2$
+different shades of gray: black and white. And stated as generally as
+possible, this means that in n-bit grayscale there are $2^n$ different
+shades of gray. So there can indeed be many different kind of
+greyscale, the PNG format, for example, supports supports grayscale of
+the bit depths $1$, 2, 4, 8 and
+16\cite{boutel:_png_portab_networ_graph_specif_version12}.
+
 
 \section{Gamma}
 
@@ -566,6 +508,16 @@ imaging systems.
   \item Cyan(light blue)
   \item Magenta(purplish red)
   \end{enumerate}
+\end{Answer}
+
+\begin{Answer}[ref={tga-16-bit}]
+
+  \begin{enumerate}[(a)]
+  \item A fully opaque white color.
+  \item A transparent red color.
+  \item A transparent magenta color.
+  \end{enumerate}
+
 \end{Answer}
 
 % crt gamma = 2.5

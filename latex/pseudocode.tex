@@ -583,6 +583,13 @@ to introduce several functions for handling file operations.
 
 \item[\Call{Dec}{\ensuremath{var,n}}] Decrease the value of the
   variable $var$ by $n$.
+
+
+\item[\Call{getbits}{$b, start, end$}] is used to extract a bit
+  pattern in the given range. \Call{getbits}{$80, 4, en5$} returns
+  $5$ because $80 = 0101\ 0000$. This function will be derived in
+  exercise \ref{bitcount}
+
 \end{description}
 
 \begin{Exercise}[label={bitcount}]

@@ -107,21 +107,21 @@ void writeTGA_Image(TGA_Image image, FILE * out)
 
     if(image.extensionArea != NULL){
         fprintf(out,"Version:%s\n","2.0");
-	verbosePrint("Writing Extension Area\n");
-	fprintf(out,"Extension Area:\n");
+        verbosePrint("Writing Extension Area\n");
+        fprintf(out,"Extension Area:\n");
         writeTGA_ExtensionArea(image.extensionArea,out);
     } else
         fprintf(out,"Version:%s\n","1.0");
 
     if(image.header.IDLength > 0){
-	verbosePrint("Writing Image ID\n");
+        verbosePrint("Writing Image ID\n");
         fprintf(out,"Image ID:%s\n",image.imageID);
     }
 
 
     if(image.header.colorMapType == COLOR_MAPPED){
-	verbosePrint("Writing Color Map\n");
-	fprintf(out,"Color Map:\n");
+        verbosePrint("Writing Color Map\n");
+        fprintf(out,"Color Map:\n");
         writeColorMap(image.header,image.colorMap,out);
     }
 
@@ -132,7 +132,7 @@ void writeTGA_Image(TGA_Image image, FILE * out)
 
     if(image.extensionArea != NULL && image.extensionArea->stampOffset != 0){
 
-	verbosePrint("Writing Stamp Postage\n");
+        verbosePrint("Writing Stamp Postage\n");
 
         fprintf(out,"Stamp postage:\n");
         fprintf(out,"Width:%d\n",image.postageStamp.width);
@@ -176,12 +176,12 @@ TGA_Image loadTGA_Image(FILE * in)
 
     verbosePrint("Loading Color Data\n");
     image.colorData = loadTGA_ImageData(
-	image.header.width, image.header.height,
-	image.header,image.colorMap,compressed,in);
+        image.header.width, image.header.height,
+        image.header,image.colorMap,compressed,in);
 
     if(image.extensionArea != NULL && image.extensionArea->stampOffset != 0){
 
-	verbosePrint("Loading Postage Stamp\n");
+        verbosePrint("Loading Postage Stamp\n");
 
         image.postageStamp = loadPostageStamp(
             image.header,
@@ -217,7 +217,7 @@ void writeTGA_Header(TGA_Header header, FILE * out)
 {
     BYTE alphaChannelBits;
 
-    alphaChannelBits = getbits(header.imageDescriptor,3,4);
+    alphaChannelBits = getbits(header.imageDescriptor,0,3);
 
     fprintf(out,"Id Length:%d\n",header.IDLength);
     fprintf(out,"Color map type:%d\n",header.colorMapType);
@@ -307,7 +307,27 @@ void writeTGA_ExtensionArea(TGA_ExtensionArea * extension, FILE * out)
     fprintf(out,"Postage stamp offset: %d\n",extension->stampOffset);
     fprintf(out,"Scan line offset: %d\n",extension->scanOffset);
 
-    fprintf(out,"Attributes Type: %d\n",extension->attributesType);
+    fprintf(out,"Attributes Type: %d(\n",extension->attributesType);
+
+    switch(extension->attributesType){
+    case 0:
+        fprintf(out,"No alpha data included\n");
+
+    case 1:
+        fprintf(out,"undefined data in the Alpha field, can be ignored.\n");
+
+    case 2:
+        fprintf(out,"undefined data in the Alpha field, but should be retained\n");
+
+    case 3:
+        fprintf(out,"useful Alpha channel data is present\n");
+    case 4:
+        fprintf(out,"pre-multiplied Alpha\n");
+
+    }
+
+    fprintf(out,")\n");
+
 }
 
 TGA_ExtensionArea * loadTGAExtensionArea(FILE * in)
@@ -433,27 +453,27 @@ void writeColorData(unsigned long data,TGA_Header header,FILE * out)
     else{
         if(pixelDepth == 24){
 
-            r = (data & (0xff << 16)) >> 16;
-            g = (data & (0xff << 8)) >> 8;
-            b = data & 0xff;
+            r = getbits(data, 16,23);
+            g = getbits(data, 8, 15);
+            b = getbits(data, 0, 7);
 
             printRGB(r,g,b,out);
         } else if(pixelDepth == 32){
 
-            a = (data & (0xff << 24)) >> 24;
-            r = (data & (0xff << 16)) >> 16;
-            g = (data & (0xff << 8)) >> 8;
-            b = data & 0xff;
+            a = getbits(data, 24,31);
+            r = getbits(data, 16,23);
+            g = getbits(data, 8, 15);
+            b = getbits(data, 0, 7);
 
             printRGBA(r,g,b,a,out);
         } else if(pixelDepth == 16){
 
-            r = (data & (0x1f << 10)) >> 10;
-            g = (data & (0x1f << 5)) >> 5;
-            b = data & 0x1f;
-            visible = (data & (0x01 << 16)) >> 16;
+            r = getbits(data, 10, 14);
+            g = getbits(data, 5, 9);
+            b = getbits(data, 0, 4);
+            visible = getbits(data, 15,15);
 
-            a = visible ? 255 : 0;
+            a = visible ? 31 : 0;
             printRGBA(r,g,b,a,out);
         }
     }
@@ -581,11 +601,6 @@ unsigned long * loadColorMap(TGA_Header header, FILE * in)
     }
 
     return colorMap;
-}
-
-unsigned getbits(unsigned x, int p, int n)
-{
-    return (x >> (p+1-n)) & ~(~0 << n);
 }
 
 SHORT readShort(FILE * fp)

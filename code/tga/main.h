@@ -2,6 +2,7 @@
 #define _TGA_H_
 
 #include "../io.h"
+#include "../bitwise.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -15,9 +16,6 @@
 
 SHORT readShort(FILE * fp);
 LONG readLong(FILE * fp);
-
-/* getbits:  get n bits from position p */
-unsigned getbits(unsigned x, int p, int n);
 
 typedef struct
 {
