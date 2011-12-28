@@ -5,66 +5,194 @@
 \chapter{Conventions}
 \label{cha:pseudocode-convent}
 
-In this chapter, We'll establish all the conventions and glossary that
-will be used throughout his text.
+In this chapter, we'll establish all the conventions that will be used
+throughout his text.
 
 \section{Glossary}
 
 \begin{description}
-\item[Binary numbers] A binary number is simply a numbers of base
-  2. For example, the number $139$ is represented by the binary number
-  $1000\ 1011$ since $1 \cdot  2^7 + 0 \cdot 2^6 + 0 \cdot 2^5 + 0
-  \cdot 2^4 + 1 \cdot 2^3 + 0 \cdot 2^2 + 1 \cdot 2^1 + 1 \cdot 2^0 =
-  2^7 + 2^3 + 2^1 + 2^0 = 128 + 8 + 2 + 1 = 139 $
+\item[binary number] A binary number is simply a number of base 2. For
+  example, the number $139$ is represented by the binary number $1000\
+  1011$, since $1 \cdot 2^7 + 0 \cdot 2^6 + 0 \cdot 2^5 + 0 \cdot 2^4
+  + 1 \cdot 2^3 + 0 \cdot 2^2 + 1 \cdot 2^1 + 1 \cdot 2^0 = 2^7 + 2^3
+  + 2^1 + 2^0 = 128 + 8 + 2 + 1 = 139 $
 
-\item[bit] The separate digits of a binary numbers are reffered to as
-  bits. If we say that a bit is \textit{toggled}, we mean that the bit has a
-  value of $1$. Controversially, if a bit has the value $0$, then we say
-  that the bit is \textit{cleared}.
-\item[Highest and Lowest bit] In the numbers $1100$ the highest bit is
-  $1$ and has a value of $2^3 = 8$. In order words, the highest bit is
-  the bit that has the highest digit position in the number. The
-  lowest bit in this number is $0$ and has a value of $0$. We may also
-  can the highest bit the 4:th bit, and the lowest bit the 1:st
-  bit. So we start counting the bits from one to the position of the
-  highest bit.
-\item[Most sigficant bit] Alternative name for the highest bit.
-\item[Least sigficant bit] Alternative name for the lowest bit.
+  \begin{Exercise}[label={n-to-bin}]
+    Rewrite the following numbers on binary form:
 
-\item[Byte] A byte is simply a binary number with 8 digits/bits. The
-  max value of a byte is $2^8 - 1 = 255$ and there are $2^8$ different
-  values that a byte can have. We'll often be referring to bytes
-  throughout the entire text, since, as we shall soon see, an image
-  represented digitally is just a sequence of bytes.
+    \begin{enumerate}[(a)]
+    \item 4
+    \item 50
+    \item 500
+    \end{enumerate}
 
+  \end{Exercise}
 
-\item[Hexadecimal] We'll also be using the hexadecimal numeral system
-  in this text a lot. Here the numbers 0-9 are given their usual
-  values, while the letters A-F are assigned to the values 10-15, so
-  that the hexadecimal number \hex{D3} has the value $13 \cdot 16^1 + 3 \cdot
-  16^0 ? 13 \cdot 16 + 3 = 208 + 3 =  211$.
+  \begin{Exercise}[label={bin-to-n}]
+    Convert the following binary numbers to ordinary numbers of base
+    10:
 
-\end{description}
+    \begin{enumerate}[(a)]
+    \item $1111$
+    \item $1000\ 0000$
+    \item $1111\ 1110$
+    \end{enumerate}
 
-\begin{Exercise}[label={bits-value-order}]
-  What is the values of the 2:nd, 4:th and highest bits in the
-  number $01001$?
-\end{Exercise}
+  \end{Exercise}
 
 \begin{Exercise}[label={n-bits-max-val}]
-  If a binary number has $n$ bits, then what is its the maximum value?
+  If you know that a binary number has $n$ bits, then what is its
+  maximum possible value? Also, how many different possible values can
+  such a number have?
 \end{Exercise}
 
-\begin{Exercise}[label={count-bits-func}]
-  Given a number $x$ find a function $c(x)$ that will count the number
-  of bits in that number if it is rewritten on binary form. So that,
-  for example, the following holds true: $c(23) = 4$
+  \begin{Exercise}[label={count-bits-func}]
+    Given a number $x$, find a function $c(x)$ that will count the
+    number of bits in that number, if it is rewritten on binary
+    form. The following should, for example, hold true for this
+    function: $c(23) = 4$
 
-  (Hint: use the binary logarithm, $\log_2$)
+    (Hint: use the binary logarithm, $\log_2$, and the floor function,
+    $\lfloor x \rfloor$)
 
-  Now find the another such a function for the hexadecimal system, and
-  then find it for \textit{any} number is base n.
 \end{Exercise}
+
+\item[bit] The separate digits of a binary numbers are often referred
+  to as bits.
+
+\item[toggled bit] If we say that a bit is \textit{toggled}, we mean that
+  the bit has a value of $1$.
+
+\item[cleared bit] And controversially, if a bit has the value
+  $0$, then we say that the bit is \textit{cleared}.
+
+\item[Bit counting order] The bit that has the lowest value is
+  referred to as bit 0\footnote{This convention is mainly used because
+    us programmers like to start counting from $0$ rather than $1$}.
+  In the binary number $0100$, bit 0 is cleared( it has the value
+  $0$), bit 2 is toggled (it has the value $1$) and the last bit 3 is
+  cleared.
+
+\item[Lowest bit] Bit 0 will also commonly be referred to as the
+  lowest bit.
+
+\item[Highest bit] Bit $n - 1$ of a binary number of length $n$ bits;
+  in other words, the last bit of a binary number. In the number $100$
+  the highest bit toggled and the 2 lowest bits are cleared.
+
+\item[Most significant bit] Alternative name for the highest bit.
+
+\item[Least sigficant bit] Alternative name for the lowest bit.
+
+\begin{Exercise}[label={bits-value-order}]
+  What are the values of bits 1,3 and the most significant bit in the
+  number $01001$?
+
+\end{Exercise}
+
+\item[Byte] A byte is simply a binary number with 8 digits/bits. The
+  max value of a byte is $2^8 - 1 = 255$ and there are $2^8 = 256$
+  different values that a byte can have. We'll often be referring to
+  bytes throughout the entire text, since, as we soon shall see, an
+  image represented digitally is just a sequence of bytes.
+
+\item[ASCII] A very common text encoding that will be used a lot in
+  this text. The ASCII encoding only covers 128 different characters
+  and a single ASCII character can therefore always fit in a byte. To
+  convert between ASCII characters and byte values you can use the
+  ASCII table as it was originally specified at \cite{rfc20}. This
+  table is however a bit of a pain to use, and I therefore recommend
+  you to use the easier to read version \cite{ascii_table_descr}.
+
+  \begin{Exercise}[label={ascii-to-num}]
+    Convert the following characters to their corresponding ASCII
+    values:
+
+    \begin{enumerate}[(a)]
+    \item A
+    \item n
+    \item <
+    \end{enumerate}
+  \end{Exercise}
+
+  \begin{Exercise}[label={num-to-ascii}]
+    Convert the following ASCII values to their corresponding characters:
+    \begin{enumerate}[(a)]
+    \item $35$
+    \item $122$
+    \item $63$
+    \end{enumerate}
+  \end{Exercise}
+
+\item[Hexadecimal] We'll also be using the hexadecimal numeral system
+  in this text a lot. To signify that a number is hexadecimal, it is
+  prefixed by the characters \hex{}. In the hexadecimal system the
+  numbers 0-9 are given their usual values, while the letters A-F are
+  assigned to the values 10-15, so that the hexadecimal number
+  \hex{D3} has the value $13 \cdot 16^1 + 3 \cdot 16^0 = 13 \cdot 16 +
+  3 = 208 + 3 = 211$.
+
+  \begin{Exercise}[label={hex-to-n}]
+    Convert the following hexadecimal numbers to ordinary numbers of
+    base-10:
+
+    \begin{enumerate}[(a)]
+    \item \hex{23}
+    \item \hex{FF}
+    \item \hex{AA}
+    \end{enumerate}
+
+  \end{Exercise}
+
+  \begin{Exercise}[label={n-to-hex}]
+    Convert the following numbers to hexadecimal:
+
+    \begin{enumerate}[(a)]
+    \item 3
+    \item 46
+    \item 189
+    \end{enumerate}
+
+  \end{Exercise}
+
+\item[String] A string is simply a sequence of letters in some
+  encoding. The most commonly used encoding in this text will be
+  ASCII \cite{rfc20} and we will also most typically use C-strings.
+
+\item[C-string] String as they are represented in the C programming
+  language. In this language, strings are always terminated by a so
+  called NULL character. The NULL character has a value of
+  $0$\cite{kernighan1988c}. This means that the string ``eric'' will
+  be represented by the sequence of bytes $101,114,105,99, 0$ in the C
+  programming language. This is important to know, because in a lot of
+  image formats strings are stored as C-strings.
+
+  Why the NULL character at the end of the string even is necessary is
+  for rather complex reasons that I will not treat in this text.
+
+\item[File] We are going to be talking a lot about files in this text,
+  so it is important that we as early as possible establish a strict
+  definition for what a file is. A file is just a sequence of bytes;
+  it is in other word just a sequence of numbers. A perfectly valid
+  file could for example consist of the numbers $101,114,105,99$. This
+  a file that consists of the single string ``eric'', where the
+  letters use ASCII encoding. However, if you opened this file in a
+  text editor, say notepad, you would only see the letters ``eric''
+  and not the numbers that represent the letters. This is because a
+  text editor is programmed to see all the bytes in a file as text. If
+  you on the other hand opened this file in a hex viewer, you would
+  see the file for what it truly is: a sequence of numbers\footnote{Do
+    note that in a hex viewer these numbers are, as is implied by the
+    name, shown as hexadecimal numbers}.
+
+
+\item[Offset] When we are talking about an offset we are referring to
+  a position in a file. The offset is zero based. When we are talking
+  about the number at offset 0 in the file $13,2,1$ we are talking
+  about the number $13$. In the same file at the offset $2$, the
+  number $1$ can be found.
+
+\end{description}
 
 \section{Pseudocode Conventions}
 
@@ -77,7 +205,7 @@ The pseudocode will be kept as traditional as possible, but we'll
 still need to establish several conventions for it, which is what
 we're going to do for the rest of the chapter.
 
-\section{Typographical Conventions}
+\subsection{Typographical Conventions}
 
 \begin{description}
 \item[Keywords] will use \textbf{bold} font.
@@ -85,7 +213,7 @@ we're going to do for the rest of the chapter.
 \item[variables] can noticed by their $cursive\ slant$.
 \end{description}
 
-\section{Boolean Operators}
+\subsection{Boolean Operators}
 \label{sec:boolean-operators}
 
 To signify the boolean operators, or logical operators as we'll often
@@ -140,13 +268,26 @@ tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
   \label{tab:log-not-table}
 \end{table}
 
-\section{Bitwise Operators}
+\begin{Exercise}[label={boolean}]
+  Are the following expressions \True or \False?
+
+  \begin{enumerate}[(a)]
+  \item $\NOT \True \AND \True$
+  \item $\NOT \True \OR (\True \AND \NOT \False)$
+
+  \item $(\True \AND \True) \AND (\True \AND \NOT(\False \OR \NOT \True))$
+
+  \end{enumerate}
+\end{Exercise}
+
+\subsection{Bitwise Operators}
 \label{sec:bitwise-operators}
 
-\subsection{Notation}
+\subsubsection{Notation}
 
-Bitwise operators will be used a lot in this text. We will be using
-the notation used in \C{}\cite{kernighan1988c} to represent them in pseudocode:
+Bitwise operators will also be used a lot in this text. We will use
+notation introduced in \C{}\cite{kernighan1988c} to represent them in
+pseudocode:
 
 \begin{description}
 \item[$\BitAnd$] Bitwise \textit{AND}
@@ -164,40 +305,56 @@ the fact that we'd otherwise confuse it with logical and, $\AND$.
 What follows is a short introduction to the very simple bitwise
 operators.
 
-\subsection{Bitwise and, or and xor}
+\subsubsection{Bitwise and, or and xor}
 
 Bitwise AND is just like logical and, except for the fact that it
 operates on the on the bit level. Let us for demonstrative consider
-the result of the expression $23 \BitAnd 12$. Since the bitwise and
-operates on the bit level we first must convert the two numbers to the
-binary numeral system: $10110 \BitAnd 01100$. Then the calculation of
-now simply done like this:
+the result of the expression $22 \BitAnd 12$. Since bitwise and
+operates on the bit level we first must convert the two numbers to
+binary : $10110 \BitAnd 01100$. Then the calculation is simply done
+like this:
 
 \begin{center}
   \begin{tabular}{lr}
-    & 10110  \\
+              & 10110  \\
     $\BitAnd$ & 01100 \\
     \hline
-    & 00100 \\
+              & 00100 \\
   \end{tabular}
 \end{center}
 
-And so the result of the operation $23 \BitAnd 12$ is $00100=4$. So as
-you can see, the bitwise operators do boolean logic on the bit level
-by considering a toggled bit as truth, and a cleared as falsity
+So $22 \BitAnd 12$ is $00100=4$. So as you can see, the bitwise
+operators do boolean logic on the bit level by considering a toggled
+bit truth, and a cleared bit falsity
 
-Bitwise OR is in the same way logical OR on the bit level. Let us
-perform the former calculation using bitwise or instead of and to
-illustrate the difference between them:
+\begin{Exercise}[label={bitand}]
+  \begin{enumerate}[(a)]
+  \item $2 \BitAnd 1$
+  \item $255 \BitAnd 23$
+  \item $26 \BitAnd 12$
+  \end{enumerate}
+\end{Exercise}
+
+Bitwise or is in the same way logical or on the bit level. Let us
+perform the former calculation using bitwise or instead of bitwise and
+to illustrate the difference between them:
 
 \begin{center}
   \begin{tabular}{lr}
-    & 10110  \\
+             & 10110  \\
     $\BitOr$ & 01100 \\
     \hline
     & 11110 \\
   \end{tabular}
 \end{center}
+
+\begin{Exercise}[label={bitor}]
+  \begin{enumerate}[(a)]
+  \item $172 \BitOr 52$
+  \item $3 \ BitOr 3$
+  \item $240 \BitOr 15$
+  \end{enumerate}
+\end{Exercise}
 
 \begin{table}
   \centering
@@ -219,59 +376,178 @@ expression $10110 \BitXor 01100$:
 
 \begin{center}
   \begin{tabular}{lr}
-    & 10110  \\
+              & 10110  \\
     $\BitXor$ & 01100 \\
     \hline
-    & 11010 \\
+              & 11010 \\
   \end{tabular}
 \end{center}
 
-\subsection{Bitwise not}
+\begin{Exercise}[label={bitxor}]
+  \begin{enumerate}[(a)]
+  \item $10 \BitXor 10$
+  \item $12 \BitXor 7$
+  \item $48 \BitXor 16$
+  \end{enumerate}
+\end{Exercise}
+
+\subsubsection{Bitwise not}
 
 When dealing with bitwise not, it is important that we consider the
-size of the variable that we are storing the number we are to perform
-the operation on. If for example $b=10$ and $b$ the variable $b$ is of
-type byte, then $b=0000\ 1010$. What bitwise not does is that it
-inverts the number, so that at all toggled bits gets cleared, and all
-cleared bits gets toggled, so $\BitNeg b = 1111\ 0101$. Now you should
-see it was important that we considered the size of the variable data
-type. Since if for example the variable $b$ instead was of size 4-bits
-isntead of 8-bits, then $b = 1010$ and  the end result of the operation $\BitNeg$
-would have been $0101$ instead of $1111\ 0101$.
+size of the numbers that we are performing the operation on. If for
+example $b=10$ and the variable $b$ is of type byte, then it
+\textit{must} be of length 8 bits: $b=0000\ 1010$. What bitwise not
+does, is that it inverts the number, so that at all toggled bits gets
+cleared, and all cleared bits gets toggled, so $\BitNeg b = 1111\
+0101$.
 
-\subsection{Bitwise shifting}
+Now you should see why it was important that we considered the size of
+the number. Had the variable $b$ been of size 4 bits, then $b = 1010$
+and then the end result of the operation $\BitNeg b$ would have been
+$0101$ instead of $1111\ 0101$.
+
+\begin{Exercise}[label={bitnot}]
+  What are the values of the following expressions, if all the numbers
+  are bytes?
+
+  \begin{enumerate}[(a)]
+  \item $\BitNeg 11$
+  \item $(\BitNeg 4) \BitXor 4$
+  \item $(\BitNeg b) \BitXor b$, for any byte $b$
+  \item $(\BitNeg b) \BitOr b$, for any byte $b$
+  \item $(\BitNeg b) \BitAnd b$, for any byte $b$
+  \end{enumerate}
+
+\end{Exercise}
+
+\subsubsection{Bitwise shifting}
 
 It is also in bitwise shifting important that we consider the size of
-the numbers. Bitwise shifting is actually very simple. All the $b
+the numbers. Bitwise shifting is actually very simple: all the $b
 \ShiftLeft n$ really does, is that it shifts the bit pattern in the
-variable $b$ $n$ steps to the right. For the 4-bit number $0011$, this
+number $b$ $n$ steps to the right. For the 4-bit number $0011$, this
 means that $0011 \ShiftLeft 2 = 1100$. But what would have happened if
-the bit pattern was shifted 3 steps. Then one bit is going fall of the
+the bit pattern was shifted 3 steps? Then one bit is going fall of the
 bit boundary and disappear, so $0011 \ShiftLeft 3 = 1000$.
 
-And bitwise left shifting works in pretty much the same way, expect
+And bitwise right shifting works in pretty much the same way, expect
 for the fact that the bit shifting are done to the right instead of
-left, so that for the 4-bit number $0110 \ShiftRight 2 = 0001$.
+the left, so that for the 4-bit number $0110$: $0110 \ShiftRight 2 =
+0001$.
 
-\begin{enumerate}
-\item For the byte $b = 1101\ 0001$ calculate the value of the
-  expression
+\begin{Exercise}[label={bit-shiting}]
+  Assuming that we are dealing with bytes, what is the value of the
+  following expression:
 
   \begin{equation*}
-    ((b \ShiftLeft 3) \BitAnd b) \BitXor ((b \ShiftRight 4) \BitOr b)
+    120 \BitAnd (3 \ShiftLeft 4)
   \end{equation*}
 
-\item Using the bitwise operators, try to devise an algorithm for
-  counting the numbers of toggled bits in a byte. It should for
-  example give the end result of $4$ for the numbers $147 = 1001\
-  0011$
+  (important!) What does this expression really do?
 
-\item Try to make an algorithm for reversing the bits in a byte. For
-  $32=0000\ 0111$ is should give the result $224 = 1110\ 0000$.
+  (Hint: what kind of value does it extract from the byte $120$?)
 
-\end{enumerate}
+\end{Exercise}
 
-\section{Functions}
+
+\subsection{Syntax}
+
+In this section we will discuss the basic syntax of the pseudocode.
+
+The start of a comment is indicated by the symbol \commentsymbol.
+
+To assign the value $n$ to the variable $var$, the notation shown in
+algorithm \ref{alg:assign} is used.
+
+
+
+\begin{algorithm}[H]
+  \caption{Syntax for assigning the value $n$ to the variable $var$.}
+  \label{alg:assign}
+  \begin{algorithmic}[1]
+    \Let{$var$}{$n$}
+  \end{algorithmic}
+\end{algorithm}
+
+To store a sequence of values we'll use arrays. If for example the
+array $a$ contains the values the $3,1,2$ then to access the first
+value of this array, $3$, the syntax $a[0]$ is used. In general, to
+access the n:th value of an array you do $a[n-1]$, since arrays are 0
+indexed.
+
+To then to go through each value in the array $a$, the syntax
+demonstrated in algorithm \ref{alg:for-each} is used.
+
+\begin{algorithm}[H]
+  \caption{The for each control structure.}
+  \label{alg:for-each}
+  \begin{algorithmic}[1]
+    \linecomment{Go through every value $v$ in the
+      array $a$. The variable  $v$ is here to each element in the
+      array in turn}
+    \ForEach{$v$}{$a$}
+    \linecomment{Do something with $a$ here.}
+    \EndForEach
+  \end{algorithmic}
+\end{algorithm}
+
+In algorithm \ref{alg:repeat} the control structure repeat is
+demonstrated.
+
+\begin{algorithm}[H]
+  \caption{The repeat control structure.}
+  \label{alg:repeat}
+  \begin{algorithmic}[1]
+    \Repeatn{$n$}
+    \State $actions$ \Comment{$actions$ are repeated $n$ times.}
+    \EndRepeatn
+  \end{algorithmic}
+\end{algorithm}
+
+For functions, we'll be using the traditional syntax;
+\Call{Func}{$a,b,c$} means that we are calling the function
+\textproc{Func} with the argument $a$,$b$ and $c$ and that the value
+of this expression is the return value of the function. To return a
+value from a function the \textbf{return} statement is used.
+
+The function syntax is demonstrated in algorithm \ref{alg:euclid}. In
+this function, Euclid's algorithm is used to calculate the greatest
+common divisor of the two given numbers.
+\cite{cormen2009introduction_to_algo,weisstein:_euclid_algor}.
+
+\begin{algorithm}
+  \caption{Euclid's algorithm for computing the greatest common
+    divisor of two numbers.}
+  \label{alg:euclid}
+  \begin{algorithmic}[1]
+    \Procedure{Euclid}{$a,b$}
+      \State $r\gets a\bmod b$
+      \While{$r\not=0$}
+      \State $a\gets b$
+      \State $b\gets r$
+      \State $r\gets a\bmod b$
+      \EndWhile
+      \State \textbf{return} $b$
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+The for loop allows for iteration with an explicit counter variable
+that is given in the for loop statement. In algorithm \ref{alg:forto}
+the for to loop is used to count from $1$ to $9$. Note that it in
+reality counts up to $10$, then stops.
+
+\begin{algorithm}
+  \caption{For to loop.}
+  \label{alg:forto}
+  \begin{algorithmic}[1]
+    \ForTo{$i$}{$1$}{$10$}
+    \linecomment{Print the number 1.}
+    \EndFor
+  \end{algorithmic}
+\end{algorithm}
+
+\subsection{Functions}
 \label{sec:pseudocode}
 
 We'll be dealing with files in many of these algorithms, so we'll need
@@ -309,49 +585,243 @@ to introduce several functions for handling file operations.
   variable $var$ by $n$.
 \end{description}
 
-\section{Syntax}
+\begin{Exercise}[label={bitcount}]
+  Using the bitwise operators, try to devise a function
+  \textproc{bitcount} for counting the numbers of toggled bits in a
+  byte. For \Call{bitcount}{$7$} it should return $3$ and for
+  \Call{bitcount}{$1$} it should return $1$.
 
-As a decently competent programmer, you should be familiar with most
-of the control structures we'll be using. But one control structure
-that will be used that is probably unfamiliar to you is the custom
-control structure called \algorithmicrepeat\index{Repeat Control
-  Structure}, which is demonstrated in algorithm \ref{alg:repeat}.
+\end{Exercise}
 
-\begin{algorithm}[H]
-  \caption{The repeat control structure.}
-  \label{alg:repeat}
-  \begin{algorithmic}[1]
-    \Repeatn{$n$}
-    \State $actions$ \Comment{$actions$ are repeated $n$ times.}
-    \EndRepeatn
-  \end{algorithmic}
-\end{algorithm}
+\begin{Exercise}[label={getbits}]
 
-and by the way, The start of a comment is indicated by the symbol \commentsymbol.
+Make a function named \Call{getbits}{$b, start, end$} that extracts
+the bit pattern of a number $b$ from a given starting position to a
+given ending position. These positions are be zero-based. Example:
+\Call{getbits}{$80, 4, 6$}$=5$, because $80$ is represented by the
+binary number $0101\ 0000$ and from the positions 4 to 6 there is a
+bit pattern that has a value of $5$, which is what this function is
+supposed to extract.
 
-To assign the value $n$ to the variable $var$, the notation shown in
-algorithm \ref{alg:assign} is used.
+It is especially important that you do this exercise, because the
+function \textproc{getbits} is going to be used \textit{a lot}
+throughout this text.
 
-\begin{algorithm}[H]
-  \caption{Assigning the value $n$ to $var$..}
-  \label{alg:assign}
-  \begin{algorithmic}[1]
-    \Let{$var$}{$n$}
-  \end{algorithmic}
-\end{algorithm}
+Hint: The bitwise operators $\ShiftLeft, \ShiftRight, \BitAnd,
+\BitNeg$ and the arithmetic operators $+,-$ is all you really need to
+use to solve this problem.
 
-\begin{Answer}[ref={bits-value-order}]
-  $1$, $1$ and $0$
+\end{Exercise}
+
+\section{Answers to the exercises}
+
+\begin{Answer}[ref={n-to-bin}]
+  \begin{enumerate}[(a)]
+  \item $100$
+  \item $11\ 0010$
+  \item $1\ 1111\ 0100$
+  \end{enumerate}
+\end{Answer}
+
+\begin{Answer}[ref={bin-to-n}]
+  \begin{enumerate}[(a)]
+  \item $15$
+  \item $128$
+  \item $254$
+  \end{enumerate}
 \end{Answer}
 
 \begin{Answer}[ref={n-bits-max-val}]
-  $2^n - 1$
+  The max value is $2^n - 1$ and the number of different possible
+  values is $2^n$
 \end{Answer}
 
 \begin{Answer}[ref={count-bits-func}]
-  $x(x) = log_2$
+  This function is $c(x) = \lfloor log_2 x \rfloor + 1$, where $\lfloor
+  x \rfloor$ is the floor funciton that calculates the largest whole
+  integer not greater than $x$.
 
-  floor function?
+  This function is a bit hard to use however, since few calculators
+  include a button for the $log_2$ function. But we can define it in
+  terms of the $\ln$ function like this:
 
-  Where $log_2 = log_{10} / log_{10}2$
+  \begin{equation*}
+    2^x = y \iff x = log_2 y
+  \end{equation*}
+
+  If we from this can find a way to calculate $x$ from $y$ we will
+  have solved the problem. And it turns out that we can:
+
+  \begin{align*}
+    \ln 2^x = & \ln y \\
+    x \ln 2 = & \ln y \\
+    x = & \frac{\ln y}{\ln 2}
+  \end{align*}
+
+  So $log_2 x = \frac{\ln y}{\ln 2}$. So the final solution can also be
+  written like this: $c(x) = \left\lfloor \frac{\ln x}{\ln 2} \right\rfloor + 1$
+
+\end{Answer}
+
+\begin{Answer}[ref={bits-value-order}]
+  $1$, $1$ and $0$. Or: toggled, toggled, cleared.
+
+\end{Answer}
+
+\begin{Answer}[ref={ascii-to-num}]
+
+  \begin{enumerate}[(a)]
+  \item $65$
+  \item $110$
+  \item $60$
+  \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={num-to-ascii}]
+
+  \begin{enumerate}[(a)]
+  \item \#
+  \item z
+  \item ?
+  \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={hex-to-n}]
+
+  \begin{enumerate}[(a)]
+  \item $35$
+  \item $255$
+  \item $170$
+  \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={n-to-hex}]
+
+  \begin{enumerate}[(a)]
+  \item \hex{03}
+  \item \hex{2E}
+  \item \hex{BD}
+  \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={boolean}]
+
+  \begin{enumerate}[(a)]
+  \item \False
+  \item \True
+  \item \False
+  \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={bitand}]
+  \begin{enumerate}[(a)]
+  \item $0$
+  \item $23$
+  \item $8$
+  \end{enumerate}
+\end{Answer}
+
+\begin{Answer}[ref={bitor}]
+  \begin{enumerate}[(a)]
+  \item $52$
+  \item $3$
+  \item $255$
+  \end{enumerate}
+\end{Answer}
+
+\begin{Answer}[ref={bitxor}]
+  \begin{enumerate}[(a)]
+  \item $0$
+  \item $11$
+  \item $32$
+  \end{enumerate}
+\end{Answer}
+
+\begin{Answer}[ref={bitnot}]
+  \begin{enumerate}[(a)]
+  \item $244$
+  \item $256$
+  \item $256$
+  \item $256$
+  \item $0$
+  \end{enumerate}
+\end{Answer}
+
+\begin{Answer}[ref={bit-shiting}]
+
+  The value of the expression is $3$. What this expression does, is
+  that it extracts the values of the 5:th and 6:th bits from the
+  number $120$.
+
+\end{Answer}
+
+\begin{Answer}[ref={bitcount}]
+
+  \begin{algorithmic}[1]
+    \Procedure{bitcount}{$n$}
+      \Let{$count$}{$0$}
+
+      \ForTo{$shift$}{$0$}{$8$}
+        \If{$n \BitAnd (1 \ShiftLeft shift)$}
+        \State \Call{Inc}{$count$}
+        \EndIf
+      \EndFor
+
+    \EndProcedure
+  \end{algorithmic}
+
+\end{Answer}
+
+\begin{Answer}[ref={getbits}]
+
+  \begin{algorithmic}[1]
+    \Procedure{bitcount}{$n$}
+      \linecomment{Calculate the length of the bit pattern}
+      \Let{$len$}{$end - start + 1$}
+      \State \textbf{return} $(b \ShiftRight start) \BitAnd (\BitNeg
+      (\BitNeg 0 \ShiftLeft len))$
+    \EndProcedure
+  \end{algorithmic}
+
+  The answer is given above. I'll now explain this function, since it
+  will be used a lot throughout this text.
+
+  If given the input \Call{getbits}{$80, 4, 6$} how may we calculate
+  the value $5$ from this?
+
+  $80$ is represented by the bit pattern $0101\ 0000$. First, we'll
+  right shift down the pattern $start=4$ steps, $0101\ 0000 \ShiftRight
+  start$ ,resulting in the bit pattern $0000\ 0101$. Now all that
+  remains to be done is that we need to figure out how construct the
+  bit pattern $0000\ 0111$ from the input values. Once we have figured
+  out how to make this pattern, we can calculate the proper result
+  like this: $0000\ 0101 \BitAnd 0000\ 0111 = 101 = 5$
+
+  The bit pattern we want to construct is $0000\ 0111$. We want a
+  sequence of $3$ toggled bits from the lowest bit. We can trivially
+  calculate this length like this: $end - start + 1 = 6 - 4 + 1 = 3$,
+  $ + 1$ is necessary because the bit position are zero based.
+
+  We now have the length of the pattern. Now we need to figure out how
+  to construct it. From the operation $\BitXor 0$ you get the bit
+  pattern $1111\ 1111$. Then, by shifting this pattern $len$ steps to
+  the left, $3 \ShiftLeft 1111\ 1111$ we end up with the value $1111\
+  1000$. Now, by simply using the bitwise not operation again,
+  $\BitNeg (1111\ 1000)$ ,we end up with the desired pattern $0000\
+  0111$. And now we can simply extract the bit pattern like this:
+  $0000\ 0101 \BitAnd 0000\ 0111 = 101 = 5$
+
+  This method so general that it not only works on 8-bit numbers, but
+  also on $n-bit$ numbers! The fact that we're using the bitwise
+  shiftings and not operations doesn't in this case affect the fact
+  that this is a very general algorithm. The reader should verify that
+  this method also works for 16-bit number by using this algorithm to
+  extract the pattern $1100$ from the 16-bit number $1100\ 0011\ 1010\
+  1111$.
+
 \end{Answer}
