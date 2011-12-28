@@ -5,6 +5,9 @@
 \chapter{Digital Color}
 \label{cha:color}
 
+% opponent process
+% http://en.wikipedia.org/wiki/Opponent_process#cite_note-2
+
 % standard rgb color spaces.pdf for color spaces, values xy whitepoint
 
 % cotton color!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!11
@@ -345,6 +348,18 @@ used in certain formats, to give an example.
 
 \subsection{Other channel sizes}
 
+Other kinds of numbers than 8-bit numbers can be assigned to the
+separate channels as well. Assigning a 16-bit number to each channel
+is also common, and is supported by the PNG
+format\cite{boutel:_png_portab_networ_graph_specif_version12}, which
+we'll discuss in chapter \ref{cha:png}. This is for obvious reasons
+known as 48-bit. If an alpha channel is added to this model it is then
+as 64-bit color.
+
+In 48-bit the miaxmum value of a color channel is obvious $2^{16} - 1
+= 65535$, meaning that the reddest of red is represented by the
+triplet $(65535, 0, 0)$
+
 \subsection{Grayscale Color}
 
 \newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
@@ -352,7 +367,7 @@ used in certain formats, to give an example.
 
 If every color channel of a RGB color is set to the same value, the
 resulting color will be a grayscale color. Using 24-bit color, we can for example make the following
-grayscales:
+scalwes of grey :
 \selfrgbtripgray{100},\selfrgbtripgray{210},\selfrgbtripgray{60}. Using
 24-bits you can really only represent 256 different possible
 grayscale colors because $256$ is how many different values can be
@@ -427,45 +442,6 @@ byte. Algorithm \ref{alg:read-24-bit-rgb} demonstrates how to read
 all the separate color channels.
 
 \todo{discuss endianess}
-
-\begin{algorithm}[H]
-  \caption{Reading the color channels of RGB 24-bit number.}
-  \label{alg:read-24-bit-rgb}
-  \begin{algorithmic}[1]
-    \Let{$R$}{\VoidCall{ReadByte}}
-    \Let{$G$}{\VoidCall{ReadByte}}
-    \Let{$B$}{\VoidCall{ReadByte}}
-  \end{algorithmic}
-\end{algorithm}
-
-\subsubsection{32-bit color}
-
-32-bit color is very much like 24-bit color. But the alpha channel
-can either come before the RGB color values, ARGB\index{ARGB}, or
-they can occur after the RGB color values, RGBA\index{RGBA}. Figure
-\ref{fig:32-bit-colors-bits} shows both the variants. The first one
-is ARGB och the second one RGBA. The separate alpha channel can be
-parsed in the same way the separate color channels are parsed in
-algorithm \ref{alg:read-24-bit-rgb}.
-
-\begin{figure}
-  \centering
-  {\Large%
-    \textcolor{gray}{11110000}%
-    \textcolor{red}{10001011}%
-    \textcolor{green}{01010010}%
-    \textcolor{blue}{\fullbyte}
-
-    \textcolor{red}{10001011}%
-    \textcolor{green}{01010010}%
-    \textcolor{blue}{\fullbyte}%
-    \textcolor{gray}{11110000}%
-  }
-
-  \caption{The ARGB and RGBA variants of 24-bit color depth. The
-    gray color represents the alpha channel }
-  \label{fig:32-bit-colors-bits}
-\end{figure}
 
 \subsubsection{16-bit color}
 

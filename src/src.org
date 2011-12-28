@@ -19,11 +19,17 @@ http://www.handprint.com/HP/WCL/color7.html#CIELUV
 * Excellent sources:  ICC White Papers
 http://www.color.org/whitepapers.xalter
 
-* [edit] White points of standard illuminants extra source. 
+* [edit] White points of standard illuminants extra source.
 http://wayback.archive.org/web/*/http://www.colour.org/tc8-04/Data/F.txt
 
-* Gamma correction. useful stanford applet. 
+* Gamma correction. useful stanford applet.
 http://graphics.stanford.edu/courses/cs178/applets/gamma.html
 
-* Introduction to color theory 
+* Introduction to color theory
 http://graphics.stanford.edu/courses/cs178-10/applets/locus.html
+
+* Color conversion math and formulas
+http://www.easyrgb.com/index.php?X=MATH
+
+* RGB Working Space Information
+http://www.brucelindbloom.com/index.html?WorkingSpaceInfo.html
