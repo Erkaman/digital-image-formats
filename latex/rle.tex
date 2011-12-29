@@ -169,7 +169,8 @@ that could get quite efficient compression ratios using RLE.
   \item AAABBBCCC
   \item eric
   \item success
-  \item The infinite string $aaabbbaaabbbaaa\dots$
+  \item The very long,repeating string $aaabbbaaabbbaaa\dots aaabbb$,
+    whose length is dividable by $3$.
     % \item The infinite string $aabbbaabbb\dots$
   \end{enumerate}
 
@@ -634,7 +635,22 @@ contents of the packet is read and outputted byte by byte.
   \item 2A2B2C, $\frac{2}{3}$
   \item 0e0r0i0c, $2$
   \item 0s0u1c0e1s, $\frac{10}{7}$
-  \item $2a2b2a2b\dots$, $\frac{2}{3}$
+  \item $2a2b2a2a2b\dots 2a$, $\frac{2}{3}$.
+
+    And as long as the length of the original string is dividable by
+    $3$ and the pattern keeps repeating in the same way, then
+    compression ratio will be constant. Because if we have the
+    patterns $aaa$ an $bbb$ repeating, if we assign the number total
+    of these repeating strings to the symbol $c$, then the original
+    file size will be $3c$. And during the compression, these $c$
+    strings will be compressed down to $2a$ and $3b$ and the total
+    size of the compressed string will be $2n$. So the compression
+    ratio ends up being:
+
+    \begin{equation*}
+      \frac{2n}{3n} = \frac{2}{3}
+    \end{equation*}
+
   \end{enumerate}
 
 \end{Answer}
