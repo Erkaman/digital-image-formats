@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
             break;
 
         ++argv;
-	--argc;
+        --argc;
     }
 
     if(argc < 1){
@@ -89,7 +89,7 @@ void RLE_Decode(FILE * in, FILE * out)
 
     while (!feof(in)){
 
-	verbosePrint("RLE Packet: data = %d, size = %d\n", c, length);
+        verbosePrint("RLE Packet: data = %d, size = %d\n", c, length);
         for(; length > 0; --length)
             writeByte(c,out);
 
@@ -102,41 +102,36 @@ void RLE_Encode(FILE * in, FILE * out)
 {
     BYTE c2,c1;
     BYTE length;
-    int passedFirstCharacter;
 
     verbosePrint("RLE Encoding\n");
 
     length = 1;
-    passedFirstCharacter = 0;
+    c1 = readByte(in);
 
-    c2 = readByte(in);
-    while (!feof(in)){
+    while (1){
 
-        /* if it's not the first character. */
-        if(passedFirstCharacter){
-            if(c2 == c1 && length < BYTE_MAX)
-                ++length;
-            else{
-
-		verbosePrint("RLE Packet: data = %d, size = %d\n", c1, length);
-
-                writeByte(length,out);
-                writeByte(c1,out);
-
-                length = 1;
-            }
-        }
-        passedFirstCharacter = 1;
-        c1 = c2;
         c2 = readByte(in);
+
+        if(feof(in))
+            break;
+
+        if(c1 == c2 && length < BYTE_MAX)
+            ++length;
+        else{
+            verbosePrint("RLE Packet: data = %d, size = %d\n", c2, length);
+
+            writeByte(length,out);
+            writeByte(c1,out);
+
+            c1 = c2;
+
+            length = 1;
+        }
     }
 
-    /* write the last bytes. */
-    if(passedFirstCharacter){
-	verbosePrint("RLE Packet: data = %d, size = %d\n", c1, length);
-        writeByte(length,out);
-        writeByte(c1,out);
-    }
+    verbosePrint("RLE Packet: data = %d, size = %d\n", c1, length);
+    writeByte(length,out);
+    writeByte(c1,out);
 }
 
 void writeRawPacket(BYTE length,BYTE * data,FILE * out)
@@ -152,7 +147,7 @@ void writeRawPacket(BYTE length,BYTE * data,FILE * out)
 
     for(i = 0 ; i < (length + 1) ; ++i){
         writeByte(data[i],out);
-	verbosePrint("%d\n",data[i]);
+        verbosePrint("%d\n",data[i]);
     }
 }
 
@@ -255,21 +250,21 @@ void packBitsDecode(FILE * in, FILE * out)
         if(head & 0x80){
             b = readByte(in);
 
-	    verbosePrint("Packbits RLE Packet: data = %d, size = %d\n", b, length + 1);
+            verbosePrint("Packbits RLE Packet: data = %d, size = %d\n", b, length + 1);
 
             for(length = length + 1; length > 0; --length)
                 writeByte(b,out);
         } else {
             /* raw packet */
 
-	    verbosePrint("Packbits Raw Packet: size = %d, contents:\n", length + 1);
+            verbosePrint("Packbits Raw Packet: size = %d, contents:\n", length + 1);
 
             for(length = length + 1; length > 0; --length){
 
                 b = readByte(in);
                 writeByte(b,out);
 
-		verbosePrint("%d\n",b);
+                verbosePrint("%d\n",b);
             }
         }
 
