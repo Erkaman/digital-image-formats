@@ -71,16 +71,17 @@ int main(int argc, char *argv[])
 void printHelp(void)
 {
     printf("Usage: rle [OPTION]... IN OUT\n");
-    printf("Compress or decompress the IN file to the OUT file using the Run Length Encoding/Decoding algorithm.\n");
+    printf("Compress or decompress the IN file to the OUT file using the Run Length Encoding algorithm.\n");
 
     printf("  --help\tDisplay this help message.\n");
-    printf("  -p\tUse the packBits algorithm for the (de)compression(default is plain RLE).\n");
+    printf("  -p\tUse the PackBits RLE algorithm for the (de)compression(default is plain RLE).\n");
     printf("  -d\t Perform decompression rather than compression to the output file.\n");
 }
 
 void RLE_Decode(FILE * in, FILE * out)
 {
-    BYTE c,length;
+    BYTE c;
+    short length;
 
     verbosePrint("RLE Decoding\n");
 
@@ -90,6 +91,7 @@ void RLE_Decode(FILE * in, FILE * out)
     while (!feof(in)){
 
         verbosePrint("RLE Packet: data = %d, size = %d\n", c, length);
+        length += 1;
         for(; length > 0; --length)
             writeByte(c,out);
 
@@ -105,7 +107,7 @@ void RLE_Encode(FILE * in, FILE * out)
 
     verbosePrint("RLE Encoding\n");
 
-    length = 1;
+    length = 0;
     c1 = readByte(in);
 
     while (1){
@@ -118,14 +120,14 @@ void RLE_Encode(FILE * in, FILE * out)
         if(c1 == c2 && length < BYTE_MAX)
             ++length;
         else{
-            verbosePrint("RLE Packet: data = %d, size = %d\n", c2, length);
+            verbosePrint("RLE Packet: data = %d, size = %d\n", c2, length+1);
 
             writeByte(length,out);
             writeByte(c1,out);
 
             c1 = c2;
 
-            length = 1;
+            length = 0;
         }
     }
 
@@ -136,16 +138,13 @@ void RLE_Encode(FILE * in, FILE * out)
 
 void writeRawPacket(BYTE length,BYTE * data,FILE * out)
 {
-    BYTE packetHead;
     int i;
 
-    packetHead = 0;
-    packetHead |= length;
-    writeByte(packetHead,out);
+    writeByte(length,out);
 
     verbosePrint("Packbits Raw Packet: size = %d,contents:\n", length + 1);
 
-    for(i = 0 ; i < (length + 1) ; ++i){
+    for(i = 0 ; i < length + 1 ; ++i){
         writeByte(data[i],out);
         verbosePrint("%d\n",data[i]);
     }
@@ -165,73 +164,75 @@ void writeRunLengthPacket(BYTE length,BYTE data,FILE * out)
 
 void packBitsEncode(FILE * in, FILE * out)
 {
-    BYTE c2,c1;
+    BYTE c1,c2;
     BYTE length;
-    int passedFirstCharacter;
     int packetType;
     BYTE data[128];
 
     verbosePrint("RLE Packbits Encoding\n");
 
-    length = 0;
-    passedFirstCharacter = 0;
-
     packetType = RAW_PACKET;
-    c2 = readByte(in);
+    length = 0;
+    c1 = readByte(in);
 
     while (!feof(in)){
-        /* if it's not the first character. */
-        if(passedFirstCharacter){
 
-            /* if the packet is full.*/
-            if(length == 127){
-                if(packetType == RUN_LENGTH_PACKET){
-                    writeRunLengthPacket(length,c1,out);
-                    packetType = RAW_PACKET;
-                    length = 0;
-                }else{
-                    writeRawPacket(length-1,data,out);
-                    length = 1;
-                }
-            }
-            else if(c2 == c1){
-                /* if a raw packet was being written, finish it. */
-                if(packetType == RAW_PACKET && length > 0){
-                    writeRawPacket(length-1,data,out);
-                    length = 0;
-                }
-                ++length;
-                packetType = RUN_LENGTH_PACKET;
-            }
-            /* if it's a raw packet, or the run length packet is full. */
-            else{
-                if(packetType == RUN_LENGTH_PACKET){
-                    writeRunLengthPacket(length,c1,out);
-                    packetType = RAW_PACKET;
-                    length = 0;
-                }else{
-                    /* continue raw packet */
-                    data[length] = c1;
-                    length = length + 1;
-                    packetType = RAW_PACKET;
-                }
+        c2 = readByte(in);
+
+        if(feof(in))
+            break;
+
+        /* if it's not the first character. */
+
+        /* if the packet is full.*/
+        if(length == 127){
+            if(packetType == RUN_LENGTH_PACKET){
+                writeRunLengthPacket(length,c1,out);
+                packetType = RAW_PACKET;
+                length = 0;
+            }else if(packetType == RAW_PACKET){
+
+                data[length] = c1;
+                writeRawPacket(length,data,out);
+                length = 0;
+                c1 = c2;
             }
         }
-        passedFirstCharacter = 1;
-        c1 = c2;
-        c2 = readByte(in);
+        else if(c2 == c1){
+            /* if a raw packet was being written, finish it. */
+            if(packetType == RAW_PACKET && length > 0){
+                writeRawPacket(length-1,data,out);
+                length = 0;
+            }
+            ++length;
+            packetType = RUN_LENGTH_PACKET;
+        }
+        /* if it's a raw packet, or the end of run length packet has been reached. */
+        else{
+            if(packetType == RUN_LENGTH_PACKET){
+                writeRunLengthPacket(length,c1,out);
+                packetType = RAW_PACKET;
+                length = 0;
+            }else if(packetType == RAW_PACKET){
+                /* continue raw packet */
+                data[length] = c1;
+                length += 1;
+            }
+
+            c1 = c2;
+
+        }
+
     }
 
-/* write the last bytes. */
-    if(passedFirstCharacter){
-        if(packetType == RUN_LENGTH_PACKET){
-            writeRunLengthPacket(length,c1,out);
-        } else{
-            data[length] = c1;
-            writeRawPacket(length,data,out);
-        }
+    if(packetType == RUN_LENGTH_PACKET){
+        writeRunLengthPacket(length,c1,out);
+    } else{
+        data[length] = c1;
+        writeRawPacket(length,data,out);
     }
 }
+
 
 void packBitsDecode(FILE * in, FILE * out)
 {
@@ -242,7 +243,6 @@ void packBitsDecode(FILE * in, FILE * out)
     head = readByte(in);
 
     while (!feof(in)){
-
 
         length = head & 0x7f;
 
