@@ -35,7 +35,7 @@
 % alpha%
 % file:///home/eric/Dropbox/freebooks/netghost.narod.ru/gff/graphics/book/ch02_04.htm
 
-%\cite{niederst1999webdesign}
+% \cite{niederst1999webdesign}
 
 % useful glossary.
 % http://tigger.uic.edu/~hilbert/Glossary.html#Brightness
@@ -54,7 +54,7 @@
 
 % GREAT walkthough of the trichromatic color theory, the eye, and the
 % CIE color spaces.
-%\cite{Cotton95colour}
+% \cite{Cotton95colour}
 
 % encylopedia.
 % http://netghost.narod.ru/gff/graphics/book/ch02_02.htm
@@ -333,6 +333,7 @@ channels in a different order. The $(A,R,G,B)$ and $(A,B,G,R)$ order are also
 used in certain formats, to give an example.
 
 \subsection{Other channel sizes}
+\label{sec:other-channel-sizes}
 
 \subsubsection{48- and 64-bit color}
 
@@ -401,6 +402,7 @@ Also, in 16-bit color the maximum value of a color channel is $2^5 - 1
 
 \subsection{Grayscale Color}
 
+
 \newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
 \newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
 
@@ -422,6 +424,44 @@ greyscale, the PNG format, for example, supports supports grayscale of
 the bit depths $1$, 2, 4, 8 and
 16\cite{boutel:_png_portab_networ_graph_specif_version12}.
 
+\subsection{Color palettes}
+
+And finally, one last way of storing color is by using color
+palettes. A color palette is an array of colors that is specified at
+the beginning of the image. These colors are most typically stored as
+24-bit RGB triplets. The image data in an image that uses a color
+palette consists not of a sequence of RGB triplets nor grayscale
+color, but of a sequence of indexes to the palette.
+
+For example, say an image had the palette $(Red, Purple, Black,
+Green)$. Then the color Purple in the image would be represented by
+the number $1$. And note that $1$ is a \textit{zero based} index to
+the palette, and not one based. You may think that most image formats
+would for this palette store these indexes in 2-bit numbers, since
+that all the bits you need to store 4 different combinations of
+something. But they would surprisingly enough have been stored in
+8-bit bytes. This is mainly to keep things as simple as possible,
+because few programming languages supports directly reading files bit
+by bit from a file. It is actually for several reasons more efficent
+to read the data from a file in 8-bit bytes servings. I will discuss
+this subject more in depth at a later time.
+
+Color palettes are most useful when an image uses a limited subset of
+colors. Say a 10 by 10 pixels image uses only 4 different colors and
+that these colors are stored in 24-bit RGB triplets. Then the color
+data requires $100 \cdot 3 = 300$ bytes to be stored. If the image on
+the other hand put these four colors into a palette at the beginning
+of the image, then the these colors could be represented as 8-bit
+bytes in the image data instead. Then it would only take $100 + 4
+\cdot 3 = 112$ bytes to store the image. Note that storing the palette
+requires an extra overhead o $12$ bytes in this case. So for the usage
+of palettes to really pay off, the space spacing gained by using a
+palette has to compensate for the extra overhead of storing it.
+
+For images whose widths and heights are really low the usage of a
+palette tends to increase the file of the size, while for huge images
+that uses a small subset of colors a significant space savings can
+result from the usage of a palette.
 
 \section{Gamma}
 
@@ -523,5 +563,5 @@ imaging systems.
 % crt gamma = 2.5
 
 % endianess sources:
-%file:///home/eric/Dropbox/freebooks/netghost.narod.ru/gff/graphics/book/ch06_01.htm
-%http://www.ietf.org/rfc/ien/ien137.txt
+% file:///home/eric/Dropbox/freebooks/netghost.narod.ru/gff/graphics/book/ch06_01.htm
+% http://www.ietf.org/rfc/ien/ien137.txt

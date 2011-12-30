@@ -196,7 +196,6 @@ TGA_Image loadTGA_Image(FILE * in)
 TGA_Header loadTGA_Header(FILE * in)
 {
     TGA_Header header;
-
     header.IDLength = readByte(in);
     header.colorMapType = readByte(in);
     header.imageType = readByte(in);
