@@ -38,12 +38,14 @@ for fileName in dirList:
         out.write(fileName + ' & ')
 
         fileName = os.path.join(testDirectory,fileName)
+        outfileName = os.path.join(testDirectory,fileName + ".lzw")
+
         uncompressedSize = os.path.getsize(fileName)
         out.write(str(uncompressedSize) + ' & ')
 
         for codeSize in range(9,16):
 
-            command = './lzw ' + '-cs=' + str(codeSize) + ' ' + fileName
+            command = './lzw ' + '-cs=' + str(codeSize) + ' ' + fileName + ' ' + outfileName
             os.system(command)
 
             compressedSize = os.path.getsize(fileName + '.lzw')

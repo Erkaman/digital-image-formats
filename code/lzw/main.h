@@ -28,5 +28,4 @@ typedef struct {
     unsigned int characterCode;
 } tableEntry;
 
-
 #endif /* _MAIN_H_ */

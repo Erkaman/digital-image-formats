@@ -40,11 +40,11 @@ throughout his text.
 
   \end{Exercise}
 
-\begin{Exercise}[label={n-bits-max-val}]
-  If you know that a binary number has $n$ bits, then what is its
-  maximum possible value? Also, how many different possible values can
-  such a number have?
-\end{Exercise}
+  \begin{Exercise}[label={n-bits-max-val}]
+    If you know that a binary number has $n$ bits, then what is its
+    maximum possible value? Also, how many different possible values can
+    such a number have?
+  \end{Exercise}
 
   \begin{Exercise}[label={count-bits-func}]
     Given a number $x$, find a function $c(x)$ that will count the
@@ -55,7 +55,7 @@ throughout his text.
     (Hint: use the binary logarithm, $\log_2$, and the floor function,
     $\lfloor x \rfloor$)
 
-\end{Exercise}
+  \end{Exercise}
 
 \item[bit] The separate digits of a binary numbers are often referred
   to as bits.
@@ -84,11 +84,11 @@ throughout his text.
 
 \item[Least sigficant bit] Alternative name for the lowest bit.
 
-\begin{Exercise}[label={bits-value-order}]
-  What are the values of bits 1,3 and the most significant bit in the
-  number $01001$?
+  \begin{Exercise}[label={bits-value-order}]
+    What are the values of bits 1,3 and the most significant bit in the
+    number $01001$?
 
-\end{Exercise}
+  \end{Exercise}
 
 \item[Byte] A byte is simply a binary number with 8 digits/bits. The
   max value of a byte is $2^8 - 1 = 255$ and there are $2^8 = 256$
@@ -155,9 +155,12 @@ throughout his text.
 
   \end{Exercise}
 
+
 \item[String] A string is simply a sequence of letters in some
   encoding. The most commonly used encoding in this text will be
   ASCII \cite{rfc20} and we will also most typically use C-strings.
+
+  If the string ``eric'' is stored in the variable \texttt{str}, then
 
 \item[C string] String as they are represented in the C programming
   language. In this language, strings are always terminated by a so
@@ -316,10 +319,10 @@ like this:
 
 \begin{center}
   \begin{tabular}{lr}
-              & 10110  \\
+    & 10110  \\
     $\BitAnd$ & 01100 \\
     \hline
-              & 00100 \\
+    & 00100 \\
   \end{tabular}
 \end{center}
 
@@ -341,7 +344,7 @@ to illustrate the difference between them:
 
 \begin{center}
   \begin{tabular}{lr}
-             & 10110  \\
+    & 10110  \\
     $\BitOr$ & 01100 \\
     \hline
     & 11110 \\
@@ -376,10 +379,10 @@ expression $10110 \BitXor 01100$:
 
 \begin{center}
   \begin{tabular}{lr}
-              & 10110  \\
+    & 10110  \\
     $\BitXor$ & 01100 \\
     \hline
-              & 11010 \\
+    & 11010 \\
   \end{tabular}
 \end{center}
 
@@ -445,7 +448,30 @@ the left, so that for the 4-bit number $0110$: $0110 \ShiftRight 2 =
 
   (important!) What does this expression really do?
 
-  (Hint: what kind of value does it extract from the byte $120$?)
+  Hint: what kind of value does it extract from the byte $120$?
+
+\end{Exercise}
+
+\begin{Exercise}[label={bit-equiv}]
+
+  What is
+
+  \begin{enumerate}[(a)]
+  \item $1 \ShiftLeft 0$
+  \item $1 \ShiftLeft 1$
+  \item $1 \ShiftLeft 2$
+  \item $3 \ShiftLeft 1$
+  \item $3 \ShiftLeft 2$
+  \item $3 \ShiftLeft 3$
+  \end{enumerate}
+
+  Can you express the operation $N \ShiftLeft S$, if the condition $S
+  \geq 0$ holds, in terms of the arithmetic operators? Exponentiation
+  counts as an arithmetic operator in this exercise.
+
+\end{Exercise}
+
+\begin{Exercise}[]
 
 \end{Exercise}
 
@@ -474,6 +500,10 @@ array $a$ contains the values the $3,1,2$ then to access the first
 value of this array, $3$, the syntax $a[0]$ is used. In general, to
 access the n:th value of an array you do $a[n-1]$, since arrays are 0
 indexed.
+
+Strings are also considered arrays. If the string ``eric'' was
+stored in the variable \texttt{str}, then the letter ``e'' can be
+accessed with the syntax $str[0]$
 
 To then to go through each value in the array $a$, the syntax
 demonstrated in algorithm \ref{alg:for-each} is used.
@@ -521,13 +551,13 @@ common divisor of the two given numbers.
   \label{alg:euclid}
   \begin{algorithmic}[1]
     \Procedure{Euclid}{$a,b$}
-      \State $r\gets a\bmod b$
-      \While{$r\not=0$}
-      \State $a\gets b$
-      \State $b\gets r$
-      \State $r\gets a\bmod b$
-      \EndWhile
-      \State \textbf{return} $b$
+    \State $r\gets a\bmod b$
+    \While{$r\not=0$}
+    \State $a\gets b$
+    \State $b\gets r$
+    \State $r\gets a\bmod b$
+    \EndWhile
+    \State \textbf{return} $b$
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -602,21 +632,21 @@ to introduce several functions for handling file operations.
 
 \begin{Exercise}[label={getbits}]
 
-Make a function named \Call{getbits}{$b, start, end$} that extracts
-the bit pattern of a number $b$ from a given starting position to a
-given ending position. These positions are be zero-based. Example:
-\Call{getbits}{$80, 4, 6$}$=5$, because $80$ is represented by the
-binary number $0101\ 0000$ and from the positions 4 to 6 there is a
-bit pattern that has a value of $5$, which is what this function is
-supposed to extract.
+  Make a function named \Call{getbits}{$b, start, end$} that extracts
+  the bit pattern of a number $b$ from a given starting position to a
+  given ending position. These positions are be zero-based. Example:
+  \Call{getbits}{$80, 4, 6$}$=5$, because $80$ is represented by the
+  binary number $0101\ 0000$ and from the positions 4 to 6 there is a
+  bit pattern that has a value of $5$, which is what this function is
+  supposed to extract.
 
-It is especially important that you do this exercise, because the
-function \textproc{getbits} is going to be used \textit{a lot}
-throughout this text.
+  It is especially important that you do this exercise, because the
+  function \textproc{getbits} is going to be used \textit{a lot}
+  throughout this text.
 
-Hint: The bitwise operators $\ShiftLeft, \ShiftRight, \BitAnd,
-\BitNeg$ and the arithmetic operators $+,-$ is all you really need to
-use to solve this problem.
+  Hint: The bitwise operators $\ShiftLeft, \ShiftRight, \BitAnd,
+  \BitNeg$ and the arithmetic operators $+,-$ is all you really need to
+  use to solve this problem.
 
 \end{Exercise}
 
@@ -767,17 +797,32 @@ use to solve this problem.
 
 \end{Answer}
 
+\begin{Answer}[ref={bit-equiv}]
+
+  \begin{enumerate}[(a)]
+  \item $1$
+  \item $2$
+  \item $4$
+  \item $6$
+  \item $12$
+  \item $24$
+  \end{enumerate}
+
+  The operation $N \ShiftLeft S$ is equivalent to $N \cdot 2^S$.
+
+\end{Answer}
+
 \begin{Answer}[ref={bitcount}]
 
   \begin{algorithmic}[1]
     \Procedure{bitcount}{$n$}
-      \Let{$count$}{$0$}
+    \Let{$count$}{$0$}
 
-      \ForTo{$shift$}{$0$}{$8$}
-        \If{$n \BitAnd (1 \ShiftLeft shift)$}
-        \State \Call{Inc}{$count$}
-        \EndIf
-      \EndFor
+    \ForTo{$shift$}{$0$}{$8$}
+    \If{$n \BitAnd (1 \ShiftLeft shift)$}
+    \State \Call{Inc}{$count$}
+    \EndIf
+    \EndFor
 
     \EndProcedure
   \end{algorithmic}
@@ -788,10 +833,10 @@ use to solve this problem.
 
   \begin{algorithmic}[1]
     \Procedure{bitcount}{$n$}
-      \linecomment{Calculate the length of the bit pattern}
-      \Let{$len$}{$end - start + 1$}
-      \State \textbf{return} $(b \ShiftRight start) \BitAnd (\BitNeg
-      (\BitNeg 0 \ShiftLeft len))$
+    \linecomment{Calculate the length of the bit pattern}
+    \Let{$len$}{$end - start + 1$}
+    \State \textbf{return} $(b \ShiftRight start) \BitAnd (\BitNeg
+    (\BitNeg 0 \ShiftLeft len))$
     \EndProcedure
   \end{algorithmic}
 

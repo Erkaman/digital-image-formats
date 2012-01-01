@@ -5,60 +5,55 @@
 \chapter{LZW}
 \label{cha:lzw}
 
-In this chapter, we will discuss the data compression algorithm LZW as
-it is defined and described in
-\cite{nelson89:_lzw_data_compr,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC}. We
+In this chapter, we will discuss the data compression algorithm LZW,
+as it is defined and described in
+\cite{Nelson:1989:LDC:77102.77104,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC,mark1996data_compression_book,nelson:_lzw_revis}. We
 will first discuss the history behind the algorithm, then the
 compression algorithm itself, after this we will describe the
-decompression algorithm and in the end we will discuss the efficiency
-and compression ratio of this algorithm.
+decompression algorithm and in the end we will discuss the compression
+efficiency of this algorithm.
 
 \section{The History Behind}
 
-In the years 1977 to 1978 the two Israeli researchers published two
-papers; in the first of these papers \cite{Ziv77auniversal}, they
+In the years 1977 to 1978, the two Israeli researchers published two
+papers; in the first of these papers, \cite{Ziv77auniversal}, they
 described the algorithm that came to be known as LZ77(sometimes also
-known as LZ1) and the second of these papers \cite{Ziv78compressionof}
-they defined the algorithm LZ78(also known as LZ2). LZ obviously
-stands for their initials,\textbf{L}empel and \textbf{Z}iv, and the
-number is the years in which the algorithm was published. These two
-methods started the family of compression algorithms that is today
-known as the \textit{dictionary methods}\index{ḑictionary methods}
-\cite{Salomon:2004:DCC,roelofs99:_png,winters:_us_paten_adapt}.
+known as LZ1) and in the second of these papers,
+\cite{Ziv78compressionof}, they defined the algorithm that would from
+then on become known as LZ78(also known as LZ2)
+\cite{roelofs09:_histor_portab_networ_graph_png_format,Salomon:2004:DCC,winters:_us_paten_adapt}.
 
-Examples of algorithms in the family of dictionary methods are LZMA
-\cite{palov11}, LZW and LZSS \cite{Salomon:2004:DCC}. LZW is the
-method that we will discuss in this chapter. It was invented by Terry
-Welch during his research at Sperry and was based on the LZ78
-method. He published the algorithm in \cite{welch85:_u}, which is
-going to be the main source of reference for this entire
-chapter. \cite{roelofs99:_png}
+These two methods started the family of compression algorithms that is
+known as the \textit{dictionary methods}\index{dictionary methods},
+because the majority of these methods are based on either LZ77 or
+LZ78
 
-\section{Description of the Compression algorithm}
+Examples of algorithms in the family of dictionary methods are LZMA,
+which is based on LZ78 \cite{palov11}, LZW, which is also based on
+LZ78, and LZSS,which was based on LZ77 \cite{Salomon:2004:DCC}. LZW is
+the method that we will discuss in this chapter. It was invented by
+Terry Welch and he published the algorithm in \cite{welch85:_u}.
+
+\section{The Compression algorithm}
 \label{sec:lzw-comp-desc}
 
 The LZW compression\index{LZW compression} algorithm is best
 understood by walking through the LZW algorithm's process of
-compressing some sample data.
-
-In this example the algorithm is going to compress the sample data
-\texttt{ababcbababaaaaaaa}.
+compressing some example string, so we will in this example
+demonstrate how the compression of the string
+$ababcbababaaaaaaa$ is done in LZW.
 
 Central to the entire algorithm's process is a string table. In this
-table numbers called \textit{codes}\index{code} are assigned to
-strings. The algorithm start by filling this string table with all the
-strings that are possible to fit in a byte. That is, it adds all the
-number codes 0-255 to the string table and these number codes are
-assigned a one length string and this one length string consists of
-the character that the number code represents in the current
-encoding. For this example, we will use the character set ASCII
-\cite{rfc20}, but really any character set could be used.
-
-Table \ref{tab:str-tab-ascii} shows how this table ends up looking
-like when it is filled.
+table, numbers called \textit{codes} are assigned to strings. The
+algorithm starts by filling this string table with all the strings
+that are possible to fit in a byte. So all the codes $0-255$ are
+assigned their respective strings. We will for sake of simplicity use
+ASCII encoding throughout this example, so the codes $0-255$ are
+assigned their respective ASCII characters, as is shown in table
+\ref{tab:str-tab-ascii}.
 
 \newcommand{\dotsrow}{\dots & \dots \\}
-\newcommand{\strrow}[2]{$#1$ & #2 \\}
+\newcommand{\strrow}[2]{$#1$ & $#2$ \\}
 
 \begin{table}
   \centering
@@ -78,34 +73,29 @@ like when it is filled.
     \strrow{100}{d}
     \strrow{101}{e}
     \dotsrow
-    \strrow{255}{}
+    \strrow{255}{(\text{unassigned to in the ASCII set})}
 
     \bottomrule
   \end{tabular}
-  \caption{The initial LZW string table, filled with all the ASCII
-    characters.}
+  \caption{The initial LZW string table, assuming that we are ASCII encoding.}
   \label{tab:str-tab-ascii}
 \end{table}
 
-%\newcommand*{\newcode}[1]{%
-%  \expandafter\newcommand\csname#1\endcsname c[1][]{\texttt{#1}##1\xspace}}
+\newcommand{\acode}{$a$\xspace}
+\newcommand{\bcode}{$b$\xspace}
+\newcommand{\ccode}{$c$\xspace}
+\newcommand{\abcode}{$ab$\xspace}
+\newcommand{\bacode}{$ba$\xspace}
+\newcommand{\abccode}{$abc$\xspace}
 
-%\newcode{a}
-\newcommand{\acode}{\texttt{a}\xspace}
-\newcommand{\bcode}{\texttt{b}\xspace}
-\newcommand{\ccode}{\texttt{c}\xspace}
-\newcommand{\abcode}{\texttt{ab}\xspace}
-\newcommand{\bacode}{\texttt{ba}\xspace}
-\newcommand{\abccode}{\texttt{abc}\xspace}
-
-Now the algorithm actually start going through the sample
-string. First it reads in the character \acode. In the string table
-that letter has the code $97$, so the code $97$ is outputted. Next,
-the character \bcode is read, which has the code $98$. So $98$ is
-outputted and then the two strings read so far are appended together
-to form the string \abcode. The string table is searched for the
-string \abcode, but it cannot be found in the string table, so it is
-added to the string table and is assigned the next available code, $256$.
+Now the actual compression of the string starts. First it reads in the
+character \acode. In the string table that letter has the code $97$,
+so the code $97$ is outputted. Next, the character \bcode is read,
+which has the code $98$. So $98$ is outputted and then the two strings
+read so far are appended together to form the string \abcode. The
+string table is searched for the string \abcode, but it cannot be
+found in the string table, so it is added to the string table and is
+assigned the next available code, $256$.
 
 \acode is discarded, \bcode is kept and another \acode is
 read. First \bcode is outputted, and the appended string
@@ -124,11 +114,30 @@ added to the string table and given the code $258$.
 
 And the algorithm just keeps going on like this. Table
 \ref{tab:str-tab-str} shows all the codes that were added during the
-compression of the sample string. Table \ref{tab:lzw-walkthru} gives a
-detailed walkthrough of the compression of the same string. Do study
-both of these tables table carefully and don't continue reading until you
-fully understand what happened during the compression of the
-string.
+compression of the sample string $ababcbababaaaaaaa$. Table
+\ref{tab:lzw-walkthru} gives a detailed walkthrough of the entire
+compression process of that same string. So the string
+$ababcbababaaaaaaa$ was in the end compressed down to the
+string $ab,256,c,257,260,a,262,263,a$.
+
+So to summarize, the LZW algorithm basically works like: the algorithm
+keeps accumulating and reading characters into the string $S$. This
+process goes on as long as, for the read in character $c$, the string
+$Sc$, where $Sc$ represents the string that is formed when the
+character $c$ is appended to the end of the string $S$, can be found
+in the dictionary. When $Sc$, for some read in character $c$, cannot
+be found in the dictionary, then the code for the string $S$ is
+outputted, and the appended string $Sc$ is added to the dictionary.
+
+\todo{Add exercise where the compression of $aaaaaaaaa....$ is
+  analyzed}
+
+\begin{Exercise}[label={lzw-compress}]
+
+  LZW compress the string $abababab$. Show the output of the
+  compressor and the resulting string table.
+
+\end{Exercise}
 
 \begin{table}
   \centering
@@ -151,86 +160,92 @@ string.
     \strrow{264}{aaaa}
     \bottomrule
   \end{tabular}
-  \caption{The string table after the LZW algorithm has been run on
-    the string \texttt{ababcbababaaaaaaa}.}
+  \caption{The resulting string table after the LZW algorithm has been run on
+    the string $ababcbababaaaaaaa$.}
   \label{tab:str-tab-str}
 \end{table}
 
+\newcommand{\lzwrow}[6]{$#1$ = $#2$ & $#3$ = $#4$ &
+  $#1$ = $#2$ & $#5$ = $#6$ \\}
+
+\newcommand{\stoplzwrow}[2]{$#1$ = $#2$ & STOP &
+  $#1$ = $#2$ & STOP \\}
+
 \begin{table}
   \centering
-  \newcommand{\lzwrow}[4]{#1 & #2 & #3 & #4 \\}
   \begin{tabular}{llll}
     \toprule
-    String Code & New Code & Output Code & New table entry \\
+    String Code & Character Code & Output Code & New table entry \\
     \midrule
-
-    \lzwrow{a}{b}{a = 97}{ab = 256}
-    \lzwrow{b}{a}{b = 98}{ba = 257}
-    \lzwrow{a}{b}{}{}
-    \lzwrow{ab}{c}{ab = 256}{abc = 258}
-    \lzwrow{c}{b}{c = 99}{cb = 259}
-    \lzwrow{b}{a}{}{}
-    \lzwrow{ba}{b}{ba = 257}{bab = 260}
-    \lzwrow{b}{a}{}{}
-    \lzwrow{ba}{b}{}{}
-    \lzwrow{bab}{a}{bab = 260}{baba = 260}
-    \lzwrow{a}{a}{a = 97}{aa = 261}
-    \lzwrow{a}{a}{}{}
-    \lzwrow{aa}{a}{aa = 262}{aaa = 262}
-    \lzwrow{a}{a}{}{}
-    \lzwrow{aa}{a}{}{}
-    \lzwrow{aaa}{a}{aaa = 263}{aaaa = 263}
-
+    \lzwrow{a}{97}{b}{98}{ab}{256}
+    \lzwrow{b}{98}{a}{97}{ba}{257}
+    \lzwrow{ab}{256}{c}{99}{abc}{258}
+    \lzwrow{c}{99}{b}{98}{cb}{259}
+    \lzwrow{ba}{257}{b}{98}{bab}{260}
+    \lzwrow{bab}{260}{a}{97}{baba}{261}
+    \lzwrow{a}{97}{a}{97}{aa}{262}
+    \lzwrow{aa}{262}{a}{97}{aaa}{263}
+    \lzwrow{aaa}{263}{a}{97}{aaaa}{264}
+    \stoplzwrow{a}{97}
     \bottomrule
   \end{tabular}
-  \caption{Detailed LZW compression on the string \texttt{ababcbababaaaaaaa}.}
+  \caption{The LZW compression process on the string $ababcbababaaaaaaa$.}
   \label{tab:lzw-walkthru}
 \end{table}
 
-\section{Technical Implementation the Algorithm}
+\section{Technical Implementation of The Compression Algorithm}
 \label{sec:lzw-enc-algorithm}
 
 In algorithm \ref{alg:lzw-compression} the complete LZW compression
-algorithm is presented. Try reading through it at least once,
-but I doubt you'd be able to understand all of it at this point. The
-implementation of the algorithm turns out not to be as easy as it
-sounds.
+algorithm is presented. Try reading through it at least once, but I
+doubt you'd be able to understand much of it at this point. The
+implementation of the algorithm turns out not to be as easy as it may
+seem
 
 \begin{algorithm}[H]
   \caption{The LZW compression algorithm.}
   \label{alg:lzw-compression}
   \begin{algorithmic}[1]
 
-    \State \VoidCall{FillInitialStringTable}
-    \Let{$nextCode$}{$256$}
-    \Let{$stringCode$}{\VoidCall{$ReadByte$}}
-    \Let{$charCode$}{\VoidCall{$ReadByte$}}
+    \Let{$maxValue$}{$2^{codeSize} - 1$}
+    \Let{$maxCode$}{$maxValue - 1$}
+
+    \State Fill the string table for the codes $1-255$
+    \Let{$nextCode$}{$256$} \Comment{The code value the next string
+      will be assigned to.}
+    \Let{$string$}{\VoidCall{$ReadByte$}}
+    \Let{$character$}{\VoidCall{$ReadByte$}}
 
     \While{\neof}
 
-      \If{\Call{InStringTable}{$stringCode,charCode$}} \label{algl:hasingcheckintable}
-        \Let{$stringCode$}{\Call{GetCode}{$stringCode,charCode$}} \label{algl:hasgetcode}
+      \If{\Call{InStringTable}{$string + character$}} \label{algl:hasingcheckintable}
+        \linecomment{Keep accumulating the string}
+%        \Let{$stringCode$}{\Call{GetCode}{$stringCode,charCode$}} \label{algl:hasgetcode}
+        \Let{$string$}{$string + character$}
+
       \Else
-        \State \Call{outputCode}{$stringCode$}
 
-        \If{$nextCode \leq maxCode$}
+        \State \Call{outputCode}{$string$}
 
-          \State \Call{AddToStringTable}{$nextCode, stringCode, charCode$}\label{algl:hashadd}
+        \linecomment{Only add the accumulated string to the table if
+          there's space for it.}  \If{$nextCode \leq maxCode$}
+
+          \State \Call{AddToStringTable}{$nextCode, string + character$}\label{algl:hashadd}
           \Inc{nextCode}{1}
 
         \EndIf
 
-        \Let{$stringCode$}{$charCode$}
+        \Let{$string$}{$character$}
 
       \EndIf
 
-      \Let{$charCode$}{\VoidCall{$ReadByte$}}
+      \Let{$character$}{\VoidCall{$ReadByte$}}
 
     \EndWhile
 
-    \State \Call{outputCode}{$stringCode$}
+    \State \Call{outputCode}{$string$}
     \State \Call{outputCode}{$maxValue$}
-    \State \Call{outputCode}{$0$} \Comment{Cause the last packet to be
+    \State \Call{outputCode}{$0$} \Comment{This causes the last packet to be
       written } \label{algl:flush}
   \end{algorithmic}
 \end{algorithm}
@@ -238,210 +253,124 @@ sounds.
 \subsection{Codes sizes}
 
 All a LZW compressed file will consist of after this algorithm has
-been run, is just a long sequence of outputted codes.
+been run on it, is just a long sequence of outputted codes.  Since all
+the of the string codes added during the compression step will have
+code values over $255$, bytes will obviously not be sufficient to
+store these codes. In our version of the LZW algorithm, fixed code
+sizes are assigned to every code. So this means that the codes are
+stored in fixed $n$-bit numbers for some value $n$. The most typically
+used code sizes are in the range $9 \leq n \leq 15$, and this is the
+also the range of code sizes that that the sample compressor for this
+chapter supports.
 
-Since all the of the actual strings(whose length is greater than one)
-in the string table have codes values over $255$, bytes will obviously
-not be sufficient to store these codes. The code sizes\index{code
-  size} used in the LZW algorithm are typically in the ranges $9 \leq
-codeSize \leq 15$. But in our examples we will be using 12-bit codes,
-as they are most commonly used.
-
-\subsection{String Storage Model}
-
-\newcommand{\strpair}[2]{(#1,#2)}
-
-You could of course just store all the strings in the string table as
-real strings. However, these strings are going to end up
-taking way more space than they really need to.
-
-As you probably remember from section \ref{sec:lzw-comp-desc}, the string
-to be added to the table is just the concatenation of the character
-just read and the former string. The concatenation of the characters
-characters \texttt{a} and \texttt{b} could be expressed as the string
-\texttt{ab}. But however, they could also be described by the
-pair\index{pair} \strpair{97}{98}, which consists of the two codes of
-the two strings. Okay, there is no real big difference in size yet,
-but now consider \texttt{abcbde} and \texttt{a} and their
-concatenation \texttt{abcbdea}. If \texttt{abcbde} has the code, say,
-289, then obviously the pair \strpair{289}{97} is much more space
-efficent than \texttt{abcbdea}.
-
-You may think we are just nitpicking here, but also need to consider
-that with huge files this string table could end up becoming huge. And
-besides, pair of numbers are often much easier to deal with than
-strings, especially in languages like \C!
-
-Using this new string storage model table \ref{tab:str-tab-str}, is
-translated to table \ref{tab:str-tab-pair}. Notice that the string
-codes of the single character strings whose codes values are less than
-$256$ are given the value $-1$  in order to differentiate them from
-ordinary strings. You will why need to this when we discuss the
-decompression algorithm.
-
-\newcommand{\pairrow}[3]{$#1$ & \strpair{#2}{#3} \\}
-
-\begin{table}
-  \centering
-  \begin{tabular}{ll}
-    \toprule
-    String & Code \\
-    \midrule
-    \pairrow{97}{-1}{a}
-    \pairrow{98}{-1}{b}
-    \pairrow{99}{-1}{c}
-    \dotsrow
-    \pairrow{256}{97}{b}
-    \pairrow{257}{98}{a}
-    \pairrow{258}{256}{c}
-    \pairrow{259}{99}{b}
-    \pairrow{260}{257}{b}
-    \pairrow{261}{260}{a}
-    \pairrow{262}{87}{a}
-    \pairrow{263}{262}{a}
-    \pairrow{264}{263}{a}
-    \bottomrule
-  \end{tabular}
-  \caption{The string table after the LZW algorithm has been run.}
-  \label{tab:str-tab-pair}
-\end{table}
+This is of course not the only possible storage model for the
+codes. In the GIF format's variation of the LZW algorithm, increasing
+codes sizes are used to even further improve the compression
+efficiency of this algorithm. We'll discuss this variation in chapter
+\ref{cha:gif}.
 
 \subsection{Table size}
 
-Since we are using fixed code sizes there is a limit on how large the
-string table can grow. For example, for 12-bit codes the maximum size
-of the string table will be $2^{11}=4096$. In algorithm
-\ref{alg:lzw-compression} the constants $maxCode$ and $maxValue$ are
-used to be make sure that the table doesn't grow beyond it's maximum
-size. In algorithm \ref{alg:lzw-constants} we show how set the size
-constants for the example code size 12. Notice that the maximum value
-of the final code, $maxCode$ is one less than the actual max size of
-the table. That's because at the end of algorithm we output the final
-code to always be the maximum value of the current code size. You will
-soon see why we do this when discuss the decompression algorithm, but for
-now ignore it.
+Since we are using fixed code sizes there must be a limit on how large
+the string table can grow. For any fixed code size $n$, this code size
+can represent $2^n$ codes, and therefore the maximum length for the
+string table will also be $2^n$. For 12-bit codes the maximum length
+of the string table is $2^{12}=4096$.
 
-\begin{algorithm}[H]
-  \caption{Settings the constants for the LZW algorithm for the
-    example code size 12.}
-  \label{alg:lzw-constants}
-  \begin{algorithmic}[1]
-    \Let{$codeSize$}{12}
-    \Let{$maxValue$}{$(1 << codeSize) - 1$}
-    \Let{$maxCode$}{$maxValue - 1$}
-  \end{algorithmic}
-\end{algorithm}
+There is also another issue that we will need to discuss; how will the
+decompressor know when the end of the compressed data has been
+reached? Well, wouldn't it obviously know that when it has reached to
+the end of the file? That is one way of doing it, but many LZW
+compressors use another method: in these compressors, at the end the
+compressed data the maximum possible code value is outputted. For the
+code-size $n$ bits this is the value $2^n - 1$.
 
-\subsection{Managing The String Table}
+But this has another important implication; since one code is
+reserved, the actual number of strings that the string table can store
+will be $2^n - 1$. And furthermore, the maximum code that can be
+assigned to a string will be $2^n - 2$, and not $2^n - 1$.
 
-Please Inspect line
-\algref{alg:lzw-compression}{algl:hasingcheckintable} and line
-\algref{alg:lzw-compression}{algl:hasgetcode} of the compression
-algorithm. Since we are clearly using the strings themselves to search
-for their corresponding codes, we need to figure out how to find their
-respective codes.
-
-One way to implement this would be by using the code as an index to an
-array of strings. But this clearly prohibitively slow as you would
-have search the entire string table, string by string, when you would
-want the code of a specific string.
-
-The easiest way to solve this problem is to just use a hash table. The
-string can used to create a key to index the table to get the searched
-codes.
-
-Since most modern languages already implement some sort of hash table
-in their standard library, this functionality should not be very hard
-to implement. If you are using more lower level language like \C, you
-will either have to roll your own or use a library. In the sample \C
-source code of this chapter a simple hand-rolled hash table
-is used to manage the string table.
-
-\subsection{Outputting variable sized codes}
+\subsection{Outputting variably sized codes}
 
 A last thing we'll have to consider is how to actually output the
 codes. The file I/O functions of most programming languages do not
-support outputting numbers whose sizes are not multiples of 8, so
+support outputting numbers whose bit sizes are not multiples of 8, so
 we'll have to devise a routine of our own for doing this.
 
-Let us consider how to output the codes $5$, $5$, $11$ and $12$. The
-binary equivalents of these numbers are 0101, 0101, 1011 and
-1100. Since the maximum number of bits needed to store these numbers
-is $4$ we'll be outputting codes of size 4.
+Let us consider how to output the codes $5$, $5$, $11$ and $12$, all
+of code length $4$. The corresponding binary numbers of these decimal
+numbers are $0101$, $0101$, $1011$ and $1100$.
 
-Now, the thing that the want to do with these bytes is this: we want
-to \textit{pack} these variably sized codes into
-\textit{packets}\index{packets} of 8-bits integers, or bytes as we
-usually call them.
+Now, the thing that the want to do with these codes is this: we want
+to \textit{pack} these variably sized codes into \textit{packets} of
+8-bits numbers. Once we have packed them into 8-bit packets, we can
+simply output them using the ordinary aforementioned file I/O
+functions.
 
 \subsubsection{Packing order}
 
-But we first need to make a decision: when, for example, the codes
-1011 and after 1100 are to be packed in order, there can actually be two
-different resulting byte packets: 10111100 or 11001011. In the first
-case the bits of the codes start to get packed at the \textit{most
-  significant bits} of the resulting packet.  The most significant
-bits are the bits whose values are the greatest when toggled. In the
-second case the bits from the codes start to get written at the
-\textit{least significant bits}.
+But we will first need to make a decision: when, for example, the
+codes $1011$ and $1100$ are to be packed, there can actually be two
+different resulting byte packets: $1011\ 1100$ or $1100\ 1011$. In the
+first case, the bits of the codes start to get packed from the
+\textit{most significant bits} to the \textit{least significant bits}
+of the resulting packet. In the second case, the bits from the codes
+get packed from the \textit{least significant bits} to the
+\textit{most significant bits} of the packet.
 
-The first of these packing order we'll from now on call
-MSBF\index{MSBF} which stands for \textbf{M}ost \textbf{S}ignificant
-\textbf{B}its \textbf{F}irst. And the second order we'll refer to as
-LSBF\index{MSBF}, which of course stands for \textbf{L}east
-\textbf{S}ignificant \textbf{B}its \textbf{F}irst
+The first of these two packing orders we'll from now on call
+MSBF\index{MSBF}, which stands for \textbf{M}ost \textbf{S}ignificant
+\textbf{B}its \textbf{F}irst and the second order we'll refer to as
+LSBF\index{MSBF}, which stands for \textbf{L}east \textbf{S}ignificant
+\textbf{B}its \textbf{F}irst
+
+The packing order we'll be using in the following packing algorithm
+will be LSBF, because that is the packing order used in the LZW
+compression of the GIF format \cite{gif89a}. The GIF format is the
+subject of chapter \ref{cha:gif}.
+
+\begin{Exercise}[label={bit-packing-order}]
+
+  What packets would get outputted if the codes that we wanted to
+  output were $0110$, $1100$, $0001$ and $1111$, if the packing order
+  was
+
+  \begin{enumerate}[(a)]
+  \item MSBF
+  \item LSBF
+  \end{enumerate}
+
+\end{Exercise}
 
 \subsubsection{The Algorithm}
 
 \paragraph{Smaller Codes}
 
-The packing order we'll be using in the algorithm we'll be describing is LSBF,
-because that is the packing order used in the LZW compression of GIF
-files \cite{gif89a}.
-
-So remember, the codes that wanted to write was 0101, 0101, 1011 and
-1100. We'll first request an empty byte packet and make it empty:
-0000 0000. Now we'll set the bits of the first four least
-significant bits of the packet to the bits of the first code:
-0101. This can trivially be done using the bitwise-OR operation:
-
-\begin{center}
-  \begin{tabular}{lr}
-    & 0000 0000  \\
-    $\BitOr$ & 0101 \\
-    \hline
-    & 0000 0101 \\
-  \end{tabular}
-\end{center}
+So remember, the codes that we wanted to write were $0101$, $0101$,
+$1011$ and $1100$. We'll first request an empty byte packet: $0000\
+0000$. The four least significant bits of the packet are now set the
+bits the of the first code, $0101$. This trivially done with the
+bitwise or operation: $0000\ 0000 \BitOr 0101 = 0000\ 0101$
 
 After this operation, only half of the byte packet has been filled, so
-we won't write packet quite yet. We'll put the writing operation on
-hold until we've read the next code.
+we won't output the packet quite yet. We'll put the outputting
+operation on hold until we've read the next code.
 
 The next code 0101 has now arrived. We now set the four most
-significant bits of the current package to the bits of this packet. So
-we'll have to use a bitwise OR operation. But we cannot do this in the
-same fashion that we wrote the last packet. We first have to left
-bitwise shift the bits of the current code, to make sure that we only
-write to the four most significant bits of the current packet. The
-number of bits remaining to be set in the current package is $4$. And
-that is how many bits we'll bitwise left shift the current code value:
-$4 \ShiftLeft 0101 = 0101\ 0000$. And after this the bitwise OR
-operation is finally performed:
+significant bits of the current package to the bits of this code. But
+first the code has to be shifted $8 -4 = 4$ steps to the left, so that
+the bitwise or operation can properly set the four highest bits of the
+packet to the four bits of the current code:
 
-\begin{center}
-  \begin{tabular}{lr}
-    & 0000 0101  \\
-    $\BitOr$ & 0101 0000 \\
-    \hline
-    & 0101 0101 \\
-  \end{tabular}
-\end{center}
+\begin{equation*}
+  0000\ 0101 \BitOr (0101 \ShiftLeft 4) = 0000\ 0101 \BitOr 0101\ 0000 =
+  0101\ 0101
+\end{equation*}
 
-Now we have filled the entire packet; the packet is thus outputted and
-we request a new empty packet. We'll fill this packet with the two
+So now we have filled the entire packet; the packet is thus outputted
+and we request a new empty packet. We'll fill this packet with the two
 remaining codes 1011 and 1100 in the same way we filled the last
-packet, and we end up making the packet  1100 1011.
+packet, and we end up making the packet 1100 1011.
 
 \paragraph{Larger Codes}
 
@@ -451,49 +380,68 @@ will always contain enough data to fill a byte packet, but we'll also
 have to save small unused chunks of the codes that are to be used for
 the next packet.
 
-Let's say we want to output the two codes 0110 1101 0111 and 0010 1100
-0100 and let's also say that these codes both have the code size
-$12$.
+Let's say we want to output the two codes $0110\ 1101\ 0111$ and $0010\ 1100\
+0100$ of length $12$
 
-Our first code is $0110\ 1101\ 0111$. We'll start by filling the packet
-with the 8 least significant bits of this code. The packet then has
-the value 1101 0111. And already the packet is filled. So it is
-outputted and new empty packet is requested. But we cannot yet throw
-away the code we are processing; we haven't yet dealt with 4
-most-significant bits of it! So what we'll do is that we'll bitwise
-right shift the code 8 times: $0110\ 1101\ 0111 \ShiftRight 8 =
-0110$. The number $8$ is used because that is the number of bits that
-fit in a full packet. Good, now these four bits are then set to be the
-4 least significant bits of the new packet. And so after dealing with
-the first code we have outputted a packet with the value 1101 0111 and
-the value of the new packet is 0000 0000 0110.
+Our first code is $0110\ 1101\ 0111$. We'll start by filling the
+packet with the 8 least significant bits of this code. And the packet
+is already filled: $1101\ 0111$. So it is outputted and a new empty
+packet is requested. But we cannot yet throw away the code we are
+processing; we haven't yet dealt with 4 most-significant bits of it!
+So what we'll do is that we'll bitwise right shift the code 8 times:
+\mbox{$0110\ 1101\ 0111 \ShiftRight 8 = 0110$}. Good, now these four
+bits are then set to be the 4 least significant bits of the next
+packet. After dealing with the first code, a packet with the contents
+$1101\ 0111$ have been outputted, and a halfway filled packet $0000\ 0110$ is
+waiting for more codes to be processed.
 
-In the  same manner, the  next code $0010\  1100\ 0100$ is  handled: the
-four most significant  bytes of the new packet are  set to $0100$, the
-code is  right shifted 4 steps;  because that is the  number bits that
-was  remaining to  be added  to the  package at  the beginning  of the
-processing of the code; the  newly filled packet is then outputted and
-the  next packet is  filled with  the remaining  bits of  the current,
-modified, code.
+In the same manner the next code $0010\ 1100\ 0100$ is handled: the
+four most significant bytes of the new packet are set to $0100$, the
+four least significant bits of the current code, the code is right
+shifted 4 steps, the newly filled packet is then outputted and the
+next packet is filled with the remaining bits of the current, modified
+code: $0010\ 1100$.
 
-In algorithm \ref{alg:variable-codes-output} the complete variable
-sized codes output algorithm is given. In this algorithm we introduce
-a new function \Call{FirstNBits}{$n,bits$}\index{FirstNBits}. What
-this function does, is that gets the value the first $bits$ least
-significant bits of the number $n$. So the call
-\Call{FirstNBits}{$001101,3$}, for example, would result in the value
-$010$.
+We summarize the just described procedure in algorithm
+\ref{alg:variable-codes-output}. This algorithm is very flexible and
+can handle outputting codes of differing sizes. If the codes were kept
+to one fixed size this algorithm would actually have been much
+simpler, and since this is what we are doing in our version of the LZW
+algorithm the reader may wonder why this algorithm has to be so
+complex?  This is to make sure that this procedure can be also be used
+in the decompression of GIF files, which do indeed use codes of
+varying sizes. So this procedure was designed so flexibly so that it
+could be easily reused in chapter \ref{cha:gif}.
+
+In this algorithm, we introduce a new function
+\Call{firstNBits}{$n,bits$}\index{FirstNBits}. What this function does
+is that it gets the value the first $bits$ least significant bits of
+the number $n$. So the call \Call{firstNBits}{$001101,3$}, for the
+binary number $001101$, would result in the binary number $101$.
+
+\begin{Exercise}[label={firstnbits}]
+
+  Implement the \Call{firstNBits}{$n,bits$} procedure in terms of
+
+  \begin{enumerate}[(a)]
+  \item the \textproc{getbits} procedure(we discussed this procedure
+    way back in exercise \ref{getbits}).
+  \item the bitwise operators.
+  \end{enumerate}
+
+\end{Exercise}
 
 \begin{algorithm}[H]
   \caption{Algorithm for outputting variably sized codes.}
   \label{alg:variable-codes-output}
   \begin{algorithmic}[1]
+    \linecomment{These variables are set before the procedure in run
+      for the first time.}
     \Let{$remainingPacketBits$}{8}
     \Let{$packet$}{0}
     \Let{$shift$}{0}
-    \Let{$codeSize$}{12}
-
-    \Function{OutputCode}{$code$}
+    \linecomment{This number can be varied.}
+    \Function{OutputCode}{$code,codeSize$}
 
       \Let{$remainingCodeBits$}{$codeSize$}
 
@@ -521,17 +469,15 @@ $010$.
           \Let{$packet$}{$0$}
           \Let{$shift$}{$0$}
 
+          \linecomment{After this, the rest of the code is processed.}
+
         \Else
 
         \linecomment{If the rest of the code fit in the entire
           packet.}
 
           \linecomment{Read in the entire code to the packet.}
-          \Let{$code$}{\Call{FirstNBits}{$code,remainingCodeBits$}}
-          \Let{$packet$}{$packet \BitOr(
-             code \ShiftLeft shift)$}
-
-          \linecomment{Handle the number shifting of the packet.}
+          \Let{$packet$}{$packet \BitOr(code \ShiftLeft shift)$}
 
           \Inc{shift}{remainingCodeBits}
           \Dec{remainingPacketBits}{remainingCodeBits}
@@ -546,140 +492,124 @@ $010$.
 
 \subsubsection{Flushing The Packets}
 
-Let's say we want to write the two codes $11000$ and $11011$. To do
-this we perform two calls to the function explained in algorithm
-\ref{alg:variable-codes-output}. However, this only results in the
-packet $0111 \ 1000$ being outputted, and the rest of two bits $11$ in
-the last packet $11011$ ends up being put on hold for the next
-code. But we have already written the two codes we want to output, so
-how may we force the last two bits being written?  This turns out to
-be very easy to do, as all we have to do is write an empty extra code
-$0000 \ 0000$. This results in the last two bits being written out in
-the form of the packet $0000 \ 0011$.
+Let's say we want to write the two 5 length codes $11000$ and
+$11011$. To do this we perform two calls to the function explained in
+algorithm \ref{alg:variable-codes-output}. However, this only results
+in the packet $0111 \ 1000$ being outputted and the two bits $11$
+being put on hold for the next code. But we have already written the
+two codes we want to output, so how may we force the last two bits to
+be written?  This turns out to be very easy to do, as all we have to
+do is write an empty extra code $0000 \ 0000$. This results in the
+last two bits being written out in the form of the packet $0000 \
+0011$.
 
-And all of this is why line \algref{alg:lzw-compression}{algl:flush}
-even exists. Otherwise, the last few bits of the max value would not
-get outputted, and this would cause huge problems for the
-decompressor.
+This is why the last line in algorithm \ref{alg:lzw-compression} even
+exists. Otherwise, the last few bits of the max value would not get
+outputted, and this would cause huge problems for the decompressor.
 
 \section{Description of the Decompression algorithm}
 
-Using the compression algorithm LZW on the string
-\texttt{ababcbababaaaaaaa} produces the compressed data stream
-\texttt{97 98 256 99 257 260 97 262 263 264 4095}. Since we were using
-12-bit codes to encode the data, the maximum value of an unsigned
-12-bit number, $2^{12} - 1 = 4095$, is used to terminate it. This is to
-make sure that the decompressor knows when to stop reading.
+Using the compression algorithm LZW on the string $ababcbababaaaaaaa$
+produced the compressed data $ab, 256,c, 257, 260, a, 262, 263, 264,
+a,4095$. Since we were using 12-bit codes to encode the data, the
+number $2^{12} - 1 = 4095$ terminates the data. This number is used by
+the decompressor to check if it is done with the decompression.
 
-As you may have noticed, in a LZW compressed file the string table is
-not included. Then how could you possibly decompress the file without
-such essential information? It turns out that all the LZW
-decompression algorithm do is basically the same thing that the
-compression algorithm does; it just reconstructs the string table as
-it goes along and reads and decompresses the file at the same time.
+In a LZW compressed file the string table used to encode the file is
+not included. But how could you possibly decompress the file without
+such essential information? It turns out that only from the compressed
+data the decompressor is able to rebuild an exact copy of the string
+table built during the compression.
 
-So, we wanted to decompress the data stream \texttt{97 98 256 99 257
-  260 97 262 263 264 4095}. The decompressor first makes the same
-table \ref{tab:str-tab-ascii}  that the LZW compressing algorithm did at the beginning of
-its process.
+We wanted to decompress $ab, 256,c, 257, 260, a, 262, 263, 264,
+a,4095$. The decompressor first assign the code values $0-255$ to
+their corresponding single length strings, and makes the same table
+\ref{tab:str-tab-ascii} that was also built in the beginning of the
+compression.
 
-First the first code is read simply and outputted, which is $98$, or
-simply the letter \texttt{a}. And in the same fashion the next code
-$98$ is read and outputted as \texttt{b}.
+The characters $a$ and $b$ are read and $a$ is outputted. Now $a$ and
+$b$ are appended together to form the string $ab$. This string is
+added to the string table and is given the code $256$.
 
-Now \texttt{a} and \texttt{b} are appended together to the string
-\texttt{ab}. This string is added to the string table and is given the
-code $256$.
+A new code $256$ is read, $a$ is discarded and $b$ is outputted. The
+code $256$ is according to our current string table the string
+$ab$.
 
-A new code is read, this time it's $256$, and \texttt{a} is
-discarded. $256$ is now to be translated. We just assigned the code
-$256$ the string \texttt{ab}, so the translation of $256$ is obviously
-\texttt{ab} and because of that \texttt{ab} is outputted.
+Now we need to form the next string to be added to the table. To do
+this, we take the string $b$ and append it to the first character of
+the string $ab$, thus forming the string $ba$. This string is added to
+the table with the code $257$.
 
-Now we need to form the next string to be added the table,
-\texttt{ba}. To do this, we take the former string \texttt{b} and add
-to the first character of the current string \texttt{ab}, thus forming
-the desired string \texttt{ba}. this string is added to the table with
-the code $257$. And in this way all of the other strings to be added
-to the table.
+The character is read $c$, the old $b$ is discarded and the string
+$ab$ is now outputted. $ab$ and $c$ are appended together to form the
+string $abc$(The first character of the one length string $c$ is
+simply $c$) and then $abc$ is added to the string table with
+the code $258$.
 
-But we're going to keep doing this for a whole. You will soon see
-why. $99$ is read and then is outputted as \texttt{c}. \texttt{ab} and
-\texttt{c} are appended together to form the string \texttt{abc} and then
-\texttt{abc} is added to the string table with the code $258$.
+The code $257$ is read in, which corresponds to the string $ba$. Since
+the former code was $c$, the string to be added to the table is $cb$,
+and this string is given the code $259$.
 
-$257$ is read in. This is the code for \texttt{ba}.Since the former
-code was \texttt{c}, the string to be added to the table is
-\texttt{cb}, and it is given the code $260$.
+Next the code $260$ is read. But we haven't even yet added that code
+to the table! How could this be?
 
-But now we read in the code $260$ before we have even added it to the
-table! Up to this we have so far uncompressed up to the string
-\texttt{ababcba}. What remains is the string \texttt{babaaaaaaa}. The
-problen here is that the compressor outputted a code before the
-decompressor was able to define it. So we need to handle this as a
-special case. We need to figure out how to construct the table entry
-bab=260 with the information we currently got. We could actually
-pretty easily construct this appending the old code \texttt{ba} to the
-first character of the old code \texttt{b}.
+Up to this point, the compressor had compressed the string $ababc$ and
+had defined the code for the string $ba$ as $257$. What remained to be
+compressed after this was $bababaaaaaaa$. So it read the string $ba$
+and the character $b$, becuase $ba$ was already defined in the string
+table. After outputting the code for $ba$, it added the string $bab$
+to string the string table, assigning it the code $260$. Then it threw
+away $ba$ and kept $b$. Then it accumulated the string $bab$ until it
+found the character $a$. At this point, the code $260$ for the string
+$bab$ was outputted.  The important thing to realize here is that this
+happened before the decompressor even had the chance the define the
+code $260$.
 
 \newcommand{\ko}{\ensuremath{k\omega}\xspace}
 \newcommand{\kok}{\ensuremath{\ko k}\xspace}
 \newcommand{\kokok}{\ensuremath{\kok \omega k}\xspace}
 
-The general problem could described like: If the string \ko is already
-in the string table and if the string \kokok is encountered, then
-compressor will first add \kok the string table and then output
-\ko. After the code for \kok is output before the decompressor is able
-to define it. But this table entry can then be constructed using $\ko
-+k$.  So this is really only a special case you need to handle when a
-code is not defined in the string table.
+So the general problem could described like this\cite{welch85:_u}: if
+the string \ko is already in the string table and if the string \kokok
+is encountered, the compressor will first add \kok the string table,
+and then output \ko. It will after this accumulate and output the code
+for the string \kok, and this is before the decompressor has defined
+that code in its own string table. However, since this is the only
+special case in which a undefined code can legally be found, this
+special case can be handled by instead defining the current string to
+be $\kok$. This string is equivalent to the string represented by the
+undefined code.
 
-So the decompressor just keeps working through the data like this while
-deconstructing the string table that was used to compress it. It reads
-until it encounters the maximum value of the current code size $x$,
-$2^{x}-1$; for 12-bit codes this $2^{12} - 1 = 4095$, as can be seen
-from out test data stream, \texttt{97 98 256 99 257 260 97 262 263 264
-  4095}. The entire decompression process is shown in table \ref{tab:lzw-dec-walkthru}.
+Now let us return to our example string. The codes we currently had at
+hand were $ba$ and $260$. We want to get the characters $k$ and
+$\omega$, so that we may construct the string $\kok$. Since $ba$ are
+the first two letters of the string $\kokok$, then $k = b$ and $\omega
+= a$, so the string represented by the $260$ is $\kok = bab$.
 
-\begin{table}
-  \centering
-  \noindent\makebox[\textwidth]{%
-  \begin{tabular}{lllll}
-    \toprule
-    Old Code & Newcode Code & Input Code & Output Codes & New table entry \\
-    \midrule
+And the decompressor just keeps working through the data like this,
+while at the same time reconstructing the string table that was used
+to compress the data in the first place. This just keeps on going
+until it encounters the maximum value of the current code size $n$,
+$2^{n}-1$. For 12-bit codes this value is $2^{12} - 1 = 4095$, as it
+can be seen from our example data $97, 98, 256, 99, 257, 260, 97, 262,
+263, 264, 4095$.
 
-    97=a & & 97=a & a=97 & \\
-    97=a & 98=b & 98=b & b=98 & ab=256 \\
-    98=b & 256=ab & 256=ab & a=97,b=98 & ba=257 \\
-    ab=256 & c=99 & c=99 & c=99  & abc=258 \\
-    c=99 & 257=ba & 257=ba & b=98,a=97 & cb=259 \\
-    bab & 260 & 260&b=98,a=97,b=98 &bab=260 \\
-    bab=260 & a=97  & a=97 & a=97 & baba=261\\
-    bab=260 & a=97 & a=97 & a=97 & baba=261\\
+\begin{Exercise}[label={lzw-decompress}]
 
-    aa & 262 & 262 & a=97,a=97 & aa=262 \\
+  Assuming that 12-bit codes were in the compression of exercise
+  \ref{lzw-compress}, then compress the resulting data
+  $97,98,256,258,98,4095$.
 
-    aaa & 263 & 263 & a=97,a=97,a=97 & aaa=263 \\
-
-    aaa=263 & a=97 & a=97 & a=97 & aaaa=264  \\
-
-    a=97 & 4095=maxValue & 4095=maxValue & STOP &  \\
-
-    \bottomrule
-  \end{tabular}}
-  \caption{Detailed LZW decompression on the string \texttt{ababcbababaaaaaaa}.}
-  \label{tab:lzw-dec-walkthru}
-\end{table}
+\end{Exercise}
 
 \section{Technical Implementation of the Decompression Algorithm}
 
 And the algorithm we have just described can be seen in algorithm
 \ref{alg:lzw-working-decompression}. Having discussed the compression
 algorithm very much in depth, you should be able to perfectly
-understand most of this alglorithm. However, there are still some more
-things we need to discuss in the implementation of this algorithm
-until we completely are done with discussing the LZW algorithm.
+understand most of this algorithm. However, there is still one thing
+we need to discuss in the implementation of this algorithm until we
+completely are done with discussing the LZW algorithm.
 
 \begin{algorithm}[H]
   \caption{LZW working decompression algorithm.}
@@ -699,18 +629,20 @@ until we completely are done with discussing the LZW algorithm.
     \While{$newCode \neq maxValue$}
 
       \If{$\NOT$ \Call{IsInTable}{$newCode$}} \Comment{The special case}
-        \Let{$string$}{\Call{Translate}{oldCode}}
+        \Let{$string$}{\Call{TranslateCodeToString}{oldCode}}
         \Let{$string$}{$string + character$}
       \Else
-        \Let{$string$}{\Call{Translate}{$newCode$}}
+        \Let{$string$}{\Call{TranslateCodeToString}{$newCode$}}
       \EndIf
 
       \State \Call{outputString}{$string$}
 
       \Let{$character$}{$string[0]$} \Comment{Get the first character
-        of the translated string.}
+        of the string.}
 
       \If{$nextCode \leq maxCode$}
+        \linecomment{Add the translation of $oldCode$ $+$ $character$
+          to the table}
         \State \Call{$AddToStringTable$}{$nextCode,oldCode, character$}
 
         \Inc{nextCode}{1}
@@ -724,63 +656,25 @@ until we completely are done with discussing the LZW algorithm.
   \end{algorithmic}
 \end{algorithm}
 
-\subsection{Translating string codes}
-
-First we need to figure out how translate string from the code pair format as we
-discussed in section \ref{sec:lzw-enc-algorithm}.
-
-Please see algorithm \ref{alg:translate-string-code}. This puts the
-decoded string of the code $code$ \textit{reversed} into the string
-$decodedString$. The string ends up being reversed because we
-basically are translating the code from the end of the string to the
-beginning. As you can see, we are just working through character code
-after character code looking up the next code in the table using the
-string code. For this algorithm, we have chosen to put a negative one
-into the stringCode of pairs that represent single characters. If we
-have reached such a pair, we have reached to beginning of the string
-and we are done translating it.
-
-This discussion leads up to another point. \textit{The decompressor
-  has no need of a hash table to manage the string table}. This makes sense as
-we are really only using the number codes to look up strings in the
-table to manage the string table. Since the codes are numbers, they
-can be used as indices and hence there is no need for a hash table,
-which makes the work for the compressor one heck of a lot easier.
-
-\begin{algorithm}[H]
-  \caption{Translating a string code to normal string. Where code is
-    the code we want to translate. }
-  \label{alg:translate-string-code}
-  \begin{algorithmic}[1]
-    \Let{$\strpair{stringCode}{characterCode}$}{$stringTable[code]$}
-    \While{\True}
-      \Let{$decodedString$}{$decodedString + characterCode$}
-      \If{$stringCode = -1$}
-        \Break
-      \Else
-        \Let{$\strpair{stringCode}{characterCode}$}{$stringTable[stringCode]$}
-      \EndIf
-    \EndWhile
-  \end{algorithmic}
-\end{algorithm}
-
 \subsection{Inputting Variably Sized Codes}
 
 We also need to construct an algorithm for inputting the variably
-sized codes output by the compression algorithm. This algorithm is
-algorithm \ref{alg:variable-codes-input}. Because the way this algorithm operates is extremely
-similar to the outputting algorithm, I will not offer an in depth
-discussion of it. Just read and study the comments carefully and you
-should be fine.
+sized codes. This algorithm is algorithm
+\ref{alg:variable-codes-input}. Because the way this algorithm
+operates is extremely similar to the corresponding outputting
+algorithm \ref{alg:variable-codes-output}, I will not offer an in
+depth discussion of it.
 
 \begin{algorithm}[H]
   \caption{Algorithm for inputting variably sized codes.}
   \label{alg:variable-codes-input}
   \begin{algorithmic}[1]
+    \linecomment{These variables are set before the procedure is run
+      for the first time.}
     \Let{$remainingPacketBits$}{8}
     \Let{$packet$}{\VoidCall{ReadByte}}
 
-    \Function{OutputCode}{$codeSize$}
+    \Function{InputCode}{$codeSize$}
 
       \Let{$remainingCodeBits$}{$codeSize$}
       \Let{$code$}{$0$}
@@ -794,15 +688,15 @@ should be fine.
         \If{$remainingPacketBits < remainingCodeBits$}
 
           \linecomment{Read the remaining bits of the packet.}
-          \Let{$firstNBits$}{\Call{FirstNBits}{$packet,remainingPacketBits$}}
-          \Let{$code$}{$code \BitOr (firstNBits \ShiftLeft shift)$}
-
-          \linecomment{Read in a new packet. }
-          \Let{$packet$}{\VoidCall{ReadByte}}
+          \Let{$code$}{$code \BitOr (packet \ShiftLeft shift)$}
 
           \linecomment{Handle the left shifting of bits.}
           \Inc{shift}{remainingPacketBits}
           \Dec{remainingCodeBits}{remainingPacketBits}
+
+          \linecomment{Read in a new packet. }
+          \Let{$packet$}{\VoidCall{ReadByte}}
+          \Let{$remainingPacketBits$}{$8$}
 
         \Else
 
@@ -823,38 +717,37 @@ should be fine.
           \Let{$remainingCodeBits$}{$0$}
         \EndIf
       \EndWhile
+
+      \Ret{$code$}
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
 
+\section{Compression Efficiency Of LZW}
 
-\section{Efficiency}
+In this section, we will be showing and discussing the results of a
+test that tested how the compression ratio of the LZW algorithm varied
+for different sorts of files and data with different codes sizes.
 
-In this section we will be testing how good of a compression ratio the
-LZW algorithm have on different sorts of files and data with
-different codes sizes.
+\subsection{How compression is achieved in LZW}
 
-We will not however be discussing about the \textit{performance} of
-the algorithm. Read a more advanced book on data compression of you
-want such information.
+The main idea behind LZW compression is that strings that occur often
+within a file will get replaced by shorter codes. And in general, the
+longer the algorithm runs, the longer the strings that get added to
+the table get. This has the consequence that larger files typically
+have a much better compression ratio than smaller files.
 
 \subsection{The Canterbury Corpus}
 
-As you may noticed, doing LZW compression on small data is a very small
-gain operation. However, doing this on larger files do actually yield a
-significant decrease in file sizes.
+Here we introduce a set of test files that we will be using to test
+the efficiency of compression algorithms. A corpus of files designed
+for testing new compression algorithms called the Canterbury Corpus is
+that we will be using. These files were selected by
+\cite{arnold:corpus} out of thousands of other files because they were
+shown to test the efficiency of lossless compression algorithms the
+best. Table \ref{tab:corp-files} lists all the files in the Canterbury
+Corpus. They can all be downloaded at \cite{powell:desc-corp}.
 
-In the chapter, we introduce a set of test files we'll be using the
-demonstrate the efficiency of compression algorithms. A corpus of
-files for designed testing new compression algorithms called the
-Canterbury Corpus is that we will be using. These files we're selected
-out of thousands of other files because they demonstrate the
-efficiency of compression algorithms the best \cite{arnold:corpus}.
-
-Table \ref{tab:corp-files} summaries all the files we'll be using. They can all be
-downloaded from \cite{powell:desc-corp}.
-
-\todo{typesett the file names using typewriter font.}
 \begin{table}
   \centering
   \begin{tabular}{ll}
@@ -862,7 +755,7 @@ downloaded from \cite{powell:desc-corp}.
     File & Category \\
     \midrule
     alice29.txt & English text \\
-    asyoulik.txt & Shakespeare \\
+    asyoulik.txt & Shakespeare Play \\
     cp.html & HTML source \\
     fields.c & C source \\
     grammar.lsp & LISP source \\
@@ -871,10 +764,8 @@ downloaded from \cite{powell:desc-corp}.
     plrabn12.txt & Poetry \\
     sum & SPARC Executable \\
     xargs.1 & GNU manual page \\
-    E.coli & Complete genome of the E. Coli bacterium \\
-    bible.txt & The King James version of the bible \\
-    world192.txt & The CIA world fact book \\
     \bottomrule
+
   \end{tabular}
   \caption{}
   \label{tab:corp-files}
@@ -882,11 +773,18 @@ downloaded from \cite{powell:desc-corp}.
 
 \subsection{The Test}
 
-The test we will be doing in this section as that we will be testing
-how the compression ratio vary with different code sizes and different
-kinds of files. We'll running the test on all the files in table and
-we'll doing it for every file with the code sizes in the range $9 \leq
-codeSize \leq 15$
+The purpose of the test was to test for the compression ratio for all
+the files in table \ref{tab:corp-files} for different code fixed sizes
+$n$ in the range $9 \leq n \leq 15$.
+
+The program that was used to do the compression was \verb|LZW|, which
+also is the program that was written to demonstrate the techniques
+discussed in this chapter. The source code for the program can be find
+in \verb|code/lzw/|.
+
+To run the run the program on all the test files and accumulate the
+gathered data into a \LaTeX{} table, a Python\footnote{\url{http://python.org/}} script was written. This
+script can be found at the location \verb|code/lzw/test.py|.
 
 \subsection{The Test Results}
 
@@ -896,40 +794,157 @@ In table \ref{tab:lzw-test-results} we show the results of the test.
   \scriptsize
   \centering
   \input{../code/lzw/table.tex}
-  \caption{LZW test results. The different percentages the represent the respective compression <ratios of that code size.}
+  \caption{LZW compression test results. The percentages are compression ratios.}
   \label{tab:lzw-test-results}
 \end{table}
 
 \subsection{Discussion}
 
-And now we are to discuses these test results, and see if they make us
-realist some new things about the LZW algorithm.
+Now we will discuss the results gathered in table
+\ref{tab:lzw-test-results} and see if we can draw any sort of
+conclusion from them.
 
-The first thing we notice is that more is not always better. And by
-that I am referring to the code sizes. Bigger code sizes does
-\textit{not} always result in better compression. But what we should
-also realise is the fact that codes with bigger sizes also take up
-more space, than smaller codes. See for example the files
-\verb|fields.c| and \verb|grammar.lsp|, these are source and/or text
-files. What is peculiar about these files is that for highest code
-size, $15$, they do not achieve the highest compression. What is even
-stranger is that these files are program source code, meaning that are
-highly likely chok of redundancies.
+\subsubsection{Human Readable Text}
 
-But we should also realize that these are not very large, they are
-some of the smallest files. So it highly likely that is because the
-15-bit codes are not really used. 15-bit codes means that the string
-table has a maximum size of $2^{15} = 32768$, which is nowhere near
-the sizes of these files. And thus, the conclusion we reach is that
-these files were compressed poorly using 15-bit codes because the
-extra bit added to 14-bit codes was not even used. The files were just
-to small to even use and the compression of the file was over before
-the string table was even full.
+We will first discuss the four files \verb|asyoulik.txt|,
+\verb|alice29.txt|, \verb|plrabn12.txt|, \verb|lcet10.txt|. What these
+files have in common is that they all contain only human-readable
+English text. Interestingly enough, if we exclude the file
+\verb|asyoulik.txt|, they all seem to share a common pattern: larger
+codes sizes means better compression(the lower compression ratio, the
+better compression). This makes sense because the English language,
+and human languages in general, is full of redundancies. So for larger
+code sizes, larger string tables can be built and therefore a greater
+number of redundancies can be eliminated from the text.
 
-And true enough, if we inspect the larger files, say \verb|bible.txt|
-or \verb|world192.txt|, we see that larger code sizes do indeed mean
-greater compression. But this only because these files were large
-enough to actually make use of the extra bits the larger code sizes
-added.
+You may also notice that the largest files, \verb|plrabn12.txt| and
+\verb|lcet10.txt|, achieved the best compression. This is because for
+longer files much more of the string table will get built up. The
+longer a compression goes on, the larger the string table gets. And
+the larger the string table gets, the better the data can be
+compressed.
+
+For the smallest file, \verb|asyoulik.txt|, the best compression ratio
+was not achieved for the largest code size. This is because for
+smaller files it is unlikely that the string table even gets fully
+built up. If the size of the code doesn't get used to its full
+potential, then unnecessary bits are only added when the code size is
+increased. These unnecessary bits has the consequence that the codes
+are stored in larger numbers, and this in turn can unnecessarily
+increase the size and worsen the compression.
+
+\subsubsection{Program code}
+
+For the two source code files, \verb|fields.c| and \verb|grammar.lsp|,
+the compression ratio doesn't get very good at all, compared to the
+compression ratio of the text files. This is surprising, because
+source code tends to contain tons of keywords, like
+\verb|for|,\verb|while| \verb|return| that are repeated throughout the
+entire file. You'd think that by replacing all these repeated words by
+small codes this would result a good compression ratio.
+
+But the worse compression ratio for higher codes sizes is in this case
+attributed to the very low size of the files. Since these files are so
+small, it is very hard for them to get a better compression ratio than
+that of the huge English text files.
+
+\subsubsection{Both text and code}
+
+The files \verb|cp.html| and \verb|xargs.1| could be said to contain a
+combination of both English human-readable text and source
+code. \verb|xargs.1| is a pretty small file and hence gets its maximum
+compression ratio for the rather small code size of $11$. The file
+\verb|cp.html| is bit larger than the former, but the compression
+ratio for this file behaves in largely the same way.
+
+\subsubsection{Binary formats}
+
+The files \verb|sum| and \verb|kennedy.xls| are files in binary
+format. That is to say, they consist of a sequence of numbers
+unreadable by humans. Binary files can most often only be interpreted
+by the applications that created them. Image formats are examples of
+binary formats.
+
+The file \verb|kennedy.xls| achieves the best possible compression
+ratio in this entire test. This is mainly because this is the largest
+file in the entire Canterbury Corpus.
+
+\verb|sum| is a binary file that has very unstable and unpredictable
+compression ratios. But it in general seems to achieve the better
+ratios using the larger codes.
+
+\subsection{Conclusion}
+
+The main conclusion of these tests is that for larger files larger
+code sizes also tend to result in better compression ratios. For
+smaller files larger codes can on the other hand unnecessarily worsen
+the compression ratio. 
 
 \FloatBarrier
+
+\section{Answers The Exercises}
+
+\begin{Answer}[ref={lzw-compress}]
+
+%\texttt{abababab}
+
+  \begin{center}
+    \begin{tabular}{llll}
+      \toprule
+      String Code & Character Code & Output Code & New table entry \\
+      \midrule
+
+      \lzwrow{a}{97}{b}{98}{ab}{256}
+      \lzwrow{b}{98}{a}{97}{ba}{257}
+      \lzwrow{ab}{256}{a}{97}{aba}{258}
+      \lzwrow{aba}{258}{b}{98}{abab}{259}
+      \stoplzwrow{b}{98}
+      \bottomrule
+   \end{tabular}
+
+
+  \end{center}
+
+  So the string is compressed down to $97,98,256,258,98$.
+\end{Answer}
+
+\begin{Answer}[ref={bit-packing-order}]
+
+  \begin{enumerate}[a]
+  \item $0110\ 1100$ and $0001\ 1111$.
+  \item $1100 \ 0110$ and $1111 \ 0001$
+  \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={firstnbits}]
+
+  \begin{enumerate}[(a)]
+  \item
+
+    \begin{algorithmic}[1]
+      \Procedure{firstNBits}{$n,bits$}
+      \Ret{\Call{getbits}{$n,0,bits-1$}}
+      \EndProcedure
+    \end{algorithmic}
+
+  \item
+
+
+    \begin{algorithmic}[1]
+      \Procedure{firstNBits}{$n,bits$}
+      \Ret{$n \BitAnd (\BitNeg(\BitNeg 0 \ShiftLeft bits))$}
+      \EndProcedure
+    \end{algorithmic}
+
+
+  \end{enumerate}
+
+\end{Answer}
+
+
+\begin{Answer}[ref={lzw-decompress}]
+
+  The decompressed data you should get is $abababab$.
+
+\end{Answer}

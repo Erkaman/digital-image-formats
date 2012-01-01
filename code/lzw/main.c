@@ -137,6 +137,7 @@ char printString(FILE * out)
         putc(stringCodeStack[--stackp],out);
     }
 
+    /* Return the character code.*/
     return returnValue;
 }
 
@@ -224,6 +225,7 @@ void LZW_Compress(FILE * in,FILE * out)
         }else{
             /* not in the table */
 
+	    verbosePrint("Outputted Code: %d\n", stringCode);
             outputCode(stringCode,out);
 
             /* if less than the maximum size */
@@ -248,6 +250,7 @@ void LZW_Compress(FILE * in,FILE * out)
         charCode = getc(in);
     }
 
+    verbosePrint("Outputted Code: %d\n", stringCode);
     outputCode(stringCode,out);
     outputCode(maxValue,out);
     outputCode(0,out);
@@ -287,11 +290,11 @@ void outputCode(unsigned int code,FILE * out)
             packet = 0;
             shift = 0;
         }else{
+
+	    /* remainingPacketBits >= remainingCodeBits */
             /* if the number of bits remaining to be read is less than the
                bits in the current input value. */
 
-            /* remainingPacketBits >= remainingCodeBits */
-            code = firstNBits(code,remainingCodeBits);
             packet |= code << shift;
 
             shift += remainingCodeBits;
@@ -329,8 +332,7 @@ unsigned int inputCode(FILE * input)
            to fill the current code. */
         if(remainingPacketBits < remainingCodeBits){
 
-            code |=
-                (firstNBits(packet,remainingPacketBits) << shift);
+            code |= (packet << shift);
 
             shift += remainingPacketBits;
             remainingCodeBits -= remainingPacketBits;
