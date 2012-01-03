@@ -1,0 +1,166 @@
+\newcommand{\edgecolor}{black} \newcommand{\blockthickness}{very
+  thick} \newcommand{\defarrow}{->}
+
+\begin{tikzpicture}[rotate=90,transform shape,
+  ,node distance=5mm
+  and 5mm, rectangle,minimum size=10mm, rounded corners=1mm,very
+  thick, keyblock/.style={draw=\edgecolor, fill=yellow!80!black,
+    \blockthickness},
+  descblock/.style={draw=\edgecolor,align=center,fill=blue!50!white,
+    \blockthickness},
+  colortableblock/.style={draw=\edgecolor,align=center,fill=purple!50!white,
+    \blockthickness,dashed},
+  optext/.style={draw=\edgecolor,align=center,fill=brown!70!white,
+    \blockthickness,dashed},
+  reqext/.style={draw=\edgecolor,align=center,fill=brown!80!white,
+    \blockthickness},
+  data/.style={draw=\edgecolor,align=center,fill=red!40!white,
+    \blockthickness,dashed},
+  opt/.style={draw=\edgecolor,align=center,
+    \blockthickness,dashed},
+  req/.style={draw=\edgecolor,align=center,
+    \blockthickness},
+  ]
+
+  \tikzstyle{every node}=[font=\footnotesize]
+
+  % blocks
+
+  \node (header) [keyblock] {Header};
+
+  \node (logscreendesc) [descblock, right= of header] {Logical
+    Screen \\ Descriptor};
+
+  \node (reqblock) [req, below = of logscreendesc, yshift=-40mm]
+  {Required \\ Block};
+
+  \node (optblock) [opt, right = of reqblock]
+  {Optional \\ Block};
+
+  \node (globalcolortable) [colortableblock, right= of
+  logscreendesc]
+  {Global \\
+    Color Table};
+
+  \node (appext) [reqext, below right = of globalcolortable, xshift=20mm,yshift=-5mm]
+  {Application Extension};
+
+  \node (commentext) [reqext, below  = of appext] {Comment Extension};
+
+  \node (graphcontrext) [optext, above right = of globalcolortable,xshift=4mm]
+  {Graphic Control \\ Extension};
+
+  \node (plaintext) [reqext, below right = of
+  graphcontrext,xshift=10mm] {Plain Text Extension};
+
+  \node (imagedesc) [descblock, above right = of graphcontrext]
+  {Image \\ Descriptor};
+
+  \node (localcolortable) [colortableblock, right = of imagedesc]
+  {Local \\ Color Table};
+
+  \node (imagedata) [data, right = of localcolortable]
+  {Image \\ Data};
+
+  \node (trailer) [keyblock, below right = of imagedata,xshift=10mm,
+  yshift=-27mm]
+  {Trailer};
+
+  % arrow paths
+
+  % first part
+
+  \path (header) edge[\defarrow] (logscreendesc);
+
+  \path (logscreendesc) edge[\defarrow] (globalcolortable);
+
+  \draw (globalcolortable.east) -- ($ (globalcolortable.east) +
+  (5mm,0) $);
+
+  % second part.
+
+  \path ($ (globalcolortable.east) + (5mm,0) $) edge
+  ($(appext.west) + (-20mm,-8mm) $);
+
+  \path ($(appext.west) + (-20mm,-8mm) $) edge ($(appext.west) +
+  (-10mm,-8mm) $);
+
+  \draw ($(appext.west) + (-10mm,-8mm) $) -- ($(appext.west) +
+  (-10mm,0) $);
+
+  \path ($(appext.west) + (-10mm,0) $) edge[\defarrow] (appext.west);
+
+  \draw ($(appext.west) + (-10mm,-8mm) $) -- ($(commentext.west) +
+  (-11mm,0) $);
+
+  \path  ($(commentext.west) + (-11mm,0) $)edge[\defarrow]
+  (commentext.west);
+
+
+  \path (appext.east) edge ($(appext.east) + (5mm,0) $);
+  \path ($(appext.east) + (5mm,0) $) edge ($(appext.east) + (5mm,-7mm) $);
+
+
+  \path (commentext.east) edge ($(commentext.east) + (6mm,0) $);
+  \path ($(commentext.east) + (6mm,0) $) edge ($(commentext.east) +
+  (6mm,9mm) $);
+  \node (join2) at ($(commentext.east) + (6mm,9mm) $) {};
+
+
+  \path ($ (globalcolortable.east) + (5mm,0) $) edge
+  ($(graphcontrext.west) + (-4mm,0) $);
+
+  \path ($(graphcontrext.west) + (-4mm,0) $) edge[\defarrow]
+  (graphcontrext);
+
+  \draw (graphcontrext.east) -- ($(graphcontrext.east) + (+3mm,0)$);
+
+  \draw ($(graphcontrext.east) + (+3mm,0)$) -- ($(imagedesc.west) +
+  (-2mm,0)$);
+
+  \draw ($(graphcontrext.east) + (+3mm,0)$) -- ($(plaintext.west) +
+  (-12mm,0)$);
+
+  \path ($(plaintext.west) + (-12mm,0)$) edge[\defarrow]
+  (plaintext.west);
+
+  \path ($(imagedesc.west) + (-2mm,0)$) edge[\defarrow]
+  (imagedesc.west);
+
+  \draw (imagedata.east) -- ($(imagedata.east) + (2mm,0)$);
+
+  \draw  ($(imagedata.east) + (2mm,0)$) -- ($(imagedata.east) +
+  (2mm,-13mm)$);
+
+  \draw (plaintext.east) -- ($(plaintext.east) + (16.8mm,0)$);
+
+  \draw ($(plaintext.east) + (16.8mm,0)$) -- ($(plaintext.east) +
+  (16.8mm,18mm)$);
+
+  \node (join1) at ($(plaintext.east) + (16.8mm,18mm)$) {};
+
+  \draw ($(join1) + (0,0mm)$) -- ($(join1) + (5mm,0mm)$);
+
+  \draw ($(join1) + (5mm,0mm)$) -- ($(join1) + (5mm,-30mm)$);
+
+  \draw ($(join2) + (0,0)$) -- ($(join1) + (5mm,-44.5mm)$);
+
+  \draw ($(join1) + (5mm,-44.5mm)$) -- ($(join1) + (5mm,-30mm)$);
+
+  \node (join3) at ($(join1) + (5mm,-30mm)$) {};
+
+  \path ($(join3) + (0,0)$) edge[\defarrow] (trailer);
+
+
+  \path ($(join3) + (3mm,0)$) edge ($(join3) + (3mm,55mm)$);
+  \path  ($(join3) + (3mm,55mm)$) edge ($(globalcolortable.east) +
+  (3mm,42mm)$);
+  \path  ($(globalcolortable.east) + (3mm,42mm)$) edge[\defarrow] ($(globalcolortable.east) + (3mm,0)$);
+
+
+
+  \path (imagedesc) edge[\defarrow] (localcolortable);
+  \path (localcolortable) edge[\defarrow] (imagedata);
+
+
+\end{tikzpicture}

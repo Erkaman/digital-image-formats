@@ -206,13 +206,14 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in);
 void printDataSubBlocks(FILE * out,GIFDataSubBlocks subBlocks);
 void printBytes(FILE * out,size_t size,BYTE * bytes);
 
-void debugPrint(const char * format, ...);
-
 void printDisposalMethod(GIFGraphicControl graphicControl,FILE * out);
 
 char * subBlocksDataToString(GIFDataSubBlocks subBlocks);
 
 UNSIGNED readUnsigned(FILE * fp);
 
+void uninterlaceColorData(void);
+
 #endif /* _GIF_H_ */
+
 

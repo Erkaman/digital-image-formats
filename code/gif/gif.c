@@ -8,7 +8,7 @@
 #include <stdarg.h>
 
 /* Implement command line parsing and -v flag. Clean up debug messages and verbose
- messages. */
+   messages. */
 
 int subBlockIndex;
 
@@ -36,8 +36,6 @@ unsigned int * colorIndexTable;
 
 int globalColorTableSize;
 
-/* structures */
-
 GIFImageDescriptor imageDescriptor;
 
 int main(int argc, char *argv[])
@@ -49,14 +47,30 @@ int main(int argc, char *argv[])
         printf("No file was specified for loading\n");
         printf("Try --help for more information.\n");
         return 1;
-    } else
-        if(!strcmp("--help",argv[1]))
-            printHelp();
+    } else{
+        ++argv;
+        --argc;
 
-    in = fopen(argv[1],"rb");
+        while(1){
+
+            if(!strcmp("--help",*argv)){
+                printHelp();
+                return 0;
+            }
+            else if(!strcmp("-v",*argv))
+                verbose = 1;
+            else
+                break;
+
+            ++argv;
+            --argc;
+        }
+    }
+
+    in = fopen(argv[0],"rb");
     assertFileOpened(in);
 
-    out = fopen(argv[2],"wb");
+    out = fopen(argv[1],"wb");
     assertFileOpened(out);
 
     loadGIF(in, out);
@@ -81,17 +95,17 @@ void loadGIF(FILE * in, FILE * out)
 
     /* load and print the beginning blocks of the GIF format */
 
-    debugPrint("HEADER\n");
+    verbosePrint("Loading Header\n");
 
     header = loadHeader(in);
 
-    debugPrint("LOGICAL SCREEN DESCRIPTOR\n");
+    verbosePrint("Loading Logical Screen Descriptor\n");
 
     logicalScreenDescriptor = loadLogicalScreenDescriptor(in);
     globalColorTableSize = logicalScreenDescriptor.globalColorTableSize;
     if(logicalScreenDescriptor.globalColorTableFlag){
 
-	debugPrint("GLOBAL COLOR TABLE\n");
+        verbosePrint("Loading Global Color Table\n");
         globalColorTable = loadColorTable(globalColorTableSize,in);
     }
 
@@ -109,7 +123,6 @@ void loadGIF(FILE * in, FILE * out)
     if(logicalScreenDescriptor.globalColorTableFlag){
         free(globalColorTable);
     }
-
 }
 
 GIFColor * loadColorTable(int colorTableSize,FILE * in)
@@ -160,20 +173,20 @@ void loadImageData(FILE * in,FILE * out)
 
         switch(introducer){
         case EXTENSION_INTRODUCER:
-            debugPrint("EXTENSION INTRODUCER\n");
+            verbosePrint("Found Extension Introducer\n");
             loadExtension(in,out);
             break;
         case IMAGE_SEPARATOR:
-            debugPrint("IMAGE SEPARATOR\n");
+            verbosePrint("Found Image Separator\n");
 
 
-	    debugPrint("IMAGE DESCRIPTOR\n");
+            verbosePrint("Loading Image Descriptor\n");
             loadImageDescriptor(in);
             printImageDescriptor(out);
 
             if(imageDescriptor.localColorTableFlag){
 
-		debugPrint("LOCAL COLOR TABLE\n");
+                verbosePrint("Loading Local Color Table\n");
 
                 localColorTable = loadColorTable(imageDescriptor.localColorTableSize,in);
 
@@ -188,9 +201,12 @@ void loadImageData(FILE * in,FILE * out)
                                                      imageDescriptor.imageWidth
                                                      * imageDescriptor.imageHeight);
 
-	    debugPrint("IMAGE COLOR DATA\n");
+            verbosePrint("Loading Image Color Data\n");
 
             loadImageColorData(in);
+
+            if(imageDescriptor.interlaceFlag)
+                uninterlaceColorData();
 
             fprintf(out,"* Image Color Data:\n");
 
@@ -224,24 +240,24 @@ void loadExtension(FILE * in,FILE * out)
 
     switch(extensionLabel){
     case GRAPHIC_CONTROL_LABEL:
-        debugPrint("GRAPHIC CONTROL LABEL\n");
+        verbosePrint("Loading Graphic Control\n");
         graphicControl = loadGraphicControl(in);
         printGraphicControl(graphicControl,out);
         break;
     case COMMENT_LABEL:
-        debugPrint("COMMENT LABEL\n");
+        verbosePrint("Loading Comment Label\n");
         comment = loadCommentExtension(in);
 
         printCommentExtension(comment,out);
 
         break;
     case APPLICATION_EXTENSION_LABEL:
-        debugPrint("APPLICATION EXTENSION LABEL\n");
+        verbosePrint("Loading Application Extension\n");
         applicationExtension = loadApplicationExtension(in);
         printApplicationExtension(applicationExtension,out);
         break;
     case PLAIN_TEXT_LABEL:
-        debugPrint("PLAIN TEXT LABEL\n");
+        verbosePrint("Loading Plain Text Extension\n");
 
         plainText = loadPlainTextExtension(in);
 
@@ -296,7 +312,6 @@ void loadImageColorData(FILE * in)
 
             free(compressionTable);
             compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
-            debugPrint("Clear Code\n");
 
             nextCode = resetCompressionTable();
             codeSize = InitialCodeSize;
@@ -321,18 +336,9 @@ void loadImageColorData(FILE * in)
             compressionTable[nextCode].stringCode = oldCode;
             compressionTable[nextCode].characterCode = character;
 
-/*            debugPrint("Added new dictionary entry:%d {%d = %c,%d = %c}\n",
-                       nextCode,
-                       oldCode,
-                       oldCode,
-                       character,
-                       character);*/
-
             if(nextCode == (pow(2,codeSize) - 1) &&
                codeSize != 12 ){
-
                 ++codeSize;
-/*                debugPrint("New code size:%d\n",codeSize);*/
             }
 
             nextCode++;
@@ -373,7 +379,6 @@ int printString(void)
 
     while(stackp > 0){
         colorIndexTable[currentColorIndex++] = stringCodeStack[--stackp];
-/*        debugPrint("outputted color:%d\n",stringCodeStack[stackp]); */
     }
 
     return returnValue;
@@ -390,8 +395,8 @@ unsigned int inputCode(int codeSize)
     while(codeSize > 0){
         if(remainingBits < codeSize){
 
-	    /* the data in the current byte are not enough bits of data. Reads in what's
-	     remaining and read a new byte. */
+            /* the data in the current byte are not enough bits of data. Reads in what's
+               remaining and read a new byte. */
 
             /* read in what's left of the current byte */
             returnValue |=
@@ -404,23 +409,22 @@ unsigned int inputCode(int codeSize)
 
         }else{
             /* if remainingBits > codeSize */
-	    /* Enough bits of data can be read from the current byte.
-	       Read in enough data and bitwise shift the data to the right to
-	       get rid of the bytes read in. */
+            /* Enough bits of data can be read from the current byte.
+               Read in enough data and bitwise shift the data to the right to
+               get rid of the bytes read in. */
 
             returnValue |=
-		(firstNBits(imageDataSubBlocks.data[subBlockIndex],codeSize) << shift);
+                (firstNBits(imageDataSubBlocks.data[subBlockIndex],codeSize) << shift);
 
             imageDataSubBlocks.data[subBlockIndex] >>= codeSize;
             remainingBits -= codeSize;
 
-	    /* enough bits of data has been read in. This line thus causes the loop to terminate
-	       and causes the functions to return. */
+            /* enough bits of data has been read in. This line thus causes the loop to terminate
+               and causes the functions to return. */
             codeSize = 0;
         }
     }
 
-/*    debugPrint("END:returnValue:%d\n",returnValue); */
     return returnValue;
 }
 
@@ -497,7 +501,6 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
     do{
         for(r = currentBlocksize; r > 0; r--){
             subBlocks.data[i++] = readByte(in);
-/*            debugPrint("%d:%X\n",subBlocks.data[i-1],subBlocks.data[i-1]); */
         }
 
         currentBlocksize = readByte(in);
@@ -545,17 +548,6 @@ void printImageColorData(FILE * out)
             col = 0;
             ++row;
         }
-    }
-}
-
-void debugPrint(const char * format, ...)
-{
-    va_list vl;
-
-    if(DEBUG){
-        va_start(vl, format);
-        vprintf(format, vl);
-        va_end(vl);
     }
 }
 
@@ -645,7 +637,6 @@ void printLogicalScreenDescriptor(
             logicalScreenDescriptor.pixelAspectRatio);
 }
 
-
 void loadImageDescriptor(FILE * in)
 {
     int packedFields;
@@ -659,11 +650,11 @@ void loadImageDescriptor(FILE * in)
 
     packedFields = readByte(in);
 
-    imageDescriptor.localColorTableFlag = (packedFields & (1 << 7)) >> 7;
-    imageDescriptor.interlaceFlag = (packedFields & (1 << 6)) >> 6;
-    imageDescriptor.sortFlag = (packedFields & (1 << 5)) >> 5;
-    imageDescriptor.reserved = (packedFields & (3 << 3)) >> 3;
-    imageDescriptor.localColorTableSize = (packedFields & 7);
+    imageDescriptor.localColorTableFlag = getbits(packedFields,7,7);
+    imageDescriptor.interlaceFlag = getbits(packedFields,6,6);
+    imageDescriptor.sortFlag = getbits(packedFields,5,5);
+    imageDescriptor.reserved = getbits(packedFields,3,4);
+    imageDescriptor.localColorTableSize = getbits(packedFields,0,2);
 }
 
 void printImageDescriptor(FILE * out)
@@ -696,12 +687,10 @@ GIFGraphicControl loadGraphicControl(FILE * in)
 
     packedFields = readByte(in);
 
-    debugPrint("%d:%x",packedFields,packedFields);
-
-    graphicControl.reserved = ((packedFields & (5 << 7)) >> 5);
-    graphicControl.disposalMethod = ((packedFields & (3 << 2)) >> 2);
-    graphicControl.userInputFlag = ((packedFields & (1 << 1)) >> 1);
-    graphicControl.transparencyFlag = (packedFields & 1);
+    graphicControl.reserved = getbits(packedFields,5,7);
+    graphicControl.disposalMethod = getbits(packedFields,2,4);
+    graphicControl.userInputFlag = getbits(packedFields,1,1);
+    graphicControl.transparencyFlag = getbits(packedFields,0,0);
 
     graphicControl.delayTime = readUnsigned(in);
     graphicControl.transparencyIndex = readByte(in);
@@ -763,10 +752,10 @@ GIFLogicalScreenDescriptor loadLogicalScreenDescriptor(FILE * in)
     logicalScreenDescriptor.logicalScreenHeight = readUnsigned(in);
 
     packedFields = readByte(in);
-    logicalScreenDescriptor.globalColorTableFlag = (packedFields & (1 << 7)) >> 7;
-    logicalScreenDescriptor.colorResolution = (packedFields & (7 << 4)) >> 4;
-    logicalScreenDescriptor.sortFlag = (packedFields & (1 << 3)) >> 3;
-    logicalScreenDescriptor.globalColorTableSize = (packedFields & 7);
+    logicalScreenDescriptor.globalColorTableFlag = getbits(packedFields,7,7);
+    logicalScreenDescriptor.colorResolution = getbits(packedFields,4,6);
+    logicalScreenDescriptor.sortFlag = getbits(packedFields,3,3);
+    logicalScreenDescriptor.globalColorTableSize = getbits(packedFields,0,2);
 
     logicalScreenDescriptor.backgroundColorIndex = readByte(in);
     logicalScreenDescriptor.pixelAspectRatio = readByte(in);
@@ -898,4 +887,41 @@ UNSIGNED readUnsigned(FILE * fp)
     UNSIGNED s;
     fread(&s,sizeof(UNSIGNED),1,fp);
     return s;
+}
+
+void uninterlaceColorData(void)
+{
+    unsigned int * transfer;
+    unsigned int i;
+    unsigned int row, col;
+    unsigned int height, width;
+
+    int pass;
+    unsigned int startingRow[4] = {0, 4, 2, 1};
+    unsigned int rowIncrement[4] = {8, 8, 4, 2};
+
+    height = imageDescriptor.imageHeight;
+    width = imageDescriptor.imageWidth;
+
+    transfer = (unsigned int *)malloc(sizeof(unsigned int) * height * width);
+
+    row = 0;
+
+    i = 0;
+
+    for(pass = 0; pass < 4; ++pass){
+        row = startingRow[pass];
+
+        /* since height is one based and row is zero based this works.*/
+        while(row < height){
+
+            for(col = 0;col < width; ++col)
+                transfer[row * width + col] = colorIndexTable[i++];
+
+            row += rowIncrement[pass];
+        }
+    }
+
+    free(colorIndexTable);
+    colorIndexTable = transfer;
 }

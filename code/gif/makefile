@@ -1,13 +1,12 @@
 PROG = gif
 include ../default
-objects = gif.o ../io.o ../bitwise.o
+objects = gif.o
 
 $(PROG) : $(objects)
-	$(CC) $(objects) -o  $(PROG) -lm
+	cd .. && $(MAKE)
+	$(CC) $(commonobjects) $(objects) -o  $(PROG) -lm
 
 gif.o : gif.h ../io.h ../defs.h ../bitwise.h
-../io.o : ../io.h ../defs.h
-../bitwise.o : ../bitwise.h ../defs.h
 
 clean :
-	rm $(PROG) $(objects)
+	rm $(PROG) $(objects) $(commonobjects)

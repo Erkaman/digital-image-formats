@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
             tableSize = 33941;
         else if(codeSize == 14)
             tableSize =  18041;
-        else if(codeSize == 13)
+       else if(codeSize == 13)
             tableSize =  9029;
         else if(codeSize <= 12)
             tableSize = 5021;
