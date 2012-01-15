@@ -10,9 +10,9 @@ int main(void)
 
     data = getNewDataList(NULL, NULL);
 
-    addByteToDataList(&data, 0x0e);
+    addByteToDataList(&data, 0x99);
 
-    printf("Final CRC: %lx\n", crc8(data, 0x07, 0));
+    printf("Final CRC: %lx\n", crc8(data, 0x107, 0));
 
     freeDataList(data, 1);
 
@@ -68,16 +68,19 @@ unsigned long crc8(DataList list, unsigned long polynom, unsigned long initial)
     unsigned long i,j, result;
     BYTE b;
 
+    result = 0;
+
     result = initial;
     for(i = 0; i < list.count; ++i){
 
         b = *(BYTE *)list.list[i];
         result = result ^ b;
 
-	printf("xor: %ld\n", result);
+	printf("after xor: %lx\n", result);
 
         for( j=0; j < 8; ++j){
 
+	    /* This to do the actual division. */
             if (result & 0x80){
 		printf("if branch\n");
                 result = (result << 1) ^ polynom;
@@ -90,6 +93,7 @@ unsigned long crc8(DataList list, unsigned long polynom, unsigned long initial)
 	    printf("result: %lx\n", result);
         }
     }
-    
+
     return result & 0xff;
 }
+

@@ -2,136 +2,180 @@
   \bibliography{project.bib}
 \end{comment}
 
-% http://math.stackexchange.com/questions/66098/crc-computation
-
-\chapter{cyclic redundancy check}
+\chapter{Cyclic Redundancy Check}
 \label{cha:crc}
 
 \section{Checksums and error detection}
 
-Say I have an image file on my computer. Now imagine that I fiddled
-around with this file and changed a couple of numbers in the file
-using a hex editor. Now the file is no longer the orginal image, but
-how would the computer \textit{know} this? Well, say before saving
-this image the program producing this image calculated a number using
-all of the numberical data in the image. This number is then added at
-the end of the image data. Now, say I try to open this image in any
-arbirtary image viewer. As a quick way of checking the validity of the
-image to viewer recalculates this number on the numberical data and
-compares it with the data at the end of the image. And since I fiddled
-with the image, the same number would no longer be produced and in
-this way the computer can see that the image data is invalid.
+The following introduction to checksums is based on
+\cite{Williams_1993_crc_painless,barr:_addit_check,tanenbaum2003computernetworks_crc,Nelson:1992:FVU:135011.135017_crc32}.
 
-But how would the computer calculate this sum? Imagine, for the sake
-of example, that the image data consists of the simple byte numbers
-$32,12,241$. That sort of number can we calculate from these? A simply
-answer would simply be to sum
-them\cite{Williams_1993_crc_painless}. Then the computed sum modulo
-256 is added as another byte at the end of the data: $32 + 12 + 241
-\bmod 256 = 29$. Modulo 256 is necessary, because otherwise the sum
-wouldn't be able to fit in a 8-bit byte. But this has one big flaw:
-what if changed these numbers to $33,11,241$, because this sum also
-calculates to 29: $(33 + 11 + 241) \bmod = 29$. The main problem this
-method is thus that since there are only $256$ for a byte, there is a
-only $\frac{1}{2^8} = \frac{1}{256}$ change that an error would go undetected.
+Say I have an image file on my computer. Now imagine that I, using a
+hex editor, changed a couple of numbers in the numerical image data of
+this file. Now the file is no longer represents the original
+image. But if now the computer attempted loading this image, it would
+have no way of knowing that the data was fiddled with. If furthermore
+the image data was compressed, it is even highly likely that it would
+fail in the decompression of the data, and hence fail the loading of
+the image.
 
-We could of course make this sum stronger by giving it a less change
-of failure. Instead of storing the numbers in 8-bit bytes we could for
-example store them in larger 16-bit numbers. This would mean a much
+But is there any for the computer in beforehand to know that I had
+fiddled with the file? Suppose that before saving this image the
+program producing this image calculated a check number using all of
+the numerical data in the image and, that this check number was then
+added at the end of the image data. Then, any program attempting to
+open the image can as a quick way of checking the validity of the
+image data recalculate this number on the data and compare it with the
+check number at the end of the image data. And since I fiddled with
+the image, the same number would no longer be calculated. In this way
+the computer could see that the image data was invalid.
+
+But \textit{how} would this number be calculated? Let's say that the
+image data simply consisted of the bytes $32,12,241$. What sort of
+number can we calculate from these? An easy answer would simply be to
+sum them modulo $256$ and add this number as a byte at the end of the
+data. It is necessary that we do this modulo 256, because otherwise
+the sum wouldn't be able to fit in a 8-bit byte. This sum would be
+calculated to $(32 + 12 + 241) \bmod 256 = 29$. This number is then
+appended to the end of the data like this: $32,12,241,29$. The
+computer could then validate this check number by recalculating this
+sum. . But this system has one big flaw: what if I had changed these
+numbers to $33,11,241, 29$ when fiddling with the image data?  Because
+this sum also calculates to 29: $(33 + 11 + 241) \bmod = 29$.
+
+Thus, the main problem of this method is that since there are only
+$256$ possible values for a byte, there is a $\frac{1}{2^8} =
+\frac{1}{256}$ change that an error would go undetected. But on the
+other hand, there is a $1 - \frac{1}{256} \approx 99.6\%$ chance that
+this method would indeed work.
+
+We could of course make this method stronger by giving it a less
+change of failure. Instead of storing the sum in a 8-bit number, we
+could for example store it in a 16-bit number. This would mean a much
 lower probability of failure to detect errors, namely
-$\frac{1}{2^{16}} =
-\frac{1}{65536}$ \cite{Williams_1993_crc_painless}.
+$\frac{1}{2^{16}} = \frac{1}{65536}$. But this doesn't really fix the
+original problem; the computed check numbers would still be equal:
+$(32 + 12 + 241) \bmod 65535 = 285$ and $(33 + 11 + 241) \bmod 65535 =
+285$.
 
-Both of these to methods are algorithms known as
-\textit{checksums}\index{checksum}. A checksum is this simply a value
+Both of these two computed numbers are known as
+\textit{checksums}\index{checksum}. A checksum is simply a value
 calculated from a sequence of numerical data that is used to verify
-that it is error free. They are more generally known as
-error-detection codes. There is also a class of codes known as
-detection codes known as \textit{error-correction} codes. These codes
-on the other are other for fixing error in corrupted data
-\cite{tanenbaum2003computernetworks_crc}. The reader who wants to know
-more on error-correction codes is reffered to \cite{tanenbaum2003computernetworks_crc,1950hamming_codes_crc_parity,hamming1986coding_information_theory_detection_correction}.
-
-Error detection are used for many different things. As their name
-implies, rarely are they used for correcting errors, but only for
-detecting them. They are for example useful for checking if a file has
-not been corrupted, also known as verification as is discussed in
-\cite{Nelson:1992:FVU:135011.135017_crc32}. They are also used when
-transmitting data over through copper wire and optical fibers. Since
-the error rates of these are so low, it is more efficent to
-retransmitt corruptet messages over these than error correting
-them\cite{tanenbaum2003computernetworks_crc}.
+that the data is error free. I was unfortunately unable to find a
+strict definition of a checksum, but do note that summings do not
+necessarily have to occur for a number to be classified as a
+checksum.
 
 \section{CRC}
 
-One very well used method of computing error-detection codes are
-Cyclic Redundancy Checks, or simply CRCs, which is what we'll call them from now
-on \cite{tanenbaum2003computernetworks_crc}
+One very well used checksum is a CRC, Cyclic Redundancy Check. I will
+in the following section discuss the computation of a CRC.
 
-The following description of CRC is based on the references \cite{Ritter:1986:GCM:12647.12648,Williams_1993_crc_painless,tanenbaum2003computernetworks_crc,Nelson:1992:FVU:135011.135017_crc32,Stigge06reversingcrc}
+The following description of CRC is based on the references
+\cite{Ritter:1986:GCM:12647.12648,Williams_1993_crc_painless,tanenbaum2003computernetworks_crc,Nelson:1992:FVU:135011.135017_crc32,Stigge06reversingcrc,barr:_crc_implem_code_c,black:_fast_crc32_softw,geremia99:_cyclic}. Note
+that I will not discuss the mathematics behind CRC in depth nor
+rigorously in this text. I will however assume that the reader is
+moderately familiar with long division.
 
-I won't dicuss the mathematisc behind CRC in depth nor
-rigorously in this text, so I refer the reader who want such to a
-discussion to the texts
-\cite{Stigge06reversingcrc,tanenbaum2003computernetworks_crc,Peterson_Brown_1961_crc_orig,press2007numerical_recipes,Ramabadran:1988:TCC:623224.623360_crc_tutorial}. I
-especially refer such a reader to \cite{Peterson_Brown_1961_crc_orig}
-where the concept of a CRC was first invented.
+\subsection{CRC Polynomial arithmetic}
 
-\subsection{Polynomial arithmetic}
+\subsubsection{Polynomial Representation}
 
-Now I am to explain how CRCs are calculated. To understand the
-following explanation the reader is required to understand long
-polynomial division only on a basic level and the modulo operation.
+Data in a file is simply a sequence of 8-bit bytes. The number $200$,
+for example, is in binary $1100\ 1000$. However, in the world of CRC,
+this binary string is instead seen as the polynomial
 
-As I stated before, the data in a file could just be seen as a
-sequence of bytes. The number $200$ is for example the binary number
-$1100 1000$. However, in the world CRCs this binary string is instead
-seen as a polynomial. For $1100 1000$ this polynomial is $1x^7 + 1x^6
-+ 0x^5 + 0x^4 + 1x^3 + 0x^2 + 0x^1 + 0x^0 = x^7 + x^6 + x^3$. And in
-the same way, the number $7$ is seen as the polynomial $x^2 + x^1 +
-x^0 = x^2 + x + 1$. From now on, the width of such a polynomial is
-defined as the value of the highest exponent. So for the number $110$,
-represented by the polynomial $x^2 + x^1$, the width of this numbers
-is $2$, and not $3$. The width could also be said to be the value
-position of the highest toggled bit, if the lowest bit is considered
-to be at position $0$. Stated more generally, this means that the
-polynomial
+\begin{equation*}
+  1x^7 + 1x^6 + 0x^5 + 0x^4 + 1x^3 + 0x^2 + 0x^1 + 0x^0 = x^7 + x^6 + x^3
+\end{equation*}
 
+So that a bit of value $b$ in the position $n$ is represented by
+$bx^n$.
+
+\begin{Exercise}[label={bin-to-poly}]
+
+  What polynomials does the following numbers represent:
+
+  \begin{enumerate}[(a)]
+  \item The binary number $1011\ 0011$
+  \item The number $35$
+  \item The hexadecimal number \hex{13}
+  \end{enumerate}
+
+\end{Exercise}
+
+\begin{Exercise}[label={poly-to-bin}]
+
+  What binary numbers does the following polynomials represent:
+
+  \begin{enumerate}[(a)]
+  \item $x^7 + 1$
+  \item $x^3 + x^2 + x + 1$
+  \item $x^{15} + x^{12} + x^{11} + x^4 + x^3 + x^2 + x + 1$
+  \end{enumerate}
+
+\end{Exercise}
+
+\subsubsection{Polynomial Width}
+
+From now on, the width $w$ of such a polynomial is defined as the
+value of its highest exponent. The binary number $110$, represented by
+the polynomial $x^2 + x^1$, has width $2$. The width could also be
+said to be the position of the highest toggled bit. Stated more
+generally, this means that the polynomial p
 \begin{equation*}
   P(x) = a_wx^w + a_{w-1}x^{w-1} + \dots + a_{1}x + a_{0}
   % this correct?
 \end{equation*}
 
-has a width of $w$, despite the fact that the numbers is $w + 1$ bits
-long.
+has a width of $w$, despite the fact that the number it represents is
+$w + 1$ bits long.
 
-But in the world CRCs yet another property holds for these bytes: all
-operations are done under modulo 2. To demonstrate this property, I'll
+\begin{Exercise}[label={width-poly}]
+
+  What is the width of the polynomial
+
+  \begin{enumerate}[(a)]
+  \item $x^{32} + x^{31} + x^{30} + x^{29} + x^{28} + x^{27} + 1 $
+  \item The polynomial represented by the binary number $1000$
+  \item The polynomial represented by the binary number $1101\ 0101\
+    1111\ 0000$
+  \end{enumerate}
+
+\end{Exercise}
+
+\subsubsection{Polynomial Addition}
+
+In the world of CRCs yet another property holds for these polynomials:
+all operations are done modulo 2. To demonstrate this property, I'll
 introduce the concepts of addition and subtraction in the world of CRC
-polynomials. And to make things simpler and cleaner, I'll write these
-polynomials as binary numbers, meaning that the polynomial $P(x)$ of
-width $w$
+polynomials. And to make things simpler and cleaner during these
+explanations, I'll write the polynomials as their binary equivalents.
+
+First off we describe addition. While the ordinary relationships
 
 \begin{equation*}
-  P(x) = a_wx^w + a_{w-1}x^{w-1} + \dots + a_{1}x + a_{0}
+  0 + 0 = 0
 \end{equation*}
 
-is from the now on represented by the binary number
+and
 
 \begin{equation*}
-  P(x) = a_wa_{w-1} \dots a_{1} a_{0}
+  1 + 0 = 0 + 1 = 1
 \end{equation*}
 
-To give an example, the polynomial $x^3 + x^1 + 1$ is from now on written as
-$1011$.
+hold true, the relationship $1 + 1 = 2$
+does not. Instead, the relationship
 
-So first off we describe addition. While the ordinary relationships $0 + 0 =
-0$, $1 + 0 = 0 + 1 = 0$ hold true in the world is CRC polynomials, the
-relationship $1 + 1 = 2$ does not. Why? This is because in this form
-of polynomial addition is done modulo 2, and $(1 + 1) \bmod 2 = 2
-\bmod 2 = 0$. So this makes sense. Put another way, this means there
-is no carry. So means that the sum of the numbers $1100$ and $0101$
-is:
+\begin{equation*}
+  1 + 1 = 0
+\end{equation*}
+
+is true.  Why? Because in CRC arithmetic is done modulo 2, and $(1 +
+1) \bmod 2 = 2 \bmod 2 = 0$.
+
+The sum of the example numbers $1100$ and $0101$ can thus be
+calculated like this:
 
 \begin{center}
   \begin{tabular}{lr}
@@ -142,13 +186,15 @@ is:
   \end{tabular}
 \end{center}
 
-As summary of the addition operation is given in table
+The entire addition operation is defined in table
 \ref{tab:poly-add}. Studying this table and the above addition you may
-discover something very interesting: polynomial addition under modulo
-2 the same thing as the bitwise XOR operation, $\BitXor$. This
-discovery is something that will make implementing CRCs essentially
-trivial. The reader is reccomended to, as an exercise, add the three
-numbers $1100$, $1001$ and $1111$() together.
+discover something very interesting: polynomial addition is the same
+thing as the bitwise XOR operation, $\BitXor$. This discovery is
+something that will greatly simplify the implementation of CRC.
+
+\begin{Exercise}[label={poly-add}]
+  Using CRC arithmetic, compute the sum  $1100 + 1001 + 1111$
+\end{Exercise}
 
 \begin{table}
   \centering
@@ -162,33 +208,50 @@ numbers $1100$, $1001$ and $1111$() together.
   \label{tab:poly-add}
 \end{table}
 
-Polynomial subtraction is defined in the exact same thing as
-polynomial addition: $1 - 1 = 0 - 0 = 0$, $1 - 0 = $ and $0 - 1 =
-0$. The relation expression holds true, because in modulo 2 negative
-numbers wrap around.
+\subsubsection{Polynomial Subtraction}
 
-And so it turns that polynomial subtraction and addition and bitwise
-XOR are all equal operations. This also means that the only possible
-numbers to be used within this system are $0$ and $1$. So for any
-polynomial
+Polynomial subtraction is defined in the exact way as polynomial
+addition is, so the following relations hold true:
+
+\begin{equation}
+  \label{eq:poly-sub1}
+  1 - 1 = 0 - 0 = 0
+\end{equation}
+
+and
+
+\begin{equation}
+  \label{eq:poly-sub2}
+  1 - 0 = 0 - 1 = 1
+\end{equation}
+
+\ref{eq:poly-sub2} hold true because negative numbers wrap in CRC
+arithmetic.
+
+So given the two polynomials $P_1(x)$ and $P_2(x)$, then, under the
+rules of CRC arithmetic, the following will always hold true:
 
 \begin{equation*}
-  P(x) = a_wx^w + a_{w-1}x^{w-1} + \dots + a_{1}x + a_{0}
+  P_1(x) + P_2(x) = P_1(x) - P_2(x)
 \end{equation*}
 
-It holds true for any number $n$ in the range of $0 \le n \le w$ that
-$a_n \in \{0,1\}$. And this all makes sense, since remember, we are
-just dealing with binary data that we have rewritten on a polynomial
-form. It is left as an exercise to the reader to solve for the
-polynomial $a$ in the following equation $1001 - a = 1110 +
-1001$(0111).
 
-Next up is polynomial multiplication, which is defined just like normal
-multiplication, with the exception that it uses polynomial addition in
-the last step. (show multiplication of $1011$ and $0011$)
+Since CRC subtraction is equivalent to CRC addition, this has the
+important consequence that CRC subtraction is also equivalent to
+bitwise xor.
+
+\subsubsection{Polynomial Multiplication}
+
+CRC multiplication is, on the other hand, defined just as it is in
+ordinary arithmetic. So $1100 \cdot 1 = 1100$ and $1100 \cdot 0 =
+0000$ hold true. We will not discuss the multiplication of two
+operands both longer than one bit, because that is not necessary for our
+purposes.
+
+\subsubsection{Polynomial Division}
 
 Having defined addition, subtraction, and multiplication, we can now
-easily define division. Here is the division of the number $10011$ by
+define division. Here is the long division of the number $10011$ by
 $10$:
 
 \begin{equation*}
@@ -222,36 +285,70 @@ $10$:
   \end{array}
 \end{equation*}
 
-The end result is $1001$, with a remainder of $1$.
+So $\frac{10011}{10}$ is $1001$ with a reminder of $1$. Stated
+differently:
+
+\begin{equation*}
+  10011 = 1001 \cdot 10 + 1
+\end{equation*}
+
+This operation may seem complex, but it is in fact easy to
+understand. In the first step, since the highest bit of the numerator
+is toggled, the two highest bits of the numerator are subtracted by
+the denominator, $10 \cdot 1 = 10$. In the second step, since the
+highest bit of the numerator is now cleared, it is divided by a
+cleared bit pattern with the same length as the denominator, $10 \cdot
+0 = 00$. These multiples are then noted at the top of the
+staircase. This algorithm keeps going until the bits of the numerator
+are exhausted. After this the remaining bits are noted as the
+remainder at the bottom.
+
+\begin{Exercise}[label={poly-div}]
+  Perform the division $\frac{11100}{11}$ using CRC arithmetic.
+\end{Exercise}
 
 \subsection{The CRC computation}
 
 The polynomial division operation is especially interesting for our
 purposes because it turns out that the CRC computation is simply a
-polynomial division!
+polynomial division.
 
-To compute the CRC of some binary data, first you need to consider all
-the data a long sequence of ones and zeroes, meaning that the numbers
-16($10000$) and 2($10$) would form the sequence $1000010$. This
-sequence of binary digits will now have to be divided by something
-known as the generator polynomial. The generator polynomial is the key
-parameter is the key part of the algorithm and there are many
-different to chose from. the only requirement that a this polynomial
-has to satisfy, is that it has to begin and end with a $1$. So $1001$
-is a valid generator polynomial, while $0001$ is not because while it
-end with a $1$ it doesn't begin with a $1$. I was unfortunately unable
-to understand why this is, but an explanation, which I didn't
-understand, can be found in \cite{press2007numerical_recipes}.
+To compute the CRC of some data, first you need to consider all the
+data a long sequence of bits. Meaning that, for example, the data that
+consisted of the numbers 16($10000$, 5 binary digits) and 2($10$, 2
+binary digits) would form the sequence $1000010$(We use these rather
+arbitrary binary number sizes to make the following example easier to
+follow) .
 
-In this example we'll use the artibrariyl chosen polynomial $1101$,
-but keep in mind that we could have chosen any arbitrary polynomial to
-use a divisor. To the sequence we want to compute the CRC of we now
-add $w=3$ zeroes at the end of it, where $w$ is the width of generator
-polynomial. $w=3$, so the sequence we want to operate on becomes
-$1000010000$. Having done all of the prepartory steps, we now perform
-the final calculation: the changed sequence of binary digits is by the
-generator polynomial, and the reminder of this division is the
-checksum:
+This sequence of binary digits is now to be divided by something known
+as the \textit{generator polynomial}, $G(x)$. The generator polynomial
+is the key parameter of the algorithm and there are many different to
+chose from. The only requirement that this polynomial has to satisfy,
+is that it has to begin and end with a toggled bit. So $1001$ is a valid
+generator polynomial, while $0001$ is not because while it ends with a
+toggled bit, it doesn't begin with a toggled bit.
+
+\begin{Exercise}[label={valid-gen}]
+
+  Which of the following are valid generator polynomials:
+
+  \begin{enumerate}[(a)]
+  \item $0001$
+  \item $1011\ 0001\ 1101$
+  \item $x^3 + x^2 + x$
+  \end{enumerate}
+
+\end{Exercise}
+
+In the following example, we'll use the arbitrarily chosen generator
+polynomial $1101$. The data that we wanted to compute the CRC of was
+$1000010$.  First, $w=3$ cleared bits are end to the end of the
+sequence, so the sequence gets transformed to $1000010000$. Having
+done all of the preparatory steps(concatenating the data to one big
+binary number and then appending $w$ cleared bits to the end of the
+data), we now perform the final calculation: the binary sequence is
+divided by the generator polynomial, and the reminder of this division
+is the CRC:
 
 \begin{equation*}
   \newcommand{\divline}{\cline{5-15}}
@@ -281,189 +378,410 @@ checksum:
     &&&&&&&&&&& 1 & 1 & 1 & 0 \\
     &&&&&&&&&&& 1 & 1 & 0 & 1 \\
     \divline
-    &&&&&&&&&&& 0 & 0 & 1 & 1 \\
+    &&&&&&&&&&&& 0 & 1 & 1 \\
   \end{array}
 \end{equation*}
 
-And in this case the checksum is $0011$, or simply $3$. To get a feel
-for this new technique, I'd advise the reader to now experiment with
-choosing generator polynomials and performing polynonial division. One
-last thing, the generator polynomial has to begin and end with a $1$.
+In this case the checksum is $011$, or simply $3$. Notice that the
+final bit size of the checksum ends up being equal to the width $w$ of
+the generator polynomial. Also notice that the computed quotient is
+not at all interesting for computing the CRC.
 
 \subsection{Generator Polynomials}
 
-Next we are to discuss how to implement this polynomial division in
-code. But first I will note that there are many different kinds of
-generator polynomials. But we'll only discuss polynomial generators
-whores width is dividable by 8, since these much easier to implement
-polnominal division for, and because they're are much more used than
-generator polynomials whose width is not dividable by $8$.
-
-Authors like to write out generator polynomials as hexadecimal
-numbers. In this text the polynominal $x^3 + x^2 + x^0$ is represented
-by the hexadecimal number \hex{d}($=1101$). However, since the last
-highest and lowest bits are mandatory, and could therefore be seen as
-implicit, several authors like to leave them out. The authors of
-\cite{press2007numerical_recipes} would for example have written that
-polynomial as \hex{5}($=0101$), because they considered the highest
-bit($x^{3}$) implicit; on the other hand, the people behind
-\cite{Koopman04cyclicredundancy_embedded_networks} would have written
-it as \hex{9}($=101$), because they first considered the lowest bit
-implicit, and to make things even more confusing they decided to leave
-out the first bit altogether on the binary numbers and start the
-number from the second bit! And some authors, like
-\cite{boutel:_png_portab_networ_graph_specif_version12}, like to start
-the bits from the highest bit to the lowest, also leaving out the
-highest bit,meaning the aforementioned polynominal would be
-represented like \hex{3}($=0011$)
+Authors of texts describing generator polynomials like to write out
+them as hexadecimal numbers. In this text, we represent the polynomial
+$x^3 + x^2 + x^0$ by the hexadecimal number \hex{d}($=1101$). However,
+since the last highest and lowest bits are mandatory, and could
+therefore be seen as implicit, several authors like to leave them
+out. The authors of \cite{press2007numerical_recipes} would for
+example have written that last polynomial as \hex{5}($=0101$), because
+they considered the highest bit($x^{3}$) implicit; on the other hand,
+the people behind \cite{Koopman04cyclicredundancy_embedded_networks}
+would have written it as \hex{9}($=101$), because they first of all
+reversed the bit string to $1011$, and they then chose to simply leave
+out the lowest bit of the resulting bit string!
 
 I will in this text refrain from using such confusing conventions and
-will \textit{always} write out all the coefficients of the generator
+will always write out \textit{all} the coefficients of the generator
 polynomials in their hexadecimal and binary representations.
 
-In table \cite{Koopman04cyclicredundancy_embedded_networks} some of
-the most common generator polynomials are listed. The table uses the
-references
-\cite{cook:_catal_crc,Koopman04cyclicredundancy_embedded_networks,press2007numerical_recipes,Ramabadran:1988:TCC:623224.623360_crc_tutorial,boutel:_png_portab_networ_graph_specif_version12}.Keep
-in mind that these are but a few of the many different CRC
-polynomials. The reader should as an exercise convert these
-hexadecimal numbers to polynomials.
+There are \textit{many} different CRC generator polynomials used. So
+many that I quickly realized that it would become a too great of a
+task to even summarize a few of them. This is mainly because the names
+of these polynomials tend to be very inconsistent. According to
+\cite{cook:_catal_crc} there are around 16 different CRC-16
+polynomials! These are polynomials whose width is $w=16$. But if the
+reader really wants a table of pretty much all the possible
+polynomials, then I refer the reader to \cite{cook:_catal_crc}. This
+is a huge table, based on many references, of the many different
+possible generator polynomials.
 
-note that the names of these polynomials tend to be very inconsistent
-and that you should be very careful when guessing what polynominals
-authors in actuality refer to. According to \cite{cook:_catal_crc}
-there are around 16 different CRC-16 polynomials! To give you an
-example of how confusing this can be,in
-\cite{inc05:_epctm_radio_frequen_ident_protoc} the polynomial $x^{16}
-+ x^{12} + x^5 + 1$ is refered to as CRC-16, but this name is awfully
-vauge since, as stated before, there are around 16 such
-polynomials. And furthermore, the polynomial they wanted to refer to
-was, according to
-\cite{cook:_catal_crc,Koopman04cyclicredundancy_embedded_networks},
-CCITT-16.
-
-\begin{table}
-  \centering
-  \begin{tabular}{llll}
-    \toprule
-    Name & Width & Polynomial(hex) \\
-    \midrule
-    CRC-16-CCITT & 16 & \hex{11021} \\ %& $x^{16} + x^{12} + x^5 + 1$ \\
-
-    CRC-32(also known as  Ethernet by
-    \cite{Ramabadran:1988:TCC:623224.623360_crc_tutorial}) & 32 &
-    \hex{84C11DB7} \\ %$x^{32} + x^{26} + x^{23} + x^{22} + x^{16} +
-                      %x^{12} + x^{11} + \\x^{10} +    x^{8} + x^{7} +
-                      %x^{5} + x^{4} + x^2 + x + 1$ \\
-
-    CRC-8/ITU & 8 & \hex{107}\\
-
-    \bottomrule
-  \end{tabular}
-  \caption{Table of common CRC polynomial generators.}
-  \label{tab:common-poly-gens}
-\end{table}
+The advantages of various generators is very complex issue that I will
+not cover in this text.
 
 \subsection{Implementation}
 
 Now we will finally discuss how to implement the CRC computation in
 code.
 
-First note that it is very common to implement the CRC algorithm in
-pure hardware. But we will in this text only discuss the software
-implementation and readers who want to know how to implement it in
-hardware are referred to
-\cite{Ramabadran:1988:TCC:623224.623360_crc_tutorial,Ritter:1986:GCM:12647.12648}.
-
-Let is first consider how to implement to CRC algorithm with the
-generator polynomial CRC-8 from table \ref{tab:common-poly-gens}. So
-we are going to consider for the polynomial $x^8 + x^2 + x + 1$. Let's
-say we want to calculate the checksum for the numbers $14,2$ using
-this generator polynomial. This means we want to calculate the
-polynominal for the binary sequence $???$, right? We put concatenated the
-binary sequences of the two numbers, then added ($w=$)8 zeroes add the
-end of the sequence, forming it. What follows is a start of the CRC
-computation:
-
-\begin{equation*}
-  \newcommand{\divline}{\cline{10-26}}
-  \renewcommand\arraystretch{1.2}
-  \begin{array}{*9r @{\hskip\arraycolsep}c@{\hskip\arraycolsep}
-      *{16}r}
-    &&&&&&&&&&&&&&&&&& 0 & 0 & 0 & 0 \\
-    \divline
-    1 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 & \big) & 0 & 0 & 0 & 0 & 1 & 1 &
-    1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-
-    &&&&&&&&&& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
-    \divline
-
-    &&&&&&&&&&& 0 & 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 &&&&&& \\
-    &&&&&&&&&&& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &&&&&& \\
-    \divline
-
-    &&&&&&&&&&&& 0 & 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 &&&&& \\
-    &&&&&&&&&&&& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &&&&& \\
-    \divline
-
-    &&&&&&&&&&&&& 0 & 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 &&&& \\
-    &&&&&&&&&&&&& 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 &&&& \\
-    \divline
-
-    &&&&&&&&&&&&&& 1 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 &&& \\
-    &&&&&&&&&&&&&& 1 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 1 &&& \\
-    \divline
-
-    &&&&&&&&&&&&&&& 1 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 0 && \\
-    &&&&&&&&&
-    \dots & \dots & \dots & \dots & \dots & \dots & \dots & \dots & \\
-    \divline
-    00101010
-  \end{array}
-\end{equation*}
-
-% http://miscel.dk/MiscEl/CRCcalculations.html#CRC8
-
-The entire computation is not shown because it is so long. Now please
-inspect algorithm \ref{alg:crc8-comp}. It implements polynomial
-division for generator polynomials of width 8.
+Please inspect algorithm \ref{alg:crc8-comp}. It implements
+polynomial division for generator polynomials of width 8.
 
 \begin{algorithm}[H]
   \caption{The CRC computation for CRCs of width 8.}
   \label{alg:crc8-comp}
   \begin{algorithmic}[1]
-    \Require  $bytes$ is an array containing all the bytes to compute the
-    checksum for, and $len$ is the length of this zero indexed array
-    and $G(x)$ is the generator polynomial.
+    \Require $bytes$ is an array containing all the bytes to compute
+    the checksum for and $G(x)$ is the generator polynomial.
 
-    \Function{crc8}{$bytes, len, G(x)$}
+    \Procedure{crc8}{$bytes, G(x)$}
     \Let{result}{$0$}
 
     \ForEach{$byte$}{$bytes$}
-      \Let{$result$}{$result \BitXor byte$}
+    \Let{$result$}{$result \BitXor byte$}
 
-      \Repeatn{$n$}
-        \If{$result \BitAnd \hex{80}$}
-          \Let{$result$}{$(result \ShiftLeft 1) \BitXor G(x)$}
-        \Else
-          \Let{$result$}{$result \ShiftLeft 1$}
-        \EndIf
-      \EndRepeatn
+    \Repeatn{$8$}
+    \linecomment{\hex{80} is the value of the highest bit in a byte.}
+    \If{$result \BitAnd \hex{80}$}
+    \Let{$result$}{$(result \ShiftLeft 1) \BitXor G(x)$}
+    \Else
+    \Let{$result$}{$result \ShiftLeft 1$}
+    \EndIf
+    \EndRepeatn
 
     \EndForEach
 
     \State \textbf{return}  $result \BitAnd \hex{FF}$
-    \EndFunction
+    \EndProcedure
 
   \end{algorithmic}
 \end{algorithm}
 
+Notice first how the numbers that we want to find the CRC for are not
+even concatenated together to form one large binary number.  But the
+reader will soon realize that it is not even necessary to do this to
+calculate the CRC.  For a generator polynomial of width $w=8$, $8$
+cleared bits will be added to the end of the data. It is these last
+$8$ bits that will in the end contain the CRC. These 8 bits are in the
+algorithm represented by the variable $result$.
 
-% CRC32 has a reminder of, but it's length is 33 bits. It's highest term
-% is x^32, thus it has 33 bits(down to x^0, 0-32) and since its width is
-% 32 the reminder has a size of 32.
+So what will happen to the very first byte in the data of this
+algorithm? Let us first consider what would happen with the byte
+$14$. This is the binary number $0000\ 1110$. This bit pattern first
+gets bitwise xored into the bit pattern of the resulting CRC,
+$result$. Since the initial value of this variable was set to $0$ in
+the beginning of this algorithm, this simply means that, by the
+definition of the bitwise xor operator, the $result$ variable is set
+to the bit pattern $0000\ 1110$.
 
-% it is necessary that the last bit 1, becuasee otherwhise polynomial
-% division wouldn't be possible.
+The four highest bits of the number to be divided, $0000\ 1110$, are
+all cleared. As familiar from the representation of long division in
+CRC, if the highest bit of the numerator is cleared, then the
+numerator is divided the cleared bit pattern, and then the next bit
+highest bit of the numerator is dealt with.
 
-\cite{gailly96:_zlib_compr_data_format_specif}
+Subtraction is the same thing as the bitwise xor operator in CRC
+arithmetic. Hence the effect of subtracting by the cleared bit pattern
+is none, because by the defintion of the bitwise xor operator $a
+\BitXor 0 = a$. If you don't see why this must be true, then I refer
+you back to table \ref{tab:log-exlusive-or-table}.
+
+So nothing is required to be done to subtract by the empty bit
+pattern. Now, in order to deal with the following bits of the bit
+pattern, we must bitwise shift the pattern left one step. In our
+pattern $0000\ 1110$, there are four cleared bits in the beginning,
+and so we bitwise shift left four times.
+
+After these four operations, the four remaining bits to be dealt with
+are $1110$. Note that these four bits can now be found in the four
+highest bits of the $result$ variable.
+
+You may now suggest that we simply bitwise xor the generator
+polynomial into $result$, because if the highest bit of the numerator
+is toggled then it is subtracted by the generator polynomial. While it
+is true that we now need to subtract by the generator polynomial, we
+cannot simply use a bitwise xor operation in order to do this. This
+would not work, because the length of the generator polynomial is $9$
+bits, and the bit length of $result$ is $8$. So this would not
+work. However, because the highest bit of the polynomial must always
+be one, you can instead just bitwise left shift $result$ one
+step. This way, the highest bit disspears of the register, so this has
+the exact same effect as subtracting would have. Then $result$ is
+bitwise xored with the generator polynomial, to perform the rest of
+the division. The $8$:th bit of the generator polynomial outside the
+size boundaries of the $result$ variable will not affect this
+computation, hence why we had to bitwise left shift $result$ before
+doing the actual subtraction.
+
+This general algorithm is repeated for all the 8 bits of the byte. So
+What this subalgorithm basically does, is that it divides one byte of
+the data by the generator polynomial and gets the reminder of this
+operation. For dealing with the next byte, this reminder is bitwise
+xored with that next byte, and then the 8 bits of $result$ is
+processed in the same way.
+
+It may be a bit hard to see why this works, so consider the following:
+we want to compute the CRC for the binary numbers $111$ and $011$ for
+the generator polynomial $1100$. Using the traditional long division
+polynomial algorithm, this would be done as such:
+
+\begin{equation*}
+  \newcommand{\divline}{\cline{5-14}}
+  \renewcommand\arraystretch{1.2}
+  \begin{array}{*4r @{\hskip\arraycolsep}c@{\hskip\arraycolsep} *9r}
+    &&&&&&&& 1 & 0 & 1 & 1 & 0 & 1\\
+
+    \divline
+    1 & 1 & 0 & 0 & \big) & 1 & 1 & 1 & 0 & 1 & 1 & 0 & 0 & 0 \\
+    &&&&& 1 & 1 & 0 & 0 & \\
+    \divline
+
+    &&&&&& 0 & 1 & 0 & 1 &&&\\
+    &&&&&& 0 & 0 & 0 & 0 &&& \\
+
+    \divline
+
+    &&&&&&& 1 & 0 & 1 & 1 &&\\
+    &&&&&&& 1 & 1 & 0 & 0 &&\\
+
+    \divline
+
+    &&&&&&&& 1 & 1 & 1 & 0 &&\\
+    &&&&&&&& 1 & 1 & 0 & 0 &&\\
+
+    \divline
+
+    &&&&&&&&& 0 & 1 & 0 & 0 &\\
+    &&&&&&&&& 0 & 0 & 0 & 0 &\\
+
+    \divline
+
+    &&&&&&&&&& 1 & 0 & 0 & 0\\
+    &&&&&&&&&& 1 & 1 & 0 & 0\\
+
+    \divline
+
+    &&&&&&&&&&& 1 & 0 & 0\\
+
+  \end{array}
+\end{equation*}
+
+However, using our algorithm, the checksum would be computed in the
+following way: first we divide $111$ by the generator polynomial and
+compute the reminder:
+
+\begin{equation*}
+  \newcommand{\divline}{\cline{5-11}}
+  \renewcommand\arraystretch{1.2}
+  \begin{array}{*4r @{\hskip\arraycolsep}c@{\hskip\arraycolsep} *6r}
+
+    &&&&&&&& 1 & 0 & 1 \\
+
+    \divline
+
+    1 & 1 & 0 & 0 & \big) & 1 & 1 & 1 & 0 & 0 & 0 \\
+    &&&&& 1 & 1 & 0 & 0 & \\
+
+    \divline
+
+    &&&&&& 0 & 1 & 0 & 0 \\
+    &&&&&& 0 & 0 & 0 & 0 \\
+
+    \divline
+
+    &&&&&&& 1 & 0 & 0 & 0 \\
+    &&&&&&& 1 & 1 & 0 & 0 \\
+
+    \divline
+
+    &&&&&&&& 1 & 0 & 0 \\
+
+  \end{array}
+\end{equation*}
+
+Then, the next byte is subtracted by the reminder. The result of this
+subtraction is divided by the generator polynomial:
+
+\begin{equation*}
+  \newcommand{\divline}{\cline{5-11}}
+  \renewcommand\arraystretch{1.2}
+  \begin{array}{*4r @{\hskip\arraycolsep}c@{\hskip\arraycolsep} *6r}
+
+    &&&&&&&& 1 & 0 & 1 \\
+
+    \divline
+
+    1 & 1 & 0 & 0 & \big) & 1 & 1 & 1 & 0 & 0 & 0 \\
+    &&&&& 1 & 1 & 0 & 0 & \\
+
+    \divline
+
+    &&&&&& 0 & 1 & 0 & 0 \\
+    &&&&&& 0 & 0 & 0 & 0 \\
+
+    \divline
+
+    &&&&&&& 1 & 0 & 0 & 0 \\
+    &&&&&&& 1 & 1 & 0 & 0 \\
+
+    \divline
+
+    &&&&&&&& 1 & 0 & 0 \\
+
+  \end{array}
+\end{equation*}
+
+So, the two division operations on the two separate bytes is
+equivalent to the division operation on the concatenated bit
+pattern. And therefore, algorithm \ref{alg:crc8-comp} works. The
+advantage that our algorithm has, is that doesn't require
+concatenating the numbers into one large binary number, but rather
+only requires being able to perform the operations on rather small
+numbers.
+
+It also turns out that this algorithm is general enough to allow for
+$result$ to have bit sizes different than 8 bits. Bits outside of the
+$7$:th byte boundary(the highest possible bit position of a byte) will
+always stay outside this boundary during the shift. But since only the
+8 lowest bits of the $result$ variable are the actual CRC, you will
+need to find a way to only include these bits. This trivially done
+using the bitwise and operation. By bitwise anding $result$ with the
+pattern $1111\ 1111$(=\hex{FF)}, you can make sure that you only get
+the 8 lowest bits.
+
+There are many ways of varying the algorithm I just described. It is
+for example common to have different initial values of $0$ than
+zero. This results in different computed CRCs. It is also common to
+return not only $result \BitAnd \hex{FF}$, but many different values
+are instead of \hex{FF}. My main advise is to always read the
+specification of a CRC \textit{carefully}, before starting to
+implement it.
+
+The algorithm for computing CRC I just described turns out to be far
+from optimal; there is a table based algorithm that is almost always
+faster than the rather naive method I just described. But since
+exploring the performance of algorithms is not the main goal of this
+text, I will not discuss it here.
+
+Reasoning in very much the same, way can also implement the CRC
+computation for generator computations of width $32$, as is shown in
+algorithm. As you can see, it is largely the same algorithm.
+
+\todo{explain better}
+
+\begin{algorithm}[H]
+  \caption{The CRC computation for CRCs of width 32.}
+  \label{alg:crc8-comp}
+  \begin{algorithmic}[1]
+    \Require $bytes$ is an array containing all the bytes to compute
+    the checksum for and $G(x)$ is the generator polynomial.
+
+    \Procedure{crc32}{$bytes, G(x)$}
+    \Let{result}{$0$}
+
+    \ForEach{$byte$}{$bytes$}
+    \Let{$result$}{$result \BitXor (byte \ShiftLeft 24)$}
+
+    \Repeatn{$8$}
+    \If{$result \BitAnd \hex{80000000}$}
+    \Let{$result$}{$(result \ShiftLeft 1) \BitXor G(x)$}
+    \Else
+    \Let{$result$}{$result \ShiftLeft 1$}
+    \EndIf
+    \EndRepeatn
+
+    \EndForEach
+
+    \State \textbf{return}  $result \BitAnd \hex{FFFFFFFF}$
+    \EndProcedure
+
+  \end{algorithmic}
+\end{algorithm}
+
+\section{CRC-32}
+
+We will end this chapter by briefly discussing the CRC that is used in
+the PNG format
+
+\todo{discuss}
+
+\section{Answers To The Exercises}
+
+\begin{Answer}[ref={bin-to-poly}]
+  \begin{enumerate}[(a)]
+  \item $x^7 + x^5 + x^4 + x + 1$
+  \item $x^5+ x + 1$
+  \item $x^4 + x + 1$
+  \end{enumerate}
+\end{Answer}
+
+\begin{Answer}[ref={poly-to-bin}]
+  \begin{enumerate}[(a)]
+  \item $1000\ 0001$
+  \item $1111$
+  \item $1001\ 1000\ 0001\ 1111$
+  \end{enumerate}
+\end{Answer}
+
+\begin{Answer}[ref={width-poly}]
+
+  \begin{enumerate}[(a)]
+  \item $32$
+  \item $3$
+  \item $15$
+  \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={poly-add}]
+
+  $1010$
+
+\end{Answer}
+
+\begin{Answer}[ref={poly-div}]
+
+  \begin{equation*}
+    \newcommand{\divline}{\cline{3-8}}
+    \renewcommand\arraystretch{1.2}
+    \begin{array}{*2r @{\hskip\arraycolsep}c@{\hskip\arraycolsep} *5r}
+      &&&&  1 &  0 & 1 & 1\\
+      \divline
+      1 & 1 &\big)& 1 &  1 & 1 & 0 & 0 \\
+      &&& 1 & 1 \\
+
+      \divline
+
+      &&&& 0 & 1 \\
+      &&&& 0 & 0 \\
+
+      \divline
+
+      &&&&& 1 & 0 \\
+      &&&&& 1 & 1 \\
+
+      \divline
+
+      &&&&&& 1 & 0 \\
+      &&&&&& 1 & 1 \\
+
+      \divline
+
+      &&&&&&& 1 \\
+
+    \end{array}
+  \end{equation*}
+
+\end{Answer}
+
+\begin{Answer}[ref={valid-gen}]
+
+  \begin{enumerate}
+  \item Not a generator polynomial.
+  \item Valid generator polynomial.
+  \item Not a generator polynomial, because this polynomial is
+    equivalent to $1x^3 + 1x^2 + 1x + 0x^0$.
+  \end{enumerate}
+
+\end{Answer}
