@@ -62,7 +62,6 @@ typedef struct{
     DataList profile;
 } ICC_Profile;
 
-/* How this structures should be interpreted depends on the color type used. */
 typedef struct {
     BYTE significantGreyscaleBits;
 
@@ -236,6 +235,14 @@ void writeColor(PNG_Image image,
                 Color color,
                 FILE * out);
 
+
+SignificantBits * loadSignificantBits(ImageHeader header, DataStream stream);
+
+void writeSignificantBits(
+    SignificantBits * significantBits,
+    ImageHeader header,
+    FILE * out);
+
 TextualData * loadTextualData(
     DataStream stream,
     int compressed,
@@ -297,5 +304,6 @@ unsigned long readNextChannel(DataStream * stream, ImageHeader header);
 void addColorToDataList(DataList * list, Color color);
 
 DataList uninterlace(DataList data, ImageHeader header);
+
 
 #endif /* _PNG_H_ */

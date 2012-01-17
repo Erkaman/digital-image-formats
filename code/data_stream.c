@@ -68,8 +68,15 @@ BYTE readBits(DataStream * stream, int nbits)
 	stream->remainingBitsBits = 8;
     }
 
-    bits = lastNBits(stream->b, nbits, stream->remainingBitsBits) &
-	(~(~0 << nbits));
+    bits = getbits(stream->b, 8 - nbits, 7);
+
+/*lastNBits(stream->b, nbits, stream->remainingBitsBits) &
+	(~(~0 << nbits));*/
+
+    stream->b <<= nbits;
+
+/*    bits <<= nbits; */
+
     stream->remainingBitsBits -= nbits;
 
     verbosePrint("bits:%d\n",bits);

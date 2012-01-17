@@ -4,14 +4,14 @@
 \usepackage[charter]{mathdesign}
 \usepackage[kerning,spacing]{microtype}
 \usepackage{longtable}
-\title{(preliminärt)Schema för projektarbetet}
+\title{Schema för projektarbetet}
 \author{Eric Arnebäck}
 \date{}
 \setlength{\parskip}{1ex plus 0.5ex minus 0.2ex}
 \setlength{\parindent}{0pt}
 
 \newcounter{week}
-\setcounter{week}{38}
+\setcounter{week}{3}
 \newcommand{\nextweek}{%
    \theweek%
    \stepcounter{week}%
@@ -23,66 +23,26 @@
 
 \maketitle
 
-(Om en vecka är tom betyder det att samma sak görs som förra veckan.)
-
 \centering
 \begin{longtable}{p{1cm}p{10cm}}
   \textbf{v.} & \textbf{Att göra} \\
 
-  \weekschedule{Gör färdigt skriftliga delen om RLE. Renskriv och
-    städa upp allt nuvarande material. Eftersom jag tidigare inte
-    följde ett riktigt schema är det nuvarande materialet lite rörigt,
-    därför krävs det en vecka för att renskriva det. }
+  \weekschedule{Gör färdigt png laddare.}
 
-  \weekschedule{Sammanfatta TGA skriftligt.}
-
-  \weekschedule{Utforska och förstå kompressionsalgoritmen LZW.}
-
-  \weekschedule{LZW sammanfattas skriftligt.}
-
-  \weekschedule{Läs GIF specifikationen och börja koda GIF-laddare. }
-
-  \weekschedule{Gör färdigt GIF laddare. }
-
-  \weekschedule{Sammanfatta GIF formatet skriftligt.}
-  \weekschedule{}
-
-  \weekschedule{Jobbet på PNG påbörjas med att DEFLATE algoritmen
-    utforskas. DEFLATE algoritmen är en kombination av LZZ7 och
-    Huffmankodning. Dem här två algoritmerna kommer att utforskas
-    separat. Sen på slutet kommer den kompletta DEFLATE algoritmen att
-    utforskas.}
-
+  \weekschedule{Sammanfatta png skriftligt}
   \weekschedule{}
   \weekschedule{}
 
-  \weekschedule{DEFLATE algoritmen sammanfattas skriftligt}
+  \weekschedule{DEFLATE}
   \weekschedule{}
-  \setcounter{week}{2}
   \weekschedule{}
+  \weekschedule{}
+  \weekschedule{}
+  \weekschedule{}
+  \weekschedule{}
+  \weekschedule{Klart}
 
-  \weekschedule{PNG specifikationen skummas igenom och boken ``PNG - the
-  definitive guide'' läses som ett stöd vid sidan av.}
-  \weekschedule{}
-
-  \weekschedule{Koda PNG-laddare}
-  \weekschedule{}
-  \weekschedule{}
-  \weekschedule{}
-
-  \weekschedule{PNG sammanfattas skriftligt.}
-  \weekschedule{}
-  \weekschedule{}
-  \weekschedule{}
-
-  \weekschedule{Renskrivning och uppstädning av \textit{allt} material.}
-
-  \weekschedule{}
-
-  \weekschedule{}
-
-  \weekschedule{}
-
+% till vecka 16
 \end{longtable}
 
 \end{document}

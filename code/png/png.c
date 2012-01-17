@@ -32,6 +32,10 @@ void freePNG_Image(PNG_Image image)
     if(image.pixelDimensions != NULL)
         free(image.pixelDimensions);
 
+    if(image.significantBits != NULL)
+        free(image.significantBits);
+
+
     if(image.transparency != NULL){
         freeDataList(image.transparency->transparentIndices, 1);
         free(image.transparency);
@@ -138,6 +142,9 @@ PNG_Image loadPNG(FILE * in)
                 &image.textDataList,
                 loadTextualData(stream, 0, chunk.length));
 
+        else if(isChunkType(chunk, sBIT))
+            image.significantBits = loadSignificantBits(image.header, stream);
+
         else {
             if(!isCriticalChunk(chunk)){
                 printWarning("Unknown ancillary chunk %s found, skipping chunk.\n",
@@ -174,12 +181,14 @@ void writePNG(PNG_Image image, FILE * out)
     writePixelDimensions(image.pixelDimensions, out);
     writeTimeStamp(image.timeStamp, out);
     writeBackgroundColor(image, image.backgroundColor, out);
+    writeSignificantBits(image.significantBits, image.header, out);
 
     writeTextDataList(image.textDataList, out);
 
     writePalette(image, out);
 
     writeColorData(image, out);
+
 }
 
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out)
@@ -665,7 +674,6 @@ DataList loadColorData(DataList data, ImageHeader header)
 {
     int former;
     DataList decompressed, unfiltered, colorData, interlaced;
-    size_t i;
     former = verbose;
 
     verbose = 0;
@@ -683,27 +691,11 @@ DataList loadColorData(DataList data, ImageHeader header)
     colorData = splitUpColorData( unfiltered, header);
     freeDataList(unfiltered, 1);
 
-    0,0,0,0,0,0,0,0,
-    0,0,0,0,0,1,0,0,
-    0,0,0,0,0,0,0,0,
-    3,2,0,0,0,0,0,0,
-    0,3,3,2,0,2,2,2,
-    0,0,0,0,0,0,0,0,
-    2,3,3,0,0,0,0,0,
-    2,1,3,0,2,2,2,0,
-
     if(header.interlaceMethod == ADAM7_INTERLACE){
-	for(i = 0; i < colorData.count; ++i){
-		verbosePrint("%d,", (*(Color *)colorData.list[i]).index);
-	    }
         interlaced = uninterlace(colorData, header);
-        freeDataList(colorData, 0); /* 0 ? */
-    }
-
-    /* Split up the bytes in pixels. . */
-    if(header.interlaceMethod == ADAM7_INTERLACE)
+        freeDataList(colorData, 0);
         return interlaced;
-    else
+    } else
         return colorData;
 }
 
@@ -915,8 +907,6 @@ DataList splitUpColorData(DataList data, ImageHeader header)
 
     colorData = getNewDataList(NULL, NULL);
 
-    /* Read the row by row. Because what happens when the row 1 1 1 of length 3 is processed in a single byte? */
-
     colorStream = getNewDataStream(data, PNG_ENDIAN);
 
     for(i = 0; i < (header.width * header.height); ++i){
@@ -947,10 +937,17 @@ DataList splitUpColorData(DataList data, ImageHeader header)
             color.rgba.G = readNextChannel(&colorStream, header);
             color.rgba.B = readNextChannel(&colorStream, header);
             color.rgba.A = readNextChannel(&colorStream, header);
-
         }
 
         addColorToDataList(&colorData, color);
+
+        if((i+1) % header.width == 0 && (i+1) != header.width * header.height &&
+           header.bitDepth < 8){
+
+            colorStream.b = readStreamByte(&colorStream);
+            colorStream.remainingBitsBits = 8;
+
+        }
     }
 
     return colorData;
@@ -1062,52 +1059,126 @@ Transparency * loadTransparency(ImageHeader header, DataStream stream)
     return transparency;
 }
 
-DataList uninterlace(DataList data, ImageHeader header)
+SignificantBits * loadSignificantBits(ImageHeader header, DataStream stream)
 {
-    DataList images[7];
-    DataList uninterlaced;
-    size_t i,j;
-    size_t col,row;
-    void * color;
+    SignificantBits * significantBits;
 
-    int adam7[8][8] = {
-        {1, 6, 4, 6, 2, 6, 4, 6},
-        {7, 7, 7, 7, 7, 7, 7, 7},
-        {5, 6, 5, 6, 5, 6, 5, 6},
-        {7, 7, 7, 7, 7, 7, 7, 7},
-        {3, 6, 4, 6, 3, 6, 4, 6},
-        {7, 7, 7, 7, 7, 7, 7, 7},
-        {5, 6, 5, 6, 5, 6, 5, 6},
-        {7, 7, 7, 7, 7, 7, 7, 7},
-    };
+    significantBits = malloc(sizeof(SignificantBits));
 
-    for(i = 0; i < 7; ++i){
-        /* copy functions needed here.*/
-        images[i] = getNewDataList(NULL, NULL);
+    if(header.colorType == GREYSCALE_COLOR)
+        significantBits->significantGreyscaleBits = readStreamByte(&stream);
+    else if(header.colorType == TRUECOLOR_COLOR ||
+            header.colorType == INDEXED_COLOR){
+
+        significantBits->significantRedBits = readStreamByte(&stream);
+        significantBits->significantGreenBits = readStreamByte(&stream);
+        significantBits->significantBlueBits = readStreamByte(&stream);
+
+    } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
+
+        significantBits->significantGreyscaleBits = readStreamByte(&stream);
+        significantBits->significantAlphaBits = readStreamByte(&stream);
+    } else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
+
+        significantBits->significantRedBits = readStreamByte(&stream);
+        significantBits->significantGreenBits = readStreamByte(&stream);
+        significantBits->significantBlueBits = readStreamByte(&stream);
+        significantBits->significantAlphaBits = readStreamByte(&stream);
     }
 
-    for(row = 0; row < header.height; ++row)
-        for(col = 0; col < header.width; ++col){
+    return significantBits;
+}
 
-	    verbosePrint("row:%d,col=%d, i = %d\n", row,col, header.width * row + col);
-            color = data.list[header.width * row + col];
+void writeSignificantBits(
+    SignificantBits * significantBits,
+    ImageHeader header,
+    FILE * out)
+{
+    if(significantBits != NULL){
 
-            addToDataList(&images[adam7[row % 8][col % 8] - 1], color);
+        fprintf(out, "Significant bits\n");
+
+        if(header.colorType == GREYSCALE_COLOR)
+
+	    fprintf(out, "significant greyscale bits: %d\n",
+		    significantBits->significantGreyscaleBits);
+
+        else if(header.colorType == TRUECOLOR_COLOR ||
+                header.colorType == INDEXED_COLOR){
+
+	    fprintf(out, "significant red bits: %d\n",
+		    significantBits->significantRedBits);
+	    fprintf(out, "significant green bits: %d\n",
+		    significantBits->significantGreenBits);
+	    fprintf(out, "significant blue bits: %d\n",
+		    significantBits->significantBlueBits);
+
+
+        } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
+
+	    fprintf(out, "significant greyscale bits: %d\n",
+		    significantBits->significantGreyscaleBits);
+
+	    fprintf(out, "significant alpha bits: %d\n",
+		    significantBits->significantAlphaBits);
+
+
+        } else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
+	    fprintf(out, "significant red bits: %d\n",
+		    significantBits->significantRedBits);
+	    fprintf(out, "significant green bits: %d\n",
+		    significantBits->significantGreenBits);
+	    fprintf(out, "significant blue bits: %d\n",
+		    significantBits->significantBlueBits);
+	    fprintf(out, "significant alpha bits: %d\n",
+		    significantBits->significantAlphaBits);
         }
+    }
+}
+
+
+
+DataList uninterlace(DataList data, ImageHeader header)
+{
+    DataList uninterlaced;
+    size_t col,row;
+    int pass;
+    size_t i;
+
+    int startingRow[7]  = { 0, 0, 4, 0, 2, 0, 1 };
+    int startingCol[7]  = { 0, 4, 0, 2, 0, 1, 0 };
+    int rowIncrement[7] = { 8, 8, 8, 4, 4, 2, 2 };
+    int colIncrement[7] = { 8, 8, 4, 4, 2, 2, 1 };
 
     uninterlaced = getNewDataList(NULL, NULL);
 
-    for(i = 0; i < 7; ++i){
+    /* TODO: clean up.*/
+    uninterlaced = allocateNewDataList(
+        header.width * header.height,
+        header.width * header.height,
+        NULL,
+        NULL);
 
-	for(j = 0; j < images[i].count; ++j){
-	    verbosePrint("i:%d,j=%d\n", i, j);
+    i = 0;
 
-	    addToDataList(&uninterlaced, images[i].list[j]);
-	}
-    }
+    for(pass = 0; pass < 7; ++pass){
 
-    for(i = 0; i < 7; ++i){
-        freeDataList(images[i], 0);
+        row = startingRow[pass];
+
+        while(row < header.height){
+
+            col = startingCol[pass];
+
+            while(col < header.width){
+                uninterlaced.list[row * header.width + col] = data.list[i++];
+                col += colIncrement[pass];
+
+                printf("i:%ld\n", i);
+            }
+
+            row += rowIncrement[pass];
+
+        }
     }
 
     return uninterlaced;
