@@ -35,6 +35,8 @@ void freePNG_Image(PNG_Image image)
     if(image.significantBits != NULL)
         free(image.significantBits);
 
+    if(image.chromaticities != NULL)
+	free(image.chromaticities);
 
     if(image.transparency != NULL){
         freeDataList(image.transparency->transparentIndices, 1);
@@ -145,6 +147,10 @@ PNG_Image loadPNG(FILE * in)
         else if(isChunkType(chunk, sBIT))
             image.significantBits = loadSignificantBits(image.header, stream);
 
+        else if(isChunkType(chunk, cHRM))
+            image.chromaticities = loadPrimaryChromaticities(stream);
+
+
         else {
             if(!isCriticalChunk(chunk)){
                 printWarning("Unknown ancillary chunk %s found, skipping chunk.\n",
@@ -182,6 +188,7 @@ void writePNG(PNG_Image image, FILE * out)
     writeTimeStamp(image.timeStamp, out);
     writeBackgroundColor(image, image.backgroundColor, out);
     writeSignificantBits(image.significantBits, image.header, out);
+    writePrimaryChromaticities(image.chromaticities, out);
 
     writeTextDataList(image.textDataList, out);
 
@@ -1136,7 +1143,57 @@ void writeSignificantBits(
     }
 }
 
+PrimaryChromaticities * loadPrimaryChromaticities(DataStream stream)
+{
+    PrimaryChromaticities * primaryChromaticities;
 
+    primaryChromaticities = malloc(sizeof(PrimaryChromaticities));
+
+
+    primaryChromaticities->whitePointX = read32BitsNumber(&stream);
+    primaryChromaticities->whitePointY = read32BitsNumber(&stream);
+
+    primaryChromaticities->RedX = read32BitsNumber(&stream);
+    primaryChromaticities->RedY = read32BitsNumber(&stream);
+
+    primaryChromaticities->GreenX = read32BitsNumber(&stream);
+    primaryChromaticities->GreenY = read32BitsNumber(&stream);
+
+    primaryChromaticities->BlueX = read32BitsNumber(&stream);
+    primaryChromaticities->BlueY = read32BitsNumber(&stream);
+
+    return primaryChromaticities;
+}
+
+void writePrimaryChromaticities(
+    PrimaryChromaticities * primaryChromaticities,
+    FILE * out)
+{
+    if(primaryChromaticities != NULL){
+
+	fprintf(out, "Primary chromaticities and white point:\n");
+
+	fprintf(out, "White point x:%0.4f\n",
+		primaryChromaticities->whitePointX / 100000.0);
+	fprintf(out, "White point y:%0.4f\n",
+		primaryChromaticities->whitePointY / 100000.0);
+
+	fprintf(out, "Red x:%0.4f\n",
+		primaryChromaticities->RedX / 100000.0);
+	fprintf(out, "Red y:%0.4f\n",
+		primaryChromaticities->RedY / 100000.0);
+
+	fprintf(out, "Green x:%0.4f\n",
+		primaryChromaticities->GreenX / 100000.0);
+	fprintf(out, "Green y:%0.4f\n",
+		primaryChromaticities->GreenY / 100000.0);
+
+	fprintf(out, "Blue x:%0.4f\n",
+		primaryChromaticities->BlueX / 100000.0);
+	fprintf(out, "Blue y:%0.4f\n",
+		primaryChromaticities->BlueY / 100000.0);
+    }
+}
 
 DataList uninterlace(DataList data, ImageHeader header)
 {

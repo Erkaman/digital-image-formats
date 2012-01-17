@@ -243,6 +243,12 @@ void writeSignificantBits(
     ImageHeader header,
     FILE * out);
 
+PrimaryChromaticities * loadPrimaryChromaticities(DataStream stream);
+
+void writePrimaryChromaticities(
+    PrimaryChromaticities * primaryChromaticities,
+    FILE * out);
+
 TextualData * loadTextualData(
     DataStream stream,
     int compressed,
