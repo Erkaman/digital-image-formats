@@ -21,6 +21,11 @@ BYTE readStreamByte(DataStream * stream)
     return *(BYTE *)stream->list.list[stream->position++];
 }
 
+void * readNext(DataStream * stream)
+{
+    return stream->list.list[stream->position++];
+}
+
 uint16_t read16BitsNumber(DataStream * stream)
 {
     BYTE b1,b2;

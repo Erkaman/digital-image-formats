@@ -24,6 +24,8 @@ BYTE readStreamByte(DataStream * stream);
 uint16_t read16BitsNumber(DataStream * stream);
 uint32_t read32BitsNumber(DataStream * stream);
 
+void * readNext(DataStream * stream);
+
 BYTE readBits(DataStream * stream, int nbits);
 
 #endif /* _DATA_STREAM_H_ */

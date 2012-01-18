@@ -183,7 +183,8 @@ typedef struct {
 
     Color * backgroundColor;
 
-    INT16 * imageHistogram;
+    /* INT 16 */
+    DataList * imageHistogram;
 
     PixelDimensions * pixelDimensions;
 
@@ -224,6 +225,9 @@ void writeTimeStamp(TimeStamp * timeStamp, FILE * out);
 
 PixelDimensions * loadPixelDimensions(DataStream streamn);
 void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out);
+
+DataList * loadImageHistogram(DataStream stream);
+void writeImageHistogram(DataList * imageHistogram, FILE * out);
 
 Color * loadBackgroundColor(ImageHeader header, DataStream stream);
 void writeBackgroundColor(

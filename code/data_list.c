@@ -122,8 +122,13 @@ void copyAppendToDataList(DataList * destination, DataList appendee)
     size_t i;
 
     for(i = 0; i < appendee.count; ++i){
-        addToDataList(destination,destination->copyFunction(appendee.list[i]));
+	copyAppend(destination, appendee.list[i]);
     }
+}
+
+void copyAppend(DataList * destination, void * appendee)
+{
+    addToDataList(destination,destination->copyFunction(appendee));
 }
 
 DataList readBytes(size_t count, FILE * in)

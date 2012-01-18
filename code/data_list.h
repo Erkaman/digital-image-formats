@@ -44,6 +44,8 @@ void addToDataList(DataList * list, void * newElement);
 
 void copyAppendToDataList(DataList * destination, DataList appendee);
 
+void copyAppend(DataList * destination, void * appendee);
+
 DataList readBytes(size_t count, FILE * in);
 void addByteToDataList(DataList * list, BYTE b);
 void * copyByte(void * bptr);

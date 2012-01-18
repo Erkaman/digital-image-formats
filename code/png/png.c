@@ -38,6 +38,11 @@ void freePNG_Image(PNG_Image image)
     if(image.chromaticities != NULL)
 	free(image.chromaticities);
 
+    if(image.imageHistogram != NULL){
+        freeDataList(*image.imageHistogram,1);
+	free(image.imageHistogram);
+    }
+
     if(image.transparency != NULL){
         freeDataList(image.transparency->transparentIndices, 1);
         free(image.transparency);
@@ -144,12 +149,19 @@ PNG_Image loadPNG(FILE * in)
                 &image.textDataList,
                 loadTextualData(stream, 0, chunk.length));
 
+        else if(isChunkType(chunk, zTXt))
+            addToDataList(
+                &image.textDataList,
+                loadTextualData(stream, 1, chunk.length));
+
         else if(isChunkType(chunk, sBIT))
             image.significantBits = loadSignificantBits(image.header, stream);
 
         else if(isChunkType(chunk, cHRM))
             image.chromaticities = loadPrimaryChromaticities(stream);
 
+        else if(isChunkType(chunk, hIST))
+            image.imageHistogram = loadImageHistogram(stream);
 
         else {
             if(!isCriticalChunk(chunk)){
@@ -189,6 +201,7 @@ void writePNG(PNG_Image image, FILE * out)
     writeBackgroundColor(image, image.backgroundColor, out);
     writeSignificantBits(image.significantBits, image.header, out);
     writePrimaryChromaticities(image.chromaticities, out);
+    writeImageHistogram(image.imageHistogram, out);
 
     writeTextDataList(image.textDataList, out);
 
@@ -622,9 +635,11 @@ TextualData * loadTextualData(
 {
     TextualData * data;
     char ch;
-    int i;
-    int textLength;
-
+    size_t i;
+    size_t textLength;
+    DataList compressedData, decompressedData;
+    int former;
+    BYTE b;
 
     data = malloc(sizeof(TextualData));
     data->str = NULL;
@@ -640,7 +655,36 @@ TextualData * loadTextualData(
 
 
     if(compressed){
+
         /* Uncompress the data.*/
+
+	/* read the compression method. */
+	(char)readStreamByte(&stream);
+
+	compressedData = getNewDataList(NULL, copyByte);
+
+	for(i = stream.position; i < stream.list.count; ++i){
+	    copyAppend(&compressedData, readNext(&stream));
+	}
+
+	former = verbose;
+	verbose = 0;
+	decompressedData = ZLIB_Decompress(compressedData);
+	verbose = former;
+
+	freeDataList(compressedData, 1);
+
+        data->str = malloc(sizeof(char) * (decompressedData.count + 1));
+
+	for(i = 0; i < decompressedData.count; ++i){
+	    b = *(BYTE *)decompressedData.list[i];
+	    data->str[i] = (char)b;
+	}
+
+	data->str[i] = '\0';
+
+	freeDataList(decompressedData, 1);
+
     } else{
         /* Simply read the data.
 
@@ -1192,6 +1236,43 @@ void writePrimaryChromaticities(
 		primaryChromaticities->BlueX / 100000.0);
 	fprintf(out, "Blue y:%0.4f\n",
 		primaryChromaticities->BlueY / 100000.0);
+    }
+}
+
+DataList * loadImageHistogram(DataStream stream)
+{
+    DataList * histogram;
+    size_t i;
+    uint16_t * p;
+
+    histogram = malloc(sizeof(DataList));
+
+    *histogram =  getNewDataList(NULL, NULL);
+
+    for(i = 0; i < (stream.list.count / 2); ++i){
+	printf("i:%ld\n", i);
+	p = malloc(sizeof(INT16));
+	*p = read16BitsNumber(&stream);
+	addToDataList(histogram, p);
+    }
+
+    return histogram;
+}
+
+void writeImageHistogram(DataList * imageHistogram, FILE * out)
+{
+    size_t i;
+
+    if(imageHistogram != NULL){
+
+	fprintf(out, "Image histogram: \n");
+
+	for(i = 0; i < imageHistogram->count; ++i){
+
+	    fprintf(out, "%d, ", *(INT16 *) imageHistogram->list[i]);
+	}
+
+	fprintf(out, "\n");
     }
 }
 
