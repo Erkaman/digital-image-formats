@@ -202,6 +202,17 @@ typedef struct {
 
 } PNG_Image;
 
+typedef struct {
+    size_t width;
+    size_t height;
+} Size;
+
+typedef struct {
+    Size sizes[7];
+} InterlacedSubImagesSizes;
+
+InterlacedSubImagesSizes calcInterlacedSubImagesSizes(size_t width, size_t height);
+
 void dumpPNG(FILE * in, FILE * out);
 
 PNG_Image loadPNG(FILE * in);
@@ -291,7 +302,18 @@ INT32 getMaximumChannelValue(ImageHeader header);
 
 DataList unfilter(DataList data, ImageHeader header);
 
+DataList unfilterInterlacedImage(DataList data, ImageHeader header);
+
 DataList splitUpColorData(DataList data, ImageHeader header);
+
+DataList splitUpColorDataSubImage(
+    DataStream * colorStream,
+    ImageHeader header,
+    size_t width,
+    size_t height
+    );
+
+DataList splitUpColorDataInterlaced(DataList data, ImageHeader header);
 
 
 ColorInfo getColorInfo(ImageHeader header);
@@ -315,5 +337,12 @@ void addColorToDataList(DataList * list, Color color);
 
 DataList uninterlace(DataList data, ImageHeader header);
 
+DataList unfilterSubImage(
+    DataStream * stream,
+    size_t imageWidth,
+    size_t height,
+    ColorInfo info);
+
+void * copyColor(void * vptr);
 
 #endif /* _PNG_H_ */

@@ -121,6 +121,7 @@ void copyAppendToDataList(DataList * destination, DataList appendee)
 {
     size_t i;
 
+    printf("appendee.count:%ld\n", appendee.count);
     for(i = 0; i < appendee.count; ++i){
 	copyAppend(destination, appendee.list[i]);
     }
@@ -128,6 +129,7 @@ void copyAppendToDataList(DataList * destination, DataList appendee)
 
 void copyAppend(DataList * destination, void * appendee)
 {
+    
     addToDataList(destination,destination->copyFunction(appendee));
 }
 

@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-/* FIXME: Check the output of basn3p04.png in ./png and netpbm. Fix it. */
-
 void dumpPNG(FILE * in, FILE * out)
 {
     PNG_Image image;
@@ -36,11 +34,11 @@ void freePNG_Image(PNG_Image image)
         free(image.significantBits);
 
     if(image.chromaticities != NULL)
-	free(image.chromaticities);
+        free(image.chromaticities);
 
     if(image.imageHistogram != NULL){
         freeDataList(*image.imageHistogram,1);
-	free(image.imageHistogram);
+        free(image.imageHistogram);
     }
 
     if(image.transparency != NULL){
@@ -193,6 +191,7 @@ void writePNG(PNG_Image image, FILE * out)
 {
     writeSignature(image.signature, out);
     writeHeader(image.header, out);
+    writePalette(image, out);
 
     writeRenderingIntent(image.renderingIntent, out);
     writeImageGamma(image.imageGamma, out);
@@ -205,7 +204,6 @@ void writePNG(PNG_Image image, FILE * out)
 
     writeTextDataList(image.textDataList, out);
 
-    writePalette(image, out);
 
     writeColorData(image, out);
 
@@ -658,32 +656,32 @@ TextualData * loadTextualData(
 
         /* Uncompress the data.*/
 
-	/* read the compression method. */
-	(char)readStreamByte(&stream);
+        /* read the compression method. */
+        (char)readStreamByte(&stream);
 
-	compressedData = getNewDataList(NULL, copyByte);
+        compressedData = getNewDataList(NULL, copyByte);
 
-	for(i = stream.position; i < stream.list.count; ++i){
-	    copyAppend(&compressedData, readNext(&stream));
-	}
+        for(i = stream.position; i < stream.list.count; ++i){
+            copyAppend(&compressedData, readNext(&stream));
+        }
 
-	former = verbose;
-	verbose = 0;
-	decompressedData = ZLIB_Decompress(compressedData);
-	verbose = former;
+        former = verbose;
+        verbose = 0;
+        decompressedData = ZLIB_Decompress(compressedData);
+        verbose = former;
 
-	freeDataList(compressedData, 1);
+        freeDataList(compressedData, 1);
 
         data->str = malloc(sizeof(char) * (decompressedData.count + 1));
 
-	for(i = 0; i < decompressedData.count; ++i){
-	    b = *(BYTE *)decompressedData.list[i];
-	    data->str[i] = (char)b;
-	}
+        for(i = 0; i < decompressedData.count; ++i){
+            b = *(BYTE *)decompressedData.list[i];
+            data->str[i] = (char)b;
+        }
 
-	data->str[i] = '\0';
+        data->str[i] = '\0';
 
-	freeDataList(decompressedData, 1);
+        freeDataList(decompressedData, 1);
 
     } else{
         /* Simply read the data.
@@ -733,13 +731,19 @@ DataList loadColorData(DataList data, ImageHeader header)
 
     /* Unfilter. */
 
-    unfiltered = unfilter(decompressed, header);
+    if(header.interlaceMethod == ADAM7_INTERLACE)
+        unfiltered = unfilterInterlacedImage(decompressed, header);
+    else
+        unfiltered = unfilter(decompressed, header);
 
     freeDataList(decompressed, 1);
 
     /* Undo the Scanline serialization; that is, split up the bytes into colors. */
 
-    colorData = splitUpColorData( unfiltered, header);
+    if(header.interlaceMethod == ADAM7_INTERLACE)
+        colorData = splitUpColorDataInterlaced( unfiltered, header);
+    else
+        colorData = splitUpColorData( unfiltered, header);
     freeDataList(unfiltered, 1);
 
     if(header.interlaceMethod == ADAM7_INTERLACE){
@@ -760,6 +764,7 @@ void writeColorData(PNG_Image image, FILE * out)
 
         for(col = 0; col < image.header.width; ++col){
 
+            printf("i:%ld\n",row * image.header.width + col);
             writeColor(image,*(Color *)image.colorData.list[row * image.header.width + col], out);
             fprintf(out,",");
         }
@@ -769,21 +774,20 @@ void writeColorData(PNG_Image image, FILE * out)
 
 }
 
-/* See: http://www.w3.org/TR/PNG-Filters.html*/
-DataList unfilter(DataList data, ImageHeader header)
+DataList unfilterSubImage(
+    DataStream * stream,
+    size_t imageWidth,
+    size_t height,
+    ColorInfo info)
 {
     DataList unfiltered;
-    DataStream stream;
     size_t scanline;
     int filterType;
     size_t i;
+
     size_t width;
 
-    size_t bpp;
-
     BYTE unfilteredByte;
-
-    ColorInfo info;
 
     /* The byte being filtered. */
     BYTE x;
@@ -796,31 +800,25 @@ DataList unfilter(DataList data, ImageHeader header)
 
     BYTE c;
 
-    info = getColorInfo(header);
+    size_t bpp;
 
     bpp =  (int)ceil((double)(info.numChannels * info.channelBitDepth) / 8.0);
 
-    for(i = 0; i < data.count; ++i){
-        verbosePrint("%d,", getByteAt(data, i));
-    }
-    verbosePrint("\n");
+    width = ceil((info.channelBitDepth *  imageWidth * info.numChannels) / 8.0);
 
-    width = (data.count / header.height) - 1;
-
-    stream = getNewDataStream(data, PNG_ENDIAN);
     unfiltered = getNewDataList(NULL, copyByte);
 
     /* Read scanline after scanline*/
-    for(scanline = 0; scanline < header.height; ++scanline){
+    for(scanline = 0; scanline < height; ++scanline){
 
         /* Read the filter type. */
-        filterType = readStreamByte(&stream);
+        filterType = readStreamByte(stream);
 
         verbosePrint("Filtertype: %d\n", filterType);
 
         for(i = 0; i < width; ++i){
 
-            x = readStreamByte(&stream);
+            x = readStreamByte(stream);
 
             /* Unfilter byte according to a, b, c and x*/
 
@@ -875,6 +873,124 @@ DataList unfilter(DataList data, ImageHeader header)
     }
 
     return unfiltered;
+
+}
+
+/* See: http://www.w3.org/TR/PNG-Filters.html*/
+DataList unfilter(DataList data, ImageHeader header)
+{
+    DataStream stream;
+    size_t i;
+
+    ColorInfo info;
+
+    info = getColorInfo(header);
+
+    for(i = 0; i < data.count; ++i){
+        verbosePrint("%d,", getByteAt(data, i));
+    }
+
+    verbosePrint("\n");
+
+    stream = getNewDataStream(data, PNG_ENDIAN);
+
+    return unfilterSubImage(&stream, header.width, header.height, info);
+}
+
+DataList unfilterInterlacedImage(DataList data, ImageHeader header)
+{
+    DataStream stream;
+    size_t i;
+    size_t pass;
+
+    ColorInfo info;
+
+    InterlacedSubImagesSizes sizes;
+
+    DataList subimage;
+    DataList fullImage;
+
+    info = getColorInfo(header);
+
+    for(i = 0; i < data.count; ++i){
+        verbosePrint("%d,", getByteAt(data, i));
+    }
+
+    verbosePrint("\n");
+
+    stream = getNewDataStream(data, PNG_ENDIAN);
+
+    fullImage = getNewDataList(NULL, copyByte);
+
+    sizes = calcInterlacedSubImagesSizes(header.width, header.height);
+
+    for(pass = 0; pass < 7; ++pass){
+
+        printf("pass %ld: (%ld,%ld)\n", pass, sizes.sizes[pass].width,sizes.sizes[pass].height);
+
+        if(sizes.sizes[pass].width != 0 && sizes.sizes[pass].height != 0){
+
+            subimage = unfilterSubImage(
+                &stream,
+                sizes.sizes[pass].width,
+                sizes.sizes[pass].height,
+                info);
+
+            copyAppendToDataList(&fullImage, subimage);
+
+            freeDataList(subimage, 1);
+        }
+
+    }
+
+    return fullImage;
+}
+
+InterlacedSubImagesSizes calcInterlacedSubImagesSizes(size_t width, size_t height)
+{
+    InterlacedSubImagesSizes ret;
+
+    int startingRow[7]  = { 0, 0, 4, 0, 2, 0, 1 };
+    int startingCol[7]  = { 0, 4, 0, 2, 0, 1, 0 };
+    int rowIncrement[7] = { 8, 8, 8, 4, 4, 2, 2 };
+    int colIncrement[7] = { 8, 8, 4, 4, 2, 2, 1 };
+
+    size_t  pass;
+    size_t col;
+    size_t  row;
+
+    for(pass = 0; pass < 7; ++pass){
+
+        ret.sizes[pass].width = 0;
+        col = startingCol[pass];
+
+        while(col < width){
+            ++ret.sizes[pass].width;
+            col += colIncrement[pass];
+        }
+
+        ret.sizes[pass].height = 0;
+        row = startingRow[pass];
+
+        while(row < height){
+            ++ret.sizes[pass].height;
+            row += rowIncrement[pass];
+        }
+    }
+
+    return ret;
+
+/*
+
+  1 6 4 6 2 6 4 6
+  7 7 7 7 7 7 7 7
+  5 6 5 6 5 6 5 6
+  7 7 7 7 7 7 7 7
+  3 6 4 6 3 6 4 6
+  7 7 7 7 7 7 7 7
+  5 6 5 6 5 6 5 6
+  7 7 7 7 7 7 7 7
+*/
 }
 
 ColorInfo getColorInfo(ImageHeader header)
@@ -949,59 +1065,145 @@ unsigned int paethPredictor(unsigned int a, unsigned int b, unsigned int c)
         return c;
 }
 
-DataList splitUpColorData(DataList data, ImageHeader header)
+DataList splitUpColorDataSubImage(
+    DataStream * colorStream,
+    ImageHeader header,
+    size_t width,
+    size_t height
+    )
 {
     size_t i;
     DataList colorData;
     Color color;
-    DataStream colorStream;
 
     colorData = getNewDataList(NULL, NULL);
 
-    colorStream = getNewDataStream(data, PNG_ENDIAN);
-
-    for(i = 0; i < (header.width * header.height); ++i){
+    for(i = 0; i < (width * height); ++i){
 
         if(header.colorType == GREYSCALE_COLOR){
-            color.greyscale = readNextChannel(&colorStream, header);
+            color.greyscale = readNextChannel(colorStream, header);
         }
 
         else if(header.colorType == INDEXED_COLOR){
-            color.index = readNextChannel(&colorStream, header);
+
+            color.index = readNextChannel(colorStream, header);
+            printf("index:%d\n", color.index);
         }
 
         else if(header.colorType == TRUECOLOR_COLOR){
-            color.rgb.R = readNextChannel(&colorStream, header);
-            color.rgb.G = readNextChannel(&colorStream, header);
-            color.rgb.B = readNextChannel(&colorStream, header);
+            color.rgb.R = readNextChannel(colorStream, header);
+            color.rgb.G = readNextChannel(colorStream, header);
+            color.rgb.B = readNextChannel(colorStream, header);
         }
 
         else if(header.colorType == GREYSCALE_ALPHA_COLOR){
 
-            color.greyscaleAlpha.greyscale = readNextChannel(&colorStream, header);
-            color.greyscaleAlpha.alpha = readNextChannel(&colorStream, header);
+            color.greyscaleAlpha.greyscale = readNextChannel(colorStream, header);
+            color.greyscaleAlpha.alpha = readNextChannel(colorStream, header);
         }
 
         else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
 
-            color.rgba.R = readNextChannel(&colorStream, header);
-            color.rgba.G = readNextChannel(&colorStream, header);
-            color.rgba.B = readNextChannel(&colorStream, header);
-            color.rgba.A = readNextChannel(&colorStream, header);
+            color.rgba.R = readNextChannel(colorStream, header);
+            color.rgba.G = readNextChannel(colorStream, header);
+            color.rgba.B = readNextChannel(colorStream, header);
+            color.rgba.A = readNextChannel(colorStream, header);
         }
 
         addColorToDataList(&colorData, color);
 
-        if((i+1) % header.width == 0 && (i+1) != header.width * header.height &&
+        if((i+1) % width == 0 /*&& (i+1) != width * height */ && colorStream->position != colorStream->list.count&&
            header.bitDepth < 8){
 
-            colorStream.b = readStreamByte(&colorStream);
-            colorStream.remainingBitsBits = 8;
+            printf("RESET\n");
+            colorStream->b = readStreamByte(colorStream);
+            colorStream->remainingBitsBits = 8;
 
         }
     }
 
     return colorData;
+}
+
+void * copyColor(void * vptr)
+{
+    Color * copy;
+    Color b;
+
+    b = *(Color *)vptr;
+
+    copy = malloc(sizeof(Color));
+    *copy = b;
+
+    return copy;
+}
+
+
+DataList splitUpColorDataInterlaced(DataList data, ImageHeader header)
+{
+    DataStream colorStream;
+    size_t pass;
+
+    DataList subimage;
+    DataList fullImage;
+
+    InterlacedSubImagesSizes sizes;
+    size_t i;
+    Color c;
+
+    sizes = calcInterlacedSubImagesSizes(header.width, header.height);
+
+    fullImage = getNewDataList(NULL, copyColor);
+
+    colorStream = getNewDataStream(data, PNG_ENDIAN);
+
+    for(pass = 0; pass < 7; ++pass){
+
+        if(sizes.sizes[pass].width != 0 && sizes.sizes[pass].height != 0){
+
+            subimage =
+                splitUpColorDataSubImage(&colorStream, header,
+                                         sizes.sizes[pass].width,
+                                         sizes.sizes[pass].height);
+
+	    printf("important\n");
+            for(i = 0; i < subimage.count; ++i){
+                printf("%ld::\n", i);
+                c = *(Color *)subimage.list[i];
+                c = c;
+            }
+
+            copyAppendToDataList(&fullImage, subimage);
+
+            for(i = 0; i < fullImage.count; ++i){
+                printf("%ld::\n", i);
+                c = *(Color *)fullImage.list[i];
+                c = c;
+            }
+
+
+            freeDataList(subimage, 1);
+        }
+    }
+
+    for(i = 0; i < fullImage.count; ++i){
+        printf("%ld::\n", i);
+        c = *(Color *)fullImage.list[i];
+        c = c;
+    }
+
+    printf("size of the damn thing:%ld\n", fullImage.count);
+
+    return fullImage;
+}
+
+DataList splitUpColorData(DataList data, ImageHeader header)
+{
+    DataStream colorStream;
+
+    colorStream = getNewDataStream(data, PNG_ENDIAN);
+
+    return splitUpColorDataSubImage(&colorStream, header, header.width, header.height);
 }
 
 unsigned long readNextChannel(DataStream * stream, ImageHeader header)
@@ -1061,22 +1263,22 @@ DataList * loadPalette(DataStream stream)
 
 void writePalette(PNG_Image image,FILE * out)
 {
-    image = image;
-    out = out;
-/*    size_t i;
+    size_t i;
+    Color c;
 
-      if(image.palette.count > 0){
-      fprintf(out, "Image Palette:\n");
+    if(image.palette != NULL){
+        fprintf(out, "Image Palette:\n");
 
-      for(i = 0; i < image.palette.count; ++i){
-      fprintf(out, "%ld:", i);
-      writeColor(image, *(Color *)image.palette.list[i], out);
-      fprintf(out, "\n");
-      }
+        for(i = 0; i < image.palette->count; ++i){
 
-      fprintf(out, "\n");
+            c = *(Color *)image.palette->list[i];
 
-      }*/
+            fprintf(out, "%ld: (%d,%d,%d)\n", i, c.rgb.R, c.rgb.G , c.rgb.B);
+        }
+
+        fprintf(out, "\n");
+
+    }
 }
 
 Transparency * loadTransparency(ImageHeader header, DataStream stream)
@@ -1151,38 +1353,38 @@ void writeSignificantBits(
 
         if(header.colorType == GREYSCALE_COLOR)
 
-	    fprintf(out, "significant greyscale bits: %d\n",
-		    significantBits->significantGreyscaleBits);
+            fprintf(out, "significant greyscale bits: %d\n",
+                    significantBits->significantGreyscaleBits);
 
         else if(header.colorType == TRUECOLOR_COLOR ||
                 header.colorType == INDEXED_COLOR){
 
-	    fprintf(out, "significant red bits: %d\n",
-		    significantBits->significantRedBits);
-	    fprintf(out, "significant green bits: %d\n",
-		    significantBits->significantGreenBits);
-	    fprintf(out, "significant blue bits: %d\n",
-		    significantBits->significantBlueBits);
+            fprintf(out, "significant red bits: %d\n",
+                    significantBits->significantRedBits);
+            fprintf(out, "significant green bits: %d\n",
+                    significantBits->significantGreenBits);
+            fprintf(out, "significant blue bits: %d\n",
+                    significantBits->significantBlueBits);
 
 
         } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
 
-	    fprintf(out, "significant greyscale bits: %d\n",
-		    significantBits->significantGreyscaleBits);
+            fprintf(out, "significant greyscale bits: %d\n",
+                    significantBits->significantGreyscaleBits);
 
-	    fprintf(out, "significant alpha bits: %d\n",
-		    significantBits->significantAlphaBits);
+            fprintf(out, "significant alpha bits: %d\n",
+                    significantBits->significantAlphaBits);
 
 
         } else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
-	    fprintf(out, "significant red bits: %d\n",
-		    significantBits->significantRedBits);
-	    fprintf(out, "significant green bits: %d\n",
-		    significantBits->significantGreenBits);
-	    fprintf(out, "significant blue bits: %d\n",
-		    significantBits->significantBlueBits);
-	    fprintf(out, "significant alpha bits: %d\n",
-		    significantBits->significantAlphaBits);
+            fprintf(out, "significant red bits: %d\n",
+                    significantBits->significantRedBits);
+            fprintf(out, "significant green bits: %d\n",
+                    significantBits->significantGreenBits);
+            fprintf(out, "significant blue bits: %d\n",
+                    significantBits->significantBlueBits);
+            fprintf(out, "significant alpha bits: %d\n",
+                    significantBits->significantAlphaBits);
         }
     }
 }
@@ -1215,27 +1417,27 @@ void writePrimaryChromaticities(
 {
     if(primaryChromaticities != NULL){
 
-	fprintf(out, "Primary chromaticities and white point:\n");
+        fprintf(out, "Primary chromaticities and white point:\n");
 
-	fprintf(out, "White point x:%0.4f\n",
-		primaryChromaticities->whitePointX / 100000.0);
-	fprintf(out, "White point y:%0.4f\n",
-		primaryChromaticities->whitePointY / 100000.0);
+        fprintf(out, "White point x:%0.4f\n",
+                primaryChromaticities->whitePointX / 100000.0);
+        fprintf(out, "White point y:%0.4f\n",
+                primaryChromaticities->whitePointY / 100000.0);
 
-	fprintf(out, "Red x:%0.4f\n",
-		primaryChromaticities->RedX / 100000.0);
-	fprintf(out, "Red y:%0.4f\n",
-		primaryChromaticities->RedY / 100000.0);
+        fprintf(out, "Red x:%0.4f\n",
+                primaryChromaticities->RedX / 100000.0);
+        fprintf(out, "Red y:%0.4f\n",
+                primaryChromaticities->RedY / 100000.0);
 
-	fprintf(out, "Green x:%0.4f\n",
-		primaryChromaticities->GreenX / 100000.0);
-	fprintf(out, "Green y:%0.4f\n",
-		primaryChromaticities->GreenY / 100000.0);
+        fprintf(out, "Green x:%0.4f\n",
+                primaryChromaticities->GreenX / 100000.0);
+        fprintf(out, "Green y:%0.4f\n",
+                primaryChromaticities->GreenY / 100000.0);
 
-	fprintf(out, "Blue x:%0.4f\n",
-		primaryChromaticities->BlueX / 100000.0);
-	fprintf(out, "Blue y:%0.4f\n",
-		primaryChromaticities->BlueY / 100000.0);
+        fprintf(out, "Blue x:%0.4f\n",
+                primaryChromaticities->BlueX / 100000.0);
+        fprintf(out, "Blue y:%0.4f\n",
+                primaryChromaticities->BlueY / 100000.0);
     }
 }
 
@@ -1250,10 +1452,10 @@ DataList * loadImageHistogram(DataStream stream)
     *histogram =  getNewDataList(NULL, NULL);
 
     for(i = 0; i < (stream.list.count / 2); ++i){
-	printf("i:%ld\n", i);
-	p = malloc(sizeof(INT16));
-	*p = read16BitsNumber(&stream);
-	addToDataList(histogram, p);
+        printf("i:%ld\n", i);
+        p = malloc(sizeof(INT16));
+        *p = read16BitsNumber(&stream);
+        addToDataList(histogram, p);
     }
 
     return histogram;
@@ -1265,14 +1467,14 @@ void writeImageHistogram(DataList * imageHistogram, FILE * out)
 
     if(imageHistogram != NULL){
 
-	fprintf(out, "Image histogram: \n");
+        fprintf(out, "Image histogram: \n");
 
-	for(i = 0; i < imageHistogram->count; ++i){
+        for(i = 0; i < imageHistogram->count; ++i){
 
-	    fprintf(out, "%d, ", *(INT16 *) imageHistogram->list[i]);
-	}
+            fprintf(out, "%d, ", *(INT16 *) imageHistogram->list[i]);
+        }
 
-	fprintf(out, "\n");
+        fprintf(out, "\n");
     }
 }
 
@@ -1287,6 +1489,8 @@ DataList uninterlace(DataList data, ImageHeader header)
     int startingCol[7]  = { 0, 4, 0, 2, 0, 1, 0 };
     int rowIncrement[7] = { 8, 8, 8, 4, 4, 2, 2 };
     int colIncrement[7] = { 8, 8, 4, 4, 2, 2, 1 };
+
+    Color c;
 
     uninterlaced = getNewDataList(NULL, NULL);
 
@@ -1308,10 +1512,17 @@ DataList uninterlace(DataList data, ImageHeader header)
             col = startingCol[pass];
 
             while(col < header.width){
+
+                c = *(Color *)data.list[i];
+                c = c;
+
                 uninterlaced.list[row * header.width + col] = data.list[i++];
+
+                printf("target i:%ld\n", row * header.width + col);
+                printf("source i:%ld\n", i-1);
+
                 col += colIncrement[pass];
 
-                printf("i:%ld\n", i);
             }
 
             row += rowIncrement[pass];
