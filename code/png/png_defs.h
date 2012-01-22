@@ -12,7 +12,7 @@
 #define INT32 uint32_t
 
 /* An unsigned 2 byte number.*/
-#define INT16 uint32_t
+#define INT16 uint16_t
 
 /* Header chunk. */
 #define IHDR "IHDR"

@@ -138,6 +138,26 @@ typedef struct {
 } PixelDimensions;
 
 typedef struct {
+
+    char name[80];
+
+    /* of SuggestedPaletteEntry */
+    DataList entry;
+
+} SuggestedPalette;
+
+typedef struct {
+
+    INT16 R;
+    INT16 G;
+    INT16 B;
+    INT16 A;
+
+    INT16 frequency;
+
+} SuggestedPaletteEntry;
+
+typedef struct {
     INT16 year;
 
     BYTE month;
@@ -200,6 +220,8 @@ typedef struct {
 
     Transparency * transparency;
 
+    DataList * suggestedPalettes;
+
 } PNG_Image;
 
 typedef struct {
@@ -248,7 +270,8 @@ void writeBackgroundColor(
 
 void writeColor(PNG_Image image,
                 Color color,
-                FILE * out);
+                FILE * out,
+                int backgroundColor);
 
 
 SignificantBits * loadSignificantBits(ImageHeader header, DataStream stream);
