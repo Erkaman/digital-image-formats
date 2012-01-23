@@ -13,7 +13,7 @@ auto/
 *.log
 *.out
 *.toc
-#*.pdf
+*.pdf
 latex/project.pdf
 *.run.xml
 *.blg

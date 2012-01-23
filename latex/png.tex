@@ -11,22 +11,42 @@
 
 \section{History}
 
-As I explained in section \ref{sec:gif-history}, the creation of the
-PNG was was primarily motivated by the patents encumbering the GIF
-format. To solve this problem, a bunch of developers in the graphics
-community decided to coorperate on creating a new format. The work
-started on 4 January 1995 and already within a week had all of the
-major features of the new PNG format been decided. 1 Jul 96 version
-1.0 of the PNG specifcation was released:
-\cite{boutel:_png_portab_networ_graph_specif_version1}. Following
-version 1.0 was version 1.1, on new years eve of 1998:
-\cite{boutel:_png_portab_networ_graph_specif_version11}. And the
-latest version of the PNG specification that has been released is
-version 1.2, which was released in. After these standards, it was
-finally standardized by ISO and released as ISO/IEC standard
-15948:2004 \cite{iso/eic04:_iso_iec_png,roelofs09:_histor_portab_networ_graph_png_format,roelofs99:_png,roelofs:_portab_networ_graph_main}.
+As explained in section \ref{sec:gif-history}, the creation of the PNG
+format was was primarily motivated by the patents encumbering the
+already popular GIF format. To solve this problem, a bunch of
+developers in the graphics developer community decided to cooperate on
+creating a new format. \dt{1}{7}{1996}, version 1.0 of the PNG
+specification was released. Then version 1.1 was released on new years
+eve of 1998. And the latest version of the PNG specification is
+version 1.2, which was released in August 1999. After this it was
+finally standardized by ISO as ISO/IEC standard 15948:2004
+\cite{roelofs09:_histor_portab_networ_graph_png_format,roelofs99:_png,roelofs:_portab_networ_graph_main}.
+
+What follows is a technical description of the PNG format. It is based
+on the references
+\cite{boutel:_png_portab_networ_graph_specif_version12,roelofs99:_png}.
 
   \cite{sivonen:_sad_story_png_gamma_correc}
 
+\section{The Chunk Type}
 
+PNG images are fundamentally built up of chunks.
 
+\begin{figure}
+  \centering
+  \inputtikz{png_chunk.tex}
+  \caption{The PNG chunk datatype}
+  \label{fig:png-chunk}
+\end{figure}
+
+\section{Critical Chunks}
+
+\section{Color Data Storage}
+
+\subsection{Uninterlaced Color Data}
+
+\subsection{Interlaced Color Data}
+
+\section{Ancillary Chunks of interests }
+
+% quickly summarize the ones that won't get in depth coverage.

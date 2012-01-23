@@ -1,0 +1,14 @@
+\begin{tikzpicture}[field/.style={draw=black,align=center,fill=cyan!10!white,
+    very thick}, minimum height=10mm]
+
+  \tikzstyle{every node}=[field,font=\LARGE,xshift=-9mm]
+
+  \node (length) {Length};
+
+  \node (type) [right=of length]{Chunk Type};
+
+  \node (data) [right=of type]{Chunk Data};
+
+  \node (crc) [right=of data]{CRC};
+
+\end{tikzpicture}
