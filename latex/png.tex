@@ -11,6 +11,8 @@
 
 \newcommand{\chnk}[1]{``#1''}
 
+\newcommand{\IDAT}{\chnk{IDAT}\xspace}
+
 \section{History}
 
 As explained in section \ref{sec:gif-history}, the creation of the PNG
@@ -300,9 +302,64 @@ be empty.
 \section{Image Data Storage Model}
 \label{sec:png-image-data-storage}
 
+We will now describe how the color data is stored in the IDAT chunk.
+
+\subsection{The encoding process}
+
+To understand how the color data is stored in the \IDAT chunk, we must
+first understand how the data is encoded in the first place. Before
+discussing the decoding process, we will now briefly discuss how the
+image data is encoded.
+
+The unencoded data is just a sequence of pixel color values. If the
+image is to be \textit{interlaced}, then the image data is rearranged in a certain
+order. This order we'll discuss in section ??. \todo{ref prop}.
+
+Not all images are interlaced, and if so, then the image data is just
+carried onto the next step. The next step is known as \textit{scanline
+  serialization}. Here, the colors are represented as bytes and these
+bytes are then divided into the lines.
+
+After this, filters are applied to the image data that is after the
+last step represented as a sequence of bytes. The filters are
+operations on the byte sequence that makes the data easier to
+compress. We'll discuss these filters in section ??. \ref{ref prop}.
+
+After that the data has optimized for compression by the filter, it is
+compressed using the DEFLATE algorithm, and stored using the ZLIB
+format. \todo{...}.
+
+And finally, the image data divided into \IDAT chunks and written to
+the image file.
+
+And that is the entire encoding process. It is, indeed, compared to
+that of the other formats we've described, one complicated
+process.
+
+To undo this process the separate subprocesses has to be reversed in
+the reverse that they were done. So let us start by describing how to
+undo the last of these subprocesses.
+
 \subsection{Consecutive Chunks}
 
+First of all, even though the chunk length is stored in a 32-bit, one
+chunk may not be enough to store all the image data. If one chunk is
+not enough to store all the image data, then the compressed image data
+is split up over several \IDAT chunks. So if an \IDAT chunk is
+encountered, one should keep reading and concatenate the data found in
+the \IDAT chunks until a non \IDAT chunk is found. Then, before
+reading the next chunk, one should decode and deal with the image
+data.
 
+\subsection{Decompression}
+
+Once all the data of the \IDAT chunk(s) has been gathered, it is time
+to start decoding the data. Performing the compression is something we
+discussed in chapter ??. \todo{...}
+
+\subsection{Filtering}
+
+\subsection{Scanline serialization}
 
 \subsection{Interlaced Color Data}
 
