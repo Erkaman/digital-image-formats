@@ -257,7 +257,7 @@ used.
 PNG also allows certain filter to be applied to the image data. These
 filters basically make the data compress better. Only the value $0$ is
 defined for this field, and this means that the four default filters
-are used to perform the filtering. We'll discuss the filter in section
+pare used to perform the filtering. We'll discuss the filter in section
 ??.  \todo{add reference to the section covering the filters}
 
 \subsubsection*{Interlace Method (1 Byte)}
@@ -272,13 +272,37 @@ is something that we will discuss the very much in depth in section
 
 \subsection{PLTE -- Image Palette}
 
+IF the image uses indexed color, then that means that it uses a
+palette. Such images of course need a palette of some kind, and that
+is the exact thing that is stored in this chunk.
+
+The palette chunk simply consists of a sequence of colors. These
+colors will always be 24 bits of size, so 8 bits are assigned to each
+color channel. The length of this palette must not exceed the bit
+depth field, given in the \chnk{IHDR} chunk.
+
 \subsection{IDAT -- Image Data}
+
+In this chunk the color data of the image is stored. The image data
+storage system of the PNG is so complex, compared to that ofother
+formats we have discussed, the discussion of this block discussed in
+its own section \ref{sec:png-image-data-storage}. We ask the reader to
+be patient, as we will shortly reach this section.
 
 \subsection{IEND -- Image Trailer}
 
-\section{Color Data Storage}
+The reading of chunks from the PNG image will go and on until the
+image trailer chunk, \chnk{IEND}, is found. Once this chunk is
+encountered in the image data, the entire image has been processed,
+and the decoder is done. The chunk data of this chunk type will always
+be empty.
 
-\subsection{Uninterlaced Color Data}
+\section{Image Data Storage Model}
+\label{sec:png-image-data-storage}
+
+\subsection{Consecutive Chunks}
+
+
 
 \subsection{Interlaced Color Data}
 
