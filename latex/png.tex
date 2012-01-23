@@ -161,6 +161,121 @@ properly rendered. Let us discuss the critical chunks, one after one.
 
 \subsection{IHDR -- Image Header}
 
+The image header of the PNG format, the \chnk{IHDR} chunk, is by the
+PNG specification guaranteed to always occur first in a PNG file,
+after the PNG signature. It contains data that is absolutely necessary
+for loading the image data.
+
+\subsubsection*{Width (4 Bytes)}
+\subsubsection*{Height (4 Bytes)}
+
+These two consecutive fields contains the size of the image. Since
+they are stored in two 32-bit numbers each, this means that the PNG
+format allows for quite huge images.
+
+\subsubsection*{Bit Depth (1 Byte)}
+
+In the bit depth the size of each channel in the color storage model
+used is stored. Let $b$ be the value of this field. If grayscale color
+is used, then $b$ of the color depth(the size of each pixel). If on
+the other hand RGB color is used, then the color depth is $3 \cdot
+b$. This makes sense, because the value of $b$ is the size of each
+channel, \textit{not} the color depth itself. The PNG format also
+allows for storing grayscale color with an alpha channel. In that case
+the color depth will be $2 \cdot b$. And similarly, for RGBA the color
+depth will be $4 \cdot b$. And if a color palette is used, the color
+depth of the indexes stored in the image data will be $b$. However,
+note the only the values 1, 2, 4, 8 and 16 are allowed values for this
+field. This is mainly to simplify the job of the programmers using the
+PNG format.
+
+\subsubsection*{Color Type (1 Byte)}
+
+The PNG format allows five different color storage models. The color
+storage model used varies depending on this value, as is shown in
+table \ref{tab:png-color-type}.
+
+\begin{table}
+  \centering
+  \begin{tabular}{l l}
+    \toprule
+    Color Type & Description \\
+    \midrule
+    0 & Grayscale color \\
+    2 & Truecolor, meaning that RGB is used \\
+    3 & Indexed color, meaning that a color palette is used \\
+    4 & Grayscale with an alpha channel \\
+    6 & Truecolor with alpha, meaning that RGBA is used \\
+    \bottomrule
+  \end{tabular}
+  \caption{The different color types of the PNG format}
+  \label{tab:png-color-type}
+\end{table}
+
+As you can from this field and the former, the PNG is very flexible
+and allows for a multitude of different ways of storing
+color. However, the simplify things for programmers, not all possible
+bit depths can be used with all color types. The allowed color depths
+are shown in table \ref{tab:png-color-type}.
+
+\begin{table}
+  \centering
+
+  \newcommand{\invalid}{\cellcolor{gray}}
+
+  \begin{tabular}{|l|l|l|l|l|l|l|}
+    \hline
+    \multirow{2}{*}{Color Type} & \multirow{2}{*}{Channels} & \multicolumn{5}{c|}{Color Depth} \\
+
+  \cline{3-7}
+
+    & & 1 & 2 & 4 & 8 & 16 \\
+
+    \hline
+    Indexed & 1 & 1 & 2 & 4 & 8 & \invalid \\ \hline
+    Grayscale & 1 & 1 & 2 & 4 & 8 & 16  \\ \hline
+    Grayscale and alpha & 2 & \invalid& \invalid & \invalid & 16 & 32  \\ \hline
+    Truecolor & 3 & \invalid & \invalid & \invalid & 24 & 48  \\ \hline
+    Truecolor and alpha & 4 & \invalid & \invalid & \invalid & 32 & 64  \\ \hline
+
+    \hline
+
+  \end{tabular}
+  \caption{The allowed color depths for the PNG format.}
+  \label{tab:png-color-depths}
+\end{table}
+
+\subsubsection*{Compression method (1 Byte)}
+
+This field is used to indicate the compression method used in the
+image data. But the only value defined for this field by the PNG
+specification is $0$, which means that ZLIB deflate compression is
+used.
+
+\subsubsection*{Filter Method (1 Byte)}
+
+PNG also allows certain filter to be applied to the image data. These
+filters basically make the data compress better. Only the value $0$ is
+defined for this field, and this means that the four default filters
+are used to perform the filtering. We'll discuss the filter in section
+??.  \todo{add reference to the section covering the filters}
+
+\subsubsection*{Interlace Method (1 Byte)}
+
+If this field is $0$, then no interlacing is used in the image data; if it
+is $1$, then the image data is interlaced.
+
+The PNG format supports an interlacing method known Adam7. This method
+of interlacing is significantly more complex than that if GIF's, and
+is something that we will discuss the very much in depth in section
+??. \todo{add references}.
+
+\subsection{PLTE -- Image Palette}
+
+\subsection{IDAT -- Image Data}
+
+\subsection{IEND -- Image Trailer}
+
 \section{Color Data Storage}
 
 \subsection{Uninterlaced Color Data}
