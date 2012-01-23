@@ -9,6 +9,8 @@
 \chapter{Portable Network Graphics}
 \label{cha:png}
 
+\newcommand{\chnk}[1]{``#1''}
+
 \section{History}
 
 As explained in section \ref{sec:gif-history}, the creation of the PNG
@@ -24,13 +26,71 @@ finally standardized by ISO as ISO/IEC standard 15948:2004
 
 What follows is a technical description of the PNG format. It is based
 on the references
-\cite{boutel:_png_portab_networ_graph_specif_version12,roelofs99:_png}.
+\cite{boutel:_png_portab_networ_graph_specif_version12,roelofs99:_png,boutel:_png_portab_networ_graph_specif_version11}.
 
   \cite{sivonen:_sad_story_png_gamma_correc}
 
-\section{The Chunk Type}
+\section{The Buildings Blocks of the format}
 
-PNG images are fundamentally built up of chunks.
+\subsection{Chunks}
+
+PNG images are fundamentally built up of chunks. The structure of the
+chunk is shown in figure \ref{fig:png-chunk}. It consists of four so
+called fields. Let us desribe them, one after one:
+
+\subsubsection*{Length (4 Bytes)}
+
+This 32-bit number is used to store the byte length of the data
+field.
+
+\todo{mention that it's max value is $2^{31} -1$, rather than $2^{32}
+  -1$}
+
+
+
+\subsubsection*{Chunk Type (4 Bytes)}
+
+This field stores 4 bytes that are used to store the type name of the
+chunk. Only the ASCII letters in the ranges A--Z and a--z are
+acceptable values of these bytes. So \chnk{abcd} is an acceptable
+chunk type while \chnk{a:e;} is not.
+
+There is a convention used in the naming of chunks. If the first
+letters in the type name of a chunk is uppercase, it is a
+\textit{critical} chunk. If the critical chunk is found in a PNG
+image, then it \textit{must} be loaded for the image to be
+successfully displayed.  if such a chunk is not loaded, the program
+will not have enough information to render the image. Critical chunks
+and their inner workings will for this reason be the main topic of
+this chapter.
+
+If on the other hand the first letter of the chunk type name is
+lowercase, then that means that the chunk is \textit{ancillary}. These
+chunks do not need to be loaded in order to successfully render the
+image. These can contain all kinds of data, like the creation date of
+the image or a textual comment. Since much of the data stored in
+ancillary chunks are things that we discussed in chapter \ref{cha:gif}
+and \ref{cha:tga}, we will not discuss these chunks are in depth as
+the critical chunks.
+
+\todo{explain better why we will cover the ancillary chunks as in
+  depth.}
+
+\subsubsection*{Data (Variable)}
+
+In this field the actual data of the chunk is stored. The length of
+this field was specified by the earlier length field.
+
+\subsubsection*{CRC (4 Byte)}
+
+This is a CRC that is used to validate the data in the chunk
+field. The CRC algorithm used is algorithm ??, which we discussed in
+chapter ??. The CRC is calculated using the chunk type data
+\textit{and} the chunk data. If the computed CRC doesn't match the CRC
+in this field, then the data in the chunk is corrupted, and you should
+stop reading the PNG image and report an error message to the user.
+
+\todo{reference the CRC-32 algorithm properly}
 
 \begin{figure}
   \centering
@@ -39,7 +99,67 @@ PNG images are fundamentally built up of chunks.
   \label{fig:png-chunk}
 \end{figure}
 
+\subsection{PNG Signature}
+
+Only chunks can be found in a PNG image with one exception: the PNG
+signature. The PNG signature is 8 bytes that are \textit{always} found
+in the beginning of a legit PNG image. These bytes are $137 80 78 71
+13 10 26 10$. They were all chosen to detect certain kinds of errors
+that occur when transmitting a PNG file over a network.
+
+The first bit is $137$. In binary this number is $1000\ 1001$. The key
+part to notice is that this is a non-ASCII character, because since
+the 7:th bit toggled it will always have a value $\ge 128$. When data
+is tranmitted as ASCII-text over a network, the 7:th bit tends to be
+thrown away, as it is for example done in STMP \cite{rfc5321}. STMP is
+the Internet protocol used to transfer emails. To transmit non-ASCII
+binary, like image data, data one should instead use the MIME
+protocol, which is an extension to the STMP protocol.
+
+So to summarize, the main purpose of the first bit is to detect
+whether an image has accidentally been transmitted as ASCII text. If
+this byte doesn't have its proper value, then the image has been
+corrupted. Then also the bytes whose values are $\ge 128$ in the image
+data will also be corrupted, so there's little to no point in the
+decoder trying to open the corrupted image.
+
+The bytes $80 78 71$ are the ASCII values for the string PNG, so they
+could simply be seen as the magic numbers for the PNG format.
+
+The following two bytes are $13 10$. This is a windows style newline,
+CRLF, as discussed section in \ref{cha:pseudocode-convent}. If a PNG
+file is accidentally transferred as text, there is another thing that
+may corrupt the file: line ending conversions. When, for example, you
+are transmitting a file from a window based operating system to a
+UNIX-based operating system, there is a chance that the proram doing
+the transmission may convert the windows-style line-endings to their
+Unix equivalents, LF. But for a binary image file this behavior is
+clearly undesirable, and is very likely to end up corrupting the image
+data. To detect such errors, these two bytes are used.
+
+The following byte $26$ is a bit peculiar in that it doesn't even in
+verifying the correctness of the data. In the operating system DOS,
+this is known as the end-of-file character. If such a character is
+found while printing the contents of a file in DOS, then the printing
+of the file stops. So thanks to this, you could only see the first few
+bytes and verify that the file is a PNG file without seeing all the
+garbage. \todo{clarify:
+  %http://www.libpng.org/pub/png/book/chapter08.html#png.ch08.div.2
+}
+
+The last byte $10$ is the newline character in UNIX-based operating
+systems, LF. So this is yet another byte that is used to verify that
+the image was not transferred as text. This byte is used to verify
+that an image transferred from a UNIX-based operating system to a
+windows based operating system is not transferred as ASCII text.
+
 \section{Critical Chunks}
+
+Following the PNG signature a sequence of chunks. Most kinds of chunks
+can simply be ignored, but the critical ones cannot for an image to be
+properly rendered. Let us discuss the critical chunks, one after one.
+
+\subsection{IHDR -- Image Header}
 
 \section{Color Data Storage}
 
@@ -48,5 +168,7 @@ PNG images are fundamentally built up of chunks.
 \subsection{Interlaced Color Data}
 
 \section{Ancillary Chunks of interests }
+
+% mention private chunks like imagemagick's vpag
 
 % quickly summarize the ones that won't get in depth coverage.
