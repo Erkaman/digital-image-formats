@@ -1,6 +1,8 @@
 #ifndef _DEFS_H_
 #define _DEFS_H_
 
+#define __STDC_LIMIT_MACROS
+
 #include <stdint.h>
 
 #define BYTE uint8_t

@@ -46,6 +46,7 @@ for fileName in dirList:
         for codeSize in range(9,16):
 
             command = './lzw ' + '-cs=' + str(codeSize) + ' ' + fileName + ' ' + outfileName
+            print command
             os.system(command)
 
             compressedSize = os.path.getsize(fileName + '.lzw')

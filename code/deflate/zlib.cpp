@@ -1,10 +1,13 @@
 #include "zlib.h"
-#include <math.h>
+#include <cmath>
+#include <cmath>
+#include <cstdlib>
 #include "deflate.h"
 #include "../io.h"
 
 #include "../defs.h"
-#include "../data_list.h"
+
+using std::vector;
 
 typedef struct{
     BYTE CM; /* Compression Method */
@@ -39,9 +42,9 @@ void printZLIB_CMF(ZLIB_CMF cmf);
 ZLIB_FLG readZLIB_FLG(BYTE flgByte);
 void printZLIB_FLG(ZLIB_FLG flg);
 
-unsigned long adler32(DataList data);
+unsigned long adler32(vector<BYTE> data);
 
-void validateCheckSum(DataList data, DataList decompressed);
+void validateCheckSum(vector<BYTE> data, vector<BYTE> decompressed);
 
 
 void checkCheckBits(BYTE cmfByte,BYTE flgByte,ZLIB_FLG flg)
@@ -61,7 +64,7 @@ int multipleOf(int n,int mult)
     return (n % mult) == 0;
 }
 
-DataList ZLIB_Decompress(DataList data)
+vector<BYTE> ZLIB_Decompress(vector<BYTE> data)
 {
     ZLIB_CMF cmf;
     ZLIB_FLG flg;
@@ -69,11 +72,11 @@ DataList ZLIB_Decompress(DataList data)
     BYTE cmfByte;
     BYTE flgByte;
 
-    DataList decompressed;
+    vector<BYTE> decompressed;
 
     /* the first byte is the CMF byte */
-    cmfByte = *(BYTE *)data.list[0];
-    flgByte = *(BYTE *)data.list[1];
+    cmfByte = data[0];
+    flgByte = data[1];
 
     cmf = readZLIB_CMF(cmfByte);
     printZLIB_CMF(cmf);
@@ -98,7 +101,7 @@ DataList ZLIB_Decompress(DataList data)
     return decompressed;
 }
 
-void validateCheckSum(DataList data, DataList decompressed)
+void validateCheckSum(vector<BYTE> data, vector<BYTE> decompressed)
 {
     /* Does this work for computers of different Endian? */
     unsigned long calcChecksum;
@@ -107,10 +110,10 @@ void validateCheckSum(DataList data, DataList decompressed)
     calcChecksum = adler32(decompressed);
 
     dataChecksum =
-	*(BYTE *)data.list[data.count - 4] * pow(256,3) +
-	*(BYTE *)data.list[data.count - 3] * pow(256,2) +
-	*(BYTE *)data.list[data.count - 2] * pow(256,1) +
-	*(BYTE *)data.list[data.count - 1] * pow(256,0);
+	data[data.size() - 4] * pow(256,3) +
+	data[data.size() - 3] * pow(256,2) +
+        data[data.size() - 2] * pow(256,1) +
+	data[data.size() - 1] * pow(256,0);
 
     verbosePrint("checkSums: calculated = %ld. Proper = %ld\n",calcChecksum,dataChecksum);
 
@@ -206,15 +209,15 @@ void printZLIB_FLG(ZLIB_FLG flg)
 
 #define MOD_ADLER 65521
 
-unsigned long adler32(DataList data)
+unsigned long adler32(vector<BYTE> data)
 {
     /* also: check first implementation of this algorithm. */
     unsigned long a = 1, b = 0;
     unsigned long index;
 
-    for (index = 0; index < data.count; ++index)
+    for (index = 0; index < data.size(); ++index)
     {
-        a = (a + *(BYTE *)data.list[index]) % MOD_ADLER;
+        a = (a + data[index]) % MOD_ADLER;
         b = (b + a) % MOD_ADLER;
     }
 

@@ -1,31 +1,48 @@
 #ifndef _DATA_STREAM_H_
 #define _DATA_STREAM_H_
 
-#include "data_list.h"
 #include "bitwise.h"
 #include "defs.h"
+#include <vector>
+#include <cstdio>
 
-#define ENDIAN_BIG 1
-#define ENDIAN_SMALL 0
+enum Endian {
+    BigEndian,
+    SmallEndian
+};
 
-typedef struct {
-    DataList list;
-    size_t position;
+class DataStream{
 
-    int endian;
+private:
 
-    int remainingBitsBits;
-    BYTE b;
+    enum InputType{
+	vec,
+	file
+    };
 
-} DataStream;
+    std::vector<BYTE>::const_iterator iter, beg;
 
-DataStream getNewDataStream(DataList list, int endian);
-BYTE readStreamByte(DataStream * stream);
-uint16_t read16BitsNumber(DataStream * stream);
-uint32_t read32BitsNumber(DataStream * stream);
+    FILE * in;
 
-void * readNext(DataStream * stream);
+    Endian endian;
 
-BYTE readBits(DataStream * stream, int nbits);
+    InputType inputType;
+
+    size_t streamSize;
+
+public:
+
+    size_t getStreamSize()const;
+    size_t getPosition()const;
+
+    DataStream(std::vector<BYTE> & list, Endian endian_);
+
+    BYTE readStreamByte();
+    uint16_t read16BitsNumber();
+    uint32_t read32BitsNumber();
+};
+
 
 #endif /* _DATA_STREAM_H_ */
+
+

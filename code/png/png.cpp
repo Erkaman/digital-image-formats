@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <math.h>
 
+using std::vector;
+
 void dumpPNG(FILE * in, FILE * out)
 {
     PNG_Image image;
@@ -16,50 +18,42 @@ void dumpPNG(FILE * in, FILE * out)
 void freePNG_Image(PNG_Image image)
 {
     if(image.renderingIntent != NULL)
-        free(image.renderingIntent);
+        delete image.renderingIntent;
 
     if(image.imageGamma != NULL)
-        free(image.imageGamma);
+        delete image.imageGamma;
 
     if(image.timeStamp != NULL)
-        free(image.timeStamp);
+        delete image.timeStamp;
 
     if(image.backgroundColor != NULL)
-        free(image.backgroundColor);
+        delete image.backgroundColor;
 
     if(image.pixelDimensions != NULL)
-        free(image.pixelDimensions);
+        delete image.pixelDimensions;
 
     if(image.significantBits != NULL)
-        free(image.significantBits);
+        delete image.significantBits;
 
     if(image.chromaticities != NULL)
-        free(image.chromaticities);
+        delete image.chromaticities;
 
     if(image.imageHistogram != NULL){
-        freeDataList(*image.imageHistogram,1);
-        free(image.imageHistogram);
+        delete image.imageHistogram;
     }
 
-    if (image.suggestedPalettes != NULL){
+    if (image.suggestedPalettes != NULL)
+	delete image.suggestedPalettes;
 
-	free(image.suggestedPalettes);
-    }
+    if(image.transparency != NULL)
+        delete image.transparency;
 
-    if(image.transparency != NULL){
-        if(image.header.colorType == INDEXED_COLOR)
-            freeDataList(image.transparency->transparentIndices, 1);
+    if(image.palette != NULL)
+        delete image.palette;
 
-        free(image.transparency);
-    }
+    for(size_t i = 0; i < image.textDataList.size(); ++i)
+	    delete [] image.textDataList[i].str;
 
-    freeDataList(image.textDataList,1);
-    freeDataList(image.colorData,1);
-
-    if(image.palette != NULL){
-        freeDataList(*image.palette,1);
-        free(image.palette);
-    }
 }
 
 void loadSignature(BYTE * signature, FILE * in)
@@ -84,32 +78,15 @@ PNG_Image getEmptyPNG_Image(void)
     image.palette = NULL;
     image.suggestedPalettes = NULL;
 
-    image.textDataList = getNewDataList(freeTextualData, copyByte);
-
     return image;
-}
-
-void freeTextualData(void * textualData)
-{
-    TextualData * data;
-
-    data = (TextualData *) textualData;
-
-    if(data->str != NULL)
-        free(data->str);
-
-    free(data);
 }
 
 PNG_Image loadPNG(FILE * in)
 {
     PNG_Image image;
     Chunk chunk;
-    DataStream stream;
 
     int idatFound;
-
-    DataList encodedColorData;
 
     image = getEmptyPNG_Image();
 
@@ -123,7 +100,7 @@ PNG_Image loadPNG(FILE * in)
     /* Load the chunks in the file consecutively until the IEND chunk is found*/
     while(!isChunkType(chunk, IEND)){
 
-        stream = getNewDataStream(chunk.data, PNG_ENDIAN);
+	DataStream stream(chunk.data,PNG_ENDIAN);
 
         if(isChunkType(chunk, PLTE)){
             image.palette = loadPalette(stream);
@@ -133,11 +110,12 @@ PNG_Image loadPNG(FILE * in)
 
 	    /* Load all the consecutive IDAT chunks until a non IDAT chunk is found. */
 
-            encodedColorData = getNewDataList(NULL, copyByte);
+            vector<BYTE> encodedColorData;
 
-            copyAppendToDataList(&encodedColorData, chunk.data);
-
-            freeChunk(chunk);
+	    encodedColorData.insert(
+		encodedColorData.end(),
+		chunk.data.begin(),
+		chunk.data.end());
 
             chunk = loadChunk(in);
 
@@ -145,14 +123,15 @@ PNG_Image loadPNG(FILE * in)
 
             while(isChunkType(chunk, IDAT)){
 
-                copyAppendToDataList(&encodedColorData, chunk.data);
+	    encodedColorData.insert(
+		encodedColorData.end(),
+		chunk.data.begin(),
+		chunk.data.end());
 
-                freeChunk(chunk);
                 chunk = loadChunk(in);
             }
 
             image.colorData = loadColorData(encodedColorData, image.header);
-            freeDataList(encodedColorData, 1);
 
         }else if(isChunkType(chunk, sRGB))
             image.renderingIntent = loadRenderingIntent(stream);
@@ -173,14 +152,10 @@ PNG_Image loadPNG(FILE * in)
             image.transparency = loadTransparency(image.header, stream);
 
         else if(isChunkType(chunk, tEXt))
-            addToDataList(
-                &image.textDataList,
-                loadTextualData(stream, 0, chunk.length));
+	    image.textDataList.push_back(loadTextualData(stream, 0, chunk.length));
 
         else if(isChunkType(chunk, zTXt))
-            addToDataList(
-                &image.textDataList,
-                loadTextualData(stream, 1, chunk.length));
+	    image.textDataList.push_back(loadTextualData(stream, 1, chunk.length));
 
         else if(isChunkType(chunk, sBIT))
             image.significantBits = loadSignificantBits(image.header, stream);
@@ -205,21 +180,15 @@ PNG_Image loadPNG(FILE * in)
             chunk = chunk;
             idatFound = 0;
         } else{
-            freeChunk(chunk);
             chunk = loadChunk(in);
         }
     }
     return image;
 }
 
-int isChunkType(Chunk chunk, char * chunkType)
+int isChunkType(Chunk chunk, const char * chunkType)
 {
     return (!strcmp(chunk.type, chunkType));
-}
-
-void freeChunk(Chunk chunk)
-{
-    freeDataList(chunk.data,1);
 }
 
 void writePNG(PNG_Image image, FILE * out)
@@ -322,7 +291,7 @@ void writeSignature(BYTE * signature, FILE * out)
             fprintf(out, "%d\n", signature[i]);
 }
 
-Chunk loadChunk(FILE * in)
+hunk loadChunk(FILE * in)
 {
     Chunk chunk;
 
@@ -337,11 +306,8 @@ Chunk loadChunk(FILE * in)
     chunk.type[4] = '\0';
     verbosePrint("Chunk Type: %s\n", chunk.type);
 
-    /* TODO: Remember to free this memory! */
-    chunk.data = readBytes(chunk.length, in);
-
-    verbosePrint("data:\n");
-    printDataList(chunk.data, printByte);
+    for(INT32 i = 0; i < chunk.length; ++i)
+	chunk.data.push_back(getc(in));
 
     fread(&chunk.CRC, sizeof(INT32), 1, in);
     chunk.CRC = htonl(chunk.CRC);
@@ -352,31 +318,23 @@ Chunk loadChunk(FILE * in)
     return chunk;
 }
 
-
-/* Some kind of copying routine is needed! */
 void validateCRC(Chunk chunk)
 {
-    DataList checkData;
+    vector<BYTE> checkData;
 
     INT32 calcCRC;
-    BYTE b;
     size_t i;
 
     /* Calculate the CRC of the chunk type field and data fields*/
 
-    checkData = getNewDataList(NULL, copyByte);
-
-    /* Convert the chunk type string to an array of bytes. */
     for(i = 0; i < 4; ++i){
-        b = chunk.type[i];
-        addByteToDataList(&checkData, b);
+        BYTE b = chunk.type[i];
+	checkData.push_back(b);
     }
 
-    copyAppendToDataList(&checkData, chunk.data);
+    checkData.insert(checkData.end(), chunk.data.begin(), chunk.data.end());
 
     calcCRC = crc32(checkData);
-
-    freeDataList(checkData, 1);
 
     if(calcCRC != chunk.CRC){
         printError("Chunk has invalid checksum: chunk %d != calc %d\n", chunk.CRC, calcCRC );
@@ -395,46 +353,43 @@ ImageHeader loadImageHeader(FILE * in)
 {
     ImageHeader header;
     Chunk headerChunk;
-    DataStream stream;
 
     headerChunk = loadChunk(in);
-    stream = getNewDataStream(headerChunk.data, PNG_ENDIAN);
 
-    header.width = read32BitsNumber(&stream);
-    header.height = read32BitsNumber(&stream);
-    header.bitDepth = readStreamByte(&stream);
-    header.colorType = readStreamByte(&stream);
-    header.compressionMethod = readStreamByte(&stream);
-    header.filterMethod = readStreamByte(&stream);
-    header.interlaceMethod = readStreamByte(&stream);
-
-    freeChunk(headerChunk);
+    DataStream stream(headerChunk.data, PNG_ENDIAN);
+    header.width = stream.read32BitsNumber();
+    header.height = stream.read32BitsNumber();
+    header.bitDepth = stream.readStreamByte();
+    header.colorType = stream.readStreamByte();
+    header.compressionMethod = stream.readStreamByte();
+    header.filterMethod = stream.readStreamByte();
+    header.interlaceMethod = stream.readStreamByte();
 
     return header;
 }
 
-BYTE * loadRenderingIntent(DataStream stream)
+BYTE * loadRenderingIntent(DataStream & stream)
 {
     BYTE * b;
 
-    b = malloc(sizeof(BYTE));
+    b = new BYTE;
 
-    *b = readStreamByte(&stream);
+    *b = stream.readStreamByte();
 
     return b;
 }
 
 #define CRC32_POLY 0xEDB88320
 
-unsigned int crc32(DataList data){
+unsigned int crc32(vector<BYTE> data){
 
     unsigned long reminder = 0xFFFFFFFF; /* standard initial value in CRC32 */
     unsigned long i;
     unsigned long bit;
     BYTE b;
 
-    for(i = 0; i < data.count; ++i){
-        b = *(BYTE *)data.list[i];
+    for(i = 0; i < data.size(); ++i){
+        b = data[i];
         reminder ^= b; /* must be zero extended */
         for(bit = 0; bit < 8; bit++)
             if(reminder & 0x01)
@@ -450,9 +405,9 @@ INT32 * loadImageGamma(DataStream stream)
 {
     INT32 * gamma;
 
-    gamma = malloc(sizeof(INT32));
+    gamma = new INT32;
 
-    *gamma = read32BitsNumber(&stream);
+    *gamma = stream.read32BitsNumber();
 
     return gamma;
 }
@@ -467,12 +422,12 @@ PixelDimensions * loadPixelDimensions(DataStream stream)
 {
     PixelDimensions * pixelDimensions;
 
-    pixelDimensions = malloc(sizeof(PixelDimensions));
+    pixelDimensions = new PixelDimensions;
 
-    pixelDimensions->x = read32BitsNumber(&stream);
-    pixelDimensions->y = read32BitsNumber(&stream);
+    pixelDimensions->x = stream.read32BitsNumber();
+    pixelDimensions->y = stream.read32BitsNumber();
 
-    pixelDimensions->unitSpecifier = readStreamByte(&stream);
+    pixelDimensions->unitSpecifier = stream.readStreamByte();
 
     return pixelDimensions;
 }
@@ -498,15 +453,15 @@ TimeStamp * loadTimeStamp(DataStream stream)
 {
     TimeStamp * timeStamp;
 
-    timeStamp = malloc(sizeof(TimeStamp));
+    timeStamp = new TimeStamp;
 
-    timeStamp->year = read16BitsNumber(&stream);
+    timeStamp->year = stream.read16BitsNumber();
 
-    timeStamp->month = readStreamByte(&stream);
-    timeStamp->day = readStreamByte(&stream);
-    timeStamp->hour = readStreamByte(&stream);
-    timeStamp->minute = readStreamByte(&stream);
-    timeStamp->second = readStreamByte(&stream);
+    timeStamp->month = stream.readStreamByte();
+    timeStamp->day = stream.readStreamByte();
+    timeStamp->hour = stream.readStreamByte();
+    timeStamp->minute = stream.readStreamByte();
+    timeStamp->second = stream.readStreamByte();
 
     return timeStamp;
 }
@@ -531,35 +486,35 @@ Color * loadBackgroundColor(ImageHeader header, DataStream stream)
 {
     Color * backgroundColor;
 
-    backgroundColor = malloc(sizeof(Color));
+    backgroundColor = new Color;
 
     if(header.colorType == GREYSCALE_COLOR){
 
-        backgroundColor->greyscale = read16BitsNumber(&stream);
+        backgroundColor->greyscale = stream.read16BitsNumber();
 
     } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
 
-        backgroundColor->greyscaleAlpha.greyscale = read16BitsNumber(&stream);
+        backgroundColor->greyscaleAlpha.greyscale = stream.read16BitsNumber();
 
         /* TODO: does this work? */
         backgroundColor->greyscaleAlpha.alpha =
             getMaximumChannelValue(header);
     } else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
 
-        backgroundColor->rgba.R = read16BitsNumber(&stream);
-        backgroundColor->rgba.G = read16BitsNumber(&stream);
-        backgroundColor->rgba.B = read16BitsNumber(&stream);
+        backgroundColor->rgba.R = stream.read16BitsNumber();
+        backgroundColor->rgba.G = stream.read16BitsNumber();
+        backgroundColor->rgba.B = stream.read16BitsNumber();
 
         backgroundColor->rgba.A =
             getMaximumChannelValue(header);
     } else if(header.colorType == TRUECOLOR_COLOR){
 
-        backgroundColor->rgb.R = read16BitsNumber(&stream);
-        backgroundColor->rgb.G = read16BitsNumber(&stream);
-        backgroundColor->rgb.B = read16BitsNumber(&stream);
+        backgroundColor->rgb.R = stream.read16BitsNumber();
+        backgroundColor->rgb.G = stream.read16BitsNumber();
+        backgroundColor->rgb.B = stream.read16BitsNumber();
     } else if(header.colorType == INDEXED_COLOR){
 
-        backgroundColor->index = readStreamByte(&stream);
+        backgroundColor->index = stream.readStreamByte();
     }
 
     return backgroundColor;
@@ -637,13 +592,13 @@ void writeColor(PNG_Image image,
 
     else if(image.header.colorType == INDEXED_COLOR){
 
-        indexedColor = *(Color *)image.palette->list[color.index];
+        indexedColor = (*image.palette)[color.index];
 
         if(!backgroundColor && image.transparency != NULL &&
-           color.index < image.transparency->transparentIndices.count){
+           color.index < image.transparency->transparentIndices.size()){
 
             /* If the color is not there, it is 255 by default? check png spec*/
-            alpha = *(BYTE*)image.transparency->transparentIndices.list[color.index];
+            alpha = image.transparency->transparentIndices[color.index];
 
             fprintf(out, "(%d,%d,%d,%d)",
                     indexedColor.rgb.R,
@@ -659,28 +614,29 @@ void writeColor(PNG_Image image,
     }
 }
 
-TextualData * loadTextualData(
+TextualData loadTextualData(
     DataStream stream,
     int compressed,
     INT32 chunkLength)
 {
-    TextualData * data;
+    /*img/ctzn0g04.png */
+
+    TextualData data;
     char ch;
     size_t i;
     size_t textLength;
-    DataList compressedData, decompressedData;
+    vector<BYTE> compressedData, decompressedData;
     int former;
     BYTE b;
 
-    data = malloc(sizeof(TextualData));
-    data->str = NULL;
+    data.str = NULL;
 
     /* Read the keyword. */
     i = 0;
     do{
-        ch = (char)readStreamByte(&stream);
+        ch = stream.readStreamByte();
 
-        data->keyword[i++] = ch;
+        data.keyword[i++] = ch;
 
     } while(ch != '\0');
 
@@ -689,33 +645,26 @@ TextualData * loadTextualData(
 
         /* Uncompress the data.*/
 
-        /* read the compression method. */
-        (char)readStreamByte(&stream);
+        /* read the compression method(there is only one, so this value is skipped). */
+        stream.readStreamByte();
+	++i;
 
-        compressedData = getNewDataList(NULL, copyByte);
-
-        for(i = stream.position; i < stream.list.count; ++i){
-            copyAppend(&compressedData, readNext(&stream));
-        }
+	/* TODO: does this work?*/
+        for(; i < stream.getStreamSize(); ++i)
+	    compressedData.push_back(stream.readStreamByte());
 
         former = verbose;
         verbose = 0;
         decompressedData = ZLIB_Decompress(compressedData);
         verbose = former;
 
-        freeDataList(compressedData, 1);
+        data.str = new char[decompressedData.size() + 1];
 
-        data->str = malloc(sizeof(char) * (decompressedData.count + 1));
-
-        for(i = 0; i < decompressedData.count; ++i){
-            b = *(BYTE *)decompressedData.list[i];
-            data->str[i] = (char)b;
+        for(i = 0; i < decompressedData.size(); ++i){
+            b = decompressedData[i];
+            data.str[i] = (char)b;
         }
-
-        data->str[i] = '\0';
-
-        freeDataList(decompressedData, 1);
-
+        data.str[i] = '\0';
     } else{
         /* Simply read the data.
 
@@ -724,65 +673,51 @@ TextualData * loadTextualData(
         textLength = chunkLength - i;
 
         /* +1 makes space for the null character. */
-        data->str = malloc(sizeof(char) * (textLength + 1));
+        data.str = new char[textLength + 1];
 
         for(i = 0; i < (textLength); ++i){
-            data->str[i] = (char)readStreamByte(&stream);
+            data.str[i] = (char)stream.readStreamByte();
         }
 
-        data->str[i] = '\0';
+        data.str[i] = '\0';
     }
 
     return data;
 }
 
-void writeTextDataList(DataList textDataList, FILE * out)
+void writeTextDataList(vector<TextualData> textDataList, FILE * out)
 {
     size_t i;
-    TextualData * data;
-    if(textDataList.count > 0){
+    if(textDataList.size() > 0){
 
-        for(i = 0; i < textDataList.count; ++i){
+        for(i = 0; i < textDataList.size(); ++i){
             fprintf(out, "Textual data %ld:\n", i+1);
-            data = (TextualData *)textDataList.list[i];
-            fprintf(out, "Keyword: %s\n", data->keyword);
-
-            fprintf(out, "Text: %s\n", data->str);
+            fprintf(out, "Keyword: %s\n", textDataList[i].keyword);
+            fprintf(out, "Text: %s\n", textDataList[i].str);
         }
     }
 }
 
-DataList loadColorData(DataList data, ImageHeader header)
+std::vector<Color> loadColorData(vector<BYTE> data, ImageHeader header)
 {
     int former;
-    DataList decompressed, unfiltered, colorData, interlaced;
+    vector<BYTE> decompressed, unfiltered;
+    vector<Color> colorData;
     former = verbose;
-
     verbose = 0;
     decompressed = ZLIB_Decompress(data);
     verbose = former;
 
     /* Unfilter. */
 
-    if(header.interlaceMethod == ADAM7_INTERLACE)
-        unfiltered = unfilterInterlacedImage(decompressed, header);
-    else
-        unfiltered = unfilter(decompressed, header);
-
-    freeDataList(decompressed, 1);
+    unfiltered = unfilterImage(decompressed, header);
 
     /* Undo the Scanline serialization; that is, split up the bytes into colors. */
 
-    if(header.interlaceMethod == ADAM7_INTERLACE)
-        colorData = splitUpColorDataInterlaced( unfiltered, header);
-    else
-        colorData = splitUpColorData( unfiltered, header);
-    freeDataList(unfiltered, 1);
+    colorData = splitUpColorData(unfiltered, header);
 
     if(header.interlaceMethod == ADAM7_INTERLACE){
-        interlaced = uninterlace(colorData, header);
-        freeDataList(colorData, 0);
-        return interlaced;
+        return uninterlace(colorData, header);
     } else
         return colorData;
 }
@@ -797,7 +732,7 @@ void writeColorData(PNG_Image image, FILE * out)
 
         for(col = 0; col < image.header.width; ++col){
 
-            writeColor(image,*(Color *)image.colorData.list[row * image.header.width + col], out, 0);
+            writeColor(image,image.colorData[row * image.header.width + col], out, 0);
             fprintf(out,",");
         }
 
@@ -805,13 +740,13 @@ void writeColorData(PNG_Image image, FILE * out)
     }
 }
 
-DataList unfilterSubImage(
-    DataStream * stream,
+vector<BYTE> unfilterSubImage(
+    DataStream & stream,
     size_t imageWidth,
     size_t height,
-    ColorInfo info)
+    const ColorInfo & info)
 {
-    DataList unfiltered;
+    vector<BYTE> unfiltered;
     size_t scanline;
     int filterType;
     size_t i;
@@ -837,17 +772,15 @@ DataList unfilterSubImage(
 
     width = ceil((info.channelBitDepth *  imageWidth * info.numChannels) / 8.0);
 
-    unfiltered = getNewDataList(NULL, copyByte);
-
     /* Read scanline after scanline*/
     for(scanline = 0; scanline < height; ++scanline){
 
         /* Read the filter type. */
-        filterType = readStreamByte(stream);
+        filterType = stream.readStreamByte();
 
         for(i = 0; i < width; ++i){
 
-            x = readStreamByte(stream);
+            x = stream.readStreamByte();
 
             /* Unfilter byte according to a, b, c and x*/
 
@@ -875,7 +808,6 @@ DataList unfilterSubImage(
                 a = compute_a(i, bpp, unfiltered);
                 b = compute_b(scanline, width, unfiltered);
 
-                /* FIXME? Another mod 256 needed here? */
                 unfilteredByte = (BYTE)((unsigned int)x +
 
                                         floor(((unsigned int)a + (unsigned int)b) / 2)
@@ -892,10 +824,7 @@ DataList unfilterSubImage(
 
             }
 
-            /* Add it.*/
-/*            verbosePrint("unfiltered:%d\n", unfilteredByte); */
-
-            addByteToDataList(&unfiltered, unfilteredByte);
+	    unfiltered.push_back(unfilteredByte);
         }
     }
 
@@ -903,72 +832,55 @@ DataList unfilterSubImage(
 
 }
 
-/* See: http://www.w3.org/TR/PNG-Filters.html*/
-DataList unfilter(DataList data, ImageHeader header)
+vector<BYTE> unfilterImage(vector<BYTE> data, ImageHeader header)
 {
-    DataStream stream;
-    size_t i;
-
-    ColorInfo info;
-
-    info = getColorInfo(header);
-
-    for(i = 0; i < data.count; ++i){
-        verbosePrint("%d,", getByteAt(data, i));
-    }
-
-    verbosePrint("\n");
-
-    stream = getNewDataStream(data, PNG_ENDIAN);
-
-    return unfilterSubImage(&stream, header.width, header.height, info);
-}
-
-DataList unfilterInterlacedImage(DataList data, ImageHeader header)
-{
-    DataStream stream;
-    size_t i;
     size_t pass;
+    size_t passes;
 
     ColorInfo info;
 
     InterlacedSubImagesSizes sizes;
 
-    DataList subimage;
-    DataList fullImage;
+    vector<BYTE> subimage;
+    vector<BYTE> fullImage;
+
+    if(header.interlaceMethod == ADAM7_INTERLACE){
+	passes = 7;
+	sizes = calcInterlacedSubImagesSizes(header.width, header.height);
+    } else {
+	passes = 1;
+	sizes = calcImageSize(header.width, header.height);
+    }
 
     info = getColorInfo(header);
 
-    for(i = 0; i < data.count; ++i){
-        verbosePrint("%d,", getByteAt(data, i));
-    }
+    DataStream stream(data, PNG_ENDIAN);
 
-    verbosePrint("\n");
-
-    stream = getNewDataStream(data, PNG_ENDIAN);
-
-    fullImage = getNewDataList(NULL, copyByte);
-
-    sizes = calcInterlacedSubImagesSizes(header.width, header.height);
-
-    for(pass = 0; pass < 7; ++pass){
+    for(pass = 0; pass < passes; ++pass){
 
         if(sizes.sizes[pass].width != 0 && sizes.sizes[pass].height != 0){
 
             subimage = unfilterSubImage(
-                &stream,
+                stream,
                 sizes.sizes[pass].width,
                 sizes.sizes[pass].height,
                 info);
 
-            copyAppendToDataList(&fullImage, subimage);
-
-            freeDataList(subimage, 1);
+	    fullImage.insert(fullImage.end(), subimage.begin(), subimage.end());
         }
-
     }
 
     return fullImage;
+}
+
+InterlacedSubImagesSizes calcImageSize(size_t width, size_t height)
+{
+    InterlacedSubImagesSizes ret;
+
+    ret.sizes[0].width = width;
+    ret.sizes[0].height = height;
+
+    return ret;
 }
 
 InterlacedSubImagesSizes calcInterlacedSubImagesSizes(size_t width, size_t height)
@@ -1004,18 +916,6 @@ InterlacedSubImagesSizes calcInterlacedSubImagesSizes(size_t width, size_t heigh
     }
 
     return ret;
-
-/*
-
-  1 6 4 6 2 6 4 6
-  7 7 7 7 7 7 7 7
-  5 6 5 6 5 6 5 6
-  7 7 7 7 7 7 7 7
-  3 6 4 6 3 6 4 6
-  7 7 7 7 7 7 7 7
-  5 6 5 6 5 6 5 6
-  7 7 7 7 7 7 7 7
-*/
 }
 
 ColorInfo getColorInfo(ImageHeader header)
@@ -1037,20 +937,20 @@ ColorInfo getColorInfo(ImageHeader header)
     return info;
 }
 
-BYTE compute_a(size_t i, size_t bpp, DataList unfiltered)
+BYTE compute_a(size_t i, size_t bpp, const vector<BYTE> & unfiltered)
 {
     if(i >= bpp)
-        return getByteAt(unfiltered , unfiltered.count - bpp);
+        return unfiltered[unfiltered.size() - bpp];
     else
         return 0;
 }
 
-BYTE compute_b(size_t scanline, size_t width, DataList unfiltered)
+BYTE compute_b(size_t scanline, size_t width, const std::vector<BYTE> & unfiltered)
 {
     if(scanline == 0)
         return 0;
     else
-        return getByteAt(unfiltered , unfiltered.count - width);
+        return unfiltered[unfiltered.size() - width];
 }
 
 BYTE compute_c(
@@ -1058,17 +958,15 @@ BYTE compute_c(
     size_t bpp,
     size_t scanline,
     size_t width,
-    DataList unfiltered)
+    const std::vector<BYTE> & unfiltered)
 {
     if(scanline == 0)
         return 0;
     else {
-
         if(i >= bpp)
-            return getByteAt(unfiltered , unfiltered.count - width - bpp);
+            return unfiltered[unfiltered.size() - width - bpp];
         else
             return 0;
-
     }
 }
 
@@ -1090,170 +988,138 @@ unsigned int paethPredictor(unsigned int a, unsigned int b, unsigned int c)
         return c;
 }
 
-DataList splitUpColorDataSubImage(
-    DataStream * colorStream,
-    ImageHeader header,
+std::vector<Color> splitUpColorDataSubImage(
+    DataStream & colorStream,
+    BitReader & inBits,
+    const ImageHeader & header,
     size_t width,
-    size_t height
+    size_t height,
+    size_t dataCount
     )
 {
+    /* s01i3p01.png */
     size_t i;
-    DataList colorData;
+    vector<Color> colorData;
     Color color;
-
-    colorData = getNewDataList(NULL, NULL);
 
     for(i = 0; i < (width * height); ++i){
 
         if(header.colorType == GREYSCALE_COLOR){
-            color.greyscale = readNextChannel(colorStream, header);
+            color.greyscale = readNextChannel(colorStream, inBits, header);
         }
 
         else if(header.colorType == INDEXED_COLOR){
 
-            color.index = readNextChannel(colorStream, header);
+            color.index = readNextChannel(colorStream, inBits, header);
         }
 
         else if(header.colorType == TRUECOLOR_COLOR){
-            color.rgb.R = readNextChannel(colorStream, header);
-            color.rgb.G = readNextChannel(colorStream, header);
-            color.rgb.B = readNextChannel(colorStream, header);
+            color.rgb.R = readNextChannel(colorStream, inBits, header);
+            color.rgb.G = readNextChannel(colorStream, inBits, header);
+            color.rgb.B = readNextChannel(colorStream, inBits, header);
         }
 
         else if(header.colorType == GREYSCALE_ALPHA_COLOR){
 
-            color.greyscaleAlpha.greyscale = readNextChannel(colorStream, header);
-            color.greyscaleAlpha.alpha = readNextChannel(colorStream, header);
+            color.greyscaleAlpha.greyscale = readNextChannel(colorStream, inBits, header);
+            color.greyscaleAlpha.alpha = readNextChannel(colorStream, inBits, header);
         }
 
         else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
 
-            color.rgba.R = readNextChannel(colorStream, header);
-            color.rgba.G = readNextChannel(colorStream, header);
-            color.rgba.B = readNextChannel(colorStream, header);
-            color.rgba.A = readNextChannel(colorStream, header);
+            color.rgba.R = readNextChannel(colorStream, inBits, header);
+            color.rgba.G = readNextChannel(colorStream, inBits, header);
+            color.rgba.B = readNextChannel(colorStream, inBits, header);
+            color.rgba.A = readNextChannel(colorStream, inBits, header);
         }
 
-        addColorToDataList(&colorData, color);
+	colorData.push_back(color);
 
-        if((i+1) % width == 0 /*&& (i+1) != width * height */ && colorStream->position != colorStream->list.count&&
-           header.bitDepth < 8){
+        if((i+1) % width == 0 &&
+	   inBits.getPosition() != dataCount &&
+	   header.bitDepth < 8){
+	    inBits.nextByte();
 
-            colorStream->b = readStreamByte(colorStream);
-            colorStream->remainingBitsBits = 8;
-
+	    /* read next byte in stream*/
         }
     }
 
     return colorData;
 }
 
-void * copyColor(void * vptr)
+vector<Color> splitUpColorData(vector<BYTE> data, ImageHeader header)
 {
-    Color * copy;
-    Color b;
-
-    b = *(Color *)vptr;
-
-    copy = malloc(sizeof(Color));
-    *copy = b;
-
-    return copy;
-}
-
-
-DataList splitUpColorDataInterlaced(DataList data, ImageHeader header)
-{
-    DataStream colorStream;
     size_t pass;
+    size_t passes;
 
-    DataList subimage;
-    DataList fullImage;
+    vector<Color> subimage;
+    vector<Color> fullImage;
 
     InterlacedSubImagesSizes sizes;
 
-    sizes = calcInterlacedSubImagesSizes(header.width, header.height);
+    if(header.interlaceMethod == ADAM7_INTERLACE){
+	passes = 7;
+	sizes = calcInterlacedSubImagesSizes(header.width, header.height);
+    } else {
+	passes = 1;
+	sizes = calcImageSize(header.width, header.height);
+    }
 
-    fullImage = getNewDataList(NULL, copyColor);
+    DataStream colorStream(data,PNG_ENDIAN);
+    BitReader inBits(data.begin(),MSBF);
 
-    colorStream = getNewDataStream(data, PNG_ENDIAN);
-
-    for(pass = 0; pass < 7; ++pass){
+    for(pass = 0; pass < passes; ++pass){
 
         if(sizes.sizes[pass].width != 0 && sizes.sizes[pass].height != 0){
 
             subimage =
-                splitUpColorDataSubImage(&colorStream, header,
+                splitUpColorDataSubImage(colorStream, inBits, header,
                                          sizes.sizes[pass].width,
-                                         sizes.sizes[pass].height);
+                                         sizes.sizes[pass].height,
+					 data.size());
+	    fullImage.insert(
+		fullImage.end(),
+		subimage.begin(),
+		subimage.end());
 
-            copyAppendToDataList(&fullImage, subimage);
-            freeDataList(subimage, 1);
         }
     }
 
     return fullImage;
 }
 
-DataList splitUpColorData(DataList data, ImageHeader header)
-{
-    DataStream colorStream;
-
-    colorStream = getNewDataStream(data, PNG_ENDIAN);
-
-    return splitUpColorDataSubImage(&colorStream, header, header.width, header.height);
-}
-
-unsigned long readNextChannel(DataStream * stream, ImageHeader header)
+unsigned long readNextChannel(DataStream & stream, BitReader & inBits,const ImageHeader & header)
 {
     unsigned long channel;
 
-    if(header.bitDepth == 8){
-        channel = readStreamByte(stream);
-    } else if(header.bitDepth == 16){
-        channel = read16BitsNumber(stream);
-    } else if(header.bitDepth < 8)
+    if(header.bitDepth == 8)
+        channel = stream.readStreamByte();
+    else if(header.bitDepth == 16)
+        channel = stream.read16BitsNumber();
+    else if(header.bitDepth < 8)
         /* Handle bit depths 1, 2 and 4*/
-        channel = readBits(stream, header.bitDepth);
-
+        channel = inBits.readBits(header.bitDepth);
 
     return channel;
 }
 
-void addColorToDataList(DataList * list, Color color)
+vector<Color> * loadPalette(DataStream & stream)
 {
-    Color * cp;
-
-    cp = malloc(sizeof(Color));
-    *cp = color;
-    addToDataList(list, cp);
-}
-
-DataList * loadPalette(DataStream stream)
-{
-    DataList * palette;
+    vector<Color> * palette;
     size_t size;
     size_t i;
     Color color;
 
-    palette = malloc(sizeof(DataList));
-    *palette = getNewDataList(NULL, NULL);
+    palette = new vector<Color>;
 
-    verbosePrint("size:%d\n",stream.list.count);
-    size = stream.list.count / 3;
+    size = stream.getStreamSize() / 3;
 
-    verbosePrint("loading palette\n");
     for(i = 0; i < size; ++i){
-        color.rgb.R = readStreamByte(&stream);
-        color.rgb.G = readStreamByte(&stream);
-        color.rgb.B = readStreamByte(&stream);
+        color.rgb.R = stream.readStreamByte();
+        color.rgb.G = stream.readStreamByte();
+        color.rgb.B = stream.readStreamByte();
 
-        verbosePrint("(%d,%d,%d)\n",
-                     color.rgb.R,
-                     color.rgb.G,
-                     color.rgb.B);
-
-        addColorToDataList(palette, color);
+        palette->push_back(color);
     }
 
     return palette;
@@ -1267,9 +1133,9 @@ void writePalette(PNG_Image image,FILE * out)
     if(image.palette != NULL){
         fprintf(out, "Image Palette:\n");
 
-        for(i = 0; i < image.palette->count; ++i){
+        for(i = 0; i < image.palette->size(); ++i){
 
-            c = *(Color *)image.palette->list[i];
+            c = (*image.palette)[i];
 
             fprintf(out, "%ld: (%d,%d,%d)\n", i, c.rgb.R, c.rgb.G , c.rgb.B);
         }
@@ -1279,28 +1145,23 @@ void writePalette(PNG_Image image,FILE * out)
     }
 }
 
-Transparency * loadTransparency(ImageHeader header, DataStream stream)
+Transparency * loadTransparency(const ImageHeader & header, DataStream & stream)
 {
     Transparency * transparency;
     size_t i;
 
-    transparency = malloc(sizeof(Transparency));
+    transparency = new Transparency;
 
     if(header.colorType == GREYSCALE_COLOR)
-        transparency->color.greyscale = read16BitsNumber(&stream);
+        transparency->color.greyscale = stream.read16BitsNumber();
     else if(header.colorType == TRUECOLOR_COLOR){
         /* TODO: Proper order? */
-        transparency->color.rgb.R = read16BitsNumber(&stream);
-        transparency->color.rgb.B = read16BitsNumber(&stream);
-        transparency->color.rgb.G = read16BitsNumber(&stream);
+        transparency->color.rgb.R = stream.read16BitsNumber();
+        transparency->color.rgb.B = stream.read16BitsNumber();
+        transparency->color.rgb.G = stream.read16BitsNumber();
     } else if(header.colorType == INDEXED_COLOR){
-        transparency->transparentIndices = getNewDataList(NULL, NULL);
-
-        for(i = 0; i < stream.list.count; ++i){
-            addByteToDataList(
-                &transparency->transparentIndices,
-                readStreamByte(&stream)
-                );
+        for(i = 0; i < stream.getStreamSize(); ++i){
+	    transparency->transparentIndices.push_back(stream.readStreamByte());
         }
 
     }
@@ -1312,27 +1173,27 @@ SignificantBits * loadSignificantBits(ImageHeader header, DataStream stream)
 {
     SignificantBits * significantBits;
 
-    significantBits = malloc(sizeof(SignificantBits));
+    significantBits = new SignificantBits;
 
     if(header.colorType == GREYSCALE_COLOR)
-        significantBits->significantGreyscaleBits = readStreamByte(&stream);
+        significantBits->significantGreyscaleBits = stream.readStreamByte();
     else if(header.colorType == TRUECOLOR_COLOR ||
             header.colorType == INDEXED_COLOR){
 
-        significantBits->significantRedBits = readStreamByte(&stream);
-        significantBits->significantGreenBits = readStreamByte(&stream);
-        significantBits->significantBlueBits = readStreamByte(&stream);
+        significantBits->significantRedBits = stream.readStreamByte();
+        significantBits->significantGreenBits = stream.readStreamByte();
+        significantBits->significantBlueBits = stream.readStreamByte();
 
     } else if(header.colorType == GREYSCALE_ALPHA_COLOR){
 
-        significantBits->significantGreyscaleBits = readStreamByte(&stream);
-        significantBits->significantAlphaBits = readStreamByte(&stream);
+        significantBits->significantGreyscaleBits = stream.readStreamByte();
+        significantBits->significantAlphaBits = stream.readStreamByte();
     } else if(header.colorType == TRUECOLOR_ALPHA_COLOR){
 
-        significantBits->significantRedBits = readStreamByte(&stream);
-        significantBits->significantGreenBits = readStreamByte(&stream);
-        significantBits->significantBlueBits = readStreamByte(&stream);
-        significantBits->significantAlphaBits = readStreamByte(&stream);
+        significantBits->significantRedBits = stream.readStreamByte();
+        significantBits->significantGreenBits = stream.readStreamByte();
+        significantBits->significantBlueBits = stream.readStreamByte();
+        significantBits->significantAlphaBits = stream.readStreamByte();
     }
 
     return significantBits;
@@ -1389,20 +1250,20 @@ PrimaryChromaticities * loadPrimaryChromaticities(DataStream stream)
 {
     PrimaryChromaticities * primaryChromaticities;
 
-    primaryChromaticities = malloc(sizeof(PrimaryChromaticities));
+    primaryChromaticities = new PrimaryChromaticities;
 
 
-    primaryChromaticities->whitePointX = read32BitsNumber(&stream);
-    primaryChromaticities->whitePointY = read32BitsNumber(&stream);
+    primaryChromaticities->whitePointX = stream.read32BitsNumber();
+    primaryChromaticities->whitePointY = stream.read32BitsNumber();
 
-    primaryChromaticities->RedX = read32BitsNumber(&stream);
-    primaryChromaticities->RedY = read32BitsNumber(&stream);
+    primaryChromaticities->RedX = stream.read32BitsNumber();
+    primaryChromaticities->RedY = stream.read32BitsNumber();
 
-    primaryChromaticities->GreenX = read32BitsNumber(&stream);
-    primaryChromaticities->GreenY = read32BitsNumber(&stream);
+    primaryChromaticities->GreenX = stream.read32BitsNumber();
+    primaryChromaticities->GreenY = stream.read32BitsNumber();
 
-    primaryChromaticities->BlueX = read32BitsNumber(&stream);
-    primaryChromaticities->BlueY = read32BitsNumber(&stream);
+    primaryChromaticities->BlueX = stream.read32BitsNumber();
+    primaryChromaticities->BlueY = stream.read32BitsNumber();
 
     return primaryChromaticities;
 }
@@ -1437,44 +1298,34 @@ void writePrimaryChromaticities(
     }
 }
 
-DataList * loadImageHistogram(DataStream stream)
+vector<INT16> * loadImageHistogram(DataStream & stream)
 {
-    DataList * histogram;
+    vector<INT16> * histogram;
     size_t i;
-    INT16 * p;
 
-    histogram = malloc(sizeof(DataList));
+    histogram = new vector<INT16>;
 
-    *histogram =  getNewDataList(NULL, NULL);
-
-    for(i = 0; i < (stream.list.count / 2); ++i){
-        p = malloc(sizeof(INT16));
-        *p = read16BitsNumber(&stream);
-        addToDataList(histogram, p);
-
-    }
+    for(i = 0; i < (stream.getStreamSize() / 2); ++i)
+	histogram->push_back(stream.read16BitsNumber());
 
     return histogram;
 }
 
-void writeImageHistogram(DataList * imageHistogram, FILE * out)
+void writeImageHistogram(vector<INT16> * imageHistogram, FILE * out)
 {
-    size_t i;
-
     if(imageHistogram != NULL){
 
         fprintf(out, "Image histogram: \n");
 
-        for(i = 0; i < imageHistogram->count; ++i)
-            fprintf(out, "%d, ", *(INT16 *) imageHistogram->list[i]);
+        for(size_t i = 0; i < imageHistogram->size(); ++i)
+            fprintf(out, "%d, ", (*imageHistogram)[i]);
 
         fprintf(out, "\n");
     }
 }
 
-DataList uninterlace(DataList data, ImageHeader header)
+vector<Color> uninterlace(const vector<Color> & data, const ImageHeader & header)
 {
-    DataList uninterlaced;
     size_t col,row;
     int pass;
     size_t i;
@@ -1486,11 +1337,7 @@ DataList uninterlace(DataList data, ImageHeader header)
 
     Color c;
 
-    uninterlaced = allocateNewDataList(
-        header.width * header.height,
-        header.width * header.height,
-        NULL,
-        NULL);
+    vector<Color> uninterlaced(header.width * header.height);
 
     i = 0;
 
@@ -1504,10 +1351,10 @@ DataList uninterlace(DataList data, ImageHeader header)
 
             while(col < header.width){
 
-                c = *(Color *)data.list[i];
+                c = data[i];
                 c = c;
 
-                uninterlaced.list[row * header.width + col] = data.list[i++];
+                uninterlaced[row * header.width + col] = data[i++];
 
                 col += colIncrement[pass];
 

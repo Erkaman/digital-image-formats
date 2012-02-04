@@ -33,6 +33,8 @@
 \usepackage{path}
 \usepackage{xspace}
 \usepackage{amsmath}
+\usepackage{subfig}
+
 
 \usepackage{longtable}
 
@@ -74,7 +76,7 @@
 \usepackage{tikz}
 \usetikzlibrary{
   shapes,backgrounds,decorations.pathreplacing,
-  positioning,fit,shadings,fadings,matrix,calc}
+  positioning,fit,shadings,fadings,matrix,calc,patterns}
 
 \newenvironment{indentpar}[1][1cm]%
 {\begin{list}{}%
@@ -189,3 +191,4 @@
 \newcommand{\lzeight}{LZ78\xspace}
 
 \newcommand{\hex}[1]{\ensuremath{\mathrm{0x#1}}}
+\newcommand{\bin}[1]{\mbox{\ensuremath{#1}}}

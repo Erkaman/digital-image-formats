@@ -2,17 +2,16 @@
 #define _PNG_H_
 
 #include "../io.h"
-#include "../data_list.h"
 #include "../data_stream.h"
+#include "../bits.h"
 
 #include "png_defs.h"
 #include "../deflate/zlib.h"
 
-
 typedef struct {
     INT32 length;
     char type[5];
-    DataList data;
+    std::vector<BYTE> data;
     INT32 CRC;
 } Chunk;
 
@@ -59,7 +58,7 @@ typedef struct{
        See http://www.w3.org/TR/PNG/#11iCCP
        and
        http://www.color.org/ICC1V42.pdf*/
-    DataList profile;
+    std::vector<BYTE> profile;
 } ICC_Profile;
 
 typedef struct {
@@ -142,7 +141,7 @@ typedef struct {
     char name[80];
 
     /* of SuggestedPaletteEntry */
-    DataList entry;
+    std::vector<Color> entry;
 
 } SuggestedPalette;
 
@@ -167,11 +166,11 @@ typedef struct {
     BYTE second;
 } TimeStamp;
 
-typedef union {
+typedef struct {
 
     Color color;
 
-    DataList transparentIndices;
+    std::vector<BYTE> transparentIndices;
 
 } Transparency;
 
@@ -183,9 +182,9 @@ typedef struct {
     /* Put in the proper order. */
     /* The compressed datastream is then the concatenation of the
      * contents of the data fields of all the IDAT chunks. */
-    DataList colorData;
+    std::vector<Color> colorData;
 
-    DataList * palette;
+    std::vector<Color> * palette;
 
     /* Suggested palettes */
 
@@ -203,24 +202,21 @@ typedef struct {
 
     Color * backgroundColor;
 
-    /* INT 16 */
-    DataList * imageHistogram;
+    /* INT16 */
+    std::vector<INT16> * imageHistogram;
 
     PixelDimensions * pixelDimensions;
-
-/*    PaletteList * suggestedPalettes; */
 
     TimeStamp * timeStamp;
 
     /* Of type TextualData */
-    DataList textDataList;
+    std::vector<TextualData> textDataList;
 
     /* Of type InternationalTextualData */
-    DataList internationalTextDataList;
-
+    std::vector<InternationalTextualData> internationalTextDataList;
     Transparency * transparency;
 
-    DataList * suggestedPalettes;
+    std::vector<SuggestedPalette> * suggestedPalettes;
 
 } PNG_Image;
 
@@ -235,6 +231,8 @@ typedef struct {
 
 InterlacedSubImagesSizes calcInterlacedSubImagesSizes(size_t width, size_t height);
 
+InterlacedSubImagesSizes calcImageSize(size_t width, size_t height);
+
 void dumpPNG(FILE * in, FILE * out);
 
 PNG_Image loadPNG(FILE * in);
@@ -242,12 +240,13 @@ PNG_Image loadPNG(FILE * in);
 PNG_Image getEmptyPNG_Image(void);
 
 void loadSignature(BYTE * signature, FILE * in);
-ImageHeader loadImageHeader(FILE * in);
+std::vector<INT16> * loadImageHistogram(DataStream & stream);
 
-BYTE * loadRenderingIntent(DataStream stream);
+BYTE * loadRenderingIntent(DataStream & stream);
 void writeRenderingIntent(BYTE * renderingIntent, FILE * out);
 
-DataList * loadPalette(DataStream stream);
+std::vector<Color> * loadPalette(DataStream & stream);
+
 void writePalette(PNG_Image image,FILE * out);
 
 INT32 * loadImageGamma(DataStream stream);
@@ -259,8 +258,7 @@ void writeTimeStamp(TimeStamp * timeStamp, FILE * out);
 PixelDimensions * loadPixelDimensions(DataStream streamn);
 void writePixelDimensions(PixelDimensions * pixelDimensions, FILE * out);
 
-DataList * loadImageHistogram(DataStream stream);
-void writeImageHistogram(DataList * imageHistogram, FILE * out);
+void writeImageHistogram(std::vector<INT16> * imageHistogram, FILE * out);
 
 Color * loadBackgroundColor(ImageHeader header, DataStream stream);
 void writeBackgroundColor(
@@ -287,10 +285,11 @@ void writePrimaryChromaticities(
     PrimaryChromaticities * primaryChromaticities,
     FILE * out);
 
-TextualData * loadTextualData(
+TextualData loadTextualData(
     DataStream stream,
     int compressed,
     INT32 chunkLength);
+
 
 void freeTextualData(void * textualData);
 
@@ -298,74 +297,71 @@ void writePNG(PNG_Image image, FILE * out);
 void freePNG_Image(PNG_Image image);
 
 Chunk loadChunk(FILE * in);
-void freeChunk(Chunk chunk);
 
 void writeSignature(BYTE * signature, FILE * out);
 void writeHeader(ImageHeader header, FILE * out);
 
-DataList loadColorData(DataList data, ImageHeader header);
+std::vector<Color> loadColorData(std::vector<BYTE> data, ImageHeader header);
 
-Transparency * loadTransparency(ImageHeader header, DataStream stream);
+Transparency * loadTransparency(const ImageHeader & header, DataStream & stream);
 
 void writeColorData(PNG_Image image, FILE * out);
 
 
-void writeTextDataList(DataList textDataList, FILE * out);
+void writeTextDataList(std::vector<TextualData> textDataList, FILE * out);
 
 
-unsigned int crc32(DataList data);
+unsigned int crc32(std::vector<BYTE> data);
+
 
 void validateCRC(Chunk chunk);
 
 int isCriticalChunk(Chunk chunk);
-int isChunkType(Chunk chunk, char * chunkType);
-
+int isChunkType(Chunk chunk, const char * chunkType);
 
 INT32 getMaximumChannelValue(ImageHeader header);
 
-DataList unfilter(DataList data, ImageHeader header);
+std::vector<BYTE> unfilterImage(std::vector<BYTE> data, ImageHeader header);
 
-DataList unfilterInterlacedImage(DataList data, ImageHeader header);
+std::vector<Color> splitUpColorData(std::vector<BYTE> data, ImageHeader header);
 
-DataList splitUpColorData(DataList data, ImageHeader header);
 
-DataList splitUpColorDataSubImage(
-    DataStream * colorStream,
-    ImageHeader header,
+std::vector<Color> splitUpColorDataSubImage(
+    DataStream & colorStream,
+    BitReader & inBits,
+    const ImageHeader & header,
     size_t width,
-    size_t height
+    size_t height,
+    size_t dataCount
     );
-
-DataList splitUpColorDataInterlaced(DataList data, ImageHeader header);
-
 
 ColorInfo getColorInfo(ImageHeader header);
 
-BYTE compute_a(size_t i, size_t bpp, DataList unfiltered);
+BYTE compute_a(size_t i, size_t bpp, const std::vector<BYTE> & unfiltered);
 
-BYTE compute_b(size_t scanline, size_t width, DataList unfiltered);
+BYTE compute_b(size_t scanline, size_t width, const std::vector<BYTE> & unfiltered);
 
 BYTE compute_c(
     size_t i,
     size_t bpp,
     size_t scanline,
     size_t width,
-    DataList unfiltered);
+    const std::vector<BYTE> & unfiltered);
 
 unsigned int paethPredictor(unsigned int a, unsigned int b, unsigned int c);
 
-unsigned long readNextChannel(DataStream * stream, ImageHeader header);
+unsigned long readNextChannel(
+    DataStream & stream,
+    BitReader & inBits,
+    const ImageHeader & header);
+std::vector<Color> uninterlace(const std::vector<Color> & data, const ImageHeader & header);
 
-void addColorToDataList(DataList * list, Color color);
-
-DataList uninterlace(DataList data, ImageHeader header);
-
-DataList unfilterSubImage(
-    DataStream * stream,
+std::vector<BYTE> unfilterSubImage(
+    DataStream & stream,
     size_t imageWidth,
     size_t height,
-    ColorInfo info);
+    const ColorInfo & info);
 
-void * copyColor(void * vptr);
+ImageHeader loadImageHeader(FILE * in);
 
 #endif /* _PNG_H_ */

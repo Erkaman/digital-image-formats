@@ -2,8 +2,9 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
+int verbose;
 
-void assertFile(FILE * fp,char * errorStr)
+void assertFile(FILE * fp,const char * errorStr)
 {
     if(fp == NULL){
         perror(errorStr);

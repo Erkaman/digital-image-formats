@@ -1,15 +1,16 @@
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
+#include <vector>
 #include "zlib.h"
-#include "../data_list.h"
 #include "../io.h"
+
+using std::vector;
 
 void printHelp(void);
 
 void ZLIB_DecompressFile(FILE * in, FILE * out);
 
-DataList getCompressedData(FILE * in);
-
+vector<BYTE> getCompressedData(FILE * in);
 
 int main(int argc, char *argv[])
 {
@@ -25,7 +26,6 @@ int main(int argc, char *argv[])
         return 0;
     }
 
-    /* do the command line parsing */
     ++argv;
     while(1){
 
@@ -72,11 +72,11 @@ void printHelp(void)
 
 void ZLIB_DecompressFile(FILE * in, FILE * out)
 {
-    DataList decompressed, compressed;
+    vector<BYTE> decompressed, compressed;
 
     compressed = getCompressedData(in);
 
-    verbosePrint("Read in compressed data, size: %ld\n",compressed.count);
+    verbosePrint("Read in compressed data, size: %ld\n",compressed.size());
 /*    printData(compressed); */
 
     decompressed = ZLIB_Decompress(compressed);
@@ -84,38 +84,22 @@ void ZLIB_DecompressFile(FILE * in, FILE * out)
     decompressed = decompressed;
     out = out;
 
-    writeData(decompressed,out);
-
-    freeDataList(decompressed, 1);
-    freeDataList(compressed, 1);
-
-    /* print compressed data. */
+    for(size_t i = 0; i < decompressed.size(); ++i)
+	putc(decompressed[i], out);
 }
 
-DataList getCompressedData(FILE * in)
+vector<BYTE> getCompressedData(FILE * in)
 {
-    fpos_t begDataPointer;
-    size_t begData;
-    size_t endData;
-    DataList data;
-    size_t dataSize;
+    vector<BYTE> data;
+    int ch;
 
-    begData = ftell(in);
+    while(true){
+	ch = getc(in);
+	if(ch == EOF)
+	    break;
 
-    /* Save the start position of the data. */
-    if(fgetpos(in, &begDataPointer) != 0){
-        printError("Couldn't save beginning of data pointer in getCompressedData().\n");
-        exit(1);
+	data.push_back(ch);
     }
-
-    fseek(in,0,SEEK_END);
-    endData = ftell(in);
-
-    fsetpos(in,&begDataPointer);
-
-    dataSize = endData - begData;
-
-    data = readBytes(dataSize, in);
 
     return data;
 }

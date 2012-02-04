@@ -1,12 +1,12 @@
-CC = gcc
+CC = g++
 
-commonobjects = ../data_list.o ../data_stream.o ../io.o ../bitwise.o
+commonobjects =  ../data_stream.o ../io.o ../bitwise.o\
+../bits.o ../stlutil.o
 
-WARNINGS = -Wall -Wextra -Werror -Wdeclaration-after-statement \
+WARNINGS = -Wall -Wextra -Werror \
 -Wshadow -Wstrict-overflow=5 -Wpointer-arith -Wcast-qual \
--Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations \
+ -Wmissing-declarations \
 -Winit-self -Wcast-align -Wformat=2 -Wmissing-include-dirs \
 -Wunused-parameter
 
-CFLAGS = $(WARNINGS) -c -pedantic -ansi -g
-
+CXXFLAGS = $(WARNINGS) -c -pedantic -ansi -g

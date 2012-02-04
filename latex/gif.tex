@@ -367,6 +367,14 @@ are $2$, $6$, $10$, $14$ and $18$. $n_4 = 10$, so the rows of the
 final pass $4$ are $1$, $3$, $5$, $7$, $9$, $11$, $13$, $15$, $17$,
 $19$.
 
+But is it guaranteed that this interlacing method will not miss a single
+row? Yes it is; this follows from the fact that
+
+\begin{equation*}
+  \frac{1}{8} + \frac{1}{8} + \frac{1}{4} + \frac{1}{2} = \frac{4}{4}
+  = 1
+\end{equation*}
+
 In algorithm \ref{alg:gif-decompression} it is shown how to
 uninterlace the interlaced decompressed image data. Since this
 algorithm is pretty much self-explanatory, I will not include an in

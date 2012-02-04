@@ -4,17 +4,15 @@
 #include <math.h>
 
 #include "gif.h"
+#include "../lzw/lzwutil.h"
 
 #include <stdarg.h>
 
+using std::vector;
+using std::map;
+
 /* Implement command line parsing and -v flag. Clean up debug messages and verbose
    messages. */
-
-int subBlockIndex;
-
-GIFDataSubBlocks imageDataSubBlocks;
-
-tableEntry * compressionTable;
 
 /* Used by all images that do not have a local color table */
 GIFColor * globalColorTable;
@@ -24,15 +22,8 @@ GIFColor * localColorTable;
 
 unsigned long currentColorIndex;
 
-int stringCodeStack[40000];
-int stackp;
-
-int remainingBits;
-
 long ClearCode;
 long EndCode;
-
-unsigned int * colorIndexTable;
 
 int globalColorTableSize;
 
@@ -195,22 +186,21 @@ void loadImageData(FILE * in,FILE * out)
                 printColorTable(localColorTable,imageDescriptor.localColorTableSize,out);
             }
 
+            unsigned int * colorIndexTable;
+
             /* perform the decompression of the image data. */
             /* allocate index table */
-            colorIndexTable = (unsigned int *)malloc(sizeof(unsigned int) *
-                                                     imageDescriptor.imageWidth
-                                                     * imageDescriptor.imageHeight);
 
             verbosePrint("Loading Image Color Data\n");
 
-            loadImageColorData(in);
+            colorIndexTable = loadImageColorData(in);
 
             if(imageDescriptor.interlaceFlag)
-                uninterlaceColorData();
+                colorIndexTable = uninterlaceColorData(colorIndexTable);
 
             fprintf(out,"* Image Color Data:\n");
 
-            printImageColorData(out);
+            printImageColorData(colorIndexTable, out);
 
             if(imageDescriptor.localColorTableFlag)
                 free(localColorTable);
@@ -267,74 +257,90 @@ void loadExtension(FILE * in,FILE * out)
     }
 }
 
-void loadImageColorData(FILE * in)
+unsigned int * loadImageColorData(FILE * in)
 {
-    long codeSize;
-    long oldCode;
-    long newCode;
-    long character;
-    long nextCode;
-    int InitialCodeSize;
+    code oldCode;
+    code newCode;
+    code nextCode;
 
-    stackp = 0;
+    codeStr str;
+    code character;
 
-    /* for the inputCode function */
+    code InitialCodeSize;
+    code codeSize;
 
-    /* Reset these values for the current sub-image. */
-    remainingBits = 8;
+    vector<codeStr> stringTable;
+    map<codeStr, vector<code> >  cache;
+
+    GIFDataSubBlocks imageDataSubBlocks;
+
+    unsigned int * colorIndexTable;
+
+    colorIndexTable = (unsigned int *)malloc(sizeof(unsigned int) *
+                                             imageDescriptor.imageWidth
+                                             * imageDescriptor.imageHeight);
+
     currentColorIndex = 0;
-    subBlockIndex = 0;
-
-    /* do this at the beginning of the program? */
-    compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
 
     InitialCodeSize = readByte(in) + 1;
     codeSize = InitialCodeSize;
 
     imageDataSubBlocks = readDataSubBlocks(in);
 
-    /* Skip the clear code. */
-    inputCode(codeSize);
-    nextCode = resetCompressionTable();
+    BitReader inbits(imageDataSubBlocks.data,LSBF);
 
-    oldCode = inputCode(codeSize);
+    /* Skip the clear code. */
+    inbits.readBits(codeSize);
+
+    nextCode = resetCompressionTable(stringTable);
+
+    oldCode = inbits.readBits(codeSize);
 
     colorIndexTable[currentColorIndex++] = oldCode;
 
-    /* needed? */
     character = oldCode;
-    newCode = inputCode(codeSize);
+    newCode = inbits.readBits(codeSize);
 
+    /* Due to a bug, the size of the image size array is surpused
+     and the reading of the image terminates delayed. */ 
     while(newCode != EndCode){
-
         /* handle clear codes. */
         if(newCode == ClearCode){
-
-            free(compressionTable);
-            compressionTable = (tableEntry *)malloc(sizeof(tableEntry) * pow(2,12));
-
-            nextCode = resetCompressionTable();
+            /* free string table*/
+            stringTable.clear();
+            nextCode = resetCompressionTable(stringTable);
             codeSize = InitialCodeSize;
-            oldCode = inputCode(codeSize);
+            oldCode = inbits.readBits(codeSize);
             colorIndexTable[currentColorIndex++] = oldCode;
 
-            newCode = inputCode(codeSize);
+            newCode = inbits.readBits(codeSize);
         }
 
         /*if it is not in the translation table. */
         if(!(newCode < nextCode)){
-            stringCodeStack[stackp++] = character;
-            translateCode(oldCode);
-        } else
-            translateCode(newCode);
+            str.first = oldCode;
+            str.second = character;
+        } else{
+            str = stringTable[newCode];
+        }
 
-        character = printString();
+        vector<code> outStr = outputCodes(str,stringTable, cache);
+        character = outStr[0];
+
+        for(size_t i = 0; i < outStr.size(); ++i){
+            colorIndexTable[currentColorIndex++] =
+		outStr[i];
+	}
 
         /* add it the table */
         if(nextCode <= (pow(2,12) - 1)){
 
-            compressionTable[nextCode].stringCode = oldCode;
-            compressionTable[nextCode].characterCode = character;
+            codeStr newEntry;
+
+            newEntry.first = oldCode;
+            newEntry.second = character;
+
+            stringTable.push_back(newEntry);
 
             if(nextCode == (pow(2,codeSize) - 1) &&
                codeSize != 12 ){
@@ -344,94 +350,19 @@ void loadImageColorData(FILE * in)
             nextCode++;
         }
         oldCode = newCode;
-        newCode = inputCode(codeSize);
+        newCode = inbits.readBits(codeSize);
     }
 
     free(imageDataSubBlocks.data);
     imageDataSubBlocks.data = NULL;
 
-    free(compressionTable);
-    compressionTable = NULL;
+    return colorIndexTable;
 }
 
-void translateCode(unsigned int newCode)
+code resetCompressionTable(vector<codeStr> & stringTable)
 {
-    tableEntry entry;
-
-    entry = compressionTable[newCode];
-
-    while(1){
-        stringCodeStack[stackp++] = entry.characterCode;
-
-        if(entry.stringCode == -1)
-            break;
-        else
-            entry = compressionTable[entry.stringCode];
-    }
-}
-
-/* TODO: rename to outputString */
-int printString(void)
-{
-    int returnValue;
-
-    returnValue = stringCodeStack[stackp - 1];
-
-    while(stackp > 0){
-        colorIndexTable[currentColorIndex++] = stringCodeStack[--stackp];
-    }
-
-    return returnValue;
-}
-
-unsigned int inputCode(int codeSize)
-{
-    unsigned int returnValue;
-    int shift;
-
-    returnValue = 0;
-    shift = 0;
-
-    while(codeSize > 0){
-        if(remainingBits < codeSize){
-
-            /* the data in the current byte are not enough bits of data. Reads in what's
-               remaining and read a new byte. */
-
-            /* read in what's left of the current byte */
-            returnValue |=
-                (firstNBits(imageDataSubBlocks.data[subBlockIndex],remainingBits) << shift);
-            /* increase the shift */
-            shift += remainingBits;
-            codeSize -= remainingBits;
-            subBlockIndex++;
-            remainingBits = 8;
-
-        }else{
-            /* if remainingBits > codeSize */
-            /* Enough bits of data can be read from the current byte.
-               Read in enough data and bitwise shift the data to the right to
-               get rid of the bytes read in. */
-
-            returnValue |=
-                (firstNBits(imageDataSubBlocks.data[subBlockIndex],codeSize) << shift);
-
-            imageDataSubBlocks.data[subBlockIndex] >>= codeSize;
-            remainingBits -= codeSize;
-
-            /* enough bits of data has been read in. This line thus causes the loop to terminate
-               and causes the functions to return. */
-            codeSize = 0;
-        }
-    }
-
-    return returnValue;
-}
-
-unsigned int resetCompressionTable(void)
-{
-    unsigned int colorTableSize;
-    unsigned int nextCode;
+    code colorTableSize;
+    code nextCode;
 
     if(imageDescriptor.localColorTableFlag)
         colorTableSize = pow(2,imageDescriptor.localColorTableSize + 1);
@@ -439,9 +370,19 @@ unsigned int resetCompressionTable(void)
         colorTableSize = pow(2,globalColorTableSize + 1);
 
     for(nextCode = 0; nextCode < colorTableSize; ++nextCode){
-        compressionTable[nextCode].characterCode = nextCode;
-        compressionTable[nextCode].stringCode = -1;
+        codeStr cs;
+        cs.first = nextCode;
+        cs.second = emptyCh;
+        stringTable.push_back(cs);
     }
+
+    codeStr emptyCode;
+
+    emptyCode.first = emptyCh;
+    emptyCode.second = emptyCh;
+
+    stringTable.push_back(emptyCode);
+    stringTable.push_back(emptyCode);
 
     ClearCode = nextCode++;
     EndCode = nextCode++;
@@ -510,7 +451,7 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
 }
 
 /* pass the table used? */
-void printImageColorData(FILE * out)
+void printImageColorData(unsigned int * colorIndexTable,FILE * out)
 {
     UNSIGNED width;
     UNSIGNED height;
@@ -889,7 +830,7 @@ UNSIGNED readUnsigned(FILE * fp)
     return s;
 }
 
-void uninterlaceColorData(void)
+unsigned int * uninterlaceColorData(unsigned int * colorIndexTable)
 {
     unsigned int * transfer;
     unsigned int i;
@@ -923,5 +864,7 @@ void uninterlaceColorData(void)
     }
 
     free(colorIndexTable);
-    colorIndexTable = transfer;
+    return transfer;
 }
+
+

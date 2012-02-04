@@ -90,6 +90,6 @@
 #define UNKNOWN_UNIT 0
 #define METRE_UNIT 1
 
-#define PNG_ENDIAN ENDIAN_BIG
+#define PNG_ENDIAN BigEndian
 
 #endif /* _PNG_DEFS_H_ */
