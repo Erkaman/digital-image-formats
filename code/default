@@ -1,7 +1,7 @@
 CC = g++
 
-commonobjects =  ../data_stream.o ../io.o ../bitwise.o\
-../bits.o ../stlutil.o
+commonobjects =  ../data_stream.o ../io.o\
+../bits.o ../stlutil.o ../frequency_table.o
 
 WARNINGS = -Wall -Wextra -Werror \
 -Wshadow -Wstrict-overflow=5 -Wpointer-arith -Wcast-qual \
@@ -9,4 +9,4 @@ WARNINGS = -Wall -Wextra -Werror \
 -Winit-self -Wcast-align -Wformat=2 -Wmissing-include-dirs \
 -Wunused-parameter
 
-CXXFLAGS = $(WARNINGS) -c -pedantic -ansi -g
+CXXFLAGS = $(WARNINGS) -c -g

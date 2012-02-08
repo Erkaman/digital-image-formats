@@ -1,12 +1,214 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <math.h>
-
-#include "gif.h"
+#include "../io.h"
+#include "../bits.h"
 #include "../lzw/lzwutil.h"
 
-#include <stdarg.h>
+#include <cstring>
+#include <cstdlib>
+#include <cmath>
+#include <vector>
+
+using std::vector;
+
+/* The GIF standard refers to an unsigned 16-bit number as an
+ * "unsigned" for some reason. */
+#define UNSIGNED unsigned int
+
+#define FLAG int
+
+/* the color depth of the colors in a GIF is always 24 */
+#define COLOR_DEPTH 24
+#define TRAILER 0x3b
+#define EXTENSION_INTRODUCER 0x21
+#define BLOCK_TERMINATOR 0x00
+
+#define GRAPHIC_CONTROL_LABEL 0xf9
+#define COMMENT_LABEL 0xfe
+#define APPLICATION_EXTENSION_LABEL 0xff
+
+#define PLAIN_TEXT_LABEL 0x01
+#define IMAGE_SEPARATOR 0x2c
+
+typedef struct{
+    char signature[4];
+    char version[4];
+} GIFHeader;
+
+typedef vector<BYTE>  GIFDataSubBlocks;
+
+typedef struct{
+    UNSIGNED logicalScreenWidth;
+    UNSIGNED logicalScreenHeight;
+
+    /* packed fields */
+    FLAG globalColorTableFlag;
+    BYTE colorResolution;
+    FLAG sortFlag;
+    BYTE globalColorTableSize;
+
+    BYTE backgroundColorIndex;
+    BYTE pixelAspectRatio;
+
+} GIFLogicalScreenDescriptor;
+
+typedef struct{
+    BYTE imageSeparator;
+
+    UNSIGNED imageLeftPosition;
+    UNSIGNED imageTopPosition;
+
+    UNSIGNED imageWidth;
+    UNSIGNED imageHeight;
+
+    /* packed fields */
+    FLAG localColorTableFlag;
+    FLAG interlaceFlag;
+    FLAG sortFlag;
+    BYTE reserved;
+    BYTE localColorTableSize;
+
+} GIFImageDescriptor;
+
+typedef struct{
+    BYTE extensionIntroducer;
+    BYTE graphicControlLabel;
+    BYTE blockSize;
+
+    /* packed fields */
+    BYTE reserved;
+    BYTE disposalMethod;
+    FLAG userInputFlag;
+    FLAG transparencyFlag;
+
+    UNSIGNED delayTime;
+    BYTE transparencyIndex;
+    BYTE blockTerminator;
+
+} GIFGraphicControl;
+
+typedef struct{
+    BYTE extensionIntroducer;
+    BYTE extensionLabel;
+
+    BYTE blockSize;
+
+    char applicationIdentifier[9];
+
+    char applicationAuthenticationCode[4];
+
+    GIFDataSubBlocks applicationData;
+
+    BYTE blockTerminator;
+
+} GIFApplicationExtension;
+
+typedef struct{
+    BYTE extensionIntroducer;
+    BYTE commentLabel;
+
+    char * commentData;
+
+    BYTE blockTerminator;
+
+} GIFCommentExtension;
+
+typedef struct{
+
+    BYTE extensionIntroducer;
+    BYTE plainTextLabel;
+
+    BYTE blockSize;
+
+    UNSIGNED textGridLeftPosition;
+    UNSIGNED textGridTopPosition;
+
+    UNSIGNED textGridWidth;
+    UNSIGNED textGridHeight;
+
+    BYTE characterCellWidth;
+    BYTE characterCellHeight;
+
+    BYTE textForegroundColorIndex;
+    BYTE textBackgroundColorIndex;
+
+    char * plainTextData;
+
+    BYTE blockTerminator;
+
+} GIFPlainTextExtension;
+
+
+typedef struct {
+    long stringCode;
+    long characterCode;
+
+} tableEntry;
+
+typedef struct {
+    BYTE r;
+    BYTE g;
+    BYTE b;
+} GIFColor;
+
+void printHelp(void);
+
+void loadGIF(FILE * in, FILE * out);
+
+void loadImageData(FILE * in,FILE * out);
+
+void loadExtension(FILE * in,FILE * out);
+
+GIFHeader loadHeader(FILE * in);
+void printHeader(GIFHeader header,FILE * out);
+
+GIFLogicalScreenDescriptor loadLogicalScreenDescriptor(FILE * in);
+void printLogicalScreenDescriptor(
+    GIFLogicalScreenDescriptor logicalScreenDescriptor,
+    FILE * out);
+
+GIFColor * loadColorTable(int colorTableSize,FILE * in);
+void printColorTable(GIFColor * colorTable,int colorTableSize,FILE * out);
+
+void loadImageDescriptor(FILE * in);
+void printImageDescriptor(FILE * out);
+
+GIFGraphicControl loadGraphicControl(FILE * in);
+void printGraphicControl(GIFGraphicControl graphicControl,FILE * out);
+
+unsigned int * loadImageColorData(FILE * in);
+
+void printImageColorData(unsigned int * colorIndexTable,FILE * out);
+
+
+GIFCommentExtension loadCommentExtension(FILE * in);
+void printCommentExtension(GIFCommentExtension comment,FILE * out);
+
+GIFPlainTextExtension loadPlainTextExtension(FILE * in);
+void printPlainTextExtension(GIFPlainTextExtension plainText,FILE * out);
+
+
+void printTableColor(int index,GIFColor * colorTable,FILE * out);
+void printColor(int index,GIFColor * colorTable,FILE * out);
+
+GIFApplicationExtension loadApplicationExtension(FILE * in);
+void printApplicationExtension(
+    GIFApplicationExtension applicationExtension,
+    FILE * out);
+
+GIFDataSubBlocks readDataSubBlocks(FILE * in);
+
+void printDataSubBlocks(GIFDataSubBlocks subBlocks, FILE * out);
+
+void printDisposalMethod(GIFGraphicControl graphicControl,FILE * out);
+
+char * subBlocksDataToString(GIFDataSubBlocks subBlocks);
+
+UNSIGNED readUnsigned(FILE * fp);
+
+unsigned int * uninterlaceColorData(unsigned int * colorIndexTable);
+
+code resetCompressionTable(std::vector<codeStr> & stringTable);
+
+
 
 using std::vector;
 using std::map;
@@ -127,9 +329,9 @@ GIFColor * loadColorTable(int colorTableSize,FILE * in)
     colorTable = (GIFColor *) malloc(sizeof(GIFColor) * realGlobalColorTableSize);
 
     for(i = 0; i <  realGlobalColorTableSize; ++i){
-        colorTable[i].r = readByte(in);
-        colorTable[i].g = readByte(in);
-        colorTable[i].b = readByte(in);
+        colorTable[i].r = getc(in);
+        colorTable[i].g = getc(in);
+        colorTable[i].b = getc(in);
     }
 
     return colorTable;
@@ -158,7 +360,7 @@ void loadImageData(FILE * in,FILE * out)
     /* also called separator for image descriptors */
     BYTE introducer;
 
-    introducer = readByte(in);
+    introducer = getc(in);
 
     while(introducer != TRAILER){
 
@@ -213,7 +415,7 @@ void loadImageData(FILE * in,FILE * out)
             break;
         }
 
-        introducer = readByte(in);
+        introducer = getc(in);
     }
 }
 
@@ -226,7 +428,7 @@ void loadExtension(FILE * in,FILE * out)
     GIFCommentExtension comment;
     GIFPlainTextExtension plainText;
 
-    extensionLabel = readByte(in);
+    extensionLabel = getc(in);
 
     switch(extensionLabel){
     case GRAPHIC_CONTROL_LABEL:
@@ -282,12 +484,12 @@ unsigned int * loadImageColorData(FILE * in)
 
     currentColorIndex = 0;
 
-    InitialCodeSize = readByte(in) + 1;
+    InitialCodeSize = getc(in) + 1;
     codeSize = InitialCodeSize;
 
     imageDataSubBlocks = readDataSubBlocks(in);
 
-    BitReader inbits(imageDataSubBlocks.data,LSBF);
+    BitIterReader inbits(imageDataSubBlocks.begin(),LSBF);
 
     /* Skip the clear code. */
     inbits.readBits(codeSize);
@@ -302,7 +504,7 @@ unsigned int * loadImageColorData(FILE * in)
     newCode = inbits.readBits(codeSize);
 
     /* Due to a bug, the size of the image size array is surpused
-     and the reading of the image terminates delayed. */ 
+     and the reading of the image terminates delayed. */
     while(newCode != EndCode){
         /* handle clear codes. */
         if(newCode == ClearCode){
@@ -353,9 +555,6 @@ unsigned int * loadImageColorData(FILE * in)
         newCode = inbits.readBits(codeSize);
     }
 
-    free(imageDataSubBlocks.data);
-    imageDataSubBlocks.data = NULL;
-
     return colorIndexTable;
 }
 
@@ -389,22 +588,18 @@ code resetCompressionTable(vector<codeStr> & stringTable)
     return nextCode;
 }
 
-void printDataSubBlocks(FILE * out,GIFDataSubBlocks subBlocks)
-{
-    printBytes(out,subBlocks.size,subBlocks.data);
-}
-
-void printBytes(FILE * out,size_t size,BYTE * bytes)
+void printDataSubBlocks(GIFDataSubBlocks subBlocks, FILE * out)
 {
     size_t i;
 
-    for(i = 0; i < size; ++i)
-        if(i < (size - 1))
-            fprintf(out,"%d,",bytes[i]);
+    for(i = 0; i < subBlocks.size(); ++i)
+        if(i < (subBlocks.size() - 1))
+            fprintf(out,"%d,",subBlocks[i]);
         else
-            fprintf(out,"%d",bytes[i]);
+            fprintf(out,"%d",subBlocks[i]);
 
     fprintf(out,"\n");
+
 }
 
 /* TODO: handle sub-blocks larger than one */
@@ -412,39 +607,14 @@ GIFDataSubBlocks readDataSubBlocks(FILE * in)
 {
     GIFDataSubBlocks subBlocks;
     BYTE currentBlocksize;
-    fpos_t startPos;
-    unsigned long i;
     BYTE r;
 
-    subBlocks.size = 0;
-
-    fgetpos(in,&startPos);
-
-    /* Calculate the length of the data*/
-    currentBlocksize = readByte(in);
-
-    do{
-        subBlocks.size += currentBlocksize;
-        fseek(in,currentBlocksize,SEEK_CUR);
-        currentBlocksize = readByte(in);
-
-    }while(currentBlocksize != 0);
-
-    /* Allocate enough memory to hold all the data */
-    subBlocks.data = (BYTE *) malloc(sizeof(BYTE) * subBlocks.size);
-
-    fsetpos(in,&startPos);
-
-    i = 0;
-
     /* read the data */
-    currentBlocksize = readByte(in);
+    currentBlocksize = getc(in);
     do{
-        for(r = currentBlocksize; r > 0; r--){
-            subBlocks.data[i++] = readByte(in);
-        }
-
-        currentBlocksize = readByte(in);
+        for(r = currentBlocksize; r > 0; r--)
+	    subBlocks.push_back(getc(in));
+        currentBlocksize = getc(in);
     }while(currentBlocksize != 0);
 
     return subBlocks;
@@ -499,7 +669,7 @@ GIFApplicationExtension loadApplicationExtension(FILE * in)
     applicationExtension.extensionIntroducer = EXTENSION_INTRODUCER;
     applicationExtension.extensionLabel = APPLICATION_EXTENSION_LABEL;
 
-    applicationExtension.blockSize = readByte(in);
+    applicationExtension.blockSize = getc(in);
 
     readStr(in,8,applicationExtension.applicationIdentifier);
     applicationExtension.applicationIdentifier[8] = '\0';
@@ -509,7 +679,7 @@ GIFApplicationExtension loadApplicationExtension(FILE * in)
 
     applicationExtension.applicationData = readDataSubBlocks(in);
 
-    applicationExtension.blockTerminator = readByte(in);
+    applicationExtension.blockTerminator = getc(in);
 
     return applicationExtension;
 }
@@ -534,14 +704,9 @@ void printApplicationExtension(
 
     fprintf(out,"Application Data:\n");
 
-    printDataSubBlocks(
-        out,
-        applicationExtension.applicationData);
+    printDataSubBlocks(applicationExtension.applicationData, out);
 
     fprintf(out,"Block Terminator:%d\n",applicationExtension.blockTerminator);
-
-    free(applicationExtension.applicationData.data);
-    applicationExtension.applicationData.data = NULL;
 }
 
 void printHeader(GIFHeader header,FILE * out)
@@ -589,7 +754,7 @@ void loadImageDescriptor(FILE * in)
     imageDescriptor.imageWidth = readUnsigned(in);
     imageDescriptor.imageHeight = readUnsigned(in);
 
-    packedFields = readByte(in);
+    packedFields = getc(in);
 
     imageDescriptor.localColorTableFlag = getbits(packedFields,7,7);
     imageDescriptor.interlaceFlag = getbits(packedFields,6,6);
@@ -624,9 +789,9 @@ GIFGraphicControl loadGraphicControl(FILE * in)
     graphicControl.extensionIntroducer = EXTENSION_INTRODUCER;
     graphicControl.graphicControlLabel = GRAPHIC_CONTROL_LABEL;
 
-    graphicControl.blockSize = readByte(in);
+    graphicControl.blockSize = getc(in);
 
-    packedFields = readByte(in);
+    packedFields = getc(in);
 
     graphicControl.reserved = getbits(packedFields,5,7);
     graphicControl.disposalMethod = getbits(packedFields,2,4);
@@ -634,8 +799,8 @@ GIFGraphicControl loadGraphicControl(FILE * in)
     graphicControl.transparencyFlag = getbits(packedFields,0,0);
 
     graphicControl.delayTime = readUnsigned(in);
-    graphicControl.transparencyIndex = readByte(in);
-    graphicControl.blockTerminator = readByte(in);
+    graphicControl.transparencyIndex = getc(in);
+    graphicControl.blockTerminator = getc(in);
 
     return graphicControl;
 }
@@ -692,14 +857,14 @@ GIFLogicalScreenDescriptor loadLogicalScreenDescriptor(FILE * in)
     logicalScreenDescriptor.logicalScreenWidth = readUnsigned(in);
     logicalScreenDescriptor.logicalScreenHeight = readUnsigned(in);
 
-    packedFields = readByte(in);
+    packedFields = getc(in);
     logicalScreenDescriptor.globalColorTableFlag = getbits(packedFields,7,7);
     logicalScreenDescriptor.colorResolution = getbits(packedFields,4,6);
     logicalScreenDescriptor.sortFlag = getbits(packedFields,3,3);
     logicalScreenDescriptor.globalColorTableSize = getbits(packedFields,0,2);
 
-    logicalScreenDescriptor.backgroundColorIndex = readByte(in);
-    logicalScreenDescriptor.pixelAspectRatio = readByte(in);
+    logicalScreenDescriptor.backgroundColorIndex = getc(in);
+    logicalScreenDescriptor.pixelAspectRatio = getc(in);
 
     return logicalScreenDescriptor;
 }
@@ -728,8 +893,6 @@ GIFCommentExtension loadCommentExtension(FILE * in)
     commentData = readDataSubBlocks(in);
     comment.commentData = subBlocksDataToString(commentData);
 
-    free(commentData.data);
-
     comment.blockTerminator = BLOCK_TERMINATOR;
 
     return comment;
@@ -754,10 +917,10 @@ char * subBlocksDataToString(GIFDataSubBlocks subBlocks)
     char * str;
     unsigned int i;
 
-    str = (char *)malloc(sizeof(char) * (subBlocks.size + 1));
+    str = (char *)malloc(sizeof(char) * (subBlocks.size() + 1));
 
-    for(i = 0; i < subBlocks.size; ++i)
-        str[i] = (char)subBlocks.data[i];
+    for(i = 0; i < subBlocks.size(); ++i)
+        str[i] = (char)subBlocks[i];
 
     str[i] = '\0';
     return str;
@@ -771,7 +934,7 @@ GIFPlainTextExtension loadPlainTextExtension(FILE * in)
     plainText.extensionIntroducer = EXTENSION_INTRODUCER;
     plainText.plainTextLabel = PLAIN_TEXT_LABEL;
 
-    plainText.blockSize = readByte(in);
+    plainText.blockSize = getc(in);
 
     plainText.textGridLeftPosition = readUnsigned(in);
     plainText.textGridTopPosition = readUnsigned(in);
@@ -779,16 +942,14 @@ GIFPlainTextExtension loadPlainTextExtension(FILE * in)
     plainText.textGridWidth = readUnsigned(in);
     plainText.textGridHeight = readUnsigned(in);
 
-    plainText.characterCellWidth = readByte(in);
-    plainText.characterCellHeight = readByte(in);
+    plainText.characterCellWidth = getc(in);
+    plainText.characterCellHeight = getc(in);
 
-    plainText.textForegroundColorIndex = readByte(in);
-    plainText.textBackgroundColorIndex = readByte(in);
+    plainText.textForegroundColorIndex = getc(in);
+    plainText.textBackgroundColorIndex = getc(in);
 
     plainTextData = readDataSubBlocks(in);
     plainText.plainTextData = subBlocksDataToString(plainTextData);
-
-    free(plainTextData.data);
 
     plainText.blockTerminator = BLOCK_TERMINATOR;
 

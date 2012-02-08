@@ -19,10 +19,10 @@ then
 CMD="$CMD $2"
 fi
 
-eval $CMD ../testfiles/kennedy.xls  kennedy.cmp
-eval $CMD -d kennedy.cmp kennedy.unc
+eval $CMD ../testfiles/alice29.txt  alice.cmp
+eval $CMD -d alice.cmp alice.unc
 
-if diff "../testfiles/kennedy.xls" "kennedy.unc" >/dev/null ; then
+if diff "../testfiles/alice29.txt" "alice.unc" >/dev/null ; then
   echo "Resulting files equal!"
 else
   echo "Resulting files not equal!!!"

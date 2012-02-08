@@ -1,4 +1,141 @@
-#include "main.h"
+#include "../io.h"
+#include "../bits.h"
+
+#include <cstdlib>
+#include <cstring>
+#include <cstdio>
+
+#define SHORT unsigned int
+#define LONG unsigned long
+
+/* A short is an unsigned 16-bit integer in the TGA specification. */
+SHORT readShort(FILE * fp);
+
+/* A short is an unsigned 16-bit integer in the TGA standard. */
+LONG readLong(FILE * fp);
+
+typedef struct
+{
+    BYTE IDLength;
+    BYTE colorMapType;
+    BYTE imageType;
+    SHORT colorMapStart;
+    SHORT colorMapLength;
+    BYTE colorMapDepth;
+    SHORT xOrigin;
+    SHORT yOrigin;
+    SHORT width;
+    SHORT height;
+    BYTE pixelDepth;
+    BYTE imageDescriptor;
+} TGA_Header;
+
+typedef struct
+{
+    SHORT size;
+    char authorName[41];
+    char authorComment[324];
+    SHORT stampMonth;
+    SHORT stampDay;
+    SHORT stampYear;
+    SHORT stampHour;
+    SHORT stampMinute;
+    SHORT stampSecond;
+    char jobName[41];
+    SHORT jobHour;
+    SHORT jobMinute;
+    SHORT jobSecond;
+    char softwareId[41];
+    SHORT versionNumber;
+    char versionLetter;
+    LONG keyColor;
+    SHORT pixelRatioNumerator;
+    SHORT pixelRatioDenominator;
+    SHORT gammaNumerator;
+    SHORT gammaDenominator;
+    LONG colorOffset;
+    LONG stampOffset;
+    LONG scanOffset;
+    BYTE attributesType;
+} TGA_ExtensionArea;
+
+typedef struct{
+
+    unsigned long * data;
+
+    SHORT width;
+    SHORT height;
+
+} TGA_ImageData;
+
+typedef struct{
+    TGA_Header header;
+
+    char imageID[255];
+
+    unsigned long * colorMap;
+
+    TGA_ImageData colorData;
+
+    TGA_ExtensionArea * extensionArea;
+
+    TGA_ImageData postageStamp;
+
+} TGA_Image;
+
+
+enum ColorMapType{
+    NO_COLOR_MAP = 0,
+    COLOR_MAPPED = 1
+};
+
+enum ImageType{
+    NO_IMAGE_DATA = 0,
+    UNCOMPRESSED_COLOR_MAPPED = 1,
+    UNCOMPRESSED_TRUE_COLOR = 2,
+    UNCOMPRESSED_BLACK_AND_WHITE = 3,
+    RUN_LENGTH_ENCODED_COLOR_MAPPED = 9,
+    RUN_LENGTH_ENCODED_TRUE_COLOR = 10,
+    RUN_LENGTH_ENCODED_BLACK_AND_WHITE = 11
+};
+
+void freeTGA_Image(TGA_Image image);
+TGA_Image newTGA_Image(void);
+
+TGA_Image loadTGA_Image(FILE * in);
+void writeTGA_Image(TGA_Image image, FILE * out);
+
+TGA_Header loadTGA_Header(FILE * in);
+void writeTGA_Header(TGA_Header header, FILE * out);
+
+unsigned long * loadColorMap(TGA_Header header, FILE * in);
+
+void writeColorMap(TGA_Header header, unsigned long * colorMap, FILE * out);
+
+void writeTGA_ExtensionArea(TGA_ExtensionArea * extension, FILE * out);
+
+TGA_ExtensionArea * loadTGAExtensionArea(FILE * in);
+
+void loadTGA(char * file);
+
+void writeColorData(unsigned long data,TGA_Header header,FILE * out);
+
+void printFormatAuthorComment(char * authorComment,FILE * fp);
+void printRGB(unsigned long r,unsigned long g,unsigned long b,FILE * in);
+
+void printGrayScaleRGB(unsigned long d,FILE * fp);
+void printRGBA(unsigned long r,unsigned long g,unsigned long b,unsigned long a,FILE * fp);
+
+TGA_ImageData loadTGA_ImageData(unsigned long width, unsigned long height,TGA_Header header,unsigned long * colorMap, int compressed, FILE * in);
+
+void writeTGA_ImageData(TGA_ImageData image, TGA_Header header,FILE * out);
+
+void printImageInfo(FILE * out);
+
+TGA_ImageData loadPostageStamp(TGA_Header header,unsigned long * colorMap, unsigned long offset,FILE * in);
+
+void printHelp(void);
+
 
 int main(int argc, char * argv[])
 {
@@ -196,18 +333,18 @@ TGA_Image loadTGA_Image(FILE * in)
 TGA_Header loadTGA_Header(FILE * in)
 {
     TGA_Header header;
-    header.IDLength = readByte(in);
-    header.colorMapType = readByte(in);
-    header.imageType = readByte(in);
+    header.IDLength = getc(in);
+    header.colorMapType = getc(in);
+    header.imageType = getc(in);
     header.colorMapStart = readShort(in);
     header.colorMapLength = readShort(in);
-    header.colorMapDepth = readByte(in);
+    header.colorMapDepth = getc(in);
     header.xOrigin = readShort(in);
     header.yOrigin = readShort(in);
     header.width = readShort(in);
     header.height = readShort(in);
-    header.pixelDepth = readByte(in);
-    header.imageDescriptor = readByte(in);
+    header.pixelDepth = getc(in);
+    header.imageDescriptor = getc(in);
 
     return header;
 }
@@ -248,7 +385,7 @@ void writeTGA_Header(TGA_Header header, FILE * out)
 
 void writeColorMap(TGA_Header header, unsigned long * colorMap, FILE * out)
 {
-    int i;
+    unsigned long i;
 
     fprintf(out,"Color Map:\n");
 
@@ -290,7 +427,7 @@ void writeTGA_ExtensionArea(TGA_ExtensionArea * extension, FILE * out)
         fprintf(out,"\n");
     }
 
-    fprintf(out,"Key color: %d\n",extension->keyColor);
+    fprintf(out,"Key color: %ld\n",extension->keyColor);
 
     fprintf(out,"Pixel Ratio Numerator: %d\n",extension->pixelRatioNumerator);
     fprintf(out,"Pixel Ratio Denominator: %d\n",extension->pixelRatioDenominator);
@@ -302,9 +439,9 @@ void writeTGA_ExtensionArea(TGA_ExtensionArea * extension, FILE * out)
         fprintf(out,"%f\n",(float)extension->gammaNumerator / (float)extension->gammaDenominator);
     }
 
-    fprintf(out,"color correction offset: %d\n",extension->colorOffset);
-    fprintf(out,"Postage stamp offset: %d\n",extension->stampOffset);
-    fprintf(out,"Scan line offset: %d\n",extension->scanOffset);
+    fprintf(out,"color correction offset: %ld\n",extension->colorOffset);
+    fprintf(out,"Postage stamp offset: %ld\n",extension->stampOffset);
+    fprintf(out,"Scan line offset: %ld\n",extension->scanOffset);
 
     fprintf(out,"Attributes Type: %d(\n",extension->attributesType);
 
@@ -332,7 +469,7 @@ void writeTGA_ExtensionArea(TGA_ExtensionArea * extension, FILE * out)
 TGA_ExtensionArea * loadTGAExtensionArea(FILE * in)
 {
     char signature[18];
-    LONG extensionAreaOffset;
+    unsigned long extensionAreaOffset;
     TGA_ExtensionArea * extensionArea;
 
     /* Check the footer. */
@@ -352,7 +489,7 @@ TGA_ExtensionArea * loadTGAExtensionArea(FILE * in)
 
     /* Read the extension area offset. */
 
-    fread(&extensionAreaOffset,sizeof(LONG),1,in);
+    fread(&extensionAreaOffset,sizeof(unsigned long),1,in);
 
     if(extensionAreaOffset == 0){
         /* There is no extension area. */
@@ -387,7 +524,7 @@ TGA_ExtensionArea * loadTGAExtensionArea(FILE * in)
 
     readStr(in,41,extensionArea->softwareId);
     extensionArea->versionNumber = readShort(in);
-    extensionArea->versionLetter = readByte(in);
+    extensionArea->versionLetter = getc(in);
 
     extensionArea->keyColor = readLong(in);
 
@@ -401,7 +538,7 @@ TGA_ExtensionArea * loadTGAExtensionArea(FILE * in)
     extensionArea->stampOffset = readLong(in);
     extensionArea->scanOffset = readLong(in);
 
-    extensionArea->attributesType = readByte(in);
+    extensionArea->attributesType = getc(in);
 
     return extensionArea;
 }
@@ -493,7 +630,7 @@ void writeTGA_ImageData(TGA_ImageData image, TGA_Header header,FILE * out)
     }
 }
 
-TGA_ImageData loadTGA_ImageData(SHORT width, SHORT height,TGA_Header header,unsigned long * colorMap, int compressed, FILE * in)
+TGA_ImageData loadTGA_ImageData(unsigned long width, unsigned long height,TGA_Header header,unsigned long * colorMap, int compressed, FILE * in)
 {
 
     /* it is assumed that the encoding always fit on a line */
@@ -515,7 +652,7 @@ TGA_ImageData loadTGA_ImageData(SHORT width, SHORT height,TGA_Header header,unsi
     while(i < pixels){
 
         if(compressed){
-            head = readByte(in);
+            head = getc(in);
 
             length = head & 0x7f;
 
@@ -568,14 +705,14 @@ TGA_ImageData loadTGA_ImageData(SHORT width, SHORT height,TGA_Header header,unsi
     return image;
 }
 
-TGA_ImageData loadPostageStamp(TGA_Header header,unsigned long * colorMap, LONG offset,FILE * in)
+TGA_ImageData loadPostageStamp(TGA_Header header,unsigned long * colorMap, unsigned long offset,FILE * in)
 {
     BYTE width,height;
 
     fseek(in,offset,SEEK_SET);
 
-    width = readByte(in);
-    height = readByte(in);
+    width = getc(in);
+    height = getc(in);
 
     return loadTGA_ImageData(width,height,header,colorMap,0,in);
 }
@@ -584,7 +721,7 @@ unsigned long * loadColorMap(TGA_Header header, FILE * in)
 {
     size_t pixelDepth = header.colorMapDepth;
     unsigned long data;
-    int i;
+    unsigned int i;
 
     unsigned long * colorMap;
 
@@ -604,14 +741,14 @@ unsigned long * loadColorMap(TGA_Header header, FILE * in)
 
 SHORT readShort(FILE * fp)
 {
-    SHORT s;
-    fread(&s,sizeof(SHORT),1,fp);
+    unsigned long s;
+    fread(&s,2,1,fp);
     return s;
 }
 
 LONG readLong(FILE * fp)
 {
-    LONG s;
-    fread(&s,sizeof(LONG),1,fp);
+    unsigned long s;
+    fread(&s,4,1,fp);
     return s;
 }

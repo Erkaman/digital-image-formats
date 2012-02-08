@@ -1,18 +1,18 @@
 #include "stlutil.h"
-#include <cstdio>
-#include <sstream>
-#include <algorithm>
-
-using std::fwrite;
 
 using std::vector;
-using std::string;
-using std::stringstream;
 
-
-
-/*void outputString(string str, FILE * out)
+vector<BYTE> readFile(FILE * in)
 {
-    fwrite(str.c_str(), 1,str.size(), out);
-}*/
+    vector<BYTE> data;
 
+    while(true){
+	int b = getc(in);
+	if(b == EOF)
+	    break;
+
+	data.push_back(b);
+    }
+
+    return data;
+}

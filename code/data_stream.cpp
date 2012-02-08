@@ -34,10 +34,10 @@ BYTE DataStream::readStreamByte()
     return b;
 }
 
-uint16_t DataStream::read16BitsNumber()
+unsigned int DataStream::read16BitsNumber()
 {
     BYTE b1,b2;
-    uint16_t n;
+    unsigned int n;
 
     b1 = this->readStreamByte();
     b2 = this->readStreamByte();
@@ -59,7 +59,7 @@ uint16_t DataStream::read16BitsNumber()
     return n;
 }
 
-uint32_t DataStream::read32BitsNumber()
+unsigned long DataStream::read32BitsNumber()
 {
     BYTE b1, b2, b3, b4;
 

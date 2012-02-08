@@ -1,12 +1,12 @@
 PROG = rle
 include ../default
-objects = main.o ../io.o
+objects = main.o $(commonobjects)
 
 $(PROG) : $(objects)
+	cd .. && $(MAKE)
 	$(CC)  $(objects)  -o $(PROG)
 
-main.o : main.h ../io.h ../defs.h
-../io.o : ../io.h ../defs.h
+main.o : main.cpp ../io.h
 
 clean :
 	rm $(PROG) $(objects)

@@ -35,8 +35,10 @@ int main(int argc, char *argv[])
         }
         else if(!strcmp("-d",*argv))
             decompress = 1;
-        else if(!strcmp("-v",*argv))
+        else if(!strcmp("-v",*argv)){
+	    printf("lol\n");
             verbose = 1;
+	    }
         else
             break;
 

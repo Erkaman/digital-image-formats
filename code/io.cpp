@@ -1,6 +1,6 @@
 #include "io.h"
-#include <stdlib.h>
-#include <stdarg.h>
+#include <cstdlib>
+#include <cstdarg>
 
 int verbose;
 
@@ -17,27 +17,10 @@ void assertFileOpened(FILE * fp)
     assertFile(fp,"An error occurred opening the file");
 }
 
-BYTE readByte(FILE * in)
-{
-    BYTE s;
-    fread(&s,sizeof(BYTE),1,in);
-    return s;
-}
-
-void writeByte(BYTE b,FILE * out)
-{
-    fwrite(&b,sizeof(BYTE),1,out);
-}
-
 void readStr(FILE * in,size_t length,char * str)
 {
     fread(str,sizeof(char),length,in);
 }
-void printByte(void * byte)
-{
-    verbosePrint("%d\n", *((BYTE *) byte));
-}
-
 void verbosePrint(const char * format, ...)
 {
     va_list vl;
@@ -69,4 +52,16 @@ void printError(const char * format, ...)
     va_start(vl, format);
     vprintf(format, vl);
     va_end(vl);
+}
+
+size_t getFileSize(FILE * fp)
+{
+    fpos_t orig;
+    size_t size;
+    fgetpos(fp, &orig);
+    fseek(fp, 0, SEEK_END);
+    size = ftell(fp);
+    fsetpos(fp, &orig);
+    return size;
+
 }

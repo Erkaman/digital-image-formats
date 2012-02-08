@@ -732,11 +732,34 @@ detaljer om PNG formatet.
 
 Har börjat att beskriva mer av detaljerna av PNG formatet idag. Idag
 började jag att skriva om s.k. filter som används i formatet för att
-göra färgdata enklare att komprimera. 
+göra färgdata enklare att komprimera.
 
 \dayheading{30}{1}{2012}
 
 Blev idag färdig med att beskriva de olika typerna av filter.
+
+\dayheading{5}{2}{2012}
+
+Som bekant så implementerade jag bara dekompressionsversionen av
+DEFLATE algoritmen, för att jag upptäckte snabbt att det skulle bli
+mycket svårt att implementera kompressionversionen. Genom att bara
+implementera dekompressionsversionen kunde jag analysera färgdatan i
+PNG-bilder, vilka använder DEFLATE för att komprimera färgdatan.
+
+Men idag har äntligen börjat att förstå hur jag ska gå till väga för
+att implementera kompressionsversionen. Så idag påbörjade jag arbetet
+på detta. Jag kommer att fortsätta att beskriva PNG formatet
+skriftligt när jag väl är färdig med att implementera DEFLATE.
+
+\dayheading{6}{2}{2012}
+
+Jobbade vidare med arbetet som jag påbörjade igår. DEFLATE algoritmen
+kommer förmodligen att ta ett bra tag att implementera, för den har
+rätt så många delsteg.
+
+\dayheading{7}{2}{2012}
+
+Jobbat vidare.
 
 \end{document}
 

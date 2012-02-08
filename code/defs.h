@@ -1,12 +1,7 @@
 #ifndef _DEFS_H_
 #define _DEFS_H_
 
-#define __STDC_LIMIT_MACROS
-
-#include <stdint.h>
-
-#define BYTE uint8_t
-#define BYTE_MAX UINT8_MAX
+#define BYTE unsigned char
 
 /* This is done to get the htonl, ntohl, htons and ntohs functions portably. */
 #ifdef WIN32

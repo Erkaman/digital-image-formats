@@ -1,8 +1,8 @@
 #include "png.h"
 #include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <math.h>
+#include <cctype>
+#include <cstdlib>
+#include <cmath>
 
 using std::vector;
 
@@ -291,7 +291,7 @@ void writeSignature(BYTE * signature, FILE * out)
             fprintf(out, "%d\n", signature[i]);
 }
 
-hunk loadChunk(FILE * in)
+Chunk loadChunk(FILE * in)
 {
     Chunk chunk;
 

@@ -1,12 +1,12 @@
 PROG = tga
 include ../default
-objects = main.o
+objects = main.o $(commonobjects)
 
 $(PROG) : $(objects)
 	cd .. && $(MAKE)
-	$(CC)  $(objects) $(commonobjects)  -o $(PROG)
+	$(CC)  $(objects)   -o $(PROG)
 
-main.o : main.h ../io.h
+main.o : main.cpp ../io.h ../bits.h
 
 clean :
-	rm $(PROG) $(objects)
+	rm -f $(PROG) $(objects)

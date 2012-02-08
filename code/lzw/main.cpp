@@ -106,7 +106,7 @@ void LZW_Compress(unsigned int codeSize, FILE * in,FILE * out)
     code ch;
     code nextCode;
 
-    BitWriter outbits(out, MSBF);
+    BitFileWriter outbits(out, MSBF);
 
     map<codeStr, code> stringTable;
 

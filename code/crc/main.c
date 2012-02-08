@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 #include "../defs.h"
 #include "../data_list.h"
 

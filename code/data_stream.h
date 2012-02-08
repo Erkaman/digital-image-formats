@@ -1,7 +1,6 @@
 #ifndef _DATA_STREAM_H_
 #define _DATA_STREAM_H_
 
-#include "bitwise.h"
 #include "defs.h"
 #include <vector>
 #include <cstdio>
@@ -38,8 +37,8 @@ public:
     DataStream(std::vector<BYTE> & list, Endian endian_);
 
     BYTE readStreamByte();
-    uint16_t read16BitsNumber();
-    uint32_t read32BitsNumber();
+    unsigned int read16BitsNumber();
+    unsigned long read32BitsNumber();
 };
 
 

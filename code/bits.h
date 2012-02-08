@@ -5,6 +5,9 @@
 #include <vector>
 #include "defs.h"
 
+int getbits(int b, int start, int end);
+
+
 enum BitOrder {
     MSBF,
     LSBF
@@ -15,36 +18,51 @@ private:
     BYTE byte;
     BYTE bits;
 
-    BitOrder bitOrder;
+    BitOrder order;
 
-    FILE * in;
-    BYTE * data;
-    std::vector<BYTE>::const_iterator iter, beg;
+    BYTE readBit(void);
 
+protected:
 
-    enum InDataType{
-	FP,
-	BP,
-	ITER
-    };
+    BitReader(BitOrder order_);
 
-    InDataType inDataType;
-
+    virtual BYTE nextByte() = 0;
 
 public:
 
-    size_t getPosition()const;
+    virtual size_t getPosition()const = 0;
 
-    BitReader(FILE * in_, BitOrder order);
-    BitReader(BYTE * data_, BitOrder order);
-    BitReader(std::vector<BYTE>::const_iterator data_, BitOrder order);
-
-    BYTE readBit(void);
     unsigned int readBits(unsigned int nbits);
 
-    void writeBit(BYTE bit);
+};
 
-    void nextByte(void);
+class BitFileReader : public BitReader{
+
+private:
+
+    FILE * in;
+    fpos_t beg;
+
+public:
+    BitFileReader(FILE * in_, BitOrder order_);
+
+    size_t getPosition()const;
+    BYTE nextByte();
+};
+
+class BitIterReader : public BitReader{
+
+private:
+
+    typedef std::vector<BYTE>::iterator Iter;
+
+    Iter iter, beg;
+
+public:
+    BitIterReader(Iter iter_, BitOrder order_);
+
+    BYTE nextByte();
+    size_t getPosition()const;
 };
 
 class BitWriter {
@@ -53,26 +71,34 @@ private:
     BYTE byte;
     BYTE bits;
 
-    BitOrder bitOrder;
+    BitOrder order;
+
+
+    void writeBit(BYTE bit);
+
+protected:
+
+    virtual void writeByte(BYTE b) = 0;
+    BitWriter(BitOrder order_);
+
+
+public:
+
+    void writeBits(unsigned int data, unsigned int nbits);
+};
+
+class BitFileWriter : public BitWriter {
+
+private:
 
     FILE * out;
 
 public:
 
-    BitWriter(FILE * out_, BitOrder order);
+    BitFileWriter(FILE * out_, BitOrder order);
 
-    void writeBit(BYTE bit);
-
-    void writeBits(unsigned int data, unsigned int nbits);
-
+    void writeByte(BYTE b);
 };
 
 
 #endif /* _BITS_H_ */
-
-
-
-
-
-
-

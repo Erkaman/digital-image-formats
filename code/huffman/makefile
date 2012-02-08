@@ -1,14 +1,13 @@
 PROG = huffman
 include ../default
-objects = main.o ../common.o freq_table.o tree.o
+objects = main.o tree.o huffman.o $(commonobjects)
 
 $(PROG) : $(objects)
 	$(CC)  $(objects)  -o $(PROG)
 
-main.o : main.h ../common.h freq_table.h
-freq_table.o : freq_table.h main.h
-tree.o : tree.h main.h freq_table.h ../common.h
-../common.o : ../common.h
+main.o : main.cpp  ../frequency_table.h tree.h ../bits.h huffman.h ../stlutil.h
+tree.o : tree.h ../io.h
+huffman.o : ../frequency_table.h tree.h ../io.h ../bits.h
 
 clean :
-	rm $(PROG) $(objects)
+	rm -f $(PROG) $(objects)

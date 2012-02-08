@@ -1,35 +1,60 @@
 #ifndef _TREE_H_
 #define _TREE_H_
 
-#include "freq_table.h"
+#include <vector>
+#include <map>
+
+struct SymbolFreq{
+
+public:
+    unsigned long symbol;
+    unsigned long freq;
+
+    void print()const;
+};
 
 /* A node of the Huffman tree. */
 struct Node {
-    AlphabetSymbol symbol;
-    struct Node * left;
-    struct Node * right;
+
+private:
+    SymbolFreq val;
+
+    /* Values of nodes should not change, just move them around*/
+    Node * left;
+    Node * right;
+
+    static const unsigned long emptySymbol = 0;
+
+    bool NodePointerCompare(const Node *& a, const Node *& b);
+
+    static void getCodeLengths(
+        const Node * node,
+	std::map<unsigned long, unsigned long> & codeLengths,
+	int depth);
+
+public:
+
+    SymbolFreq getNodeValue()const;
+
+    Node * getLeft()const;
+    Node * getRight()const;
+
+    Node();
+    Node(SymbolFreq val_);
+    Node(Node * leftNode, Node * rightNode);
+
+    /* A single node has a depth of 0 */
+    int getMaxDepth()const;
+
+    bool isSingle()const;
+
+    void print()const;
+
+    unsigned long getMaxSymbol()const;
+
+    std::vector<unsigned long> getCodeLengths(unsigned long alphabetSize)const;
+
+    ~Node();
 };
-
-struct Node * makeTree(AlphabetSymbol symbol);
-
-struct Node * makeTreeFromTrees(struct Node * leftTree, struct Node * rightTree);
-
-void findTwoMinValues(struct Node ** trees,int length,int * tree1, int * tree2);
-
-struct Node * deepCopyTree(struct Node * tree);
-
-void freeTree(struct Node * tree);
-
-void printTrees(struct Node ** trees,int length);
-
-int isEmptyNode(struct Node * node);
-
-int maxDepth(struct Node * node);
-
-void printTree(struct Node * node);
-
-/*void padding(char ch, int n);
-
-void printTree(struct Node * node, int level);*/
 
 #endif /* _TREE_H_ */
