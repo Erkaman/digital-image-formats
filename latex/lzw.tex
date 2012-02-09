@@ -220,7 +220,6 @@ seem
 
       \If{\Call{InStringTable}{$string + character$}} \label{algl:hasingcheckintable}
         \linecomment{Keep accumulating the string}
-%        \Let{$stringCode$}{\Call{GetCode}{$stringCode,charCode$}} \label{algl:hasgetcode}
         \Let{$string$}{$string + character$}
 
       \Else
@@ -245,8 +244,6 @@ seem
 
     \State \Call{outputCode}{$string$}
     \State \Call{outputCode}{$maxValue$}
-    \State \Call{outputCode}{$0$} \Comment{This causes the last packet to be
-      written } \label{algl:flush}
   \end{algorithmic}
 \end{algorithm}
 
@@ -269,6 +266,12 @@ codes sizes are used to even further improve the compression
 efficiency of this algorithm. We'll discuss this variation in chapter
 \ref{cha:gif}.
 
+\subsection{Knowing when to stop}
+
+The compressor has to be notified of when it is done compressing the
+data. The largest possible value of a valid code size is therefore
+outputted in the end of the algorithm.
+
 \subsection{Table size}
 
 Since we are using fixed code sizes there must be a limit on how large
@@ -290,44 +293,28 @@ reserved, the actual number of strings that the string table can store
 will be $2^n - 1$. And furthermore, the maximum code that can be
 assigned to a string will be $2^n - 2$, and not $2^n - 1$.
 
-\subsection{Outputting variably sized codes}
-
-A last thing we'll have to consider is how to actually output the
-codes. The file I/O functions of most programming languages do not
-support outputting numbers whose bit sizes are not multiples of 8, so
-we'll have to devise a routine of our own for doing this.
-
-Let us consider how to output the codes $5$, $5$, $11$ and $12$, all
-of code length $4$. The corresponding binary numbers of these decimal
-numbers are $0101$, $0101$, $1011$ and $1100$.
-
-Now, the thing that the want to do with these codes is this: we want
-to \textit{pack} these variably sized codes into \textit{packets} of
-8-bits numbers. Once we have packed them into 8-bit packets, we can
-simply output them using the ordinary aforementioned file I/O
-functions.
-
 \subsubsection{Packing order}
 
-But we will first need to make a decision: when, for example, the
-codes $1011$ and $1100$ are to be packed, there can actually be two
-different resulting byte packets: $1011\ 1100$ or $1100\ 1011$. In the
-first case, the bits of the codes start to get packed from the
-\textit{most significant bits} to the \textit{least significant bits}
-of the resulting packet. In the second case, the bits from the codes
-get packed from the \textit{least significant bits} to the
-\textit{most significant bits} of the packet.
+When, for example, the codes $1011$ and $1100$ are to be packed, there
+can actually be two different resulting byte packets: $1011\ 1100$ or
+$1100\ 1011$. In the first case, the bits of the codes start to get
+packed from the \textit{most significant bits} to the \textit{least
+  significant bits} of the resulting packet. In the second case, the
+bits from the codes get packed from the \textit{least significant
+  bits} to the \textit{most significant bits} of the packet.
 
 The first of these two packing orders we'll from now on call
 MSBF\index{MSBF}, which stands for \textbf{M}ost \textbf{S}ignificant
 \textbf{B}its \textbf{F}irst and the second order we'll refer to as
 LSBF\index{MSBF}, which stands for \textbf{L}east \textbf{S}ignificant
-\textbf{B}its \textbf{F}irst
+\textbf{B}its \textbf{F}irst.
 
-The packing order we'll be using in the following packing algorithm
-will be LSBF, because that is the packing order used in the LZW
-compression of the GIF format \cite{gif89a}. The GIF format is the
-subject of chapter \ref{cha:gif}.
+It is important that differ between these two orders, \textit{because
+  different packing orders are used in different formats}. In the GIF
+format the LSBF order is used, while in other implementation MSBF is
+instead used. The GIF format wile be the main
+subject of chapter
+\ref{cha:gif}.
 
 \begin{Exercise}[label={bit-packing-order}]
 
@@ -341,171 +328,6 @@ subject of chapter \ref{cha:gif}.
   \end{enumerate}
 
 \end{Exercise}
-
-\subsubsection{The Algorithm}
-
-\paragraph{Smaller Codes}
-
-So remember, the codes that we wanted to write were $0101$, $0101$,
-$1011$ and $1100$. We'll first request an empty byte packet: $0000\
-0000$. The four least significant bits of the packet are now set the
-bits the of the first code, $0101$. This trivially done with the
-bitwise or operation: $0000\ 0000 \BitOr 0101 = 0000\ 0101$
-
-After this operation, only half of the byte packet has been filled, so
-we won't output the packet quite yet. We'll put the outputting
-operation on hold until we've read the next code.
-
-The next code 0101 has now arrived. We now set the four most
-significant bits of the current package to the bits of this code. But
-first the code has to be shifted $8 -4 = 4$ steps to the left, so that
-the bitwise or operation can properly set the four highest bits of the
-packet to the four bits of the current code:
-
-\begin{equation*}
-  0000\ 0101 \BitOr (0101 \ShiftLeft 4) = 0000\ 0101 \BitOr 0101\ 0000 =
-  0101\ 0101
-\end{equation*}
-
-So now we have filled the entire packet; the packet is thus outputted
-and we request a new empty packet. We'll fill this packet with the two
-remaining codes 1011 and 1100 in the same way we filled the last
-packet, and we end up making the packet 1100 1011.
-
-\paragraph{Larger Codes}
-
-But this sort of reasoning doesn't work for codes of sizes greater
-than $8$. If the codes have sizes that are greater than $8$, the codes
-will always contain enough data to fill a byte packet, but we'll also
-have to save small unused chunks of the codes that are to be used for
-the next packet.
-
-Let's say we want to output the two codes $0110\ 1101\ 0111$ and $0010\ 1100\
-0100$ of length $12$
-
-Our first code is $0110\ 1101\ 0111$. We'll start by filling the
-packet with the 8 least significant bits of this code. And the packet
-is already filled: $1101\ 0111$. So it is outputted and a new empty
-packet is requested. But we cannot yet throw away the code we are
-processing; we haven't yet dealt with 4 most-significant bits of it!
-So what we'll do is that we'll bitwise right shift the code 8 times:
-\mbox{$0110\ 1101\ 0111 \ShiftRight 8 = 0110$}. Good, now these four
-bits are then set to be the 4 least significant bits of the next
-packet. After dealing with the first code, a packet with the contents
-$1101\ 0111$ have been outputted, and a halfway filled packet $0000\ 0110$ is
-waiting for more codes to be processed.
-
-In the same manner the next code $0010\ 1100\ 0100$ is handled: the
-four most significant bytes of the new packet are set to $0100$, the
-four least significant bits of the current code, the code is right
-shifted 4 steps, the newly filled packet is then outputted and the
-next packet is filled with the remaining bits of the current, modified
-code: $0010\ 1100$.
-
-We summarize the just described procedure in algorithm
-\ref{alg:variable-codes-output}. This algorithm is very flexible and
-can handle outputting codes of differing sizes. If the codes were kept
-to one fixed size this algorithm would actually have been much
-simpler, and since this is what we are doing in our version of the LZW
-algorithm the reader may wonder why this algorithm has to be so
-complex?  This is to make sure that this procedure can be also be used
-in the decompression of GIF files, which do indeed use codes of
-varying sizes. So this procedure was designed so flexibly so that it
-could be easily reused in chapter \ref{cha:gif}.
-
-In this algorithm, we introduce a new function
-\Call{firstNBits}{$n,bits$}\index{FirstNBits}. What this function does
-is that it gets the value the first $bits$ least significant bits of
-the number $n$. So the call \Call{firstNBits}{$001101,3$}, for the
-binary number $001101$, would result in the binary number $101$.
-
-\begin{Exercise}[label={firstnbits}]
-
-  Implement the \Call{firstNBits}{$n,bits$} procedure in terms of
-
-  \begin{enumerate}[(a)]
-  \item the \textproc{getbits} procedure(we discussed this procedure
-    way back in exercise \ref{getbits}).
-  \item the bitwise operators.
-  \end{enumerate}
-
-\end{Exercise}
-
-\begin{algorithm}[H]
-  \caption{Algorithm for outputting variably sized codes.}
-  \label{alg:variable-codes-output}
-  \begin{algorithmic}[1]
-    \linecomment{These variables are set before the procedure in run
-      for the first time.}
-    \Let{$remainingPacketBits$}{8}
-    \Let{$packet$}{0}
-    \Let{$shift$}{0}
-    \linecomment{This number can be varied.}
-    \Function{OutputCode}{$code,codeSize$}
-
-      \Let{$remainingCodeBits$}{$codeSize$}
-
-      \linecomment{While the entire code hasn't yet been processed}
-      \While{$remainingCodeBits > 0$}
-
-        \linecomment{If the packet will get filled in this packing.}
-        \If{$remainingPacketBits < remainingCodeBits$}
-
-          \linecomment{Read as many bits necessary the fill up the
-            packet.}
-          \Let{$firstNBits$}{\Call{FirstNBits}{$code,remainingPacketBits$}}
-          \Let{$packet$}{$packet \BitOr (firstNBits \ShiftLeft shift)$}
-
-          \linecomment{Write the packet}
-          \State \Call{WriteByte}{$packet$}
-
-          \linecomment{Throw away the bits of the code that have been
-            read to the packet.}
-          \Dec{remainingCodeBits}{remainingPacketBits}
-          \Let{$code$}{$code \ShiftRight remainingPacketBits$}
-
-          \linecomment{Reset the packet}
-          \Let{$remainingPacketBits$}{$8$}
-          \Let{$packet$}{$0$}
-          \Let{$shift$}{$0$}
-
-          \linecomment{After this, the rest of the code is processed.}
-
-        \Else
-
-        \linecomment{If the rest of the code fit in the entire
-          packet.}
-
-          \linecomment{Read in the entire code to the packet.}
-          \Let{$packet$}{$packet \BitOr(code \ShiftLeft shift)$}
-
-          \Inc{shift}{remainingCodeBits}
-          \Dec{remainingPacketBits}{remainingCodeBits}
-
-          \linecomment{The entire code has been processed, so terminate the loop}
-          \Let{$remainingCodeBits$}{$0$}
-        \EndIf
-      \EndWhile
-    \EndFunction
-  \end{algorithmic}
-\end{algorithm}
-
-\subsubsection{Flushing The Packets}
-
-Let's say we want to write the two 5 length codes $11000$ and
-$11011$. To do this we perform two calls to the function explained in
-algorithm \ref{alg:variable-codes-output}. However, this only results
-in the packet $0111 \ 1000$ being outputted and the two bits $11$
-being put on hold for the next code. But we have already written the
-two codes we want to output, so how may we force the last two bits to
-be written?  This turns out to be very easy to do, as all we have to
-do is write an empty extra code $0000 \ 0000$. This results in the
-last two bits being written out in the form of the packet $0000 \
-0011$.
-
-This is why the last line in algorithm \ref{alg:lzw-compression} even
-exists. Otherwise, the last few bits of the max value would not get
-outputted, and this would cause huge problems for the decompressor.
 
 \section{Description of the Decompression algorithm}
 
@@ -602,14 +424,8 @@ can be seen from our example data $97, 98, 256, 99, 257, 260, 97, 262,
 
 \end{Exercise}
 
-\section{Technical Implementation of the Decompression Algorithm}
-
-And the algorithm we have just described can be seen in algorithm
-\ref{alg:lzw-working-decompression}. Having discussed the compression
-algorithm very much in depth, you should be able to perfectly
-understand most of this algorithm. However, there is still one thing
-we need to discuss in the implementation of this algorithm until we
-completely are done with discussing the LZW algorithm.
+In \ref{alg:lzw-working-decompression} pseudocode of the algorithm we
+just described is given.
 
 \begin{algorithm}[H]
   \caption{LZW working decompression algorithm.}
@@ -653,73 +469,6 @@ completely are done with discussing the LZW algorithm.
       \Let{$newCode$}{\VoidCall{$ReadByte$}}
 
     \EndWhile
-  \end{algorithmic}
-\end{algorithm}
-
-\subsection{Inputting Variably Sized Codes}
-
-We also need to construct an algorithm for inputting the variably
-sized codes. This algorithm is algorithm
-\ref{alg:variable-codes-input}. Because the way this algorithm
-operates is extremely similar to the corresponding outputting
-algorithm \ref{alg:variable-codes-output}, I will not offer an in
-depth discussion of it.
-
-\begin{algorithm}[H]
-  \caption{Algorithm for inputting variably sized codes.}
-  \label{alg:variable-codes-input}
-  \begin{algorithmic}[1]
-    \linecomment{These variables are set before the procedure is run
-      for the first time.}
-    \Let{$remainingPacketBits$}{8}
-    \Let{$packet$}{\VoidCall{ReadByte}}
-
-    \Function{InputCode}{$codeSize$}
-
-      \Let{$remainingCodeBits$}{$codeSize$}
-      \Let{$code$}{$0$}
-      \Let{$shift$}{$0$}
-
-      \linecomment{While an entire code hasn't yet been read.}
-      \While{$remainingCodeBits > 0$}
-
-        \linecomment{If the current packet doesn't contain enough bits
-          to fill the current code.}
-        \If{$remainingPacketBits < remainingCodeBits$}
-
-          \linecomment{Read the remaining bits of the packet.}
-          \Let{$code$}{$code \BitOr (packet \ShiftLeft shift)$}
-
-          \linecomment{Handle the left shifting of bits.}
-          \Inc{shift}{remainingPacketBits}
-          \Dec{remainingCodeBits}{remainingPacketBits}
-
-          \linecomment{Read in a new packet. }
-          \Let{$packet$}{\VoidCall{ReadByte}}
-          \Let{$remainingPacketBits$}{$8$}
-
-        \Else
-
-        \linecomment{If there are enough bits in the current packet to
-          fill the entire code.}
-
-          \linecomment{Read in the entire code to the packet.}
-          \Let{$highestCodeBits$}{\Call{FirstNBits}{$packet,remainingCodeBits$}}
-          \Let{$code$}{$code \BitOr(highestCodeBits \ShiftLeft shift)$}
-
-          \linecomment{Discard the bits from the packet that were
-            written to the code.}
-
-          \Let{$packet$}{$packet \ShiftRight remainingCodeBits$}
-          \Dec{remainingPacketBits}{remainingCodeBits}
-
-          \linecomment{The entire code has been processed, so terminate the loop}
-          \Let{$remainingCodeBits$}{$0$}
-        \EndIf
-      \EndWhile
-
-      \Ret{$code$}
-    \EndFunction
   \end{algorithmic}
 \end{algorithm}
 
@@ -930,7 +679,6 @@ the compression ratio.
 
   \item
 
-
     \begin{algorithmic}[1]
       \Procedure{firstNBits}{$n,bits$}
       \Ret{$n \BitAnd (\BitNeg(\BitNeg 0 \ShiftLeft bits))$}
@@ -941,7 +689,6 @@ the compression ratio.
   \end{enumerate}
 
 \end{Answer}
-
 
 \begin{Answer}[ref={lzw-decompress}]
 
