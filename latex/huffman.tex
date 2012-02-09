@@ -1,0 +1,309 @@
+\begin{comment}
+  \bibliography{project.bib}
+\end{comment}
+
+\chapter{Huffman Coding}
+\label{cha:crc}
+
+\section{History}
+
+\section{The Algorithm}
+
+The key observation behind Huffman Coding is this: in any non-random
+data there will almost always be some characters that are more
+frequent than other. For example, in the English the by far most
+common letter is ``e'' \cite{lewand2000cryptological}. So if a random
+letter is picked from an English language text then it is most likely
+that that letter will be an ``e''. So, what Huffman Coding does, is
+that it assigns more frequent characters to smaller \textit{codes}. A
+code is a number of a certain number of bits. For example, \bin{0011}
+is a code of value $3$ with length $4$. So more frequent character is
+assigned to more frequent letters.
+
+All values stored in a file are 8-bit numbers. Out of a compression
+performance perspective this system is catastrophic. Some ASCII values
+will always, for non-random text, be more frequent than
+others. However, do take in mind that this system is used because that
+8-bit numbers are one heck of a lot easier to deal with than variably
+sized codes.
+
+\subsection{The Prefix Property}
+
+Before we consider how the Huffman Algorithm chooses these codes, we
+also have to consider what properties these codes should satisfy. Are
+all codes acceptable?
+
+\begin{table}
+  \centering
+  \begin{tabular}{llll}
+    \toprule
+    Letter & Probability & Code 1 & Code 2 \\
+    \midrule
+    $A$ & $0.35$ & \bin{01} & \bin{01} \\
+    $B$ & $0.35$ & \bin{11} & \bin{00} \\
+    $C$ & $0.15$ & \bin{001} & \bin{010} \\
+    $D$ & $0.15$ & \bin{000} & \bin{101} \\
+    \bottomrule
+  \end{tabular}
+  \caption{}
+  \label{tab:codes-ex}
+\end{table}
+
+Let us consider a alphabet consisting only of the letters $A$, $B$,
+$C$, $D$. Let us say that the probabilities of these letters are the
+ones given in table \ref{tab:codes-ex}. One alternative of possible
+codes that could be assigned to these letters is Code 1. Character
+that are more frequent are in this code assigned shorter codes, which
+is just the property that we were after. Using this code the string
+``BABACD'' would get encoded as
+
+\begin{equation*}
+  11\ 01\ 11\ 01\ 001\ 000
+\end{equation*}
+
+This encoded can data can then be decoded perfectly fine by
+translating the codes to their corresponding letters. However, what
+would have happened had we used code 2 instead?
+
+\begin{equation*}
+  00\ 01\ 00\ 01\ 010\ 101
+\end{equation*}
+
+The first four codes can get decoded perfectly fine, but what about
+the fifth? After reading the first two bits of this code it ends up
+with the code \bin{01}, which is the code for ``A''. However, how
+would the encoder know that it is supposded to read the next bit and
+then parse it as the code for ``C''? It can't, basically. The fifth
+code in combination with the sixth, \bin{010101} can be parsed a ``C''
+followed by an ``D'', but an equally valid way to decode this data
+would be as three ``A'':s. So the second set of codes is
+\textit{ambiguous} while the first is not.
+
+The reason that the first set codes is not amvigious is because it has
+the prefix property. This means that no code in the set of codes is
+the prefix of another code. On the other hand, in the second set of
+codes, the code \bin{01} is a prefix of the code \bin{010}, and
+therefore the set of codes was ambiguous.
+
+\begin{Exercise}[label={prefix-prop}]
+
+  Which of the following sets of codes has the prefix property?  Also,
+  suggest of a way to fix the sets of codes that do not obey the
+  prefix property.
+
+  \begin{enumerate}[(a)]
+  \item \bin{011}, \bin{0101},\bin{11},\bin{001}
+
+  \item \bin{01}, \bin{00}, \bin{10}, \bin{101}
+
+  \item \bin{1010101}, \bin{00001}, \bin{001}, \bin{1011}
+
+  \end{enumerate}
+
+\end{Exercise}
+
+% http://books.google.se/books?id=CyCcRAm7eQMC&pg=PA36&redir_esc=y#v=onepage&q&f=false
+
+\newenvironment{huffman}
+{\begin{tikzpicture}
+    [level distance=10mm,
+%    every node/.style={circle,inner sep=1pt,draw=black},
+    hnode/.style={circle,inner sep=1pt,draw=black},
+    level 1/.style={sibling distance=20mm},
+      level 2/.style={sibling distance=10mm},
+      level 3/.style={sibling distance=5mm},
+      text height=1.5ex,text depth=.25ex]}{\end{tikzpicture}}
+
+\newenvironment{huffmanc}
+{\begin{center}\begin{huffman}}
+{\end{huffman}\end{center}}
+
+\newcommand{\charnodeoffset}{1.0cm}
+
+\newcommand{\nodechar}[2]{\node[below=of #1, yshift=\charnodeoffset] {#2};}
+
+\newcommand{\firstcharnode}[3]{  \node (#1) [hnode] {#2};
+  \nodechar{#1}{#3}}
+
+\newcommand{\restcharnode}[4]{
+\node (#1) [hnode,right=of #2] {#3};
+\nodechar{#1}{#4}
+}
+
+\section{Trees}
+
+A tree is a recursive data structure that is used to implement Huffman
+Coding. A tree consists of a collection of nodes with values, and
+every node can have two \textit{left} and \textit{right} child
+nodes. Two example trees:
+
+\begin{huffmanc}
+  \node (first)[hnode]{7};
+  \node[hnode,right=of first]{2}
+  child{node[hnode] {3}}
+  child{node[hnode] {1}};
+\end{huffmanc}
+
+The first of these two trees is a single node with a value of
+$2$. It has no left or right child nodes. The second trees does, on
+the hand. The with the value $2$ has two child nodes with the values
+$3$ and $1$. You also say that the node with the value $2$ is
+\textit{parent} of the two nodes with the values $3$ and $1$.
+
+\subsection{Finding The Codes}
+
+Now we will finally explain how Huffman Encoding finds a sets of
+codes, where the more frequent character assigned to smaller codes,
+that obeys the prefix property given a the frequencies of the
+characters in the data.
+
+Let us consider finding the Huffman codes for the letters of the
+letters string $ababaacdd$. First the number of every letter in the
+data is assigned to a node of its own:
+%222
+
+\begin{huffmanc}
+  \firstcharnode{ctree}{1}{c}
+  \restcharnode{btree}{ctree}{2}{b}
+  \restcharnode{dtree}{btree}{2}{d}
+  \restcharnode{atree}{dtree}{4}{a}
+\end{huffmanc}
+
+We now have forest of nodes where the value of every node is the
+frequency that that node is corresponding to. A node where the value
+of that node is the sum of the two lowest values is now made. This
+node is made the parent of the former two nodes:
+
+\begin{huffmanc}
+  \node[hnode]{3}
+  child{node(cnode)[hnode] {1}}
+  child{node(bnode)[hnode] {2}};
+  \nodechar{cnode}{c}
+  \nodechar{bnode}{b}
+  \restcharnode{bnode}{dtree}{2}{d}
+  \restcharnode{dtree}{atree}{4}{a}
+\end{huffmanc}
+
+Note that order in which these two nodes are added does not
+matter. Another alternative for the node $b$ was also $d$, but this
+choice does not either affect the validity of the computed sets of
+codes. As long as two of the lowest nodes are chosen the formed codes
+will still be valid.
+
+Now the tree we just created and the node $d$ has the lowest
+values. So they are added together to an even bigger tree:
+
+\begin{huffmanc}
+  \node[hnode]{5}
+  child{node[hnode]{3}
+  child{node(cnode)[hnode] {1}}
+  child{node(bnode)[hnode] {2}}}
+  child{node (dnode) [hnode] {2}};
+  \restcharnode{dtree}{atree}{4}{a}
+
+  \nodechar{cnode}{c}
+  \nodechar{bnode}{b}
+  \nodechar{dnode}{d}
+
+\end{huffmanc}
+
+Two only remaining single node is now $a$, so it and the bigger tree
+are added together to form the final tree:
+
+\begin{huffmanc}
+
+  \node[hnode] {9}
+  child {node[hnode]{5}
+  child{node[hnode]{3}
+  child{node(cnode)[hnode] {1}}
+  child{node(bnode)[hnode] {2}}}
+  child{node (dnode) [hnode] {2}}}
+  child{node (anode) [hnode] {4}};
+
+  \nodechar{cnode}{c}
+  \nodechar{bnode}{b}
+  \nodechar{dnode}{d}
+  \nodechar{anode}{a}
+
+\end{huffmanc}
+
+The tree we end up with is known as the Huffman tree of the input
+data. But it is important to realize that this is \textit{not}
+unique. This is because mainly because of the possibility that there
+are more than two smallest single nodes. Then a choice will have to be
+made that results in different possible result trees.
+
+To finally create the set of codes, the following is done: starting
+from the root of the tree, it is followed along its branches to reach
+a character at leaf. If a left branch is followed then a cleared bit($0$)
+is added to the resulting code, else a toggled bit($1$) is added. So
+to get the resulting code for $b$, we follow the tree from its to the
+leaf that has character $b$. To reach $b$ we go left,left and then
+right, so $b$ has the code \bin{001}. Similarly, $a$ gets the code
+\bin{1}, $d$ the code \bin{01}, and $c$ the code \bin{000}. And
+clearly, these codes obey by the prefix property.
+
+\begin{Exercise}[label={nuther}]
+  Give an example of another valid Huffman that could have been
+  constructed using the above data. What set of codes does this tree
+  result in? How many different Huffman trees can be constructed using
+  the above data?
+\end{Exercise}
+
+And Huffman Coding will in general always give valid codes that has
+the prefix property. % explain why
+
+It is also easy to see how it assigns shorter codes to more frequent
+character. Since frequent chracters will get assigned the highest
+frequencies, they will also get added to the tree at the later parts
+of the algorithm, and so they get placed higher in the tree, and
+therefore they will get assigned the shorter codes. And similarly,
+since the least occuring codes will get assigned small values, they
+also get added into the tree early, so will get placed deep down in
+the tree, and they will therefore get assigned the longer codes.
+
+\subsection{Transmitting The Huffman Tree}
+
+A file compressed by Huffman Coding not only needs the encoded data,
+but also the set of codes in order to decode the compressed
+data. There are many different ways of doing this. In chapter ?, we
+will discuss how this is odne in a very pculiaiar way in the DEFLATE method.
+
+
+\section{Answers to the exercises}
+
+\begin{Answer}[ref={prefix-prop}]
+
+  \begin{enumerate}[(a)]
+  \item Has the prefix property.
+  \item Does not have the prefix property. If the codes are changed to
+    \bin{01}, \bin{00}, \bin{101}, \bin{100}
+    they will obey the prefix property.
+  \item Has the prefix property.
+
+  \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={nuther}]
+\begin{huffmanc}
+
+  \node[hnode] {9}
+  child {node[hnode]{5}
+  child{node[hnode]{3}
+  child{node(cnode)[hnode] {1}}
+  child{node(bnode)[hnode] {2}}}
+  child{node (dnode) [hnode] {2}}}
+  child{node (anode) [hnode] {4}};
+
+  \nodechar{cnode}{c}
+  \nodechar{dnode}{b}
+  \nodechar{bnode}{d}
+  \nodechar{anode}{a}
+
+\end{huffmanc}
+
+This tree results in the codes $a=$\bin{1}, $b=$\bin{01},
+$c=$\bin{000}, $d=$\bin{001}
+
+\end{Answer}
