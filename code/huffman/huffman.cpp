@@ -8,6 +8,8 @@
 #include <map>
 #include <cassert>
 
+#include "node.h"
+
 using std::vector;
 using std::sort;
 using std::pair;
@@ -17,44 +19,11 @@ using std::map;
 using std::fill;
 using std::min;
 
-typedef unsigned int Symbol;
-typedef unsigned int Freq;
-typedef unsigned int CodeLength;
-
-struct SymbolFreq{
-public:
-    Symbol symbol;
-    Freq freq;
-};
-
-bool symbolFreqCmp(const SymbolFreq & a, const SymbolFreq & b);
-
-/* A node of the Huffman tree. */
-struct Node {
-
-public:
-    SymbolFreq val;
-
-    static const Symbol emptySymbol = 0;
-
-    /* Values of nodes should not change, just move them around*/
-    Node * left;
-    Node * right;
-
-    Node(SymbolFreq val_):val(val_), left(NULL), right(NULL){}
-
-    Node(Node * left_, Node * right_):left(left_), right(right_)
-        {
-            this->val.symbol = emptySymbol;
-            this->val.freq =
-                this->left->val.freq + this->right->val.freq;
-        }
-
-    bool isSingle()const
-        {
-            return (this->left == NULL && this->right == NULL);
-        }
-};
+vector<BYTE> repeatCode(
+    unsigned int minCodeLength,
+    unsigned int extraBits,
+    unsigned int repeatCode,
+    BitReader * compressedStream);
 
 Node * constructHuffmanTree(FrequencyTable freqTable,unsigned long & len);
 
@@ -132,7 +101,7 @@ void getCodeLengths(
 
 }
 
-vector<unsigned int> makeCodeLengths(
+CodeLengths makeCodeLengths(
     /* all the codes to be used should be assigned freqs, even the ones with no freqs at all*/
     FrequencyTable freqTable,
     CodeLength maxCodeLength)
@@ -150,7 +119,6 @@ vector<unsigned int> makeCodeLengths(
     for(size_t i = 0; i < codeDepths.size(); ++i){
         if(codeDepths[i] != 0){
             size_t depth = min(maxCodeLength,codeDepths[i]);
-	    printf("depth:%ld\n", depth);
             blCount[depth]++;
 	    sum += 1 << (maxCodeLength - depth);
         }
@@ -191,7 +159,7 @@ vector<unsigned int> makeCodeLengths(
 	upper_bound(symbols.begin(), symbols.end(), zeroFreqSymbol, symbolFreqCmp) -
         symbols.begin();
 
-    vector<unsigned int> codeLengths(freqTable.size());
+    CodeLengths codeLengths(freqTable.size());
 
     for(size_t i = 0; i < beginCodeLengths; ++i)
 	codeLengths[i] = 0;
@@ -203,6 +171,8 @@ vector<unsigned int> makeCodeLengths(
         codeLengths[symbols[i].symbol] = bits;
         blCount[bits]--;
     }
+
+    delete huffman;
 
     return codeLengths;
 }
@@ -245,7 +215,7 @@ void printCodesList(CodesList codes)
     verbosePrint("Codes List:\n");
 
     for(i = 0; i < codes.size(); ++i)
-        if(codes[i].codeLength != 0){
+        if(codes[i].length != 0){
             HuffmanCode code = codes[i];
 
             verbosePrint("Code symbol:%d:%c: ",i,i);
@@ -253,7 +223,7 @@ void printCodesList(CodesList codes)
             verbosePrint("val:%d = ",code.value);
 
 
-            for(int j = (code.codeLength - 1); j >= 0 ; --j)
+            for(int j = (code.length - 1); j >= 0 ; --j)
                 verbosePrint("%d", getBitToggled(code.value,j));
 
             verbosePrint("\n");
@@ -266,7 +236,7 @@ int getBitToggled(BYTE value,BYTE bit)
     return (((value & (1 << bit)) >> bit));
 }
 
-CodesList translateCodes(const vector<unsigned int> & codeLengths)
+CodesList translateCodes(const CodeLengths & codeLengths)
 {
     FrequencyTable codeLengthFreqs = constructFrequencyTable(codeLengths, 256);
     CodesList translatedCodes;
@@ -301,7 +271,7 @@ CodesList translateCodes(const vector<unsigned int> & codeLengths)
         HuffmanCode newCode;
 
         newCode.value = i;
-        newCode.codeLength = 0;
+        newCode.length = 0;
 
         translatedCodes.push_back(newCode);
     }
@@ -312,7 +282,7 @@ CodesList translateCodes(const vector<unsigned int> & codeLengths)
 
         if(len != 0){
             translatedCodes[i].value = nextCode[len];
-            translatedCodes[i].codeLength = len;
+            translatedCodes[i].length = len;
 
             nextCode[len]++;
         }
@@ -328,11 +298,11 @@ bool nodeCmp(const Node * a, const Node * b)
 
 void writeCode(HuffmanCode code, BitWriter * outBits)
 {
-    for(CodeLength i = 0; i < code.codeLength; ++i){
+    for(CodeLength i = 0; i < code.length; ++i){
         BYTE b = getbits(
             code.value,
-            code.codeLength - i - 1,
-            code.codeLength - i - 1);
+            code.length - i - 1,
+            code.length - i - 1);
 
         outBits->writeBits(b,1);
     }
@@ -344,7 +314,7 @@ reverseCodesList(const CodesList & codes)
     map<HuffmanCode, unsigned long, HuffmanCodeCompare> rev;
 
     for(size_t i = 0; i < codes.size(); ++i){
-        if(codes[i].codeLength != 0){
+        if(codes[i].length != 0){
             rev[codes[i]] = i;
         }
     }
@@ -358,15 +328,13 @@ unsigned long readCode(
 {
     HuffmanCode searched;
 
-    searched.codeLength = 1;
+    searched.length = 1;
     searched.value = inBits->readBits(1);
 
     map<HuffmanCode, unsigned long>::const_iterator foundIter = codes.find(searched);
 
     while(foundIter == codes.end()){
-/*      printf("val:%ld\n", searched.value); */
-
-        searched.codeLength++;
+        searched.length++;
         searched.value = inBits->readBits(1) | (searched.value << 1);
         foundIter = codes.find(searched);
     }
@@ -401,7 +369,57 @@ vector<unsigned int> getCodeDepths(
     return codeDepths;
 }
 
-bool symbolFreqCmp(const SymbolFreq & a, const SymbolFreq & b)
+RevCodesList loadCodeLengthCodes(unsigned int HCLEN,BitReader * compressedStream)
 {
-    return a.freq < b.freq;
+    unsigned int  realLength;
+    BYTE codeLengthOrder[CODE_LENGTH_CODES] = {
+        16, 17, 18,0, 8, 7,
+        9, 6, 10, 5, 11, 4,
+        12, 3, 13, 2, 14, 1, 15};
+
+    vector<unsigned int> codeLengths(CODE_LENGTH_CODES);
+
+    unsigned int i;
+
+    realLength = HCLEN + 4;
+
+    for(i = 0; i < CODE_LENGTH_CODES; ++i)
+        codeLengths[i] = 0;
+
+    for(i = 0; i < realLength; ++i)
+        codeLengths[codeLengthOrder[i]] = compressedStream->readBits(3);
+
+    return reverseCodesList(translateCodes(codeLengths));
+}
+
+vector<BYTE> repeatCode(
+    unsigned int minCodeLength,
+    unsigned int extraBits,
+    unsigned int repeatCode,
+    BitReader * compressedStream)
+{
+    int realLength;
+    int j;
+
+    vector<BYTE> rep;
+
+    realLength =  minCodeLength + compressedStream->readBits(extraBits);
+
+    for(j = 0; j < realLength; ++j)
+	rep.push_back(repeatCode);
+
+    return rep;
+}
+
+vector<BYTE> repeatZeroLengthCode(
+    unsigned int minCodeLength,
+    unsigned int extraBits,
+    BitReader * compressedStream){
+    return repeatCode(minCodeLength, extraBits, 0, compressedStream);
+}
+
+vector<BYTE> repeatPreviousLengthCode(
+    unsigned int previousCode,
+    BitReader * compressedStream){
+    return repeatCode(3, 2, previousCode, compressedStream);
 }

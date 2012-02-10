@@ -8,11 +8,13 @@
 #include <vector>
 #include <cstring>
 #include <map>
+#include <iostream>
+#include <iterator>
 
 using std::vector;
 using std::map;
-
-
+using std::ostream_iterator;
+using std::cout;
 
 void printHelp(void);
 
@@ -92,16 +94,17 @@ void huffmanCompress(FILE * in,FILE * out)
 
     FrequencyTable freqTable = constructFrequencyTable(fileData, 256);
 
-/*    FrequencyTable freqTable('c' + 1);
-    freqTable['a'] = 2;
-    freqTable['b'] = 2;
-    freqTable['c'] = 2; */
-
-    vector<unsigned int> codeLengths = makeCodeLengths(freqTable, 15);
+    CodeLengths codeLengths = makeCodeLengths(freqTable, 15);
     CodesList codes = translateCodes(codeLengths);
 
-    printf("cods:\n");
-    printCodesList(codes);
+    /* compress code Lengths. */
+
+    copy(codeLengths.begin(), codeLengths.end(),
+              ostream_iterator<CodeLength>(cout, ", "));
+    cout << "\n";
+
+/*    printf("cods:\n");
+    printCodesList(codes); */
 
     out = out;
 
@@ -143,21 +146,13 @@ void huffmanDecompress(FILE * in,FILE * out)
     CodesList codes = translateCodes(codeLengths);
 /*    printCodesList(codes); */
 
-    map<HuffmanCode, unsigned long, HuffmanCodeCompare> lookup = reverseCodesList(codes);
-
-/*    for(
-	map<HuffmanCode, unsigned long, HuffmanCodeCompare>::iterator iter = lookup.begin();
-	iter != lookup.end();
-	++iter){
-	printf("%ld:%ld:%d\n", iter->second , iter->first.value, iter->first.codeLength);
-    } */
+    RevCodesList lookup = reverseCodesList(codes);
 
     size_t fileSize = inBits->readBits(64);
 
     for(size_t i = 0; i < fileSize; ++i){
 	putc(readCode(lookup, inBits),out);
     }
-
 
     out = out;
 

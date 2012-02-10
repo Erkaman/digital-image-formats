@@ -26,9 +26,10 @@ protected:
 
     BitReader(BitOrder order_);
 
-    virtual BYTE nextByte() = 0;
 
 public:
+
+    virtual BYTE nextByte() = 0;
 
     virtual size_t getPosition()const = 0;
 

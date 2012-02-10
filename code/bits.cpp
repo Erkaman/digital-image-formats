@@ -95,7 +95,7 @@ BYTE BitIterReader::nextByte()
 
 size_t BitIterReader::getPosition()const
 {
-    return distance(this->beg, this->iter);
+    return this->iter - this->beg;
 }
 
 

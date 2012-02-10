@@ -1066,7 +1066,7 @@ vector<Color> splitUpColorData(vector<BYTE> data, ImageHeader header)
     }
 
     DataStream colorStream(data,PNG_ENDIAN);
-    BitReader inBits(data.begin(),MSBF);
+    BitIterReader inBits(data.begin(), data.begin(),MSBF);
 
     for(pass = 0; pass < passes; ++pass){
 

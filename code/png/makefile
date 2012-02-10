@@ -3,7 +3,7 @@ include ../default
 
 objects = main.o  png.o $(commonobjects)
 
-deflateObjects = ../deflate/deflate.o ../deflate/zlib.o
+deflateObjects = ../deflate/deflate.o ../deflate/zlib.o ../huffman/huffman.o ../huffman/node.o
 
 $(PROG) : $(objects)
 	cd .. && $(MAKE)
@@ -14,4 +14,4 @@ main.o : main.h png.h
 png.o :  png.h ../io.h  png_defs.h ../bits.h
 
 clean :
-	rm $(PROG) $(objects)
+	rm -f $(PROG) $(objects) $(deflateObjects)
