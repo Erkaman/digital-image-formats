@@ -6,6 +6,7 @@
 #include <cstring>
 #include <vector>
 #include <map>
+#include <cassert>
 
 using std::vector;
 using std::sort;
@@ -13,37 +14,78 @@ using std::pair;
 using std::find;
 using std::sort;
 using std::map;
+using std::fill;
+using std::min;
 
-vector<Node *> searchDepths(vector<Node *> trees, int depth);
+typedef unsigned int Symbol;
+typedef unsigned int Freq;
+typedef unsigned int CodeLength;
 
-vector<Node *> sortTrees(vector<Node *> trees);
+struct SymbolFreq{
+public:
+    Symbol symbol;
+    Freq freq;
+};
+
+bool symbolFreqCmp(const SymbolFreq & a, const SymbolFreq & b);
+
+/* A node of the Huffman tree. */
+struct Node {
+
+public:
+    SymbolFreq val;
+
+    static const Symbol emptySymbol = 0;
+
+    /* Values of nodes should not change, just move them around*/
+    Node * left;
+    Node * right;
+
+    Node(SymbolFreq val_):val(val_), left(NULL), right(NULL){}
+
+    Node(Node * left_, Node * right_):left(left_), right(right_)
+        {
+            this->val.symbol = emptySymbol;
+            this->val.freq =
+                this->left->val.freq + this->right->val.freq;
+        }
+
+    bool isSingle()const
+        {
+            return (this->left == NULL && this->right == NULL);
+        }
+};
+
+Node * constructHuffmanTree(FrequencyTable freqTable,unsigned long & len);
 
 void printTrees(vector<Node *> trees);
 
 pair<vector<Node *>::iterator,vector<Node *>::iterator>
 findTwoMinValues(vector<Node *> & trees);
 
-CodesList createOptimumCodes(Node * huffmanTree);
-
-vector<Node *> makeTrees(FrequencyTable freqTable);
+vector<Node *> makeTrees(const FrequencyTable & freqTable);
 
 bool nodeCmp(const Node * a, const Node * b);
 
-bool SymbolFreqCmp(const SymbolFreq & a, const SymbolFreq & b);
+void getCodeDepths(int depth, Node * node, vector<unsigned int> & codeDepths);
+
+vector<unsigned int> getCodeDepths(
+    FrequencyTable freqTable,
+    Node * node);
 
 int getBitToggled(BYTE value,BYTE bit);
 
-void constructCodesList(
+void getCodeLengths(
     const Node * node,
-    BYTE depth,
-    unsigned long code,
-    CodesList & codes);
+    /* A symbol value to a code length.*/
+    vector<unsigned long> & codeLengths,
+    int depth);
 
-Node * constructHuffmanTree(FrequencyTable freqTable)
+Node * constructHuffmanTree(FrequencyTable freqTable, unsigned long & len)
 {
-    Node * newTree;
 
     vector<Node *> trees = makeTrees(freqTable);
+    len = trees.size();
 
     /* While the full Huffman tree hasn't yet been built. */
     while(trees.size() > 1){
@@ -54,68 +96,115 @@ Node * constructHuffmanTree(FrequencyTable freqTable)
             vector<Node *>::iterator
             > mins = findTwoMinValues(trees);
 
+        Node * newTree;
+
         /* These two nodes are merged into one tree.*/
         newTree = new Node(*mins.first,*mins.second);
         *mins.first = newTree;
         trees.erase(mins.second);
-}
-
+    }
     return trees.front();
 }
 
-void printTrees(vector<Node *> trees)
+void getCodeLengths(
+    const Node * node,
+    /* A symbol value to a code length.*/
+    vector<unsigned long> & codeLengths,
+    int depth)
 {
-    size_t i = 0;
-    for(i = 0; i < trees.size(); ++i){
-        if(trees[i] != NULL)
-            trees[i]->print();
+    if(node->isSingle()){
+        codeLengths[node->val.symbol] = depth;
+/*      codeLengths.push_back(depth); */
+        return;
     }
+
+    if(node->right != NULL)
+        getCodeLengths(
+            node->right,
+            codeLengths,
+            depth+1);
+
+    if(node->left != NULL)
+        getCodeLengths(
+            node->left,
+            codeLengths,
+            depth+1);
+
 }
 
-CodesList createOptimumCodes(Node * huffmanTree)
+vector<unsigned int> makeCodeLengths(
+    /* all the codes to be used should be assigned freqs, even the ones with no freqs at all*/
+    FrequencyTable freqTable,
+    CodeLength maxCodeLength)
 {
-    unsigned long max = huffmanTree->getMaxSymbol();
+    unsigned long len;
+    Node * huffman = constructHuffmanTree(freqTable,len);
 
-    CodesList optimumCodes(max+1);
+    vector<unsigned int> codeDepths = getCodeDepths(freqTable, huffman);
 
-    for(size_t i = 0; i < optimumCodes.size(); ++i){
-        optimumCodes[i].codeLength = 0;
+    vector<unsigned long> blCount(maxCodeLength+1);
+
+    unsigned int sum = 0;
+
+    /* Count the frequencies of the code depths. */
+    for(size_t i = 0; i < codeDepths.size(); ++i){
+        if(codeDepths[i] != 0){
+            size_t depth = min(maxCodeLength,codeDepths[i]);
+	    printf("depth:%ld\n", depth);
+            blCount[depth]++;
+	    sum += 1 << (maxCodeLength - depth);
+        }
     }
 
-    constructCodesList(huffmanTree,0,0,optimumCodes);
+    /* HERE BE DRAGONS */
+    unsigned int overflow = sum > (unsigned int)(1 << maxCodeLength) ? sum - (1 << maxCodeLength) : 0;
 
-    return optimumCodes;
-}
-
-vector<Node *> searchDepths(vector<Node *> trees, int depth)
-{
-    vector<Node *> depths;
-
-    for(vector<Node *>::iterator iter = trees.begin();
-	iter != trees.end();
-	++iter){
-	if((*iter)->getMaxDepth() == depth)
-	    depths.push_back(*iter);
+    while (overflow--)
+    {
+        unsigned int bits = maxCodeLength-1;
+        while (blCount[bits] == 0)
+            bits--;
+        blCount[bits]--;
+        blCount[bits+1] += 2;
+        assert(blCount[maxCodeLength] > 0);
+        blCount[maxCodeLength]--;
     }
 
-    return depths;
-}
+    vector<SymbolFreq> symbols;
 
-vector<Node *> sortTrees(vector<Node *> trees)
-{
-    vector<Node *> sorted;
+    for(size_t i = 0; i < freqTable.size(); ++i){
 
-    int depth = 1;
+	SymbolFreq s;
 
-    while(sorted.size() != trees.size()){
+	s.symbol = i;
+	s.freq = freqTable[i];
 
-	vector<Node *> depths = searchDepths(trees, depth);
-	sort(depths.begin(), depths.end(), nodeCmp);
-	sorted.insert(sorted.end(), depths.begin(), depths.end());
-	++depth;
+	symbols.push_back(s);
     }
 
-    return sorted;
+    sort(symbols.begin(), symbols.end(), symbolFreqCmp);
+
+    SymbolFreq zeroFreqSymbol;
+    zeroFreqSymbol.freq = 0;
+
+    size_t beginCodeLengths =
+	upper_bound(symbols.begin(), symbols.end(), zeroFreqSymbol, symbolFreqCmp) -
+        symbols.begin();
+
+    vector<unsigned int> codeLengths(freqTable.size());
+
+    for(size_t i = 0; i < beginCodeLengths; ++i)
+	codeLengths[i] = 0;
+
+    unsigned int bits = maxCodeLength;
+    for(size_t i = beginCodeLengths; i < symbols.size(); ++i){
+        while (blCount[bits] == 0)
+            bits--;
+        codeLengths[symbols[i].symbol] = bits;
+        blCount[bits]--;
+    }
+
+    return codeLengths;
 }
 
 pair<vector<Node *>::iterator,vector<Node *>::iterator>
@@ -123,106 +212,27 @@ findTwoMinValues(vector<Node *> & trees)
 {
     pair<vector<Node *>::iterator,vector<Node *>::iterator> res;
 
-    printf("before sort\n");
-    for(vector<Node *>::iterator iter = trees.begin();
-	iter != trees.end();
-	++iter){
-	printf("S:%c D:%d F:%ld,",
-	       (char)(*iter)->getMaxSymbol(),
-	       (*iter)->getMaxDepth(),
-	       (*iter)->getNodeValue().freq);
-    }
-    printf("\n");
-
-    trees = sortTrees(trees);
-/*    sort(trees.begin(), trees.end(), nodeCmp); */
+    sort(trees.begin(), trees.end(), nodeCmp);
 
     res.first = trees.begin();
     res.second = trees.begin() + 1;
 
-    printf("after sort\n");
-    for(vector<Node *>::iterator iter = trees.begin();
-	iter != trees.end();
-	++iter){
-	printf("S:%c D:%d F:%ld,",
-	       (char)(*iter)->getMaxSymbol(),
-	       (*iter)->getMaxDepth(),
-	       (*iter)->getNodeValue().freq);
-    }
-    printf("\n");
-
-/*    printf("pair:%c;%c\n", (char)(*res.first)->getMaxSymbol(),
-	(char)(*res.second)->getMaxSymbol()); */
-
     return res;
 }
 
-void constructCodesList(
-    const Node * node,
-    BYTE depth,
-    unsigned long code,
-    CodesList & codes)
-{
-
-    if(node->isSingle()){
-
-        HuffmanCode newCode;
-        newCode.value = code;
-        newCode.codeLength = depth;
-
-        /* Reverse the codes? */
-        codes[node->getNodeValue().symbol] = newCode;
-
-        return;
-    }
-
-    if(node->getRight() != NULL){
-        constructCodesList(
-            node->getRight(),
-            depth+1,
-            (code << 1) | (1),
-            codes);
-    }
-
-    if(node->getLeft() != NULL){
-        constructCodesList(
-            node->getLeft(),
-            depth+1,
-            code << 1,
-            codes);
-    }
-}
-
-bool SymbolFreqCmp(const SymbolFreq & a, const SymbolFreq & b)
-{
-    if(a.freq != b.freq)
-        return a.freq < b.freq;
-    else
-        return a.symbol < b.symbol;
-}
-
-vector<Node *> makeTrees(FrequencyTable freqTable)
+vector<Node *> makeTrees(const FrequencyTable & freqTable)
 {
     size_t i;
-    vector<SymbolFreq> freqs;
+    vector<Node *> trees;
 
     for(i = 0;i < freqTable.size(); ++i){
         if(freqTable[i] != 0){
             SymbolFreq f;
             f.symbol = i;
             f.freq = freqTable[i];
-
-            freqs.push_back(f);
+            Node * node = new Node(f);
+            trees.push_back(node);
         }
-    }
-
-    sort(freqs.begin(), freqs.end(), SymbolFreqCmp);
-
-    vector<Node *> trees;
-
-    for(i = 0;i < freqs.size(); ++i){
-        Node * node = new Node(freqs[i]);
-        trees.push_back(node);
     }
 
     return trees;
@@ -256,9 +266,9 @@ int getBitToggled(BYTE value,BYTE bit)
     return (((value & (1 << bit)) >> bit));
 }
 
-CodesList translateCodes(const vector<unsigned long> & codeLengths)
+CodesList translateCodes(const vector<unsigned int> & codeLengths)
 {
-    FrequencyTable codeLengthFreqs(codeLengths);
+    FrequencyTable codeLengthFreqs = constructFrequencyTable(codeLengths, 256);
     CodesList translatedCodes;
 
     unsigned long alphabetSize = codeLengths.size();
@@ -280,7 +290,7 @@ CodesList translateCodes(const vector<unsigned long> & codeLengths)
 
     code = 0;
 
-    codeLengthFreqs.set(0,0);
+    codeLengthFreqs[0] = 0;
 
     for(bits = 1; bits <= maxBits; ++bits){
         code = (code + codeLengthFreqs[bits - 1]) << 1;
@@ -313,16 +323,12 @@ CodesList translateCodes(const vector<unsigned long> & codeLengths)
 
 bool nodeCmp(const Node * a, const Node * b)
 {
-    return
-/*	(a->getMaxDepth() < b->getMaxDepth()) || */
-        (a->getMaxSymbol() < b->getMaxSymbol()) ||
-        (a->getNodeValue().freq < b->getNodeValue().freq)
-        ;
+    return (a->val.freq < b->val.freq);
 }
 
 void writeCode(HuffmanCode code, BitWriter * outBits)
 {
-    for(int i = 0; i < code.codeLength; ++i){
+    for(CodeLength i = 0; i < code.codeLength; ++i){
         BYTE b = getbits(
             code.value,
             code.codeLength - i - 1,
@@ -368,3 +374,34 @@ unsigned long readCode(
     return foundIter->second;
 }
 
+void getCodeDepths(int depth, Node * node, vector<unsigned int> & codeDepths)
+{
+    if(node->isSingle())
+        codeDepths[node->val.symbol] = depth;
+    else{
+        if(node->left != NULL)
+            getCodeDepths(depth+1, node->left, codeDepths);
+
+        if(node->right != NULL)
+            getCodeDepths(depth+1, node->right, codeDepths);
+    }
+}
+
+vector<unsigned int> getCodeDepths(
+    FrequencyTable freqTable,
+    Node * node)
+{
+    size_t maxSymbol = freqTable.end() - 1 - freqTable.begin();
+
+    vector<unsigned int> codeDepths(maxSymbol + 1);
+    fill(codeDepths.begin(), codeDepths.end(), 0);
+
+    getCodeDepths(0, node, codeDepths);
+
+    return codeDepths;
+}
+
+bool symbolFreqCmp(const SymbolFreq & a, const SymbolFreq & b)
+{
+    return a.freq < b.freq;
+}

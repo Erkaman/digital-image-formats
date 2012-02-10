@@ -1,4 +1,3 @@
-#include "tree.h"
 #include "../frequency_table.h"
 #include "../io.h"
 #include "../bits.h"
@@ -19,12 +18,6 @@ void printHelp(void);
 
 void huffmanCompress(FILE * in,FILE * out);
 void huffmanDecompress(FILE * in,FILE * out);
-
-void huffmanEncode(
-    vector<BYTE> fileData,
-    FILE * out,
-    CodesList codes,
-    vector<unsigned long> codeLengths);
 
 int main(int argc, char *argv[])
 {
@@ -95,40 +88,23 @@ void printHelp(void)
 
 void huffmanCompress(FILE * in,FILE * out)
 {
-    CodesList optimumCodes;
-    struct Node * huffmanTree;
-
     vector<BYTE> fileData = readFile(in);
 
-    FrequencyTable freqTable(fileData);
+    FrequencyTable freqTable = constructFrequencyTable(fileData, 256);
 
-    huffmanTree = constructHuffmanTree(freqTable);
+/*    FrequencyTable freqTable('c' + 1);
+    freqTable['a'] = 2;
+    freqTable['b'] = 2;
+    freqTable['c'] = 2; */
 
+    vector<unsigned int> codeLengths = makeCodeLengths(freqTable, 15);
+    CodesList codes = translateCodes(codeLengths);
 
-    optimumCodes = createOptimumCodes(huffmanTree);
+    printf("cods:\n");
+    printCodesList(codes);
 
-    printf("1:\n");
-    printCodesList(optimumCodes);
-
-    vector<unsigned long> codeLengths = huffmanTree->getCodeLengths(256);
-
-    delete huffmanTree;
-    huffmanTree = NULL;
-
-    printf("2:\n");
-    CodesList optc = translateCodes(codeLengths);
-    printCodesList(optc);
-
-    huffmanEncode(fileData,out,optimumCodes, codeLengths);
     out = out;
-}
 
-void huffmanEncode(
-    vector<BYTE> fileData,
-    FILE * out,
-    CodesList codes,
-    vector<unsigned long> codeLengths)
-{
     BitFileWriter * outBits = new BitFileWriter(out, LSBF);
 
     for(size_t i = 0; i < codeLengths.size(); ++i){
@@ -156,7 +132,7 @@ void huffmanDecompress(FILE * in,FILE * out)
 {
     BitFileReader * inBits = new BitFileReader(in, LSBF);
 
-    vector<unsigned long> codeLengths;
+    vector<unsigned int> codeLengths;
 
     int sum = 0;
     for(size_t i = 0; i < 256; ++i){
@@ -165,7 +141,7 @@ void huffmanDecompress(FILE * in,FILE * out)
 	sum += 4;
     }
     CodesList codes = translateCodes(codeLengths);
-    printCodesList(codes);
+/*    printCodesList(codes); */
 
     map<HuffmanCode, unsigned long, HuffmanCodeCompare> lookup = reverseCodesList(codes);
 
@@ -187,4 +163,3 @@ void huffmanDecompress(FILE * in,FILE * out)
 
     delete inBits;
 }
-

@@ -6,26 +6,11 @@
 #include "defs.h"
 
 /* Frequency table for integer types*/
-class FrequencyTable {
+typedef std::vector<unsigned long> FrequencyTable;
 
-private:
-
-    std::vector<unsigned long> freqs;
-
-    void constructFrequencyTable(
-	const std::vector<unsigned long> & data);
-
-public:
-
-    FrequencyTable(const std::vector<BYTE> & data);
-    FrequencyTable(const std::vector<unsigned long> & data);
-    FrequencyTable(FILE * in);
-
-    unsigned long operator [] (size_t index);
-
-    void set(size_t index, unsigned long val);
-
-    size_t size() const;
-};
+FrequencyTable constructFrequencyTable(const std::vector<BYTE> & data, size_t size);
+FrequencyTable constructFrequencyTable(const std::vector<unsigned int> & data, size_t size);
+FrequencyTable constructFrequencyTable(FILE * in, size_t size);
 
 #endif /* _FREQUENCY_TABLE_H_ */
+

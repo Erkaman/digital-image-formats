@@ -3,36 +3,32 @@
 
 #include "../frequency_table.h"
 #include "../bits.h"
-#include "tree.h"
 #include <vector>
+#include <map>
+
+typedef unsigned int CodeLength;
+
 
 struct HuffmanCode{
     /* the code value of the code*/
     unsigned long value;
 
     /* The codes whose lengths are zero are ignored.  */
-    int codeLength;
+    CodeLength codeLength;
 };
-
-typedef struct{
-    BYTE symbol;
-    unsigned long frequency;
-} AlphabetSymbol;
-
 
 typedef std::vector<HuffmanCode> CodesList;
 
-Node * constructHuffmanTree(FrequencyTable freqTable);
+std::vector<unsigned int> makeCodeLengths(
+    FrequencyTable freqTable,
+    CodeLength maxCodeLength);
 
-CodesList createOptimumCodes(Node * huffmanTree);
 
 void printCodesList(CodesList codes);
 
-CodesList translateCodes(const std::vector<unsigned long> & codeLengths);
+CodesList translateCodes(const std::vector<unsigned int> & codeLengths);
 
 void writeCode(HuffmanCode code, BitWriter * outBits);
-
-
 
 bool huffmanCodeCompare(const HuffmanCode & a, const HuffmanCode & b);
 

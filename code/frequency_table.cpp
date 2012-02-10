@@ -5,43 +5,38 @@
 using std::vector;
 using std::max_element;
 
-void FrequencyTable::constructFrequencyTable(
-    const std::vector<unsigned long> & data)
+FrequencyTable constructFrequencyTable(
+    const std::vector<unsigned int> & data,
+    size_t size)
 {
     size_t i;
 
-    unsigned long max = *max_element(data.begin(), data.end());
+    FrequencyTable freqs;
 
     /* Also include the max.*/
-    freqs.resize(max+1);
+    freqs.resize(size);
 
-    for(i = 0; i < freqs.size(); ++i)
-	freqs[i] = 0;
+    fill(freqs.begin(),freqs.end(), 0);
 
-    for(i = 0; i < data.size(); ++i){
-	unsigned long  v = data[i];
-	++freqs[v];
-    }
+    for(i = 0; i < data.size(); ++i)
+	++freqs[data[i]];
+
+    return freqs;
 }
 
-FrequencyTable::FrequencyTable(const vector<BYTE> & data)
+FrequencyTable constructFrequencyTable(const std::vector<BYTE> & data, size_t size)
 {
-    vector<unsigned long> conv;
+    vector<unsigned int> conv;
 
     for(size_t i = 0; i < data.size(); ++i)
 	conv.push_back(data[i]);
 
-    constructFrequencyTable(conv);
+    return constructFrequencyTable(conv, size);
 }
 
-FrequencyTable::FrequencyTable(const vector<unsigned long> & data)
+FrequencyTable constructFrequencyTable(FILE * in, size_t size)
 {
-    constructFrequencyTable(data);
-}
-
-FrequencyTable::FrequencyTable(FILE * in)
-{
-    vector<unsigned long> conv;
+    vector<unsigned int> conv;
     vector<BYTE> fileData;
 
     fileData = readFile(in);
@@ -49,20 +44,5 @@ FrequencyTable::FrequencyTable(FILE * in)
     for(size_t i = 0; i < fileData.size(); ++i)
 	conv.push_back(fileData[i]);
 
-    constructFrequencyTable(conv);
-}
-
-unsigned long FrequencyTable::operator [] (size_t index)
-{
-    return freqs[index];
-}
-
-size_t FrequencyTable::size() const
-{
-    return freqs.size();
-}
-
-void FrequencyTable::set(size_t index, unsigned long val)
-{
-    this->freqs[index] = val;
+    return constructFrequencyTable(conv, size);
 }
