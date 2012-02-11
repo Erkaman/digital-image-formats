@@ -6,7 +6,7 @@ $(PROG) : $(objects)
 	cd .. && $(MAKE)
 	$(CC) $(objects) -o $(PROG)
 
-main.o : main.cpp ../defs.h ../bits.h
+main.o : main.cpp ../defs.h ../bits.h ../io.h
 
 clean :
 	rm $(PROG) $(objects)
