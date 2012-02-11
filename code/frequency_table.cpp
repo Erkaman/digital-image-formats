@@ -37,7 +37,7 @@ FrequencyTable constructFrequencyTable(const std::vector<BYTE> & data, size_t si
 FrequencyTable constructFrequencyTable(FILE * in, size_t size)
 {
     vector<unsigned int> conv;
-    vector<BYTE> fileData;
+    vector<unsigned int> fileData;
 
     fileData = readFile(in);
 

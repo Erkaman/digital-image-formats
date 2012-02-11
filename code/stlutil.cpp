@@ -2,9 +2,9 @@
 
 using std::vector;
 
-vector<BYTE> readFile(FILE * in)
+vector<unsigned int> readFile(FILE * in)
 {
-    vector<BYTE> data;
+    vector<unsigned int> data;
 
     while(true){
 	int b = getc(in);

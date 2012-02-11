@@ -21,8 +21,10 @@ typedef std::vector<HuffmanCode> CodesList;
 
 #define CODE_LENGTH_CODES 19
 
+
 CodeLengths makeCodeLengths(
-    FrequencyTable freqTable,
+    std::vector<unsigned int> data,
+    unsigned int alphabetSize,
     CodeLength maxCodeLength);
 
 
@@ -61,4 +63,49 @@ std::vector<BYTE> repeatPreviousLengthCode(
     unsigned int previousCode,
     BitReader * compressedStream);
 
+CodeLengths compressCodeLengths(
+    const CodeLengths & codeLengths,
+    CodeLengths & codeLengthsAlphabetCodeLengths);
+
+
+template<typename InputIterator, typename T>
+InputIterator
+find_first_not_of(InputIterator first, InputIterator last, const T & val)
+{
+    for (first = first;
+         first != last;
+         ++first)
+        if (*first != val)
+            return first;
+
+    return last;;
+}
+
+
+CodeLengths makePacket(
+    CodeLength length,
+    unsigned int code,
+    CodeLengths & codeLengthsAlphabetCodeLengths);
+
+CodeLengths makeRepeatPacket(
+    CodeLength length,
+    unsigned int code,
+    CodeLengths & codeLengthsAlphabetCodeLengths);
+CodeLengths makeZeroPacket(
+    CodeLength length,
+    CodeLengths & codeLengthsAlphabetCodeLengths);
+
+void permuteCodelengths(CodeLengths & cs);
+
+RevCodesList loadUsingCodeLengthCodes(
+    unsigned short length,
+    unsigned short alphabetLength,
+    const RevCodesList & codeLengthCodes,
+    BitReader * compressedStream);
+
+void printCodeLengths(CodeLengths cs);
+
+CodeLengths extractAlphabetCodeLengths(CodeLengths cs);
+
 #endif /* _HUFFMAN_H_ */
+

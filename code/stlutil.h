@@ -5,6 +5,6 @@
 #include <cstdio>
 #include "defs.h"
 
-std::vector<BYTE> readFile(FILE * in);
+std::vector<unsigned int> readFile(FILE * in);
 
 #endif /* _STLUTIL_H_ */

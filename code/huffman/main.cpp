@@ -8,18 +8,19 @@
 #include <vector>
 #include <cstring>
 #include <map>
-#include <iostream>
 #include <iterator>
+#include <algorithm>
 
 using std::vector;
 using std::map;
-using std::ostream_iterator;
-using std::cout;
+using std::upper_bound;
 
 void printHelp(void);
 
 void huffmanCompress(FILE * in,FILE * out);
 void huffmanDecompress(FILE * in,FILE * out);
+
+
 
 int main(int argc, char *argv[])
 {
@@ -90,39 +91,80 @@ void printHelp(void)
 
 void huffmanCompress(FILE * in,FILE * out)
 {
-    vector<BYTE> fileData = readFile(in);
+    vector<unsigned int> fileData = readFile(in);
 
-    FrequencyTable freqTable = constructFrequencyTable(fileData, 256);
+    CodeLengths byteCodeLengths = makeCodeLengths(fileData, 256, 15);
 
-    CodeLengths codeLengths = makeCodeLengths(freqTable, 15);
-    CodesList codes = translateCodes(codeLengths);
+    CodesList byteCodes = translateCodes(byteCodeLengths);
 
-    /* compress code Lengths. */
+    CodeLengths codeLengthalphabetCodeLengths;
+    CodeLengths compressedByteCodeLengths = compressCodeLengths(
+        byteCodeLengths,
+        codeLengthalphabetCodeLengths);
 
-    copy(codeLengths.begin(), codeLengths.end(),
-              ostream_iterator<CodeLength>(cout, ", "));
-    cout << "\n";
+    CodeLengths codeLengthCodeLengths =
+        makeCodeLengths(codeLengthalphabetCodeLengths, 19,7);
+    CodesList codeLengthCodes = translateCodes(codeLengthCodeLengths);
 
-/*    printf("cods:\n");
-    printCodesList(codes); */
-
-    out = out;
+    permuteCodelengths(codeLengthCodeLengths);
 
     BitFileWriter * outBits = new BitFileWriter(out, LSBF);
 
-    for(size_t i = 0; i < codeLengths.size(); ++i){
-        outBits->writeBits(codeLengths[i], 4);
+    /* Find the end of the trailing zeroes. */
+    size_t begTrail;
+    for(begTrail = codeLengthCodeLengths.size() - 1; begTrail != 0; --begTrail)
+	if(codeLengthCodeLengths[begTrail] != 0)
+	    break;
+
+    outBits->writeBits(begTrail + 1 - 4, 4);
+
+    /* these codes are used to encode the byte codes. */
+    for(size_t i = 0; i < (begTrail + 1); ++i){
+        outBits->writeBits(codeLengthCodeLengths[i], 3);
+    }
+
+    for(size_t i = 0; i < compressedByteCodeLengths.size(); ++i){
+        HuffmanCode code;
+        if(compressedByteCodeLengths[i] <= 15){
+            code = codeLengthCodes[compressedByteCodeLengths[i]];
+
+            writeCode(code, outBits);
+        } else if (compressedByteCodeLengths[i] == 16){
+            code = codeLengthCodes[compressedByteCodeLengths[i]];
+            writeCode(code, outBits);
+
+            /* Write the repeat code. */
+            ++i;
+            outBits->writeBits(compressedByteCodeLengths[i], 2);
+        } else if (compressedByteCodeLengths[i] == 17){
+            code = codeLengthCodes[compressedByteCodeLengths[i]];
+            writeCode(code, outBits);
+
+            /* Write the repeat code. */
+            ++i;
+            outBits->writeBits(compressedByteCodeLengths[i], 3);
+        } else if (compressedByteCodeLengths[i] == 18){
+            code = codeLengthCodes[compressedByteCodeLengths[i]];
+            writeCode(code, outBits);
+
+            /* Write the repeat code. */
+
+
+            ++i;
+
+            outBits->writeBits(compressedByteCodeLengths[i], 7);
+        }
     }
 
     outBits->writeBits(fileData.size(), 64);
 
     for(
-        vector<BYTE>::const_iterator iter = fileData.begin();
+        vector<unsigned int>::const_iterator iter = fileData.begin();
         iter != fileData.end();
         ++iter){
         int c = *iter;
 
-        HuffmanCode code = codes[c];
+        HuffmanCode code = byteCodes[c];
         writeCode(code, outBits);
     }
 
@@ -135,26 +177,24 @@ void huffmanDecompress(FILE * in,FILE * out)
 {
     BitFileReader * inBits = new BitFileReader(in, LSBF);
 
-    vector<unsigned int> codeLengths;
+    unsigned int HCLEN =  inBits->readBits(4);
 
-    int sum = 0;
-    for(size_t i = 0; i < 256; ++i){
-        unsigned long cl = inBits->readBits(4);
-        codeLengths.push_back(cl);
-	sum += 4;
-    }
-    CodesList codes = translateCodes(codeLengths);
-/*    printCodesList(codes); */
+    RevCodesList codeLengthCodeLengths = loadCodeLengthCodes(HCLEN, inBits);
 
-    RevCodesList lookup = reverseCodesList(codes);
+    /* The code lengths are compressed! */
+
+    RevCodesList lookup = loadUsingCodeLengthCodes(
+        256,
+        256,
+        codeLengthCodeLengths,
+        inBits);
 
     size_t fileSize = inBits->readBits(64);
 
     for(size_t i = 0; i < fileSize; ++i){
-	putc(readCode(lookup, inBits),out);
+        putc(readCode(lookup, inBits),out);
     }
-
-    out = out;
 
     delete inBits;
 }
+

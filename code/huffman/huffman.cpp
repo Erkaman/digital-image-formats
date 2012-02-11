@@ -7,6 +7,9 @@
 #include <vector>
 #include <map>
 #include <cassert>
+#include <iostream>
+#include <iterator>
+
 
 #include "node.h"
 
@@ -18,6 +21,8 @@ using std::sort;
 using std::map;
 using std::fill;
 using std::min;
+using std::ostream_iterator;
+using std::cout;
 
 vector<BYTE> repeatCode(
     unsigned int minCodeLength,
@@ -28,6 +33,10 @@ vector<BYTE> repeatCode(
 Node * constructHuffmanTree(FrequencyTable freqTable,unsigned long & len);
 
 void printTrees(vector<Node *> trees);
+
+CodeLengths makeCodeLengths(
+    FrequencyTable freqTable,
+    CodeLength maxCodeLength);
 
 pair<vector<Node *>::iterator,vector<Node *>::iterator>
 findTwoMinValues(vector<Node *> & trees);
@@ -71,7 +80,7 @@ Node * constructHuffmanTree(FrequencyTable freqTable, unsigned long & len)
         newTree = new Node(*mins.first,*mins.second);
         *mins.first = newTree;
         trees.erase(mins.second);
-    }
+}
     return trees.front();
 }
 
@@ -120,7 +129,7 @@ CodeLengths makeCodeLengths(
         if(codeDepths[i] != 0){
             size_t depth = min(maxCodeLength,codeDepths[i]);
             blCount[depth]++;
-	    sum += 1 << (maxCodeLength - depth);
+            sum += 1 << (maxCodeLength - depth);
         }
     }
 
@@ -142,12 +151,12 @@ CodeLengths makeCodeLengths(
 
     for(size_t i = 0; i < freqTable.size(); ++i){
 
-	SymbolFreq s;
+        SymbolFreq s;
 
-	s.symbol = i;
-	s.freq = freqTable[i];
+        s.symbol = i;
+        s.freq = freqTable[i];
 
-	symbols.push_back(s);
+        symbols.push_back(s);
     }
 
     sort(symbols.begin(), symbols.end(), symbolFreqCmp);
@@ -156,13 +165,13 @@ CodeLengths makeCodeLengths(
     zeroFreqSymbol.freq = 0;
 
     size_t beginCodeLengths =
-	upper_bound(symbols.begin(), symbols.end(), zeroFreqSymbol, symbolFreqCmp) -
+        upper_bound(symbols.begin(), symbols.end(), zeroFreqSymbol, symbolFreqCmp) -
         symbols.begin();
 
     CodeLengths codeLengths(freqTable.size());
 
     for(size_t i = 0; i < beginCodeLengths; ++i)
-	codeLengths[i] = 0;
+        codeLengths[i] = 0;
 
     unsigned int bits = maxCodeLength;
     for(size_t i = beginCodeLengths; i < symbols.size(); ++i){
@@ -377,7 +386,7 @@ RevCodesList loadCodeLengthCodes(unsigned int HCLEN,BitReader * compressedStream
         9, 6, 10, 5, 11, 4,
         12, 3, 13, 2, 14, 1, 15};
 
-    vector<unsigned int> codeLengths(CODE_LENGTH_CODES);
+    CodeLengths codeLengths(CODE_LENGTH_CODES);
 
     unsigned int i;
 
@@ -386,8 +395,10 @@ RevCodesList loadCodeLengthCodes(unsigned int HCLEN,BitReader * compressedStream
     for(i = 0; i < CODE_LENGTH_CODES; ++i)
         codeLengths[i] = 0;
 
-    for(i = 0; i < realLength; ++i)
-        codeLengths[codeLengthOrder[i]] = compressedStream->readBits(3);
+    for(i = 0; i < realLength; ++i){
+        BYTE b  = compressedStream->readBits(3);
+        codeLengths[codeLengthOrder[i]] = b;
+    }
 
     return reverseCodesList(translateCodes(codeLengths));
 }
@@ -406,7 +417,7 @@ vector<BYTE> repeatCode(
     realLength =  minCodeLength + compressedStream->readBits(extraBits);
 
     for(j = 0; j < realLength; ++j)
-	rep.push_back(repeatCode);
+        rep.push_back(repeatCode);
 
     return rep;
 }
@@ -422,4 +433,227 @@ vector<BYTE> repeatPreviousLengthCode(
     unsigned int previousCode,
     BitReader * compressedStream){
     return repeatCode(3, 2, previousCode, compressedStream);
+}
+
+
+CodeLengths compressCodeLengths(
+    const CodeLengths & codeLengths,
+    CodeLengths & codeLengthsAlphabetCodeLengths)
+{
+    CodeLengths compressed;
+
+    CodeLengths::const_iterator nextFound, found = codeLengths.begin();
+
+    nextFound = find_first_not_of(found, codeLengths.end(), *found);
+
+    if(codeLengths.size() == 0)
+        return compressed;
+
+    do{
+
+        /* write packet. */
+        unsigned int packetLength = nextFound - found;
+
+	/* does this decrease compression performance? */
+        if(packetLength < 2){
+            compressed.push_back(*found);
+	    codeLengthsAlphabetCodeLengths.push_back(*found);
+        } else {
+
+            CodeLengths packet = makePacket(
+		packetLength,
+		*found,
+		codeLengthsAlphabetCodeLengths);
+
+            compressed.insert(
+                compressed.end(),
+                packet.begin(),
+                packet.end());
+        }
+
+
+        found = nextFound;
+        nextFound = find_first_not_of(found, codeLengths.end(), *found);
+    } while(found != codeLengths.end());
+
+    return compressed;
+}
+
+CodeLengths makePacket(
+    CodeLength length,
+    unsigned int code,
+    CodeLengths & codeLengthsAlphabetCodeLengths)
+{
+    if(code == 0){
+        return makeZeroPacket(length,codeLengthsAlphabetCodeLengths);
+    } else {
+        return makeRepeatPacket(length, code, codeLengthsAlphabetCodeLengths);
+    }
+}
+
+CodeLengths makeRepeatPacket(
+    CodeLength length,
+    unsigned int code,
+    CodeLengths & codeLengthsAlphabetCodeLengths)
+{
+    CodeLengths packet;
+
+    packet.push_back(code);
+    codeLengthsAlphabetCodeLengths.push_back(code);
+
+    --length;
+
+    while(length > 0){
+
+        if(length > 2){
+            packet.push_back(16);
+	    codeLengthsAlphabetCodeLengths.push_back(16);
+
+            unsigned int packetLength;
+
+            packetLength = min((unsigned int)6, length);
+
+            length -=  packetLength;
+            packetLength -= 3;
+            packet.push_back(packetLength);
+        } else {
+            for(unsigned int i = 0; i < length; ++i){
+                packet.push_back(code);
+		codeLengthsAlphabetCodeLengths.push_back(code);
+            }
+            length = 0;
+        }
+    }
+
+    return packet;
+}
+
+CodeLengths makeZeroPacket(
+    CodeLength length,
+    CodeLengths & codeLengthsAlphabetCodeLengths)
+{
+    CodeLengths packet;
+
+    while(length > 0){
+
+        /* Even runs of three zeroes can efficiently be encoded to 2 codes.*/
+        if(length > 2){
+
+            unsigned int packetLength;
+
+            if(length >= 11){
+                packet.push_back(18);
+		codeLengthsAlphabetCodeLengths.push_back(18);
+                packetLength = min((unsigned int)138, length);
+                length -= packetLength;
+                packetLength -= 11;
+
+            } else if(length <= 10) {
+
+                packet.push_back(17);
+		codeLengthsAlphabetCodeLengths.push_back(17);
+
+                packetLength = min((unsigned int)10, length);
+                length -= packetLength;
+                packetLength -= 3;
+
+            }
+
+	    packet.push_back(packetLength);
+
+        } else {
+
+            for(unsigned int i = 0; i < length; ++i){
+                packet.push_back(0);
+		codeLengthsAlphabetCodeLengths.push_back(0);
+            }
+            length = 0;
+
+        }
+    }
+
+    return packet;
+}
+
+CodeLengths makeCodeLengths(
+    vector<unsigned int> fileData,
+    unsigned int alphabetSize,
+    CodeLength maxCodeLength)
+{
+    FrequencyTable freqTable = constructFrequencyTable(fileData, alphabetSize);
+    return makeCodeLengths(freqTable, maxCodeLength);
+}
+
+void permuteCodelengths(CodeLengths & cs)
+{
+    CodeLengths permuted(19);
+    unsigned int perm[] = {
+        16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
+
+    for(unsigned int i = 0; i < 19; ++i)
+        permuted[i] = cs[perm[i]];
+
+    cs = permuted;
+}
+
+RevCodesList loadUsingCodeLengthCodes(
+    unsigned short length,
+    unsigned short alphabetLength,
+    const RevCodesList & codeLengthCodes,
+    BitReader * compressedStream)
+{
+    size_t i;
+
+    CodeLengths codeLengths(alphabetLength);
+    unsigned int translatedCode;
+    int codesLenI;
+
+    codesLenI = 0;
+
+    fill(codeLengths.begin(), codeLengths.end(), 0);
+
+    while(1){
+        /* The codes are only applied to the codes in the alphabet, NOT the repetition factors */
+        translatedCode = readCode(codeLengthCodes,compressedStream);
+
+        if(/*code.litteralValue >= 0 &&*/ translatedCode <= 15){
+
+            codeLengths[codesLenI++] = translatedCode;
+
+        } else if(translatedCode >= 16){
+
+            vector<BYTE> repeated;
+
+            /* TODO: does this work????*/
+            if(translatedCode == 16){
+                repeated =
+                    repeatPreviousLengthCode(
+                        codeLengths[codesLenI-1],
+                        compressedStream);
+            }else if(translatedCode == 17){
+                repeated = repeatZeroLengthCode(3,3, compressedStream);
+            } else if(translatedCode == 18){
+
+                repeated = repeatZeroLengthCode(11,7, compressedStream);
+            }
+
+            for(i = 0; i < repeated.size(); ++i)
+                codeLengths[codesLenI++] = repeated[i];
+        }
+
+        if(codesLenI == length){
+            break;
+        }
+    }
+
+    return reverseCodesList(translateCodes(codeLengths));
+}
+
+void printCodeLengths(CodeLengths cs){
+    copy(
+        cs.begin(),
+        cs.end(),
+        ostream_iterator<CodeLength>(cout, ", "));
+
+    cout << "\n";
 }

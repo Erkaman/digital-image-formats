@@ -388,59 +388,6 @@ RevCodesList loadDistanceCodes(
         compressedStream);
 }
 
-RevCodesList loadUsingCodeLengthCodes(
-    unsigned short length,
-    unsigned short alphabetLength,
-    const RevCodesList & codeLengthCodes,
-    BitReader * compressedStream)
-{
-    size_t i;
-
-    CodeLengths codeLengths(alphabetLength);
-    unsigned int translatedCode;
-    int codesLenI;
-
-    codesLenI = 0;
-
-    fill(codeLengths.begin(), codeLengths.end(), 0);
-
-    while(1){
-        translatedCode = readCode(codeLengthCodes,compressedStream);
-
-        if(/*code.litteralValue >= 0 &&*/ translatedCode <= 15){
-
-            codeLengths[codesLenI++] = translatedCode;
-
-        } else if(translatedCode >= 16){
-
-	    vector<BYTE> repeated;
-
-	    /* TODO: does this work????*/
-            if(translatedCode == 16){
-		repeated =
-		    repeatPreviousLengthCode(
-			codeLengths[codesLenI-1],
-			compressedStream);
-            }else if(translatedCode == 17){
-		repeated = repeatZeroLengthCode(3,3, compressedStream);
-            } else if(translatedCode == 18){
-		repeated = repeatZeroLengthCode(11,7, compressedStream);
-            }
-
-	    for(i = 0; i < repeated.size(); ++i){
-		codeLengths[codesLenI++] = repeated[i];
-	    }
-
-        }
-
-        if(codesLenI == length){
-            break;
-        }
-    }
-
-    return reverseCodesList(translateCodes(codeLengths));
-}
-
 DEFLATE_DynamicBlockHeader loadDEFLATE_DynamicBlockHeader(BitReader * compressedStream)
 {
     DEFLATE_DynamicBlockHeader blockHeader;
