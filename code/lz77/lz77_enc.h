@@ -3,6 +3,10 @@
 
 #include <cstdio>
 
-void compress(signed long windowSize, signed long lookAheadSize, FILE * in, FILE * out);
+void compress(
+    unsigned int windowSize,
+    unsigned int lookAheadSize,
+    FILE * in,
+    FILE * out);
 
 #endif /* _LZ77_ENC_H_ */

@@ -16,3 +16,14 @@ vector<unsigned int> readFile(FILE * in)
 
     return data;
 }
+
+std::vector<BYTE> readFileBytes(FILE * in)
+{
+    vector<unsigned int> data = readFile(in);
+    vector<BYTE> bs(data.size());
+
+    for(size_t i = 0; i < data.size(); ++i)
+	bs[i] = (BYTE)data[i];
+
+    return bs;
+}

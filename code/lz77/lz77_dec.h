@@ -3,6 +3,10 @@
 
 #include <cstdio>
 
-void decompress(signed long windowSize, signed long lookAheadSize, FILE * in, FILE * out);
+void decompress(
+    unsigned int windowSize,
+    unsigned int lookAheadSize,
+    FILE * in,
+    FILE * out);
 
 #endif /* _LZ77_DEC_H_ */

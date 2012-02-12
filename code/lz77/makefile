@@ -9,7 +9,7 @@ $(PROG) : $(objects)
 main.o : main.cpp lz77_dec.h lz77_enc.h
 
 lz77_dec.o : token.h lz77_dec.h ../bits.h
-lz77_enc.o : token.h lz77_enc.h ../bits.h ../io.h
+lz77_enc.o : token.h lz77_enc.h ../bits.h ../io.h ../stlutil.h
 
 clean :
 	rm $(PROG) $(objects)

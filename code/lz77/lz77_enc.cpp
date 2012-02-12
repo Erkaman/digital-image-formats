@@ -2,6 +2,7 @@
 #include "token.h"
 #include "../bits.h"
 #include "../io.h"
+#include "../stlutil.h"
 
 #include <deque>
 #include <iterator>
@@ -11,59 +12,20 @@
 using std::ostream_iterator;
 using std::deque;
 using std::cout;
+using std::vector;
 
 void printBuffer(const deque<BYTE> & buffer);
 
-signed long windowCmp(
+unsigned int windowCmp(
     deque<BYTE> & buffer,
-    signed long i,
-    signed long j,
-    signed long length);
+    unsigned int i,
+    unsigned int j,
+    unsigned int length);
 
 Token searchWindow(
-    int windowSize,
-    signed long & lookAheadBeg,
+    unsigned int windowSize,
+    unsigned int & lookAheadBeg,
     std::deque<BYTE> & buffer);
-
-class TokenWriter{
-
-private:
-
-    int offsetSize;
-    int lengthSize;
-
-    BitFileWriter outBits;
-
-public:
-
-    TokenWriter(int windowSize, int lookAheadSize, FILE * out);
-
-    void writeToken(const Token & token){
-        printf("(%ld,%ld,%c)\n", token.offset, token.length, token.symbol);
-        outBits.writeBits(token.offset, offsetSize);
-        outBits.writeBits(token.length, lengthSize);
-        outBits.writeBits(token.symbol, symbolSize);
-    }
-
-    void flush();
-
-    BitFileWriter getOutBits()const;
-
-};
-
-TokenWriter::TokenWriter(int windowSize, int lookAheadSize, FILE * out):
-    offsetSize(ceil(log2(windowSize))),
-    lengthSize(ceil(log2(lookAheadSize-1))),
-    outBits(out,MSBF) {
-}
-
-void TokenWriter::flush(){
-    outBits.writeBits(0, 8);
-}
-
-BitFileWriter TokenWriter::getOutBits()const{
-    return outBits;
-}
 
 void printBuffer(const deque<BYTE> & buffer){
 
@@ -74,13 +36,13 @@ void printBuffer(const deque<BYTE> & buffer){
     printf("\n");
 }
 
-signed long windowCmp(
+unsigned int windowCmp(
     deque<BYTE> & buffer,
-    signed long i,
-    signed long j,
-    signed long length)
+    unsigned int i,
+    unsigned int j,
+    unsigned int length)
 {
-    signed long count = 0;
+    unsigned int count = 0;
 
     while(length > 0){
         --length;
@@ -94,8 +56,8 @@ signed long windowCmp(
 }
 
 Token searchWindow(
-    int windowSize,
-    signed long & lookAheadBeg,
+    unsigned int windowSize,
+    unsigned int & lookAheadBeg,
     deque<BYTE> & buffer)
 {
     Token token;
@@ -104,18 +66,18 @@ Token searchWindow(
     token.length = 0;
 
     /* Special case the last character. */
-    if( ((signed long)buffer.size() - lookAheadBeg) == 1 ){
+    if( ((unsigned int)buffer.size() - lookAheadBeg) == 1 ){
         token.symbol = buffer[lookAheadBeg];
 	++lookAheadBeg;
         return token;
     }
     /* Because the max value of a n-bit number is (2^n)-1 */
-    for(signed long windowI = 1; windowI < lookAheadBeg; ++windowI){
+    for(unsigned int windowI = 1; windowI < lookAheadBeg; ++windowI){
 
-        signed long length = windowCmp(
+        unsigned int length = windowCmp(
             buffer,
             windowI,
-            lookAheadBeg, ((signed long)buffer.size() - lookAheadBeg) - 2);
+            lookAheadBeg, ((unsigned int)buffer.size() - lookAheadBeg) - 2);
 
         if(length > token.length){
             token.offset = lookAheadBeg - windowI;
@@ -123,7 +85,7 @@ Token searchWindow(
         }
     }
 
-    for(signed long i = 0; i < token.length; ++i)
+    for(unsigned int i = 0; i < token.length; ++i)
         ++lookAheadBeg;
 
     token.symbol = buffer[lookAheadBeg];
@@ -139,28 +101,36 @@ Token searchWindow(
     return token;
 }
 
-void compress(signed long windowSize, signed long lookAheadSize, FILE * in, FILE * out)
-{
-    bool endInput = false;
+vector<Token> compress(
+    unsigned int windowSize,
+    unsigned int lookAheadSize,
+    const vector<BYTE> & data);
 
-    TokenWriter tokenOut(windowSize, lookAheadSize, out);
+vector<Token> compress(
+    unsigned int windowSize,
+    unsigned int lookAheadSize,
+    const vector<BYTE> & data)
+{
+    bool endData = false;
 
     deque<BYTE> buffer;
 
-    signed long fs = getFileSize(in);
+    unsigned int lookAheadBeg = 0;
 
-    signed long lookAheadBeg = 0;
+    vector<Token> compressed;
 
-    tokenOut.getOutBits().writeBits(fs, 64);
+    vector<BYTE>::const_iterator iter = data.begin();
+    const vector<BYTE>::const_iterator End = data.end();
 
     do{
-        if(!endInput){
-            int ch = getc(in);
-            if(ch == EOF)
-                endInput = true;
+        if(!endData){
+            if(iter == End)
+                endData = true;
             else{
-/*                printf("ch:%c\n", ch);*/
-                buffer.push_back(ch);
+		BYTE b = *iter;
+		++iter;
+
+                buffer.push_back(b);
 
 		while(lookAheadBeg > lookAheadSize){
 		    buffer.pop_front();
@@ -175,20 +145,42 @@ void compress(signed long windowSize, signed long lookAheadSize, FILE * in, FILE
 
             /* Or if the end of the input been reached then match the
              * rest of the lookahead buffer */
-            endInput) {
+            endData) {
 
             Token token =
                 searchWindow(windowSize, lookAheadBeg, buffer);
-            tokenOut.writeToken(token);
 
+	    compressed.push_back(token);
         }
-
-/*	printf("lookaheadsize:%ld\n", buffer.size() - lookAheadBeg); */
 
     } while(
         /* While the entire lookahead buffer hasn't yet been processed. */
-        ((signed long)buffer.size() - lookAheadBeg) > 0);
+        (buffer.size() - lookAheadBeg) > 0);
 
-    tokenOut.flush();
+    return compressed;
 }
 
+void compress(unsigned int windowSize, unsigned int lookAheadSize, FILE * in, FILE * out)
+{
+    vector<BYTE> file = readFileBytes(in);
+
+    vector<Token> compressed =
+	compress(windowSize,lookAheadSize,file);
+
+    BitFileWriter outBits(out, MSBF);
+
+    int offsetSize = ceil(log2(windowSize));
+    int lengthSize = ceil(log2(lookAheadSize-1));
+
+    outBits.writeBits(file.size(), 64);
+
+    for(size_t i = 0; i < compressed.size(); ++i){
+	Token token = compressed[i];
+        outBits.writeBits(token.offset, offsetSize);
+        outBits.writeBits(token.length, lengthSize);
+        outBits.writeBits(token.symbol, 8);
+    }
+
+    /* Flush*/
+    outBits.writeBits(0, 8);
+}
