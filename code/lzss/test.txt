@@ -1,0 +1,13 @@
+0: I am Sam
+9:
+10: Sam I am
+19:
+20: That Sam-I-am!
+35: That Sam-I-am!
+50: I do not like
+64: that Sam-I-am!
+79:
+80: Do you like green eggs and ham?
+112:
+113: I do not like them, Sam-I-am.
+143: I do not like green eggs and ham.
