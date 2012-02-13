@@ -7,62 +7,71 @@
 
 \section{History}
 
-In 1951 professor Robert Fano gave his students in a course on
+In 1951, professor Robert Fano gave his students in a course on
 information theory two choices: to complete the course they would
-write a term paper or take a final exam. In the term paper, the
-students were asked to solve a seemingly simple. He did not tell his
-students that the problem that he gave them was a problem that Claude
-Shannon, the father of information theory, had been unable to
+either have to write a term paper or take a final exam. In the term
+paper the students were asked to solve a seemingly simple problem. In
+order to not discourage his students, Fano did not tell them that the
+problem that he gave them was a problem that he and Claude Shannon,
+the father of information theory, had been unable to
 solve\cite{stix91:_profil}.
 
 One of Fano's students was David Huffman. For months he tried to solve
 the problem and he was in the end very close to giving up. But then,
 in a moment of insight, he suddenly realized how to solve the
-problem. In \cite{huf52} published his solution to the rest of the
-world. The technique he described in this paper is known as
+problem. He then published his solution to the rest of the world in
+\cite{huf52}. The technique he described in this paper is known as
 \textit{Huffman Coding}, and this is the compression method that we
 will be describing in this chapter.
 
 And luckily, Huffman decided not to patent the algorithm. And because
 of this, the Huffman Coding proved to be a very popular compression
-technique. It is for example widely used in high-definition televisions
-and modems.
+technique for a long time. It is for example widely used in
+high-definition televisions and modems.
 
 \section{The Algorithm}
 
 The following description of Huffman Coding is mainly based of
 Huffman's original description of the algorithm, \cite{huf52}, but
-also on \cite{Salomon:2004:DCC,mark1996data_compression_book} 
+also of
+\cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr}.
 
 The key observation behind Huffman Coding is this: in any non-random
 data there will almost always be some characters that are more
-frequent than other. For example, in the English the by far most
-common letter is ``e'' \cite{lewand2000cryptological}. So if a random
-letter is picked from an English language text then it is most likely
-that that letter will be an ``e''. So, what Huffman Coding does, is
-that it assigns more frequent characters to smaller \textit{codes}. A
-code is a number of a certain number of bits. For example, \bin{0011}
-is a code of value $3$ with length $4$. So more frequent character is
-assigned to more frequent letters.
+frequent than others. For example, in the English text the by far most
+common letter is ``e''
+\cite{lewand2000cryptological,Shannon:2001:MTC:584091.584093}. So if a
+random letter is picked from an English language text then it is most
+likely that that letter will be an ``e''. So, what Huffman Coding does
+is that it assigns more frequent characters to binary numbers with
+less digits. These numbers are referred to as \textit{codes}. The
+collection of all these codes computed, each assigned to a character,
+will henceforth be known as a code \textit{list}.
 
 All values stored in a file are 8-bit numbers. Out of a compression
-performance perspective this system is catastrophic. Some ASCII values
-will always, for non-random text, be more frequent than
-others. However, do take in mind that this system is used because that
-8-bit numbers are one heck of a lot easier to deal with than variably
-sized codes.
+performance perspective this system is catastrophic, because for
+practically all non-random data some byte-values will always be more
+frequent than others. For English ASCII text the ASCII code for the
+letter ``e'', 101, will be one of the most common characters, so it
+would make sense to represent this number by a binary number of a
+small length. However, do take in mind that the 8-bit system is used
+because that 8-bit numbers are one heck of a lot easier to deal with
+than variably sized codes. To read all the contents of a normal file
+all you have to do is read it 8 bits for value. Reading values whose
+numbers are of different bit lengths is on the other hand much harder
+and error prone for the programmer.
 
 \subsection{The Prefix Property}
 
 Before we consider how the Huffman Algorithm chooses these codes, we
-also have to consider what properties these codes should satisfy. Are
-all codes acceptable?
+also have to consider what properties the code list should
+satisfy. Are all possible code lists acceptable?
 
 \begin{table}
   \centering
   \begin{tabular}{llll}
     \toprule
-    Letter & Probability & Code 1 & Code 2 \\
+    Letter & Probability & Code List 1 & Code List 2 \\
     \midrule
     $A$ & $0.35$ & \bin{01} & \bin{01} \\
     $B$ & $0.35$ & \bin{11} & \bin{00} \\
@@ -74,21 +83,24 @@ all codes acceptable?
   \label{tab:codes-ex}
 \end{table}
 
-Let us consider a alphabet consisting only of the letters $A$, $B$,
-$C$, $D$. Let us say that the probabilities of these letters are the
-ones given in table \ref{tab:codes-ex}. One alternative of possible
-codes that could be assigned to these letters is Code 1. Character
-that are more frequent are in this code assigned shorter codes, which
-is just the property that we were after. Using this code the string
-``BABACD'' would get encoded as
+Let us say that we dealing with the four-length alphabet $A$, $B$,
+$C$, $D$ and that for the sake of argument the probabilities of these
+letters are the ones given in table \ref{tab:codes-ex}. Two possible
+alternatives(but not all possible) of code lists that could be
+assigned to this alphabet are also given in the former table. Let
+first consider the first of these code lists.  Character that are more
+frequent are in this code list assigned shorter codes, which is just
+the property that we are after. Using this code the string ``BABACD''
+would get encoded as
 
 \begin{equation*}
   11\ 01\ 11\ 01\ 001\ 000
 \end{equation*}
 
 This encoded can data can then be decoded perfectly fine by
-translating the codes to their corresponding letters. However, what
-would have happened had we used code 2 instead?
+translating the codes to their corresponding letters. The list codes
+can be transmitted along with the Huffman compressed file. However,
+what would have happened if had we used code list 2 instead?
 
 \begin{equation*}
   00\ 01\ 00\ 01\ 010\ 101
@@ -102,18 +114,21 @@ then parse it as the code for ``C''? It can't, basically. The fifth
 code in combination with the sixth, \bin{010101} can be parsed a ``C''
 followed by an ``D'', but an equally valid way to decode this data
 would be as three ``A'':s. So the second set of codes is
-\textit{ambiguous} while the first is not.
+\textit{ambiguous} while the first is not. And a file encoded using an
+ambiguous code list cannot be losslessly decompressed, since the
+encoded data can be parsed in several ways, and such a compression is
+therefore not lossless in the first place!
 
-The reason that the first set codes is not amvigious is because it has
-the prefix property. This means that no code in the set of codes is
-the prefix of another code. On the other hand, in the second set of
-codes, the code \bin{01} is a prefix of the code \bin{010}, and
-therefore the set of codes was ambiguous.
+The reason that the first code list is not ambiguous is because it has
+the \textit{prefix property}. This means that no code in the code list
+is the prefix of another code. On the other hand, in the code list 2,
+the code \bin{01} is a prefix of the code \bin{010}, and therefore the
+code list was ambiguous in the first place.
 
 \begin{Exercise}[label={prefix-prop}]
 
-  Which of the following sets of codes has the prefix property?  Also,
-  suggest of a way to fix the sets of codes that do not obey the
+  Which of the following code lists has the prefix property?  Also,
+  suggest of a way to fix the sets of codes that do not obey by the
   prefix property.
 
   \begin{enumerate}[(a)]
@@ -132,16 +147,16 @@ therefore the set of codes was ambiguous.
 \newenvironment{huffman}
 {\begin{tikzpicture}
     [level distance=10mm,
-%    every node/.style={circle,inner sep=1pt,draw=black},
+    % every node/.style={circle,inner sep=1pt,draw=black},
     hnode/.style={circle,inner sep=1pt,draw=black},
     level 1/.style={sibling distance=20mm},
-      level 2/.style={sibling distance=10mm},
-      level 3/.style={sibling distance=5mm},
-      text height=1.5ex,text depth=.25ex]}{\end{tikzpicture}}
+    level 2/.style={sibling distance=10mm},
+    level 3/.style={sibling distance=5mm},
+    text height=1.5ex,text depth=.25ex]}{\end{tikzpicture}}
 
 \newenvironment{huffmanc}
 {\begin{center}\begin{huffman}}
-{\end{huffman}\end{center}}
+    {\end{huffman}\end{center}}
 
 \newcommand{\charnodeoffset}{1.0cm}
 
@@ -151,41 +166,36 @@ therefore the set of codes was ambiguous.
   \nodechar{#1}{#3}}
 
 \newcommand{\restcharnode}[4]{
-\node (#1) [hnode,right=of #2] {#3};
-\nodechar{#1}{#4}
+  \node (#1) [hnode,right=of #2] {#3};
+  \nodechar{#1}{#4}
 }
 
 \section{Trees}
 
 A tree is a recursive data structure that is used to implement Huffman
 Coding. A tree consists of a collection of nodes with values, and
-every node can have two \textit{left} and \textit{right} child
+every node can have two left and right child
 nodes. Two example trees:
 
 \begin{huffmanc}
   \node (first)[hnode]{7};
-  \node[hnode,right=of first]{2}
+  \node[hnode,right=of first,xshift=10mm]{2}
   child{node[hnode] {3}}
   child{node[hnode] {1}};
 \end{huffmanc}
 
-The first of these two trees is a single node with a value of
-$2$. It has no left or right child nodes. The second trees does, on
-the hand. The with the value $2$ has two child nodes with the values
-$3$ and $1$. You also say that the node with the value $2$ is
+The first of these two trees is a single node with a value of $2$. It
+has no left or right child nodes. The node with the value $2$ has two
+child nodes. The left and right child have to values $3$ and $1$
+respectively. You can also say that the node with the value $2$ is
 \textit{parent} of the two nodes with the values $3$ and $1$.
 
 \subsection{Finding The Codes}
 
-Now we will finally explain how Huffman Encoding finds a sets of
-codes, where the more frequent character assigned to smaller codes,
-that obeys the prefix property given a the frequencies of the
-characters in the data.
-
 Let us consider finding the Huffman codes for the letters of the
-letters string $ababaacdd$. First the number of every letter in the
-data is assigned to a node of its own:
-%222
+string $ababaacdd$ for the alphabet $a$,$b$,$c$, and $d$. First the
+number of times every letter occurs in the data, the frequency of the
+letter, is assigned to a node of its own:
 
 \begin{huffmanc}
   \firstcharnode{ctree}{1}{c}
@@ -194,10 +204,10 @@ data is assigned to a node of its own:
   \restcharnode{atree}{dtree}{4}{a}
 \end{huffmanc}
 
-We now have forest of nodes where the value of every node is the
-frequency that that node is corresponding to. A node where the value
-of that node is the sum of the two lowest values is now made. This
-node is made the parent of the former two nodes:
+We now have forest of single nodes. The frequencies of the two nodes
+with minimum frequencies are now summed. The sum of this operation is
+made to a node and this node is made the parent of the two former
+minimum frequency nodes:
 
 \begin{huffmanc}
   \node[hnode]{3}
@@ -205,26 +215,28 @@ node is made the parent of the former two nodes:
   child{node(bnode)[hnode] {2}};
   \nodechar{cnode}{c}
   \nodechar{bnode}{b}
-  \restcharnode{bnode}{dtree}{2}{d}
+  \restcharnode{bnode}{dtree,xshift=-30}{2}{d}
   \restcharnode{dtree}{atree}{4}{a}
 \end{huffmanc}
 
-Note that order in which these two nodes are added does not
-matter. Another alternative for the node $b$ was also $d$, but this
-choice does not either affect the validity of the computed sets of
-codes. As long as two of the lowest nodes are chosen the formed codes
-will still be valid.
+Note that order in which these two nodes are added does not matter. It
+is perfectly acceptable to switch the positions of $b$ and $c$, and
+assigning $b$ to the left node and $c$ to the right node.
 
-Now the tree we just created and the node $d$ has the lowest
-values. So they are added together to an even bigger tree:
+Another alternative for the second minimum frequency to node $b$ was
+$d$, neither but this choice will affect the validity of the resulting
+code list.
+
+The last step is now repeated, and the two minimum trees are now added
+to form an even bigger tree:
 
 \begin{huffmanc}
   \node[hnode]{5}
   child{node[hnode]{3}
-  child{node(cnode)[hnode] {1}}
-  child{node(bnode)[hnode] {2}}}
+    child{node(cnode)[hnode] {1}}
+    child{node(bnode)[hnode] {2}}}
   child{node (dnode) [hnode] {2}};
-  \restcharnode{dtree}{atree}{4}{a}
+  \restcharnode{dtree}{atree,xshift=-80}{4}{a}
 
   \nodechar{cnode}{c}
   \nodechar{bnode}{b}
@@ -232,17 +244,16 @@ values. So they are added together to an even bigger tree:
 
 \end{huffmanc}
 
-Two only remaining single node is now $a$, so it and the bigger tree
-are added together to form the final tree:
+And the same thing is done for the two remaining trees:
 
 \begin{huffmanc}
 
   \node[hnode] {9}
   child {node[hnode]{5}
-  child{node[hnode]{3}
-  child{node(cnode)[hnode] {1}}
-  child{node(bnode)[hnode] {2}}}
-  child{node (dnode) [hnode] {2}}}
+    child{node[hnode]{3}
+      child{node(cnode)[hnode] {1}}
+      child{node(bnode)[hnode] {2}}}
+    child{node (dnode) [hnode] {2}}}
   child{node (anode) [hnode] {4}};
 
   \nodechar{cnode}{c}
@@ -253,37 +264,72 @@ are added together to form the final tree:
 \end{huffmanc}
 
 The tree we end up with is known as the Huffman tree of the input
-data. But it is important to realize that this is \textit{not}
-unique. This is because mainly because of the possibility that there
-are more than two smallest single nodes. Then a choice will have to be
-made that results in different possible result trees.
+data. But it is important to realize that this is \textit{not} by any
+means unique. This is because there will always be the possibility
+that these are more than two nodes with a minimum frequency.
 
-To finally create the set of codes, the following is done: starting
-from the root of the tree, it is followed along its branches to reach
-a character at leaf. If a left branch is followed then a cleared bit($0$)
-is added to the resulting code, else a toggled bit($1$) is added. So
-to get the resulting code for $b$, we follow the tree from its to the
-leaf that has character $b$. To reach $b$ we go left,left and then
-right, so $b$ has the code \bin{001}. Similarly, $a$ gets the code
-\bin{1}, $d$ the code \bin{01}, and $c$ the code \bin{000}. And
-clearly, these codes obey by the prefix property.
+To finally create the code list, the following is done: starting from
+the root of the tree, it is followed along its branches to reach its
+leaves. If a left branch is followed then a cleared bit($0$) is added
+to the resulting code, else a toggled bit($1$) is added. So to get the
+resulting code for $b$, we follow the tree from its to the leaf that
+has character $b$. To reach $b$ we go left,left and then right, so $b$
+has the code \bin{001}. The final huffman tree and the rest of the
+codes are given in table ?.
+
+\begin{figure}
+  \centering
+  \begin{huffmanc}
+
+    \node[hnode] {9}
+    child {node[hnode]{5}
+      child{node[hnode]{3}
+        child{node(cnode)[hnode] {1}}
+        child{node(bnode)[hnode] {2}}}
+      child{node (dnode) [hnode] {2}}}
+    child{node (anode) [hnode] {4}};
+    \nodechar{cnode}{c}
+    \nodechar{bnode}{b}
+    \nodechar{dnode}{d}
+    \nodechar{anode}{a}
+
+  \end{huffmanc}
+
+  \caption{Computed Huffman Tree for the input data ababaacdd}
+  \label{fig:huff}
+\end{figure}
 
 \begin{Exercise}[label={nuther}]
   Give an example of another valid Huffman that could have been
-  constructed using the above data. What set of codes does this tree
-  result in? How many different Huffman trees can be constructed using
-  the above data?
+  constructed using the above input data. What final code list does
+  this tree instead result in?
 \end{Exercise}
 
-And Huffman Coding will in general always give valid codes that has
-the prefix property. % explain why
+And Huffman Coding will in general always give valid a code list that
+has the prefix property. A tree \textit{not} satisfying that property
+would have to look something like this:
 
-It is also easy to see how it assigns shorter codes to more frequent
-character. Since frequent chracters will get assigned the highest
-frequencies, they will also get added to the tree at the later parts
-of the algorithm, and so they get placed higher in the tree, and
+\begin{huffmanc}
+
+  \node[hnode] {}
+  child {node[hnode]{c}
+    child{node[hnode]{b}}
+    child{node (dnode) [hnode] {d}}}
+  child{node (anode) [hnode] {a}};
+\end{huffmanc}
+
+Since the $c$ node is has the parent nodes $b$ and $d$, its code will
+also be a prefix of the codes of $b$ and $d$. However, since the leaf
+branches are assigned only frequency values and the leaf nodes are
+assigned characters, it is impossible for such a tree to result from
+Huffman Coding.
+
+It is easy to see how the algorithm assigns shorter codes to more
+frequent character. Since frequent characters will get assigned the
+highest frequencies, they will also get added to the tree at the later
+parts of the algorithm, and so they get placed higher in the tree, and
 therefore they will get assigned the shorter codes. And similarly,
-since the least occuring codes will get assigned small values, they
+since the least occurring codes will get assigned small values, they
 also get added into the tree early, so will get placed deep down in
 the tree, and they will therefore get assigned the longer codes.
 
@@ -294,15 +340,14 @@ but also the set of codes in order to decode the compressed
 data. There are many different ways of doing this. In chapter ?, we
 will discuss how this is odne in a very pculiaiar way in the DEFLATE method.
 
-
 \section{Answers to the exercises}
 
 \begin{Answer}[ref={prefix-prop}]
 
   \begin{enumerate}[(a)]
   \item Has the prefix property.
-  \item Does not have the prefix property. If the codes are changed to
-    \bin{01}, \bin{00}, \bin{101}, \bin{100}
+  \item Does not have the prefix property. If the codes are on the
+    other hand changed to \bin{01}, \bin{00}, \bin{101} and \bin{100}
     they will obey the prefix property.
   \item Has the prefix property.
 
@@ -311,24 +356,24 @@ will discuss how this is odne in a very pculiaiar way in the DEFLATE method.
 \end{Answer}
 
 \begin{Answer}[ref={nuther}]
-\begin{huffmanc}
+  \begin{huffmanc}
 
-  \node[hnode] {9}
-  child {node[hnode]{5}
-  child{node[hnode]{3}
-  child{node(cnode)[hnode] {1}}
-  child{node(bnode)[hnode] {2}}}
-  child{node (dnode) [hnode] {2}}}
-  child{node (anode) [hnode] {4}};
+    \node[hnode] {9}
+    child {node[hnode]{5}
+      child{node[hnode]{3}
+        child{node(cnode)[hnode] {1}}
+        child{node(bnode)[hnode] {2}}}
+      child{node (dnode) [hnode] {2}}}
+    child{node (anode) [hnode] {4}};
 
-  \nodechar{cnode}{c}
-  \nodechar{dnode}{b}
-  \nodechar{bnode}{d}
-  \nodechar{anode}{a}
+    \nodechar{cnode}{c}
+    \nodechar{dnode}{b}
+    \nodechar{bnode}{d}
+    \nodechar{anode}{a}
 
-\end{huffmanc}
+  \end{huffmanc}
 
-This tree results in the codes $a=$\bin{1}, $b=$\bin{01},
-$c=$\bin{000}, $d=$\bin{001}
+  This tree results in the codes $a=$\bin{1}, $b=$\bin{01},
+  $c=$\bin{000}, $d=$\bin{001}
 
 \end{Answer}
