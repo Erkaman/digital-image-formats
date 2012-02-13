@@ -47,7 +47,6 @@ vector<Token> compress(
                 buffer.push_back(b);
 
                 while(lookAheadBeg > windowSize){
-/*                    printf("pop\n");*/
                     buffer.pop_front();
                     --lookAheadBeg;
                 }
@@ -69,8 +68,6 @@ vector<Token> compress(
 
             token.offset = 0;
             token.length = 0;
-
-/*            printBuffer(buffer); */
 
             unsigned int windowI;
 
@@ -104,13 +101,8 @@ vector<Token> compress(
                 token.length = 1;
             }
 
-/*            if(!endInput){ */
             for(unsigned int i = 0; i < token.length; ++i)
                 ++lookAheadBeg;
-            /*} else {
-              for(unsigned int i = 0; i < token.length; ++i)
-              buffer.pop_front();
-              }*/
 
 /*            if(token.type == SymbolToken){
               printf("(%c)\n",token.symbol);

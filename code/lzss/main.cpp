@@ -116,7 +116,6 @@ void decompress(
         if(flag == SYMBOL){
 
             token.symbol = inBits.readBits(8);
-            printf("(%c)\n",token.symbol);
 
             decompressed.push_back(token.symbol);
 
@@ -124,8 +123,6 @@ void decompress(
 
             token.offset = inBits.readBits(offsetSize);
             token.length = inBits.readBits(lengthSize);
-
-            printf("(%d,%d)\n",token.offset, token.length);
 
             decodeToken(token, decompressed);
         }
