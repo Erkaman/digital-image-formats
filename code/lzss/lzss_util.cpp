@@ -21,11 +21,6 @@ unsigned int windowCmp(
     unsigned int j,
     unsigned int length);
 
-Token searchWindow(
-    unsigned int windowSize,
-    unsigned int & lookAheadBeg,
-    std::deque<BYTE> & buffer);
-
 vector<Token> compress(
     unsigned int windowSize,
     unsigned int lookAheadSize,
@@ -48,34 +43,80 @@ vector<Token> compress(
                 endData = true;
             else{
                 BYTE b = *iter;
-/*		printf("b:%c\n", b); */
                 ++iter;
-
                 buffer.push_back(b);
 
-                while(lookAheadBeg > lookAheadSize){
+                while(lookAheadBeg > windowSize){
+/*                    printf("pop\n");*/
                     buffer.pop_front();
                     --lookAheadBeg;
                 }
             }
         }
+        if(endData){
+            while(lookAheadBeg > windowSize){
+                buffer.pop_front();
+                --lookAheadBeg;
+            }
+        }
 
-        if(
-            /* If the lookahead buffer is currently full then start matching.*/
-            lookAheadSize == (buffer.size() - lookAheadBeg) ||
+        /* If the lookahead buffer is currently full then start matching.*/
+        /* Or if the end of the input been reached then match the
+         * rest of the lookahead buffer */
+        if(lookAheadSize == (buffer.size() - lookAheadBeg) || endData) {
 
-            /* Or if the end of the input been reached then match the
-             * rest of the lookahead buffer */
-            endData) {
+            Token token;
 
-            Token token =
-                searchWindow(windowSize, lookAheadBeg, buffer);
+            token.offset = 0;
+            token.length = 0;
 
-	    if(token.type == SymbolToken){
-		printf("(%c)\n",token.symbol);
-	    } else if(token.type == OffsetLengthToken){
-		printf("(%d,%d)\n",token.offset, token.length);
-	    }
+/*            printBuffer(buffer); */
+
+            unsigned int windowI;
+
+            /* If the window is filled then is not enough storage
+             * space for an offset to the very first character in the
+             * window. */
+            if(lookAheadBeg == windowSize)
+                windowI = 1;
+            else
+                windowI = 0;
+
+            for(windowI = windowI; windowI < lookAheadBeg; ++windowI){
+
+                unsigned int length = windowCmp(
+                    buffer,
+                    windowI,
+                    lookAheadBeg, ((unsigned int)buffer.size() - lookAheadBeg) - 1);
+
+                if(length > token.length){
+                    token.offset = lookAheadBeg - windowI;
+                    token.length = length;
+                }
+            }
+
+
+            if(token.length > 1) {
+                token.type = OffsetLengthToken;
+            } else{
+                token.symbol = buffer[lookAheadBeg];
+                token.type = SymbolToken;
+                token.length = 1;
+            }
+
+/*            if(!endInput){ */
+            for(unsigned int i = 0; i < token.length; ++i)
+                ++lookAheadBeg;
+            /*} else {
+              for(unsigned int i = 0; i < token.length; ++i)
+              buffer.pop_front();
+              }*/
+
+/*            if(token.type == SymbolToken){
+              printf("(%c)\n",token.symbol);
+              } else if(token.type == OffsetLengthToken){
+              printf("(%d,%d)\n",token.offset, token.length);
+              } */
 
             compressed.push_back(token);
         }
@@ -104,70 +145,14 @@ unsigned int windowCmp(
 {
     unsigned int count = 0;
 
-    while(length > 0){
-        --length;
-        if(buffer[i++] == buffer[j++])
+    while(length--){
+        if( buffer[i++] == buffer[j++])
             ++count;
         else
             return count;
     }
 
     return count;
-}
-
-Token searchWindow(
-    unsigned int windowSize,
-    unsigned int & lookAheadBeg,
-    deque<BYTE> & buffer)
-{
-    Token token;
-
-    token.offset = 0;
-    token.length = 0;
-
-    /* Special case the last character. */
-    if( ((unsigned int)buffer.size() - lookAheadBeg) == 1 ){
-        token.symbol = buffer[lookAheadBeg];
-	token.type = SymbolToken;
-        ++lookAheadBeg;
-        return token;
-    }
-    /* Because the max value of a n-bit number is (2^n)-1 */
-    for(unsigned int windowI = 1; windowI < lookAheadBeg; ++windowI){
-
-        unsigned int length = windowCmp(
-            buffer,
-            windowI,
-            lookAheadBeg, ((unsigned int)buffer.size() - lookAheadBeg) - 2);
-
-        if(length > token.length){
-            token.offset = lookAheadBeg - windowI;
-            token.length = length;
-        }
-    }
-
-/*    printf("len:%d\n", token.length); */
-
-    if(token.length > 1) {
-
-        for(unsigned int i = 0; i < token.length; ++i)
-            ++lookAheadBeg;
-
-        token.type = OffsetLengthToken;
-
-    } else{
-        token.symbol = buffer[lookAheadBeg];
-        token.type = SymbolToken;
-        ++lookAheadBeg;
-    }
-
-    while(
-        lookAheadBeg > windowSize){
-        buffer.pop_front();
-        --lookAheadBeg;
-    }
-
-    return token;
 }
 
 void decodeToken(Token token, vector<BYTE> & decompressed)

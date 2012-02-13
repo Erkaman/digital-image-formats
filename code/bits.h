@@ -25,8 +25,6 @@ private:
 protected:
 
     BitReader(BitOrder order_);
-
-
 public:
 
     virtual BYTE nextByte() = 0;

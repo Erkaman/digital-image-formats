@@ -33,9 +33,8 @@ int main(int argc, char *argv[])
 
         FILE * in, * out;
 
-        const signed long windowSize = pow(2,10);
-        const signed long lookAheadSize = pow(2,6);
-
+        const signed long windowSize = pow(2,11);
+        const signed long lookAheadSize = pow(2,4);
 
         if(!strcmp(argv[1], "-d") && (argc == 4)){
             in = fopen(argv[2], "rb");
@@ -60,14 +59,14 @@ void compress(unsigned int windowSize, unsigned int lookAheadSize, FILE * in, FI
     vector<Token> compressed =
         compress(windowSize,lookAheadSize,file);
 
-    printf("compressed\n");
+    printf("compressor:\n");
 
     BitFileWriter outBits(out, MSBF);
 
     int offsetSize = ceil(log2(windowSize));
     int lengthSize = ceil(log2(lookAheadSize-1));
 
-    outBits.writeBits(file.size(), 64);
+    outBits.writeBits(file.size(), 32);
 
     for(size_t i = 0; i < compressed.size(); ++i){
         Token token = compressed[i];
@@ -96,6 +95,8 @@ void decompress(
     FILE * in,
     FILE * out)
 {
+    printf("decompressor:\n");
+
     unsigned int offsetSize = ceil(log2(windowSize));
     unsigned int lengthSize = ceil(log2(lookAheadSize-1));
 
@@ -104,7 +105,7 @@ void decompress(
     /* For the sake of simplicity.*/
     vector<BYTE> decompressed;
 
-    size_t size = inBits.readBits(64);
+    size_t size = inBits.readBits(32);
 
     while(decompressed.size() < size){
 
@@ -115,7 +116,7 @@ void decompress(
         if(flag == SYMBOL){
 
             token.symbol = inBits.readBits(8);
-/*            printf("(%c)\n",token.symbol); */
+            printf("(%c)\n",token.symbol);
 
             decompressed.push_back(token.symbol);
 
@@ -124,7 +125,7 @@ void decompress(
             token.offset = inBits.readBits(offsetSize);
             token.length = inBits.readBits(lengthSize);
 
-/*            printf("(%d,%d)\n",token.offset, token.length); */
+            printf("(%d,%d)\n",token.offset, token.length);
 
             decodeToken(token, decompressed);
         }
