@@ -3,14 +3,14 @@
 #include <vector>
 #include "zlib.h"
 #include "../io.h"
+#include "../stlutil.h"
 
 using std::vector;
 
 void printHelp(void);
 
 void ZLIB_DecompressFile(FILE * in, FILE * out);
-
-vector<BYTE> getCompressedData(FILE * in);
+void ZLIB_CompressFile(FILE * in, FILE * out);
 
 int main(int argc, char *argv[])
 {
@@ -36,7 +36,6 @@ int main(int argc, char *argv[])
         else if(!strcmp("-d",*argv))
             decompress = 1;
         else if(!strcmp("-v",*argv)){
-	    printf("lol\n");
             verbose = 1;
 	    }
         else
@@ -54,7 +53,7 @@ int main(int argc, char *argv[])
     if(decompress){
         ZLIB_DecompressFile(in,out);
     }else{
-	printf("DEFLATE Compression not yet implemented.\n");
+	ZLIB_CompressFile(in,out);
     }
 
     fclose(in);
@@ -72,37 +71,26 @@ void printHelp(void)
     printf("  -v\tVerbose output.\n");
 }
 
+void ZLIB_CompressFile(FILE * in, FILE * out)
+{
+    vector<BYTE> data, compressed;
+
+    data = readFileBytes(in);
+
+    compressed = ZLIB_Compress(data);
+
+    for(size_t i = 0; i < compressed.size(); ++i)
+	putc(compressed[i], out);
+}
+
 void ZLIB_DecompressFile(FILE * in, FILE * out)
 {
     vector<BYTE> decompressed, compressed;
 
-    compressed = getCompressedData(in);
-
-    verbosePrint("Read in compressed data, size: %ld\n",compressed.size());
-/*    printData(compressed); */
+    compressed = readFileBytes(in);
 
     decompressed = ZLIB_Decompress(compressed);
-
-    decompressed = decompressed;
-    out = out;
 
     for(size_t i = 0; i < decompressed.size(); ++i)
 	putc(decompressed[i], out);
 }
-
-vector<BYTE> getCompressedData(FILE * in)
-{
-    vector<BYTE> data;
-    int ch;
-
-    while(true){
-	ch = getc(in);
-	if(ch == EOF)
-	    break;
-
-	data.push_back(ch);
-    }
-
-    return data;
-}
-

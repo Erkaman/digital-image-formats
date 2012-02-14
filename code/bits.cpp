@@ -2,6 +2,7 @@
 #include <algorithm>
 
 using std::distance;
+using std::vector;
 
 BitReader::BitReader(BitOrder order_)
 {
@@ -149,8 +150,23 @@ void BitFileWriter::writeByte(BYTE b)
     fwrite(&b,sizeof(BYTE), 1, this->out);
 }
 
-int getbits(int b, int start, int end)
+BitVectorWriter::BitVectorWriter(BitOrder order_):BitWriter(order_)
+{
+}
+
+void BitVectorWriter::writeByte(BYTE b)
+{
+    output.push_back(b);
+}
+
+vector<BYTE> BitVectorWriter::getOutputVector()
+{
+    return output;
+}
+
+int getbits(unsigned long b, int start, int end)
 {
     int len = end - start + 1;
     return (b >> start) & ~(~0 << (len));
 }
+

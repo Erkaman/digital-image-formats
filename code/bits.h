@@ -5,8 +5,7 @@
 #include <vector>
 #include "defs.h"
 
-int getbits(int b, int start, int end);
-
+int getbits(unsigned long b, int start, int end);
 
 enum BitOrder {
     MSBF,
@@ -98,6 +97,22 @@ public:
 
     void writeByte(BYTE b);
 };
+
+class BitVectorWriter : public BitWriter {
+
+private:
+
+    std::vector<BYTE> output;
+
+public:
+
+    BitVectorWriter(BitOrder order);
+
+    void writeByte(BYTE b);
+
+    std::vector<BYTE> getOutputVector();
+};
+
 
 
 #endif /* _BITS_H_ */

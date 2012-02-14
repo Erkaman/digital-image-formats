@@ -93,7 +93,7 @@ vector<Token> compress(
             }
 
 
-            if(token.length > 1) {
+            if(token.length > 2) {
                 token.type = OffsetLengthToken;
             } else{
                 token.symbol = buffer[lookAheadBeg];
@@ -153,3 +153,4 @@ void decodeToken(Token token, vector<BYTE> & decompressed)
         decompressed.push_back(decompressed[decompressed.size() - token.offset]);
     }
 }
+

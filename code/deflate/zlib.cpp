@@ -1,11 +1,12 @@
 #include "zlib.h"
-#include <cmath>
+#include "../io.h"
+#include "../bits.h"
+
 #include <cmath>
 #include <cstdlib>
-#include "deflate.h"
-#include "../io.h"
 
-#include "../defs.h"
+#include "inflate.h"
+#include "deflate.h"
 
 using std::vector;
 
@@ -32,6 +33,8 @@ typedef struct{
 #define FLEVEL_SLOWEST_ALGORITHM 3
 
 
+vector<BYTE> calculateChecksum(const vector<BYTE> & data);
+
 int multipleOf(int n,int mult);
 
 void checkCheckBits(BYTE cmfByte,BYTE flgByte,ZLIB_FLG flg);
@@ -42,9 +45,9 @@ void printZLIB_CMF(ZLIB_CMF cmf);
 ZLIB_FLG readZLIB_FLG(BYTE flgByte);
 void printZLIB_FLG(ZLIB_FLG flg);
 
-unsigned long adler32(vector<BYTE> data);
+unsigned long adler32(const vector<BYTE> & data);
 
-void validateCheckSum(vector<BYTE> data, vector<BYTE> decompressed);
+void validateCheckSum(const vector<BYTE> & data, const vector<BYTE> & decompressed);
 
 
 void checkCheckBits(BYTE cmfByte,BYTE flgByte,ZLIB_FLG flg)
@@ -64,7 +67,8 @@ int multipleOf(int n,int mult)
     return (n % mult) == 0;
 }
 
-vector<BYTE> ZLIB_Decompress(vector<BYTE> data)
+
+vector<BYTE> ZLIB_Decompress(const vector<BYTE> & data)
 {
     ZLIB_CMF cmf;
     ZLIB_FLG flg;
@@ -86,10 +90,13 @@ vector<BYTE> ZLIB_Decompress(vector<BYTE> data)
 
     checkCheckBits(cmfByte,flgByte,flg);
 
-    /* read dictionary if necessary. */
-
     /* decompress. */
-    decompressed = deflateDecompress(data);
+    decompressed = inflate(data);
+
+/*    for(size_t i = 0; i < decompressed.size(); ++i)
+	printf("%c,", decompressed[i]);
+
+    printf("\n"); */
 
     validateCheckSum(data,decompressed);
 
@@ -101,7 +108,9 @@ vector<BYTE> ZLIB_Decompress(vector<BYTE> data)
     return decompressed;
 }
 
-void validateCheckSum(vector<BYTE> data, vector<BYTE> decompressed)
+
+
+void validateCheckSum(const vector<BYTE> & data, const vector<BYTE> & decompressed)
 {
     /* Does this work for computers of different Endian? */
     unsigned long calcChecksum;
@@ -209,7 +218,7 @@ void printZLIB_FLG(ZLIB_FLG flg)
 
 #define MOD_ADLER 65521
 
-unsigned long adler32(vector<BYTE> data)
+unsigned long adler32(const vector<BYTE> & data)
 {
     /* also: check first implementation of this algorithm. */
     unsigned long a = 1, b = 0;
@@ -224,3 +233,56 @@ unsigned long adler32(vector<BYTE> data)
     return (b << 16) | a;
 }
 
+std::vector<BYTE> ZLIB_Compress(const std::vector<BYTE> & data)
+{
+    BYTE cmfByte = 0;
+
+    const BYTE cm = CM_DEFLATE;
+    const BYTE cinfo  = CM_RESERVED -8 ;
+
+    cmfByte |=  cm;
+    cmfByte |= (cinfo << 4);
+
+    BYTE flgByte = 0;
+
+    /* A preset dictionary is not used in the PNG format.*/
+    const BYTE fdict  = 0;
+    /* The maximum achievable compression is done by our implementation. */
+    const BYTE flevel  = FLEVEL_SLOWEST_ALGORITHM;
+
+    const BYTE fcheck  = 0/* compute here*/;
+
+    flgByte |= fcheck;
+    flgByte |= (fdict << 5);
+    flgByte |= (flevel << 6);
+
+    /* compress. */
+    vector<BYTE> compressed = deflate(data);
+
+    vector<BYTE> checksum = calculateChecksum(data);
+
+    vector<BYTE> result;
+
+    result.push_back(cmfByte);
+    result.push_back(flgByte);
+
+    result.insert(result.end(), compressed.begin(), compressed.end());
+
+    result.insert(result.end(), checksum.begin(), checksum.end());
+
+    return result;
+}
+
+vector<BYTE> calculateChecksum(const vector<BYTE> & data)
+{
+    unsigned long checksum = adler32(data);
+
+    vector<BYTE> v;
+
+    v.push_back(getbits(checksum,24,31));
+    v.push_back(getbits(checksum,16,23));
+    v.push_back(getbits(checksum,8,15));
+    v.push_back(getbits(checksum,0,7));
+
+    return v;
+}

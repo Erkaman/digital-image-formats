@@ -1,557 +1,206 @@
-
+#include "deflate.h"
 #include "../io.h"
 #include "../bits.h"
-#include "deflate.h"
-#include "../data_stream.h"
 #include "../huffman/huffman.h"
-
+#include "../lzss/lzss_util.h"
+#include "common.h"
+#include <cmath>
 #include <cstdlib>
 
 using std::vector;
 
-#define HUFFMAN_CODES 288
-#define DISTANCE_CODES 30
-#define LENGTH_CODES 29
+vector<unsigned int> tokensToDeflateCodes(
+    const vector<Token> & tokens,
+    vector<unsigned int> & litteralAndLengthCodes,
+    vector<unsigned int> & distanceCodes);
 
-typedef struct{
-    BYTE BFINAL; /* Is this the last data block? */
-    BYTE BTYPE; /* Data compression type. */
-} DEFLATE_BlockHeader;
-
-typedef struct{
-    unsigned short extraBits;
-    unsigned short minDist;
-} DistanceTableEntry;
-
-typedef struct{
-    unsigned short extraBits;
-    unsigned short minLength;
-} LengthTableEntry;
-
-typedef struct {
-    unsigned short HLIT; /* 5 bits. number of literal/length codes - 257(257-286).   */
-    unsigned short HDIST; /* 5 bits. Number of distance codes - 1 (1 - 32)  */
-    unsigned short HCLEN; /* 4 bits. Number of code length codes - 4 (4 - 19) */
-} DEFLATE_DynamicBlockHeader;
-
-RevCodesList loadLiteralLengthCodes(
-    unsigned short HLIT,
-    const RevCodesList & codeLengthCodes,
-    BitReader * compressedStream);
-
-RevCodesList loadUsingCodeLengthCodes(
-    unsigned short length,
-    unsigned short alphabetLength,
-    const RevCodesList & codeLengthCodes,
-    BitReader * compressedStream);
-
-RevCodesList loadDistanceCodes(
-    unsigned short HDIST,
-    const RevCodesList & codeLengthCodes,
-    BitReader * compressedStream);
-
-void loadDynamicTables(
-    RevCodesList * huffmanCodes,
-    RevCodesList * distanceCodes,
-    BitReader * compressedStream);
-
-DEFLATE_DynamicBlockHeader loadDEFLATE_DynamicBlockHeader(BitReader * compressedStream);
-
-void printDEFLATE_DynamicBlockHeader(DEFLATE_DynamicBlockHeader blockHeader);
-
-#define DATA_STREAM_GROW_FACTOR 2
-
-
-void setFixedHuffmanCodes(void);
-void setFixedDistanceCodes(void);
-
-void printDEFLATE_BlockHeader(DEFLATE_BlockHeader header);
-
-#define BTYPE_NO_COMPRESSION 0
-#define BTYPE_COMPRESSED_FIXED_HUFFMAN_CODES 1
-#define BTYPE_COMPRESSED_DYNAMIC_HUFFMAN_CODES 2
-#define BTYPE_RESERVED 3
-
-#define END_OF_BLOCK 256
-#define LITTERAL_VALUES_MAX 255
-#define DISTANCE_MIN 257
-#define DISTANCE_MAX 285
-
-unsigned short readRestOfLengthCode(
-    unsigned int code,
-    BitReader * compressedStream);
-
-unsigned int readRestOfDistanceCode(unsigned int code,BitReader * compressedStream);
-
-void readNonCompresedBlock(BitReader & compressedStream, vector<BYTE> & decompressedList);
-
-void readCompresedBlock(
-    const RevCodesList & huffmanCodes,
-    const RevCodesList & distanceCodes,
-    BitReader * compressedStream,
-    vector<BYTE> & decompressedList);
-
-DEFLATE_BlockHeader readDEFLATE_BlockHeader(BitReader & stream);
-
-void decodeLengthDistancePair(
-    unsigned int lengthCode,
-    const RevCodesList & distanceCodes,
-    BitReader * compressedStream,
-    vector<BYTE> & decompressedList);
-
-void outputLengthDistancePair(
-    unsigned short lengthCode,
-    unsigned short distanceCode,
-    vector<BYTE> &  decompressedList);
-
-/* Globals */
-
-int remainingPacketBits;
-
-RevCodesList fixedHuffmanCodes;
-RevCodesList fixedDistanceCodes;
-
-LengthTableEntry lengthTable[LENGTH_CODES] = {
-
-    {0,3},
-    {0,4},
-    {0,5},
-    {0,6},
-    {0,7},
-    {0,8},
-    {0,9},
-    {0,10},
-
-    {1,11},
-    {1,13},
-    {1,15},
-    {1,17},
-
-    {2,19},
-    {2,23},
-    {2,27},
-    {2,31},
-
-    {3,35},
-    {3,43},
-    {3,51},
-    {3,59},
-
-    {4,67},
-    {4,83},
-    {4,99},
-    {4,115},
-
-    {5,131},
-    {5,163},
-    {5,195},
-    {5,227},
-
-    {0, 258}
-};
-
-DistanceTableEntry distanceTable[DISTANCE_CODES] = {
-    {0,1},
-    {0,2},
-    {0,3},
-    {0,4},
-
-    {1,5},
-    {1,7},
-
-    {2,9},
-    {2,13},
-
-    {3,17},
-    {3,25},
-
-    {4,33},
-    {4,49},
-
-    {5,65},
-    {5,97},
-
-    {6,129},
-    {6,193},
-
-    {7,257},
-    {7,385},
-
-    {8,513},
-    {8,769},
-
-    {9,1025},
-    {9,1537},
-
-    {10,2049},
-    {10,3073},
-
-    {11,4097},
-    {11,6145},
-
-    {12,8193},
-    {12,12289},
-
-    {13,16385},
-    {13,24577},
-};
-
-void setFixedHuffmanCodes(void)
+vector<BYTE> deflate(const vector<BYTE> & data)
 {
-    int i;
-    HuffmanCode code;
+/*    const bool useFixedCodes = true;*/
 
-    /* Litteral value 256 is the end code.*/
+    /* The maximum size of the window buffer. */
+    const unsigned int windowSize = pow(2,15);
 
-    /* Literal values 0-143 are given the codes
-       00110000(=48=0x30) - 10111111(191=0xbf) of length 8*/
-    for(i = 0; i <= 143; ++i){
-        code.value = 0x30 + i;
-        code.length = 8;
-        fixedHuffmanCodes[code] = i;
-    }
+    /* the maximum length code. */
+    const unsigned int lookAheadSize = 258;
 
-    /* Literal values 144-255 are given the codes
-       1 1001 0000(=400=0x190) - 1 1111 1111(=511=0x1ff) of length 9*/
-    for(i = 144; i <= 255; ++i){
-        code.value = 0x190 + i - 144;
-        code.length = 9;
-        fixedHuffmanCodes[code] = i;
-    }
+    BitVectorWriter * outBits = new BitVectorWriter(LSBF);
 
-    /* Literal values 256-279 are given the codes
-       000 0000(=0=0x0) - 001 0111(=23=0x17) of length 7*/
-    for(i = 256; i <= 279; ++i){
-        code.value = 0x0 + i - 256;
-        code.length = 7;
-        fixedHuffmanCodes[code] = i;
-    }
+/*    for(size_t i = 0; i <data.size(); ++i)
+        printf("%c,", data[i]);
+ 
+    printf("\n"); */
 
-    /* Literal values 280-287 are given the codes
-       1100 0000(=192=0xc0) - 1100 0111(=199=0xc7) of length 8*/
-    for(i = 280; i <= 287; ++i){
-        code.value = 0xc0 + i - 280;
-        code.length = 8;
-        fixedHuffmanCodes[code] = i;
-    }
-}
+    vector<Token> LZSS_Tokens =
+        compress(windowSize,lookAheadSize,data);
 
-void setFixedDistanceCodes(void)
-{
-    int i;
-    HuffmanCode code;
+    vector<unsigned int> litteralAndLengthCodes;
+    vector<unsigned int> distanceCodes;
 
-    /*
-      "Distance codes 0-31 are represented by (fixed-length) 5-bit codes"
-    */
-    for(i = 0; i <= 31; ++i){
-        code.value = i;
-        code.length = 5;
-        fixedDistanceCodes[code] = i;
-    }
-}
+    vector<unsigned int> deflateCodes =
+        tokensToDeflateCodes(
+            LZSS_Tokens,
+            litteralAndLengthCodes,
+            distanceCodes);
 
-void readNonCompresedBlock(BitReader & compressedStream, vector<BYTE> & decompressedList)
-{
-    BYTE b1;
-    BYTE b2;
-    unsigned long uncompressedBlockSize;
-/* if dynaic codes are used a new table is read in before the decompression
-   of the data. */
+    /* Assume fixed codes are used from now on. */
 
-    compressedStream.nextByte();
-    /* FIXME: does this handle big and little endian? */
-    /* Implement a routine for doing this. */
-    b1 = compressedStream.readBits(8);
-    b2 = compressedStream.readBits(8);
+    outBits->writeBits(1, 1);
+    outBits->writeBits(BTYPE_COMPRESSED_FIXED_HUFFMAN_CODES, 2);
 
-    uncompressedBlockSize = (b1 + b2 * 256);
+    CodesList distanceCodesList =  getFixedDistanceCodes();
+    CodesList huffmanCodesList =  getFixedHuffmanCodes();
 
-    /* Skip NLEN */
-    compressedStream.readBits(8);
-    compressedStream.readBits(8);
+    for(size_t i = 0; i < deflateCodes.size(); ++i){
+        unsigned int code = deflateCodes[i];
 
-    for(unsigned long i = 0; i < uncompressedBlockSize; ++i){
-
-        BYTE b = compressedStream.readBits(8);
-        decompressedList.push_back(b);
-    }
-}
-
-vector<BYTE> deflateDecompress(vector<BYTE> data)
-{
-    DEFLATE_BlockHeader header;
-    vector<BYTE> decompressedList;
-
-    BitIterReader inBits(data.begin(), LSBF);
-
-/*    translateCodesTest(); */
-
-    /* TODO: ???? correct endianess?  */
-/*    compressedStream = getNewDataStream(data, ENDIAN_BIG); */
-
-    /* the first two bytes of the compressed stream were headers bytes, which
-       we have already read, so skip them. */
-    inBits.readBits(8);
-    inBits.readBits(8);
-
-    /* Put this into a preparatory function? */
-    setFixedHuffmanCodes();
-    setFixedDistanceCodes();
-
-    remainingPacketBits = 8;
-
-    do{
-        /* Skip past to the next byte in the stream where the next block begins. */
-
-        header = readDEFLATE_BlockHeader(inBits);
-        printDEFLATE_BlockHeader(header);
-
-        if(header.BTYPE == BTYPE_NO_COMPRESSION){
-
-            readNonCompresedBlock(inBits, decompressedList);
-
+        /* Literal value. */
+        if(code <= LITTERAL_VALUES_MAX){
+            writeCode(huffmanCodesList[code], outBits);
         } else{
+            /* distance length pair. */
 
-            RevCodesList huffmanCodes;
-            RevCodesList distanceCodes;
+            /* write the length code. */
+            writeCode(huffmanCodesList[code], outBits);
 
-            if (header.BTYPE == BTYPE_COMPRESSED_DYNAMIC_HUFFMAN_CODES) {
+            unsigned int extraBitsLength =
+                lengthTable[code-LENGTH_MIN].extraBits;
 
-                loadDynamicTables(&huffmanCodes, &distanceCodes, &inBits);
+            /* If the length code has any extra bits at all. */
 
-            } else if(header.BTYPE == BTYPE_COMPRESSED_FIXED_HUFFMAN_CODES) {
-                huffmanCodes = fixedHuffmanCodes;
-                distanceCodes = fixedDistanceCodes;
+            if(extraBitsLength > 0){
+
+                /* The extra bits of the length are found directly after
+                 * the length code*/
+                i++;
+                unsigned int extraBits = deflateCodes[i];
+
+                outBits->writeBits(extraBits, extraBitsLength);
             }
 
-            readCompresedBlock(
-                huffmanCodes,
-                distanceCodes,
-                &inBits,
-                decompressedList);
-        }
-    }while(header.BFINAL == 0);
+            /* Write the distance code*/
+            ++i;
 
-    return decompressedList;
-}
+            unsigned int distcode = deflateCodes[i];
 
+            writeCode(distanceCodesList[distcode], outBits);
 
+            extraBitsLength = distanceTable[distcode].extraBits;
 
-void loadDynamicTables(
-    RevCodesList * huffmanCodes,
-    RevCodesList * distanceCodes,
-    BitReader * compressedStream)
-{
-    DEFLATE_DynamicBlockHeader blockHeader;
+            if(extraBitsLength > 0){
+                ++i;
 
-    RevCodesList codeLengthCodes;
+                unsigned int extraBits = deflateCodes[i];
 
-    blockHeader = loadDEFLATE_DynamicBlockHeader(compressedStream);
-    printDEFLATE_DynamicBlockHeader(blockHeader);
-
-    codeLengthCodes = loadCodeLengthCodes(blockHeader.HCLEN, compressedStream);
-
-    *huffmanCodes = loadLiteralLengthCodes(
-        blockHeader.HLIT,
-        codeLengthCodes,
-        compressedStream);
-
-    *distanceCodes = loadDistanceCodes(
-        blockHeader.HDIST,
-        codeLengthCodes,
-        compressedStream);
-}
-
-RevCodesList loadLiteralLengthCodes(
-    unsigned short HLIT,
-    const RevCodesList & codeLengthCodes,
-    BitReader * compressedStream)
-{
-    return loadUsingCodeLengthCodes(
-        HLIT + 257,
-        HUFFMAN_CODES,
-        codeLengthCodes,
-        compressedStream);
-}
+                outBits->writeBits(extraBits, extraBitsLength);
+            }
 
 
-RevCodesList loadDistanceCodes(
-    unsigned short HDIST,
-    const RevCodesList & codeLengthCodes,
-    BitReader * compressedStream)
-{
-    return loadUsingCodeLengthCodes(
-        HDIST + 1,
-        DISTANCE_CODES,
-        codeLengthCodes,
-        compressedStream);
-}
-
-DEFLATE_DynamicBlockHeader loadDEFLATE_DynamicBlockHeader(BitReader * compressedStream)
-{
-    DEFLATE_DynamicBlockHeader blockHeader;
-
-    blockHeader.HLIT = compressedStream->readBits(5);
-    blockHeader.HDIST = compressedStream->readBits(5);
-    blockHeader.HCLEN = compressedStream->readBits(4);
-
-    return blockHeader;
-}
-
-void printDEFLATE_DynamicBlockHeader(DEFLATE_DynamicBlockHeader blockHeader)
-{
-    verbosePrint("DEFLATE Dynamic Block Header\n");
-
-    verbosePrint("HLIT:%d\n", blockHeader.HLIT);
-    verbosePrint("HDIST:%d\n", blockHeader.HDIST);
-    verbosePrint("HCLEN:%d\n", blockHeader.HCLEN);
-}
-
-void readCompresedBlock(
-    const RevCodesList & huffmanCodes,
-    const RevCodesList & distanceCodes,
-    BitReader * compressedStream,
-    vector<BYTE> & decompressedList)
-{
-    size_t code;
-
-    while(1){
-
-        code = readCode(huffmanCodes, compressedStream);
-
-        /* If the code is a simple literal value. */
-        if(code <= LITTERAL_VALUES_MAX){
-            /* */
-            decompressedList.push_back((BYTE)code);
-        }
-        else if(code == END_OF_BLOCK){
-            /* If the code is a end of block code, then stop.*/
-            break;
-        } else if(code >= DISTANCE_MIN &&
-                  code <= DISTANCE_MAX){
-
-            decodeLengthDistancePair(
-                code,
-                distanceCodes,
-                compressedStream,
-                decompressedList);
-        } else{
-            printError("Invalid code found:\n");
-            printf("%ld\n", code);
         }
     }
+
+    writeCode(huffmanCodesList[END_OF_BLOCK], outBits);
+
+    outBits->writeBits(0,8);
+
+    vector<BYTE> compressed = outBits->getOutputVector();
+
+    delete outBits;
+
+    return compressed;
 }
 
-void decodeLengthDistancePair(
-    unsigned int lengthCode,
-    const RevCodesList & distanceCodes,
-    BitReader * compressedStream,
-    vector<BYTE> & decompressedList)
+vector<unsigned int> tokensToDeflateCodes(
+    const vector<Token> & tokens,
+    vector<unsigned int> & litteralAndLengthCodes,
+    vector<unsigned int> & distanceCodes)
 {
-    unsigned short fullLengthCode;
+    vector<unsigned int> deflateCodes;
 
-    unsigned short fullDistanceCode;
+    for(size_t i = 0; i < tokens.size(); ++i){
+        Token token = tokens[i];
 
-    unsigned int distanceCode;
+        if(token.type == SymbolToken){
 
-    fullLengthCode =  readRestOfLengthCode(
-        lengthCode,
-        compressedStream);
+/*            printf("added symbol:%c\n", token.symbol); */
+            deflateCodes.push_back(token.symbol);
+            litteralAndLengthCodes.push_back(token.symbol);
 
-    /* Read the following distance code. */
-    distanceCode = readCode(distanceCodes, compressedStream);
+        } else if(token.type == OffsetLengthToken) {
 
-    fullDistanceCode = readRestOfDistanceCode(distanceCode,compressedStream);
+/*            printf("length:%d\n", token.length);
+            printf("offset:%d\n", token.offset);*/
 
-    outputLengthDistancePair(fullLengthCode, fullDistanceCode, decompressedList);
-}
+            unsigned int length;
+            /* Brute force find the matching length code. */
+            for(length = LENGTH_MIN; length <= LENGTH_MAX; ++length){
 
-void outputLengthDistancePair(
-    unsigned short lengthCode,
-    unsigned short distanceCode,
-    vector<BYTE> &  decompressedList)
-{
-    unsigned short i;
-    BYTE toAdd;
+                LengthTableEntry len = lengthTable[length - LENGTH_MIN];
 
-    for(i = 0; i < lengthCode; ++i){
+/*                printf("len:%d\n", len.minLength); */
 
-        toAdd = decompressedList[decompressedList.size() - distanceCode];
 
-        decompressedList.push_back(toAdd);
+                unsigned int lower = len.minLength;
+                unsigned int upper = len.minLength + pow(2, len.extraBits) - 1;
+
+                if(lower <= token.length && token.length <= upper){
+                    deflateCodes.push_back(length);
+                    litteralAndLengthCodes.push_back(length);
+
+                    /* TODO: does this work? */
+/*                    printf("found length code:%d\n", length);*/
+
+                    if(len.extraBits > 0){
+
+/*                        printf("extra bits:%d\n", token.length - len.minLength); */
+
+                        deflateCodes.push_back(token.length - len.minLength);
+                    }
+                    break;
+                }
+            }
+
+            if(length > LENGTH_MAX){
+                printf("ERROR, found length code with no match\n");
+                exit(1);
+            }
+
+            /* Brute force find the matching distance/offset code. */
+            unsigned int distance;
+            for(distance = 0; distance < DISTANCE_CODES; ++distance){
+
+                DistanceTableEntry dist = distanceTable[distance];
+
+                unsigned int lower = dist.minDist;
+                unsigned int upper = dist.minDist + pow(2, dist.extraBits) - 1;
+
+                if(lower <= token.offset && token.offset <= upper){
+                    deflateCodes.push_back(distance);
+                    distanceCodes.push_back(distance);
+
+/*                    printf("found distance code:%d\n",distance); */
+
+                    /* TODO: does this work? */
+                    if(dist.extraBits > 0){
+
+			/* Add the extra bits. */
+
+/*                        printf("extra bits:%d\n", token.offset - dist.minDist);*/
+
+                        deflateCodes.push_back(token.offset - dist.minDist);
+                    }
+
+                    break;
+                }
+            }
+
+            if(distance > DISTANCE_CODES){
+                printf("ERROR, found distance code with no match:%d\n", token.offset);
+                exit(1);
+            }
+
+        }
     }
-}
 
-unsigned int readRestOfDistanceCode(unsigned int code,BitReader * compressedStream)
-{
-    unsigned short distanceCode;
-    DistanceTableEntry entry;
-
-    entry = distanceTable[code];
-
-    if(entry.extraBits != 0){
-        distanceCode = entry.minDist + compressedStream->readBits(entry.extraBits);
-    } else{
-        distanceCode = entry.minDist;
-    }
-
-    return distanceCode;
-}
-
-
-unsigned short readRestOfLengthCode(
-    unsigned int code,
-    BitReader * compressedStream)
-{
-    unsigned short lengthCode;
-    LengthTableEntry entry;
-
-    entry = lengthTable[code - 257];
-
-    if(entry.extraBits != 0)
-        lengthCode = entry.minLength + compressedStream->readBits(entry.extraBits);
-    else
-        lengthCode = entry.minLength;
-
-    return lengthCode;
-}
-
-DEFLATE_BlockHeader readDEFLATE_BlockHeader(BitReader & stream)
-{
-    DEFLATE_BlockHeader header;
-
-    header.BFINAL = stream.readBits(1);
-    header.BTYPE = stream.readBits(2);
-
-    return header;
-}
-
-void printDEFLATE_BlockHeader(DEFLATE_BlockHeader header)
-{
-    verbosePrint("DEFLATE Header Block\n");
-    verbosePrint("BFINAL:%d\n",header.BFINAL);
-
-    verbosePrint("BTYPE(Block Type): %d(",header.BTYPE);
-
-    switch(header.BTYPE){
-    case BTYPE_NO_COMPRESSION:
-        verbosePrint("No Compression");
-        break;
-    case BTYPE_COMPRESSED_FIXED_HUFFMAN_CODES:
-        verbosePrint("Compressed with fixed Huffman codes");
-        break;
-    case  BTYPE_COMPRESSED_DYNAMIC_HUFFMAN_CODES:
-        verbosePrint("Compressed with dynamic Huffman codes");
-        break;
-    case BTYPE_RESERVED:
-        printError("Reserved(error");
-        printf("hai\n");
-        exit(0);
-        break;
-    }
-    verbosePrint(")\n");
-    verbosePrint("\n");
-
-    verbosePrint("\n");
+    return deflateCodes;
 }
