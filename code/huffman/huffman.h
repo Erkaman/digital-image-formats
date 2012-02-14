@@ -107,5 +107,14 @@ void printCodeLengths(CodeLengths cs);
 
 CodeLengths extractAlphabetCodeLengths(CodeLengths cs);
 
+void writeCodeLengthCodeLengths(
+    CodeLengths codeLengthCodeLengths,
+    BitWriter * outBits);
+
+void writeCompressedCodeLengths(
+    CodeLengths compressedCodeLengths,
+    CodesList codeLengthCodes,
+    BitWriter * outBits);
+
 #endif /* _HUFFMAN_H_ */
 

@@ -106,55 +106,14 @@ void huffmanCompress(FILE * in,FILE * out)
         makeCodeLengths(codeLengthalphabetCodeLengths, 19,7);
     CodesList codeLengthCodes = translateCodes(codeLengthCodeLengths);
 
-    permuteCodelengths(codeLengthCodeLengths);
-
     BitFileWriter * outBits = new BitFileWriter(out, LSBF);
 
-    /* Find the end of the trailing zeroes. */
-    size_t begTrail;
-    for(begTrail = codeLengthCodeLengths.size() - 1; begTrail != 0; --begTrail)
-	if(codeLengthCodeLengths[begTrail] != 0)
-	    break;
+    writeCodeLengthCodeLengths(codeLengthCodeLengths, outBits);
 
-    outBits->writeBits(begTrail + 1 - 4, 4);
-
-    /* these codes are used to encode the byte codes. */
-    for(size_t i = 0; i < (begTrail + 1); ++i){
-        outBits->writeBits(codeLengthCodeLengths[i], 3);
-    }
-
-    for(size_t i = 0; i < compressedByteCodeLengths.size(); ++i){
-        HuffmanCode code;
-        if(compressedByteCodeLengths[i] <= 15){
-            code = codeLengthCodes[compressedByteCodeLengths[i]];
-
-            writeCode(code, outBits);
-        } else if (compressedByteCodeLengths[i] == 16){
-            code = codeLengthCodes[compressedByteCodeLengths[i]];
-            writeCode(code, outBits);
-
-            /* Write the repeat code. */
-            ++i;
-            outBits->writeBits(compressedByteCodeLengths[i], 2);
-        } else if (compressedByteCodeLengths[i] == 17){
-            code = codeLengthCodes[compressedByteCodeLengths[i]];
-            writeCode(code, outBits);
-
-            /* Write the repeat code. */
-            ++i;
-            outBits->writeBits(compressedByteCodeLengths[i], 3);
-        } else if (compressedByteCodeLengths[i] == 18){
-            code = codeLengthCodes[compressedByteCodeLengths[i]];
-            writeCode(code, outBits);
-
-            /* Write the repeat code. */
-
-
-            ++i;
-
-            outBits->writeBits(compressedByteCodeLengths[i], 7);
-        }
-    }
+    writeCompressedCodeLengths(
+	compressedByteCodeLengths,
+	codeLengthCodes,
+	outBits);
 
     outBits->writeBits(fileData.size(), 64);
 
@@ -198,3 +157,23 @@ void huffmanDecompress(FILE * in,FILE * out)
     delete inBits;
 }
 
+/* First writes HCLEN and then writes the code lengths for the code length alphabet. */
+void writeCodeLengthCodeLengths(
+    CodeLengths codeLengthCodeLengths,
+    BitWriter * outBits)
+{
+    permuteCodelengths(codeLengthCodeLengths);
+
+    /* Find the end of the trailing zeroes. */
+    size_t begTrail;
+    for(begTrail = codeLengthCodeLengths.size() - 1; begTrail != 0; --begTrail)
+	if(codeLengthCodeLengths[begTrail] != 0)
+	    break;
+
+    outBits->writeBits(begTrail + 1 - 4, 4);
+
+    /* these codes are used to encode the byte codes. */
+    for(size_t i = 0; i < (begTrail + 1); ++i){
+        outBits->writeBits(codeLengthCodeLengths[i], 3);
+    }
+}

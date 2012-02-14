@@ -10,7 +10,6 @@
 #include <iostream>
 #include <iterator>
 
-
 #include "node.h"
 
 using std::vector;
@@ -656,4 +655,43 @@ void printCodeLengths(CodeLengths cs){
         ostream_iterator<CodeLength>(cout, ", "));
 
     cout << "\n";
+}
+
+void writeCompressedCodeLengths(
+    CodeLengths compressedCodeLengths,
+    CodesList codeLengthCodes,
+    BitWriter * outBits)
+{
+    for(size_t i = 0; i < compressedCodeLengths.size(); ++i){
+        HuffmanCode code;
+        if(compressedCodeLengths[i] <= 15){
+            code = codeLengthCodes[compressedCodeLengths[i]];
+
+            writeCode(code, outBits);
+        } else if (compressedCodeLengths[i] == 16){
+            code = codeLengthCodes[compressedCodeLengths[i]];
+            writeCode(code, outBits);
+
+            /* Write the repeat code. */
+            ++i;
+            outBits->writeBits(compressedCodeLengths[i], 2);
+        } else if (compressedCodeLengths[i] == 17){
+            code = codeLengthCodes[compressedCodeLengths[i]];
+            writeCode(code, outBits);
+
+            /* Write the repeat code. */
+            ++i;
+            outBits->writeBits(compressedCodeLengths[i], 3);
+        } else if (compressedCodeLengths[i] == 18){
+            code = codeLengthCodes[compressedCodeLengths[i]];
+            writeCode(code, outBits);
+
+            /* Write the repeat code. */
+
+            ++i;
+
+            outBits->writeBits(compressedCodeLengths[i], 7);
+        }
+    }
+
 }
