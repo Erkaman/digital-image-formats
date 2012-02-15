@@ -2,7 +2,6 @@
   \bibliography{project.bib}
 \end{comment}
 
-
 \chapter{Introduction and Abstract}
 
 \section{Introduction}
@@ -10,10 +9,9 @@
 One day a couple of years ago, I accidentally opened an executable
 file(.exe) on my computer in a text editor. In front of my eyes I saw
 an absolutely incomprehensible mess of characters and numbers. No
-matter how much I examined this mess, I could see no order in this
-absolute chaos. This event really got me thinking about one thing:
-\textit{how} exactly are all the data stored in a computer actually
-\textit{represented}?
+matter how much I examined this mess, I could see no order in it. This
+event really got me thinking about one thing: \textit{how} exactly is
+all the data stored in a computer actually \textit{represented}?
 
 A couple of months after this, I learned about the concept of a hex
 dump. A hex dump is a hexadecimal representation of the data in a
@@ -23,174 +21,154 @@ is just a bunch of ones and zeroes, then obviously all the data stored
 in a computer is also just a bunch of ones and zeroes! And
 furthermore, saying that a computer speaks in ones and zeroes is just
 another way of saying that it speaks in \textit{numbers}. Since
-mathematics have always been one of my great interests in life, this
-episode served greatly to strengthen my interest in how data is
-represented in a computer.
+numbers, and mathematics in general, have always been one of my
+greatest interests in life, this episode served to greatly strengthen
+my interest in how data is represented in a computer.
 
-Ever since I came upon this realization, something I very much like to
-do have been viewing the hexdumps of the files on my computer, and
-trying to figure out exactly how they work. %But I quickly realized that
-%doing this would require great knowledge of how the data stored in the
-%file is
-
-Every kind of way of storing a certain type of data is called a
-\textit{file format}. The exact structuring of a file format tends to
-be specified in something called that file formats
-\textit{specification}. But alas, reading these documents often
-requires the reader already being moderately knowledgeable about the
-data kind of data that the file format stores.
+A way of storing a certain type of data is called a \textit{file
+  format}. The exact structure of a file format tends to be specified
+in something called that file format's \textit{specification}. But
+alas, reading these documents often requires the reader already being
+moderately knowledgeable about the kind of data that the file format
+stores.
 
 And so I realized that it would probably require a great amount of
 research in order to truly understand how file formats work. But I
-still didn't want to give up; my thirst for knowledge was to great for
-such an action.  For this reason a spent a great deal of the summer of
-2011 in exploring how two kinds of file formats work: image and sound
-formats. And while I made progress in exploring how these kinds of
-formats work, progress was being made too slow. The Time of the summer
-was running out, and I was at the same time desperately trying to come
-up with what sort school project I should do for my last term.
+still didn't want to give up; my thirst for knowledge was too great
+for such an action.  For this reason a spent a great deal of the
+summer of 2011 in exploring how two different categories of file
+formats work: image and sound formats. And while it is true that I
+made progress in exploring how these kinds of formats work, progress
+was being made too slow. The summer was coming to an end, and I was at
+the same time desperately trying to come up with what sort school
+project I should do for my last term.
 
-And then it suddenly struck me: exploring how one kind of file format
-works would be a great idea for a school project! I needed to make a
-choice: image or sound formats? but the real questiosn was rather:
-which kind of format would be the most manageable to explore? Then the
-choice was simple: image formats, because while sound formats are
-intesting the math behind them is way beyond at the current I was
-at. And while image formats are relatively simple, you need to have
-some moderate knowledge from several different areas in order to fully
-understand them. These areas are:
+And then it suddenly struck me: exploring how one category of file
+format works would be a great idea for a school project! I needed to
+make a choice: image or sound formats? But the real question was
+rather: which kind of format would be the most manageable to explore?
+Then the choice was simple: image formats, because while it is true
+that sound formats are very interesting, the math behind them was, and
+still is, simply beyond me. And while image formats are relatively
+simple, you still need to have some moderate knowledge from several
+different areas in order to fully understand them, so a project based
+on image formats would still be quite challenging. These areas are:
 
 \begin{itemize}
-\item Information Theory
+\item Data Compression
 \item Color Science
 \end{itemize}
 
-And Color Science was by far the hardest of these two areas to study,
-which is why only a small segment of this text is dedicated to this
-area, while pretty must the rest of the book is dedicated to information
-theory.
+pAnd Color Science was by far the hardest of these two areas to study,
+which is why only a small segment of this text is dedicated to it,
+while pretty must the rest is dedicated to the art of data
+compression.
 
 \section{Abstract}
 
-The cover picture of this project was made to illustrate the main
-point of this project: the representation of images in a computer is
-just a list of numbers. The cover image is a very simplified model of
-all image formats are built and I will spend the rest of this section
-on explaining the numbers that this image consists of. I will here
-write a specifciation of the image format on the front page,that will
-from now on be known as IM, the \textit{IM}aginary image format; that
-is to say, it is a made up format that was designed for me for
-illustrative purposes.
+The cover picture of this text was made to illustrate the main point
+of this text: digital images are just numbers. The cover image is a
+very simplified model of how all image formats in general are built
+and I will spend the rest of this section explaining the numbers that
+this image consists of. I will in other words write a
+\textit{specification} of the image format that the image on the front
+page is stored in. This format will from now on be known as IM, the
+IMaginary image format.
 
 \subsection{Image Header}
 
 The first gray section of the image is known as the image header of
-the image. Let us go through to parts of the header number by number:
+the image. It will \textit{always} be found first in an image. Let us
+go through to parts of the header number by number:
 
 \subsubsection{Magic Numbers}
 
 The first two numbers are the two letters IM. Even letters are
 represented by numbers in a computer. How these letters are mapped to
-different numers is determined by the encoding of these letters. An
+different numbers is determined by the \textit{encoding} of them. An
 encoding is basically a table that maps all the letters and
-miscellaneous symbols of the human language to respective numbers. One
-common encoding for is known as ASCII \cite{rfc20}, and in ASCII the
-letter I is represented by the number 73 and the letter I is mapped to
-the number 77. So if these letters where encoded in ASCII a better way
-to represent them would have been to use the numbers 73 and 77. But I
-did not do this because it is much easier for the reader to understand
-letters than numbers.
+miscellaneous symbols of the human language to numbers. One very
+common encoding is known as ASCII, and in ASCII the letter I is
+represented by the number 73 and the letter I is mapped to the number
+77. So if these letters where encoded in ASCII, a better way to
+represent them would have been to simply use the numbers 73 and
+77. But I did not do this because it is much easier for the reader to
+understand letters than numbers.
 
-Another reason why I used letters instead of number is that there are
-so many different encoding. ASCII only has support for english
-language character, and there are other encodign that ar designed to
-support all the symbols for all human languages, the most of example
-is Unicode\cite{allen2007unicode}. But since it would have been
-bothersome for the reader to guess the encoding, I prefered to simply
-use letters instead.
-
-So these two first numbers are known as magic numbers \index{magic
-  numbers}. At the beginning of every image file, there are a couple
-bytes called magic numbers that are common to all images of that
-type. They are sort like file name extensions, meaning that they help
-you identify the type of the file you are currently reading.
+These two first numbers are known as the magic numbers \index{magic
+  numbers} of the file format. At the beginning of every image file,
+there are a couple numbers called magic numbers that are common to all
+images of that specific format. They are sort like file name
+extensions(for example, a file named ``essay.doc'' has a file name
+extension ``doc''), meaning that they help you identify the type of
+the file you are currently reading.
 
 \subsubsection{Measurements}
 
 And following the magic number is the width and the height of this
 image. In practically every image format this information is
-included.
+included. This information is included to make it easier for programs
+dealing with digital images to parse the image data in the file.
 
 \subsubsection{Metadata}
 
-But images can not only contain image data. They can also contain
-something known as metadata. Metadata is simply data that describes
-the image data. It contains no data that is necessary to understand
-how the image data within image is represented, it rather gives
-informtion about things like:
+But images can not only contain image data, they can also contain
+something known as \textit{metadata}. Metadata contains no data that
+is necessary to understand how the image data within the image is
+represented, but it rather gives information about things like:
 
 \begin{itemize}
 \item The program used to create the image
 \item A descriptive name for the image.
-\item The creator/producer of the image.
+\item The name of the creator of the image.
 \item The creation date of the image.
 \item The camera that was used to take the image.
 \end{itemize}
 
-One relatively well known method for embedding metadata about the
-camera used to take an image is known as
-Exif\cite{camera:_cipa_dc_trans_exchan}. But since Exif is a quite
-complex method for storing such data, we will not discuss it in this
-text. We will only be concerned in exploring how to extract simple
-metadata, like the creation date of the image and the producer of the
-image.
+One much used method for embedding metadata about the camera used to
+take an image is known as Exif\cite{camera:_cipa_dc_trans_exchan}. But
+since Exif is a quite complex method for storing such data, we will
+not discuss it in this text. We will only be concerned in exploring
+how to extract simple metadata, like the creation date of the image
+and the creator of the image.
 
 \subsection{Color Palette}
 
-Color palettes \index{color palette} are also very common, but not all
-images out in the wild use them, but as good all image formats support
-them, hence why they are included in this imaginary format. A color
-palette is basically an array or list of colors that is to be used by
-the image. The colors themselves are represented numerically using a
-so called color model. Color models are something we will discus much
-in depth in chapter \ref{cha:color}. The numbers in the palette is the
-numbers that the color will be represented by in the color data. In
-reality, only the color data is stored in the palette, and no numbers
-are they given. They are only written to make the image easier to
-understand, and not something that is found in ordinary images.
+Color palettes are also very common, but far from all images out in
+the wild use them, but as good all image formats support them, hence
+why they are included in this imaginary format. A color palette is
+basically a list of colors that is to be used by the image. The colors
+themselves are represented numerically using a so called color
+model. Color models are something we will discus in much depth in
+chapter \ref{cha:color}. The numbers in the palette is the numbers
+that the colors will be represented by in the color data. In other
+words, the color data in this image doesn't contain any actual color
+data, but rather contains indexes to a list of colors known as the
+color palette. But in real image formats the colors in the palette are
+not actually assigned numbers. It is the order in which they appear in
+the palette that decide which numbers they are assigned.
 
 \subsection{The Color Data}
 
-Following the header and the optional color palette is the actual
-color data. Now let us talk about how the colors are stored as an
-image.
-
+Following the header and the color palette is the actual color data.
 An image is simply a grid of colors. As you can see on the front cover
 image, an image really only consists of a lot of colored
-squares. These squares as referred to as pixels
-\index{pixel}\cite{murray1996encyclopedia}.
+squares. These squares as referred to as
+pixels\cite{murray1996encyclopedia}. Every pixel has \textit{one} and
+only one color. It is easy to see that even very big images can be
+broken down to small colored squares.
 
-So as we can see from our sample image format, IM, the flower image
-is just a couple of colored pixels. But in this case a color palette
-is used. This means the image indexes the color palette like an
-array or list. So instead of the image containing its actual color,
-it in this case just contains a bunch of index numbers.
-
-If a color palette were not to be used in this case, the image would
-just contain a grid of raw colors. The color would in that case have
-represened like they were in the palette; that is, using a color
-model.
+Since a color palette was used, the image data simply consists of a
+small sequence of indexes to the palette. If the image didn't use a
+color palette, the image would just contain a grid of raw colors. The
+color would in that case have been represented like they were in the
+palette, using a color model.
 
 \subsection{Done\dots?}
 
-But it's not really that simple. A majority of all image format have
+But it's not really that simple. A majority of all image formats have
 had some sort of compression applied to their color data. Compression
-is necessary because the raw color data usually tends to take up a lot
-of space. And performing the decompression of that image data is
-usually the most difficult part of understanding an image format. So
-most time of this text will be dedicated on understanding how these
-compression algorithms work. Compression algorithm is a major part of
-the area of \textit{information theory}, which will be the main topic
-of this text. To understand color models however, you will some
-knowledge of the area of \textit{color science}, which is what chapter
-\ref{cha:color} of this text will be dedicated to.
+is usually necessary because raw color data usually tends to take up a
+\textit{lot} of space. Compression algorithms are hands down the most
+difficult part in understanding how image formats work, which is why
+the majority of this text will be spent explaining them. 

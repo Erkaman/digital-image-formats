@@ -2,62 +2,109 @@
   \bibliography{project.bib}
 \end{comment}
 
-\chapter{Method}
+\chapter{Methods}
 \label{cha:method}
 
-\section{Tools and sources}
+\newcommand{\CC}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny\bf +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny\bf +}}
+
+\section{Tools}
+
+\newcommand{\credits}[1]{\footnote{\url{#1}}}
 
 To explore how the aforementioned image formats works, I decided to
-write small programs that would analyze the numbers that a image
-format consists. My programming language of choice for this was C and
-the compiler I used to compile the programs was
-GCC\footnote{\url{http://gcc.gnu.org/}}. For doing the memory debugging that
-is often necessary in C programming, I used
-Valgrind\footnote{\url{http://valgrind.org/}}, which at times was a
-real life saver. For tests and automatizing tasks Bash and Python were
-used. My editor of choice was \textsc{Emacs}.
+write small programs that would analyze the numbers that images in the
+formats consists of and dump the raw color data of the images in
+files. My programming language of choice for this was \CC{} and my
+compiler was GCC\credits{http://gcc.gnu.org/}. For doing the memory
+debugging that is often necessary in \CC{} programming I used
+Valgrind\credits{http://valgrind.org/}, which at times was a real life
+saver. My editor of choice for writing the code was \textsc{Emacs}\credits{http://www.gnu.org/software/emacs/}.
 
-To get the theory necessary to write these programs, I had to read
-several books on the subjects. I also read a lot of articles.
+To learn the theory necessary to write these programs I had to read
+several books and many articles.
 
-Also, this document was created and typeset using
-\LaTeXe{}\footnote{\url{http://www.latex-project.org/}}. I did not
-chose to use word, because I, as a programmer, prefer \LaTeX{} over
-words for several reasons:
-
-\begin{itemize}
-\item The default output o \LaTeX{} is almost always typographically
-  superior to that of word.
-\item It makes references management a breeze.
-\item It makes creating indexes trivial.
-\end{itemize}
+This document was created and typeset using
+\LaTeX{}\credits{http://www.latex-project.org/}. I chose to use
+\LaTeX{} rather than Word because I, as a programmer, find it a lot
+easier to use than Word.
 
 The text is typeset in the fonts Charter(main body text) and
-\texttt{inconsolata}(links). The \LaTeX{} source files were edited in
-\textsc{Emacs} with the AUC\TeX{} package.
+\texttt{inconsolata}(monospace text)\credits{http://levien.com/type/myfonts/inconsolata.html}. The \LaTeX{} source files were
+also edited in \textsc{Emacs}, using the AUC\TeX{}\credits{http://www.gnu.org/software/auctex/} package.
 
-And the following \LaTeX{} packages were used to produce this document:
+All the graphics of this document were created using
+\tikzname \& \pgf\credits{http://sourceforge.net/projects/pgf/}
 
-\texttt{inconsolata}, fontenc, mathdesign, charter, microtype,
-makeidx, xcolor, float, verbatim, siunitx, todonotes, placeins,
-booktabs, graphicx, caption, biblatex, \tikzname, \pgf , algorithms,
-algorithmicx, fancyhdr, tocbibind.
+All the source files for both this document and the programs were
+managed using \textsc{Git}\credits{http://git-scm.com/}, the version control system.
 
-All the source files in the of this entire project were managed with
-\textsc{Git}, the version control system.
+\section{Structure Of This Text}
+
+The chapters in this text are laid out as follows:
+
+\begin{description}
+\item[Chapter 4] Any preliminary knowledge that is absolutely
+  necessary to understand \textit{any} chapter of this text will be
+  put here. We will also establish all the conventions and glossaries
+  that we will be using throughout the rest of the text in this
+  chapter.
+
+\item[Chapter 5] We will in this chapter discuss how color is
+  represented digitally; that is, using numbers.
+
+\item[Chapter 6] The main topic of this chapter will be the RLE
+  compression algorithm. This algorithm is used in the TGA format.
+
+\item[Chapter 7] The TGA format is discussed.
+
+\item[Chapter 8] The LZW algorithm will be explained.
+
+\item[Chapter 9] The GIF format will be the subject of this chapter.
+
+\item[Chapter 10] To ensure the data integrity of PNG images something
+  known as a CRC is used, which is the topic of this chapter.
+
+\item[Chapter 11] The compression algorithm used in the PNG format,
+  known as DEFLATE, is a rather complex algorithm that consists of
+  several subalgorithms. One of these subalgorithms is known as
+  Huffman Coding, which is what we will be discussing in this chapter.
+
+\item[Chapter 12] The second subalgorithm of the DEFLATE algorithm is
+  known as LZ77, which is the algorihtm we will discuss in this
+  chapter. An improvement of LZ77 called LZSS is also discussed in
+  this chapter.
+
+\item[Chapter 13] In this chapter we will combine LZ77 and Huffman
+  Coding into the final DEFLATE algorihtm.
+
+\item[Chapter 14] In this chapter the PNG format will finally be
+  discussed.
+
+\item[Chapter 14] All the former chapter will be discussed and we will
+  attempt to draw a final conclusion from the project.
+
+
+\end{description}
+
+Small exercises can also be found in the text. They were primarily
+added so that the reader could have a way of checking that he/she
+truly have understood the contents of the text. 
+
 
 \section{Sample source code}
 
 All the source code of the programs that I wrote during this project
 can be found at the following address:
-\url{https://github.com/Erkaman/digital-image-formats}. In the
-\path|code| directory the C source files for the programs that
-analyzes image formats can be found. The \path|log| directory contains
-the log book for this project. And in the \path|latex| directory you
-can find the \LaTeX{} source files that were used to produce this
-document. But if you don't understand anything of the contents of the
-\path|code| folder, don't worry, because this text was written to
-explain the concepts behind image formats as intuitively as possible,
-without you having to understand the source files for the programs
-that demonstrates them. But it is of course not a bad thing if you do
-understand the source files in the \path|code| directory.
+\url{https://github.com/Erkaman/digital-image-formats}.
+
+In the \path|code| directory the \CC source files for the programs
+written during the project can be found. The \path|log| directory
+contains the log book of this project. And in the \path|latex|
+directory you can find the \LaTeX{} source files that were compiled to
+produce this document. But even if you don't understand anything of
+the contents of the \path|code| folder, don't worry, because this text
+was written to explain the concepts behind image formats as
+intuitively as possible, without you having to understand the source
+files for the programs that demonstrates them. But it is of course not
+a bad thing if you do understand the source code files in the \path|code|
+directory.

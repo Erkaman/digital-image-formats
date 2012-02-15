@@ -13,13 +13,12 @@ FrequencyTable constructFrequencyTable(
 
     FrequencyTable freqs;
 
-    /* Also include the max.*/
     freqs.resize(size);
 
     fill(freqs.begin(),freqs.end(), 0);
 
     for(i = 0; i < data.size(); ++i)
-	++freqs[data[i]];
+        ++freqs[data[i]];
 
     return freqs;
 }
@@ -29,7 +28,7 @@ FrequencyTable constructFrequencyTable(const std::vector<BYTE> & data, size_t si
     vector<unsigned int> conv;
 
     for(size_t i = 0; i < data.size(); ++i)
-	conv.push_back(data[i]);
+        conv.push_back(data[i]);
 
     return constructFrequencyTable(conv, size);
 }
@@ -42,7 +41,7 @@ FrequencyTable constructFrequencyTable(FILE * in, size_t size)
     fileData = readFile(in);
 
     for(size_t i = 0; i < fileData.size(); ++i)
-	conv.push_back(fileData[i]);
+        conv.push_back(fileData[i]);
 
     return constructFrequencyTable(conv, size);
 }

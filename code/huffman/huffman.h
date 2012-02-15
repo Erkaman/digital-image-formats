@@ -116,5 +116,9 @@ void writeCompressedCodeLengths(
     CodesList codeLengthCodes,
     BitWriter * outBits);
 
+void writeCodeLengthCodeLengths(
+    CodeLengths codeLengthCodeLengths,
+    BitWriter * outBits);
+
 #endif /* _HUFFMAN_H_ */
 

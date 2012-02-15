@@ -13,26 +13,25 @@ compression algorithm itself, after this we will describe the
 decompression algorithm and in the end we will discuss the compression
 efficiency of this algorithm.
 
-\section{The History Behind}
+\section{History}
+\label{sec:hist-lzw}
 
-In the years 1977 to 1978, the two Israeli researchers published two
-papers; in the first of these papers, \cite{Ziv77auniversal}, they
-described the algorithm that came to be known as LZ77(sometimes also
-known as LZ1) and in the second of these papers,
-\cite{Ziv78compressionof}, they defined the algorithm that would from
-then on become known as LZ78(also known as LZ2)
+In the years 1977 to 1978, the two Israeli researchers Abraham Lempel
+and Jacob Ziv published two papers; in the first of these papers,
+\cite{Ziv77auniversal}, they described the algorithm that came to be
+known as LZ77(sometimes also known as LZ1) and in the second of these
+papers, \cite{Ziv78compressionof}, they defined the algorithm that
+would from then on become known as LZ78(also known as LZ2)
 \cite{roelofs09:_histor_portab_networ_graph_png_format,Salomon:2004:DCC,winters:_us_paten_adapt}.
 
 These two methods started the family of compression algorithms that is
-known as the \textit{dictionary methods}\index{dictionary methods},
-because the majority of these methods are based on either LZ77 or
-LZ78
-
-Examples of algorithms in the family of dictionary methods are LZMA,
-which is based on LZ78 \cite{palov11}, LZW, which is also based on
-LZ78, and LZSS,which was based on LZ77 \cite{Salomon:2004:DCC}. LZW is
-the method that we will discuss in this chapter. It was invented by
-Terry Welch and he published the algorithm in \cite{welch85:_u}.
+known as the \textit{dictionary methods}\index{dictionary
+  methods}. Examples of algorithms in the family of dictionary methods
+is LZMA, which is based on LZ78 \cite{palov11}, LZW, which is also
+based on LZ78, and LZSS,which was based on LZ77
+\cite{Salomon:2004:DCC}. LZW is the method that we will discuss in
+this chapter. It was invented by Terry Welch and he published the
+algorithm in \cite{welch85:_u}.
 
 \section{The Compression algorithm}
 \label{sec:lzw-comp-desc}
@@ -128,9 +127,6 @@ character $c$ is appended to the end of the string $S$, can be found
 in the dictionary. When $Sc$, for some read in character $c$, cannot
 be found in the dictionary, then the code for the string $S$ is
 outputted, and the appended string $Sc$ is added to the dictionary.
-
-\todo{Add exercise where the compression of $aaaaaaaaa....$ is
-  analyzed}
 
 \begin{Exercise}[label={lzw-compress}]
 
@@ -662,30 +658,6 @@ the compression ratio.
   \begin{enumerate}[a]
   \item $0110\ 1100$ and $0001\ 1111$.
   \item $1100 \ 0110$ and $1111 \ 0001$
-  \end{enumerate}
-
-\end{Answer}
-
-\begin{Answer}[ref={firstnbits}]
-
-  \begin{enumerate}[(a)]
-  \item
-
-    \begin{algorithmic}[1]
-      \Procedure{firstNBits}{$n,bits$}
-      \Ret{\Call{getbits}{$n,0,bits-1$}}
-      \EndProcedure
-    \end{algorithmic}
-
-  \item
-
-    \begin{algorithmic}[1]
-      \Procedure{firstNBits}{$n,bits$}
-      \Ret{$n \BitAnd (\BitNeg(\BitNeg 0 \ShiftLeft bits))$}
-      \EndProcedure
-    \end{algorithmic}
-
-
   \end{enumerate}
 
 \end{Answer}

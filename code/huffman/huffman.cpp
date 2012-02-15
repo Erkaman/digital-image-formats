@@ -79,7 +79,7 @@ Node * constructHuffmanTree(FrequencyTable freqTable, unsigned long & len)
         newTree = new Node(*mins.first,*mins.second);
         *mins.first = newTree;
         trees.erase(mins.second);
-}
+    }
     return trees.front();
 }
 
@@ -115,7 +115,7 @@ CodeLengths makeCodeLengths(
     CodeLength maxCodeLength)
 {
     unsigned long len;
-    Node * huffman = constructHuffmanTree(freqTable,len);
+   Node * huffman = constructHuffmanTree(freqTable,len);
 
     vector<unsigned int> codeDepths = getCodeDepths(freqTable, huffman);
 
@@ -453,16 +453,16 @@ CodeLengths compressCodeLengths(
         /* write packet. */
         unsigned int packetLength = nextFound - found;
 
-	/* does this decrease compression performance? */
+        /* does this decrease compression performance? */
         if(packetLength < 2){
             compressed.push_back(*found);
-	    codeLengthsAlphabetCodeLengths.push_back(*found);
+            codeLengthsAlphabetCodeLengths.push_back(*found);
         } else {
 
             CodeLengths packet = makePacket(
-		packetLength,
-		*found,
-		codeLengthsAlphabetCodeLengths);
+                packetLength,
+                *found,
+                codeLengthsAlphabetCodeLengths);
 
             compressed.insert(
                 compressed.end(),
@@ -506,7 +506,7 @@ CodeLengths makeRepeatPacket(
 
         if(length > 2){
             packet.push_back(16);
-	    codeLengthsAlphabetCodeLengths.push_back(16);
+            codeLengthsAlphabetCodeLengths.push_back(16);
 
             unsigned int packetLength;
 
@@ -518,7 +518,7 @@ CodeLengths makeRepeatPacket(
         } else {
             for(unsigned int i = 0; i < length; ++i){
                 packet.push_back(code);
-		codeLengthsAlphabetCodeLengths.push_back(code);
+                codeLengthsAlphabetCodeLengths.push_back(code);
             }
             length = 0;
         }
@@ -542,7 +542,7 @@ CodeLengths makeZeroPacket(
 
             if(length >= 11){
                 packet.push_back(18);
-		codeLengthsAlphabetCodeLengths.push_back(18);
+                codeLengthsAlphabetCodeLengths.push_back(18);
                 packetLength = min((unsigned int)138, length);
                 length -= packetLength;
                 packetLength -= 11;
@@ -550,7 +550,7 @@ CodeLengths makeZeroPacket(
             } else if(length <= 10) {
 
                 packet.push_back(17);
-		codeLengthsAlphabetCodeLengths.push_back(17);
+                codeLengthsAlphabetCodeLengths.push_back(17);
 
                 packetLength = min((unsigned int)10, length);
                 length -= packetLength;
@@ -558,16 +558,15 @@ CodeLengths makeZeroPacket(
 
             }
 
-	    packet.push_back(packetLength);
+            packet.push_back(packetLength);
 
         } else {
 
             for(unsigned int i = 0; i < length; ++i){
                 packet.push_back(0);
-		codeLengthsAlphabetCodeLengths.push_back(0);
+                codeLengthsAlphabetCodeLengths.push_back(0);
             }
             length = 0;
-
         }
     }
 
@@ -579,6 +578,14 @@ CodeLengths makeCodeLengths(
     unsigned int alphabetSize,
     CodeLength maxCodeLength)
 {
+    /* Handle the special case in which there is no data at all. */
+/*    if(fileData.size() == 0){
+	CodeLengths cls;
+	for(size_t i = 0; i < alphabetSize; ++i){
+	    cls.push_back(0);
+	}
+	return cls;
+    }*/
     FrequencyTable freqTable = constructFrequencyTable(fileData, alphabetSize);
     return makeCodeLengths(freqTable, maxCodeLength);
 }
@@ -641,6 +648,7 @@ RevCodesList loadUsingCodeLengthCodes(
         }
 
         if(codesLenI == length){
+            printf("fin:%d\n", codesLenI);
             break;
         }
     }
@@ -693,5 +701,25 @@ void writeCompressedCodeLengths(
             outBits->writeBits(compressedCodeLengths[i], 7);
         }
     }
+}
 
+/* First writes HCLEN and then writes the code lengths for the code length alphabet. */
+void writeCodeLengthCodeLengths(
+    CodeLengths codeLengthCodeLengths,
+    BitWriter * outBits)
+{
+    permuteCodelengths(codeLengthCodeLengths);
+
+    /* Find the end of the trailing zeroes. */
+    size_t begTrail;
+    for(begTrail = codeLengthCodeLengths.size() - 1; begTrail != 0; --begTrail)
+        if(codeLengthCodeLengths[begTrail] != 0)
+            break;
+
+    outBits->writeBits(begTrail + 1 - 4, 4);
+
+    /* these codes are used to encode the byte codes. */
+    for(size_t i = 0; i < (begTrail + 1); ++i){
+        outBits->writeBits(codeLengthCodeLengths[i], 3);
+    }
 }

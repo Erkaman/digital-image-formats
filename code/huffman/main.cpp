@@ -157,23 +157,3 @@ void huffmanDecompress(FILE * in,FILE * out)
     delete inBits;
 }
 
-/* First writes HCLEN and then writes the code lengths for the code length alphabet. */
-void writeCodeLengthCodeLengths(
-    CodeLengths codeLengthCodeLengths,
-    BitWriter * outBits)
-{
-    permuteCodelengths(codeLengthCodeLengths);
-
-    /* Find the end of the trailing zeroes. */
-    size_t begTrail;
-    for(begTrail = codeLengthCodeLengths.size() - 1; begTrail != 0; --begTrail)
-	if(codeLengthCodeLengths[begTrail] != 0)
-	    break;
-
-    outBits->writeBits(begTrail + 1 - 4, 4);
-
-    /* these codes are used to encode the byte codes. */
-    for(size_t i = 0; i < (begTrail + 1); ++i){
-        outBits->writeBits(codeLengthCodeLengths[i], 3);
-    }
-}

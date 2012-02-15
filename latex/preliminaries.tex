@@ -2,11 +2,12 @@
   \bibliography{project.bib}
 \end{comment}
 
-\chapter{Conventions}
-\label{cha:pseudocode-convent}
+\chapter{Preliminaries}
+\label{cha:preliminaries}
 
-In this chapter, we'll establish all the conventions that will be used
-throughout his text.
+In this chapter, we will establish all the conventions that will be used
+throughout his text and explain some basic terms that will be
+absolutely to understand in order to read this text.
 
 \section{Glossary}
 
@@ -40,25 +41,13 @@ throughout his text.
 
   \end{Exercise}
 
-  \begin{Exercise}[label={n-bits-max-val}]
-    If you know that a binary number has $n$ bits, then what is its
-    maximum possible value? Also, how many different possible values can
-    such a number have?
-  \end{Exercise}
-
-  \begin{Exercise}[label={count-bits-func}]
-    Given a number $x$, find a function $c(x)$ that will count the
-    number of bits in that number, if it is rewritten on binary
-    form. The following should, for example, hold true for this
-    function: $c(23) = 4$
-
-    (Hint: use the binary logarithm, $\log_2$, and the floor function,
-    $\lfloor x \rfloor$)
-
-  \end{Exercise}
-
 \item[bit] The separate digits of a binary numbers are often referred
-  to as bits.
+  to as bits. An $n$-bit number is simply a number with $n$ binary digits.
+
+  \begin{Exercise}[label={n-bits-max-val}]
+    What is the maximum value of a $n$-bit number?  How many different
+    possible values can a $n$-bit number have?
+  \end{Exercise}
 
 \item[toggled bit] If we say that a bit is \textit{toggled}, we mean that
   the bit has a value of $1$.
@@ -66,23 +55,23 @@ throughout his text.
 \item[cleared bit] And controversially, if a bit has the value
   $0$, then we say that the bit is \textit{cleared}.
 
-\item[Bit counting order] The bit that has the lowest value is
+\item[bit counting order] The bit that has the lowest value is
   referred to as bit 0\footnote{This convention is mainly used because
     us programmers like to start counting from $0$ rather than $1$}.
   In the binary number $0100$, bit 0 is cleared( it has the value
   $0$), bit 2 is toggled (it has the value $1$) and the last bit 3 is
   cleared.
 
-\item[Lowest bit] Bit 0 will also commonly be referred to as the
+\item[lowest bit] Bit 0 will also commonly be referred to as the
   lowest bit.
 
-\item[Highest bit] Bit $n - 1$ of a binary number of length $n$ bits;
-  in other words, the last bit of a binary number. In the number $100$
-  the highest bit toggled and the 2 lowest bits are cleared.
+\item[highest bit] bit $n-1$ of a $n$-bit number. In order words, the
+  last bit of a binary number. In the number $100$ the highest bit
+  toggled and the 2 lowest bits are cleared.
 
-\item[Most significant bit] Alternative name for the highest bit.
+\item[most significant bit] Alternative name for the highest bit.
 
-\item[Least sigficant bit] Alternative name for the lowest bit.
+\item[least significant bit] Alternative name for the lowest bit.
 
   \begin{Exercise}[label={bits-value-order}]
     What are the values of bits 1,3 and the most significant bit in the
@@ -97,26 +86,28 @@ throughout his text.
   image represented digitally is just a sequence of bytes.
 
 \item[ASCII] A very common text encoding that will be used a lot in
-  this text. The ASCII is 7-bit encoding and therefore covers 128
+  this text. ASCII is a 7-bit encoding and therefore covers 128
   different characters. But ASCII values are for the sake of
   convenience always stored in 8-bit bytes. The entire ASCII table is
   given in table \ref{tab:ascii-table}\cite{rfc20}. Characters 33--126
-  are printable character. Characters 0--32 are on the other hand
+  are printable characters. Characters 0--32 are on the other hand
   control characters. These are used to affect how the text is
   processed. HT(9) is for an ordinary tab while SP(32) represents
   space. However, many of these control characters are obsolete and
   are practically never used. The control codes that are actually used
-  in modern files encoded ASCII are NUL, HT, LF,
-  CR \cite{maini2007digital}.
+  in modern files encoded using ASCII are NUL, HT, LF and CR
+  \cite{maini2007digital}.
 
   The usage of the two special codes CR and LF is something that we
   need to further discuss. They are used to start a new line in text
-  and to end the current line. But representing newlines turns out to
-  be a surprisingly complex issue. In Windows based operating systems
-  newlines are represented by Carriage Return, CR, followed by a
-  linefeed, LF. Unix based operating systems; like Linux, Mac OS X and
-  Xenix; simply uses a line feed, LF, to represent newlines. But for
-  Mac OS version 9 and lower, CR was used  \cite{robbins:_common_newline,noria:_under_newlin_oreilly,editor:_end_line_story_rfc,tancig01:_apart_no_more_newline,corporation08:_creat_telep_applic_both_window_linux}.
+  and therefore serves to end the current line. But representing
+  newlines turns out to be a surprisingly complex issue. In Windows
+  based operating systems newlines are represented by a Carriage
+  Return, CR, followed by a linefeed, LF. Unix based operating
+  systems; like Linux, Mac OS X and Xenix; simply uses a line feed,
+  LF, to represent newlines. But for Mac OS version 9 and lower, CR
+  was used
+  \cite{robbins:_common_newline,noria:_under_newlin_oreilly,editor:_end_line_story_rfc,tancig01:_apart_no_more_newline,corporation08:_creat_telep_applic_both_window_linux}.
 
 
   If a text file is to be used on only one operating system this will
@@ -124,7 +115,7 @@ throughout his text.
   computer running on different operating systems, it will. However,
   this is something that is almost never noticeable to the common
   user. It is really only of importance to programmers who want their
-  software to run on different operating systems without problems.
+  software to flawlessly run on different operating systems.
 
   The usage of the NUL ASCII character is something that we will
   discuss soon.
@@ -313,8 +304,10 @@ throughout his text.
   \begin{Exercise}[label={uppercase-conv}]
 
     How do you convert an uppercase ASCII value to it's corresponding
-    lower case value. How do you do the reverse transformation,
+    lower case value? How do you do the reverse transformation,
     lowercase to uppercase?
+
+    (Hint: what number has to be added or subtracted?)
 
   \end{Exercise}
 
@@ -351,18 +344,17 @@ throughout his text.
 
 
 \item[String] A string is simply a sequence of letters in some
-  encoding. The most commonly used encoding in this text will be
-  ASCII \cite{rfc20} and we will also most typically use C-strings.
-
-  If the string ``eric'' is stored in the variable \texttt{str}, then
+  encoding. The most commonly used encoding in this text will be ASCII
+  \cite{rfc20}.
 
 \item[C string] String as they are represented in the C programming
   language. In this language, strings are always terminated by the
-  ASCII NUL character\cite{kernighan1988c}. The NULL character has, as
+  ASCII NUL character\cite{kernighan1988c}. The NULL(alternative
+  spelling of NUL) character has, as
   familiar, a value of $0$. This means that the string ``eric'' will
   be represented by the sequence of bytes $101,114,105,99, 0$ in the C
   programming language. This is important to know, because in a lot of
-  image formats strings are stored as C-strings.
+  image formats strings are stored as C strings.
 
   Why the NULL character at the end of the string even is necessary is
   for rather complex reasons that I will not treat in this text.
@@ -370,18 +362,24 @@ throughout his text.
 \item[File] We are going to be talking a lot about files in this text,
   so it is important that we as early as possible establish a strict
   definition for what a file is. A file is just a sequence of bytes;
-  it is in other word just a sequence of numbers. A perfectly valid
-  file could for example consist of the numbers $101,114,105,99$. This
-  a file that consists of the single string ``eric'', where the
-  letters use ASCII encoding. However, if you opened this file in a
-  text editor, say notepad, you would only see the letters ``eric''
-  and not the numbers that represent the letters. This is because a
-  text editor is programmed to see all the bytes in a file as text. If
-  you on the other hand opened this file in a hex viewer, you would
-  see the file for what it truly is: a sequence of numbers\footnote{Do
-    note that in a hex viewer these numbers are, as is implied by the
-    name, shown as hexadecimal numbers}.
+  it is in other word just a sequence of 8-bit binary numbers. A
+  perfectly valid file could for example consist of the numbers
+  $101,114,105,99$. This a file that consists of the single string
+  ``eric'', where the letters use ASCII encoding. However, if you
+  opened this file in a text editor, say notepad, you would only see
+  the letters ``eric'' and not the numbers that represent the
+  letters. This is because a text editor is programmed to see all the
+  bytes in a file as text. If you on the other hand opened this file
+  in a hex viewer, you would see the file for what it truly is: a
+  sequence of numbers\footnote{Do note that in a hex viewer these
+    numbers are, as is implied by the name, shown as hexadecimal
+    numbers}.
 
+  But since a byte can only have 256 different values, the reader may
+  wonder how larger numbers are stored in a file. This is simply done
+  by combining bytes. Two bytes in a sequence becomes a 16-bit number
+  with a maximum value of $2^{16} - 1$. In the same fashion larger
+  numbers can be stored.
 
 \item[Offset] When we are talking about an offset we are referring to
   a position in a file. The offset is zero based. When we are talking
@@ -489,7 +487,7 @@ tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
 
 \subsubsection{Notation}
 
-Bitwise operators will also be used a lot in this text. We will use
+The bitwise operators will also be used in this text. We will use
 notation introduced in \C{}\cite{kernighan1988c} to represent them in
 pseudocode:
 
@@ -532,6 +530,7 @@ operators do boolean logic on the bit level by considering a toggled
 bit truth, and a cleared bit falsity
 
 \begin{Exercise}[label={bitand}]
+
   \begin{enumerate}[(a)]
   \item $2 \BitAnd 1$
   \item $255 \BitAnd 23$
@@ -627,12 +626,13 @@ $0101$ instead of $1111\ 0101$.
 \subsubsection{Bitwise shifting}
 
 It is also in bitwise shifting important that we consider the size of
-the numbers. Bitwise shifting is actually very simple: all the $b
-\ShiftLeft n$ really does, is that it shifts the bit pattern in the
-number $b$ $n$ steps to the right. For the 4-bit number $0011$, this
-means that $0011 \ShiftLeft 2 = 1100$. But what would have happened if
-the bit pattern was shifted 3 steps? Then one bit is going fall of the
-bit boundary and disappear, so $0011 \ShiftLeft 3 = 1000$.
+the numbers. Bitwise shifting is actually very simple: all the
+operation $b \ShiftLeft n$ really does, is that it shifts the bit
+pattern in the number $b$ $n$ steps to the left. For the 4-bit number
+$0011$, this means that $0011 \ShiftLeft 2 = 1100$. But what would
+have happened if the bit pattern was shifted 3 steps? Then one bit is
+going fall of the bit boundary and disappear, so $0011 \ShiftLeft 3 =
+1000$.
 
 And bitwise right shifting works in pretty much the same way, expect
 for the fact that the bit shifting are done to the right instead of
@@ -672,10 +672,6 @@ the left, so that for the 4-bit number $0110$: $0110 \ShiftRight 2 =
 
 \end{Exercise}
 
-\begin{Exercise}[]
-
-\end{Exercise}
-
 
 \subsection{Syntax}
 
@@ -685,8 +681,6 @@ The start of a comment is indicated by the symbol \commentsymbol.
 
 To assign the value $n$ to the variable $var$, the notation shown in
 algorithm \ref{alg:assign} is used.
-
-
 
 \begin{algorithm}[H]
   \caption{Syntax for assigning the value $n$ to the variable $var$.}
@@ -699,23 +693,23 @@ algorithm \ref{alg:assign} is used.
 To store a sequence of values we'll use arrays. If for example the
 array $a$ contains the values the $3,1,2$ then to access the first
 value of this array, $3$, the syntax $a[0]$ is used. In general, to
-access the n:th value of an array you do $a[n-1]$, since arrays are 0
-indexed.
+access the n:th value of an array you do $a[n-1]$, since the indexes
+of arrays are zero-based.
 
 Strings are also considered arrays. If the string ``eric'' was
 stored in the variable \texttt{str}, then the letter ``e'' can be
 accessed with the syntax $str[0]$
 
-To then to go through each value in the array $a$, the syntax
-demonstrated in algorithm \ref{alg:for-each} is used.
+To to go through each value in the array $a$, the syntax demonstrated
+in algorithm \ref{alg:for-each} is used.
 
 \begin{algorithm}[H]
   \caption{The for each control structure.}
   \label{alg:for-each}
   \begin{algorithmic}[1]
     \linecomment{Go through every value $v$ in the
-      array $a$. The variable  $v$ is here to each element in the
-      array in turn}
+      array $a$. The variable  $v$ is assigned every element in the
+      array $a$ in order.}
     \ForEach{$v$}{$a$}
     \linecomment{Do something with $a$ here.}
     \EndForEach
@@ -802,24 +796,15 @@ to introduce several functions for handling file operations.
   reads a number of the size $size$ \textit{bytes}(not bits) from a
   file.
 
-\item[\Call{Seek}{$offset,origin$}] Move the from current position in
-  the file offset bytes forward. The current position in the file is
-  specified by the argument $origin$. If it is $START$, we move from the
-  beginning of the file, if it is $END$ we move from the end of the
-  file, and if it is $CURRENT$ we move from the current position in
-  the file.
-
 \item[\Call{Inc}{\ensuremath{var,n}}] Increases the value of the
   variable $var$ by $n$.
 
 \item[\Call{Dec}{\ensuremath{var,n}}] Decrease the value of the
   variable $var$ by $n$.
 
-
 \item[\Call{getbits}{$b, start, end$}] is used to extract a bit
-  pattern in the given range. \Call{getbits}{$80, 4, en5$} returns
-  $5$ because $80 = 0101\ 0000$. This function will be derived in
-  exercise \ref{bitcount}
+  pattern in the given bit range from $b$. This function will be
+  derived in exercise \ref{bitcount}
 
 \end{description}
 
@@ -838,7 +823,7 @@ to introduce several functions for handling file operations.
   given ending position. These positions are be zero-based. Example:
   \Call{getbits}{$80, 4, 6$}$=5$, because $80$ is represented by the
   binary number $0101\ 0000$ and from the positions 4 to 6 there is a
-  bit pattern that has a value of $5$, which is what this function is
+  bit pattern that has a value of $5$($101$), which is what this function is
   supposed to extract.
 
   It is especially important that you do this exercise, because the
@@ -851,7 +836,7 @@ to introduce several functions for handling file operations.
 
 \end{Exercise}
 
-\section{Answers to the exercises}
+\answers{}
 
 \begin{Answer}[ref={n-to-bin}]
   \begin{enumerate}[(a)]
@@ -870,35 +855,10 @@ to introduce several functions for handling file operations.
 \end{Answer}
 
 \begin{Answer}[ref={n-bits-max-val}]
-  The max value is $2^n - 1$ and the number of different possible
-  values is $2^n$
-\end{Answer}
+  The maximum value of a $n$-bit number is $2^n - 1$.
 
-\begin{Answer}[ref={count-bits-func}]
-  This function is $c(x) = \lfloor log_2 x \rfloor + 1$, where $\lfloor
-  x \rfloor$ is the floor funciton that calculates the largest whole
-  integer not greater than $x$.
-
-  This function is a bit hard to use however, since few calculators
-  include a button for the $log_2$ function. But we can define it in
-  terms of the $\ln$ function like this:
-
-  \begin{equation*}
-    2^x = y \iff x = log_2 y
-  \end{equation*}
-
-  If we from this can find a way to calculate $x$ from $y$ we will
-  have solved the problem. And it turns out that we can:
-
-  \begin{align*}
-    \ln 2^x = & \ln y \\
-    x \ln 2 = & \ln y \\
-    x = & \frac{\ln y}{\ln 2}
-  \end{align*}
-
-  So $log_2 x = \frac{\ln y}{\ln 2}$. So the final solution can also be
-  written like this: $c(x) = \left\lfloor \frac{\ln x}{\ln 2} \right\rfloor + 1$
-
+  Since every binary digit only has two possible values, an n-bit
+  number has $2^n$ possible values.
 \end{Answer}
 
 \begin{Answer}[ref={bits-value-order}]
@@ -928,9 +888,8 @@ to introduce several functions for handling file operations.
 
 \begin{Answer}[ref={ascii-uppercase}]
 
-  The 6:th bit is always toggled. This is because since the lowest
-  uppercase character A has the value 65 and the sixth bit has the
-  value $64$.
+  The 6:th bit is always toggled. This is because the lowest uppercase
+  character, A, has the value 65 and the sixth bit has the value $64$.
 \end{Answer}
 
 \begin{Answer}[ref={uppercase-conv}]
@@ -1033,13 +992,13 @@ to introduce several functions for handling file operations.
   \begin{algorithmic}[1]
     \Procedure{bitcount}{$n$}
     \Let{$count$}{$0$}
-
+    \linecomment{Once the value $8$ is reached the for loop terminates.}
     \ForTo{$shift$}{$0$}{$8$}
     \If{$n \BitAnd (1 \ShiftLeft shift)$}
     \State \Call{Inc}{$count$}
     \EndIf
     \EndFor
-
+    \State \Return{$count$}
     \EndProcedure
   \end{algorithmic}
 
@@ -1048,7 +1007,7 @@ to introduce several functions for handling file operations.
 \begin{Answer}[ref={getbits}]
 
   \begin{algorithmic}[1]
-    \Procedure{bitcount}{$n$}
+    \Procedure{getbits}{$n$}
     \linecomment{Calculate the length of the bit pattern}
     \Let{$len$}{$end - start + 1$}
     \State \textbf{return} $(b \ShiftRight start) \BitAnd (\BitNeg
@@ -1064,7 +1023,7 @@ to introduce several functions for handling file operations.
 
   $80$ is represented by the bit pattern $0101\ 0000$. First, we'll
   right shift down the pattern $start=4$ steps, $0101\ 0000 \ShiftRight
-  start$ ,resulting in the bit pattern $0000\ 0101$. Now all that
+  start$, resulting in the bit pattern $0000\ 0101$. Now all that
   remains to be done is that we need to figure out how construct the
   bit pattern $0000\ 0111$ from the input values. Once we have figured
   out how to make this pattern, we can calculate the proper result
@@ -1072,24 +1031,16 @@ to introduce several functions for handling file operations.
 
   The bit pattern we want to construct is $0000\ 0111$. We want a
   sequence of $3$ toggled bits from the lowest bit. We can trivially
-  calculate this length like this: $end - start + 1 = 6 - 4 + 1 = 3$,
+  calculate this length like this: $end - start + 1 = 6 - 4 + 1 = 3$.
   $ + 1$ is necessary because the bit position are zero based.
 
   We now have the length of the pattern. Now we need to figure out how
-  to construct it. From the operation $\BitXor 0$ you get the bit
-  pattern $1111\ 1111$. Then, by shifting this pattern $len$ steps to
-  the left, $3 \ShiftLeft 1111\ 1111$ we end up with the value $1111\
-  1000$. Now, by simply using the bitwise not operation again,
-  $\BitNeg (1111\ 1000)$ ,we end up with the desired pattern $0000\
-  0111$. And now we can simply extract the bit pattern like this:
-  $0000\ 0101 \BitAnd 0000\ 0111 = 101 = 5$
-
-  This method so general that it not only works on 8-bit numbers, but
-  also on $n-bit$ numbers! The fact that we're using the bitwise
-  shiftings and not operations doesn't in this case affect the fact
-  that this is a very general algorithm. The reader should verify that
-  this method also works for 16-bit number by using this algorithm to
-  extract the pattern $1100$ from the 16-bit number $1100\ 0011\ 1010\
-  1111$.
+  to construct it. The operation $\BitNeg 0$, assuming we are dealing
+  with bytes, gets you the pattern $1111\ 1111$. Then, by shifting
+  this pattern $len$ steps to the left, $3 \ShiftLeft 1111\ 1111$ we
+  end up with the value $1111\ 1000$. Now, by simply using the bitwise
+  not operation again, $\BitNeg (1111\ 1000)$ ,we end up with the
+  desired pattern $0000\ 0111$. And now we can simply extract the bit
+  pattern like this: $0000\ 0101 \BitAnd 0000\ 0111 = 101 = 5$.
 
 \end{Answer}

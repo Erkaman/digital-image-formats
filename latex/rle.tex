@@ -36,23 +36,18 @@ algorithms. Data compressed losslessly can be restored to an identical
 copy of the original data. In lossy compression on the other hand,
 data is thrown away when necessary to make the compression even more
 space efficient. It is for these reasons impossible to restore an
-original copy of the data for data that has been lossily compressed.
-
-Lossy compression methods tends to be significantly more complex than
-lossless compression methods, and the math that they're based on tend
-to be on a very high level, which is the main reason why I won't treat
-them in this text.
+original copy of the data for data that has been lossily
+compressed. It is however fully possible to restore losslessly
+compressed data.
 
 \subsection{Compression Ratio}
 
 The compression ratio\index{compression ratio} is a very useful
 measure for when discussing the compression efficiency of a
-compression algorithm. If the size of the original file was $O$ bytes,
-and then after running some compression algorithm on the file its new
-size is $C$ bytes, then the compression ratio is calculated like this:
+compression algorithm. It is calculated like this:
 
 \begin{equation*}
-  {\rm Compression\;Ratio} = \frac{C}{O}
+  {\rm Compression\;Ratio} = \frac{{\rm Compressed Size}}{{\rm Original Size}}
 \end{equation*}
 
 We will in this text specify the compression ratio in fractions or
@@ -71,25 +66,18 @@ basically means that $\frac{2}{3}$ of the original size was left
 uncompressed by the algorithm, and that $\frac{1}{3}$ of the original
 file size was saved by the compression.
 
-But when discussing the efficiency of a compression algorithm, there
-are also whole lot of other properties that are measured, like the
-performance and complexity of the algorithm, but since, again, the
-mathematical basis of these concepts is on a higher level than I can
-handle, we will ignore these concepts in this text in order to keep
-things simple.
-
 \begin{Exercise}[label={compression-ratio}]
-  What is the compression ratio, if the file that contained the bytes
+
+  Calculate the compression ratio for the following cases
 
   \begin{enumerate}[(a)]
-  \item $12,13,14,15,16,17$ was compressed down to $5,12$?
-  \item $12,14,16,18,20,22$ was compressed down to $5,12,2$?
-  \item $12,12,12,13,45,45$ was compressed down to $2,12,0,13,1,45$?
+  \item $12,13,14,15,16,17$ compressed down to $5,12$?
+  \item $12,14,16,18,20,22$ compressed down to $5,12,2$?
+  \item $12,12,12,13,45,45$ compressed down to $2,12,0,13,1,45$?
   \end{enumerate}
 
   Do note that different compression algorithms were used in all three
-  cases. Also, try and reason about how the compression was done in
-  all of these algorithms.
+  cases. How was compression performed in the three cases?
 
 \end{Exercise}
 
@@ -113,16 +101,14 @@ sequences of repeating values will from known on be known as
 sequences of repeating bytes, and the two values in the packets $n-1$
 and $b$ are for this reason stored in bytes.
 
-% TODOODODOODOD. make sense.
-But why is the length byte $n$ subtracted by $1$?  A
-byte can have $256$ different values in the range $0-255$. But since
-it would be a waste to have a packet of length $0$, the designers of
-the algorithm decided that rather than letting the value zero go to
-waste, they assigned the length value $0$ to $1$, $1$ to $2$  and so
-on. So while the values stored in the packet are in the range $0-255$,
-they actually represent the value $1-256$. The advantage of this, is
-that the maximum length of a packet now is $256$ rather than $255$,
-which, while a small, still is a gain.
+But why is the length byte $n$ subtracted by $1$?  A byte can have
+$256$ different values in the range $0-255$. But since it would be a
+waste to have a packet of length $0$, the designers of the algorithm
+decided that rather than letting the value zero go to waste, they
+assigned the length value $0$ to $1$, $1$ to $2$ and so on. So while
+the values stored in the packet are in the range $0-255$, they
+actually represent range $1-256$, which has the added advantage that
+the max length of a packet is $256$ rather than $255$.
 
 But here's the main problem with this method: every single run of
 values, even those for which $n=1$, are considered runs! So even a
@@ -131,7 +117,7 @@ ends up doubling the size of the original data for such runs! More so,
 if the data is just a string of runs for which $n=1$, then the
 ``compressed'' size of this data ends of up being the double value of
 the original size. This means that strings like ``eric'' ends up
-getting ``compressed'' down to ``1e1r1i1c'', and the compression ratio
+getting ``compressed'' down to ``0e0r0i0c'', and the compression ratio
 of this compression is $\frac{2}{1} = 2$, which is an absolutely
 horrible compression ratio.
 
@@ -140,9 +126,9 @@ $b,b$ is represented by the pair $(1,b)$, and while this at least
 doesn't double the size of the data, no compression is performed in
 this case either.
 
-But for runs for which $n > 2$ we finally start seeing some results;
-for when $n > 2$, then the run $b, b, \dots, b$ ends up simply being
-compressed down to $(n-1,b)$, which results in a compression ratio of
+But for runs for which $n > 2$ we finally start seeing some
+results. Then the run $b, b, \dots, b$ ends up simply being compressed
+down to $(n-1,b)$, which results in a compression ratio of
 $\frac{2}{n}$. The maximum value of $n$ is $256$, and thus the maximum
 compression ratio of a single run is $\frac{2}{256} = \frac{1}{128}$,
 which is a quite superb compression ratio!
@@ -152,7 +138,7 @@ algorithm can indeed do great compression. English text is however not
 one kind of data that is best compressed by RLE, since there are very
 few English words where letters of repeated more than two times. True,
 there does exist plenty of words with double consonants in the English
-language, but,remember, RLE compression method does no compression
+language, but, remember, RLE compression method does no compression
 whatsoever for runs where $n=2$.
 
 But there also examples of data that could be very efficiently
@@ -169,9 +155,6 @@ that could get quite efficient compression ratios using RLE.
   \item AAABBBCCC
   \item eric
   \item success
-  \item The very long,repeating string $aaabbbaaabbbaaa\dots aaabbb$,
-    whose length is dividable by $3$.
-    % \item The infinite string $aabbbaabbb\dots$
   \end{enumerate}
 
 \end{Exercise}
@@ -181,7 +164,7 @@ compression, otherwise it is best avoided, since it could in worst
 cases double the size of the data. We will in section ? discuss how
 improve RLE by removing this limitation from the algorithm.
 
-\subsection{Algorithm}
+\subsection{The RLE Algorithm}
 
 \subsubsection{RLE Compression Algorithm}
 
@@ -229,10 +212,10 @@ $c_1$. Then the following character is read to $c_2$, but if the file
 only consisted of the character now stored in $c_1$, then we stop and
 just write out a packet $(1,c_1)$.
 
-Else, the two most recently characters are compared for equality, and
-if they are equal we have found a run where $n > 1$. However, we may
-just as this comparison is done already be in the process of making a
-packet and so we need to check for the current packet if $n <
+Else, the two most recently read characters are compared for equality,
+and if they are equal we have found a run where $n > 1$. However, we
+may just as this comparison is done already be in the process of
+making a packet and so we need to check for the current packet if $n <
 255$. This is necessary because $n$ is stored in a byte and values $>
 255$ can't fit in a byte.
 
@@ -250,9 +233,7 @@ repeated is read into $c_1$ and the process starts anew.
 And in a loop this algorithm is repeated until all the characters of
 the file have been processed. Once we have processed all the
 characters in the file, we also need to write out the last packet at
-the end of the algorithm. This is because the packet that $(n,c_1)$
-has not yet at point in the algorithm been written, and therefore this
-last step is necessary.
+the end of the algorithm.
 
 \subsubsection{RLE Decompression Algorithm}
 
@@ -294,18 +275,18 @@ The algorithm that we are about to describe is in
 \cite{96:_techn_note_tn102,apple1994inside} known as the PackBits
 method. But in \cite{91:_truev_tga_file_format_specif}, however, this
 algorithm is simply known as RLE. I will therefore try and create a
-compromise between these to names and we will call the method PackBits
-RLE from now on.
+compromise between these two names and we therefore will call the
+method PackBits RLE from now on.
 
 As familiar, the RLE algorithm can do great compression on certain
 kind of data, while it on the other can double the size of other kinds
-of data, like English text. The question is, can remove this
+of data, like English text. The question is, can we remove this
 limitation from the algorithm, while still preserving its great
 compression ratio for certain kinds of data?
 
 And yes, it turns out that we can. In PackBits RLE, the highest bit of
-the packet length specifier $n$, for a packet $(n-1,b)$, is reserved
-not for specifying the length of the packet, but for specifying the
+the packet length specifier for a packet $(n-1,b)$, is reserved not
+for specifying the length of the packet, but for specifying the
 \textit{type} of the packet.
 
 Since only one bit is used for specifying the type of a packet, there
@@ -317,16 +298,13 @@ the bit is toggled.
 These two packets differ in what kind of data they contain. The
 run-length packet contains run-length encoded, compressed,
 data. Run-length packets are used in exactly the same way as they are
-in plain RLE, except for the fact that the highest bit is always
-toggled, so $n \geq 2^7 \Rightarrow n \geq 128$, will always holds true for
-run-length packets in PackBits RLE.
+in plain RLE.
 
 To give an example, the data $5,5,5$, will in PackBits RLE get
 compressed down to ``130,5''. This makes sense because $130$ in binary
 is $1000\ 0010$. The highest bit is here used to specify that the
 packet is a run-length packet and the 7 lowest bits are used to
-specify the actual length of the packet. And once again, remember that
-the value stored in the packet is $n-1$ and not $n$.
+specify the actual length of the packet.
 
 Because only 7 bits are used to specify the length of a run-length
 packet, the maximum length of a run-length packet in PackBits RLE is
@@ -346,18 +324,9 @@ most efficiently get encoded as $3,1,2,3,4$. $3$ is in binary form
 $0000\ 0011$, and the since the highest bit is cleared, this means
 that this is a proper raw packet.
 
-So in exchange for the highest bit, we got a packet type that helps us
-avoiding the problem of doubling the size of the data that RLE
-had. Every raw packet can however only hold $128$ raw data unencoded
-data values. For this reason all the $n$ values of the packets may
-indeed end up increasing the size of the compressed data. But it could
-be worse, you could have doubled the size of the data like RLE would
-have! With PackBits RLE, you end adding perhaps only a few extra bytes
-of $n$, but it's at least not anything that would explode the size of
-the data.
-
-So the main advantage PackBits RLE has over plain RLE is that it's a
-lot more \textit{reliable}.
+Because PackBits RLE now lacks the ability to explode the size of the
+data in the way plain RLE can, the main advantage PackBits RLE has
+over plain RLE is that it is a lot more \textit{reliable}.
 
 \begin{Exercise}[label={packbits-rle}]
 
@@ -417,10 +386,12 @@ length bit is assigned to an initial value of $1 \ShiftLeft 7 =
 \subsubsection{Compression And Decompression}
 \label{sec:compr-decompr}
 
+\todo{fix section(and algorithm?)}
+
 Now that we know how to write the packets, let us consider how to
 implement the actual PackBits RLE algorithm. This algorithm is
 significantly more complex than any other algorithm so far covered in
-this text, and I recommend the reader to study the following
+this text, and I recommend the reader to read the following
 explanatory paragraphs carefully.
 
 Since there are two kinds of packets allowed in the PackBits RLE
@@ -434,18 +405,17 @@ We start the algorithm by setting up a starting package of length 1
 and of type raw packet. The first character of the file is then read
 to $c_1$ and following this the second character in the file is read
 to $c_2$. However, if there's only one character in the file, then the
-main loop stop and the last packet is written. Since we were dealing
-with a raw packet the only character $c_1$ is put to the array $data$
-in this the only packet is then written. The array $data$ stores an
-the data of the current raw packet.
+main loop is stopped and the last packet is written. Since we were
+dealing with a raw packet the only character $c_1$ is put in the array
+$data$. The array $data$ stores the data of the current raw packet.
 
 If there however was more than one character, then it is first checked
 if the current packet is not at its maximum capacity. If so, then the
-current packet is written out. If the current packet is run-length
+current packet is written out. If the current packet is a run-length
 packet then the run-length packet is simply written out and
-preparations are made for writing a new raw packet. If the packet is
-raw packet then the last character $c_1$ that fit into the raw packet is put
-at the end of the $data$ array.
+preparations are made for writing a new raw packet. If the packet is a
+raw packet then the character $c_1$ is put at the end of the $data$
+array, and then the raw packet is written out.
 
 If on the other hand the current packet is not full then we are going
 to write a run-length packet. First however, we need to check if we
@@ -552,15 +522,15 @@ outputted.
   \end{algorithmic}
 \end{algorithm}
 
-the decoding algorithm is thankfully not as complex. It is shown in
+The decoding algorithm is thankfully not as complex. It is shown in
 algorithm \ref{alg:packbits-dec}.
 
 First the first byte $n-1$ of the packet is read in. To get the length
 part of this value, it is bitwise anded with 127, which has the binary
 value $0111\ 1111$.  Then, to get the type of the packet, the highest
 bit is checked. If it is toggled, the packet is a simple run-length
-packet and it is decompress in the same way as it was in algorithm
-\ref{alg:rle-dec}. Otherwise, it is a raw and in that case the
+packet and it is decompressed in the same way as it was in algorithm
+\ref{alg:rle-dec}. Otherwise, it is a raw packet and in that case the
 contents of the packet is read and outputted byte by byte.
 
 \begin{algorithm}
@@ -595,8 +565,9 @@ contents of the packet is read and outputted byte by byte.
   \end{algorithmic}
 \end{algorithm}
 
-\section{Answers to the Exercises}
+\FloatBarrier
 
+\answers{}
 
 \begin{Answer}[ref={compression-ratio}]
 
@@ -609,13 +580,16 @@ contents of the packet is read and outputted byte by byte.
     the length of the sequence. This pair can then be decompressed
     like this: $s,s+1,s+2,\cdots,s+n$.
 
-
   \item $\frac{1}{2}$
 
     We are once again dealing with a sequential list of numbers, but
     in this case the difference between them is $2$. If we assign the
-    symbol $\Delta$ to this difference, then the sequential list $s, s
-    + 1 \cdot \Delta, s + 2 \cdot \Delta, \dots, s + n \cdot \Delta$
+    symbol $\Delta$ to this difference, then sequence
+
+    \begin{equation*}
+      s, s + 1 \cdot \Delta, s + 2 \cdot \Delta, \dots, s + n \cdot \Delta
+    \end{equation*}
+
     can be represented by the triplet $(n,s,\Delta)$
 
   \item $\frac{6}{6} = 1$.
@@ -635,22 +609,6 @@ contents of the packet is read and outputted byte by byte.
   \item 2A2B2C, $\frac{2}{3}$
   \item 0e0r0i0c, $2$
   \item 0s0u1c0e1s, $\frac{10}{7}$
-  \item $2a2b2a2a2b\dots 2a$, $\frac{2}{3}$.
-
-    And as long as the length of the original string is dividable by
-    $3$ and the pattern keeps repeating in the same way, then
-    compression ratio will be constant. Because if we have the
-    patterns $aaa$ an $bbb$ repeating, if we assign the number total
-    of these repeating strings to the symbol $c$, then the original
-    file size will be $3c$. And during the compression, these $c$
-    strings will be compressed down to $2a$ and $3b$ and the total
-    size of the compressed string will be $2n$. So the compression
-    ratio ends up being:
-
-    \begin{equation*}
-      \frac{2n}{3n} = \frac{2}{3}
-    \end{equation*}
-
   \end{enumerate}
 
 \end{Answer}
@@ -665,4 +623,3 @@ contents of the packet is read and outputted byte by byte.
 
 \end{Answer}
 
-\FloatBarrier
