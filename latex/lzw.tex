@@ -25,18 +25,17 @@ would from then on become known as LZ78(also known as LZ2)
 \cite{roelofs09:_histor_portab_networ_graph_png_format,Salomon:2004:DCC,winters:_us_paten_adapt}.
 
 These two methods started the family of compression algorithms that is
-known as the \textit{dictionary methods}\index{dictionary
-  methods}. Examples of algorithms in the family of dictionary methods
-is LZMA, which is based on LZ78 \cite{palov11}, LZW, which is also
-based on LZ78, and LZSS,which was based on LZ77
-\cite{Salomon:2004:DCC}. LZW is the method that we will discuss in
-this chapter. It was invented by Terry Welch and he published the
-algorithm in \cite{welch85:_u}.
+known as the \textit{dictionary methods}. Examples of algorithms in
+the family of dictionary methods is LZMA, which is based on LZ78
+\cite{palov11}, LZW, which is also based on LZ78, and LZSS,which was
+based on LZ77 \cite{Salomon:2004:DCC}. LZW is the method that we will
+discuss in this chapter. It was invented by Terry Welch and he
+published the algorithm in \cite{welch85:_u}.
 
 \section{The Compression algorithm}
 \label{sec:lzw-comp-desc}
 
-The LZW compression\index{LZW compression} algorithm is best
+The LZW compression algorithm is best
 understood by walking through the LZW algorithm's process of
 compressing some example string, so we will in this example
 demonstrate how the compression of the string
@@ -300,9 +299,9 @@ bits from the codes get packed from the \textit{least significant
   bits} to the \textit{most significant bits} of the packet.
 
 The first of these two packing orders we'll from now on call
-MSBF\index{MSBF}, which stands for \textbf{M}ost \textbf{S}ignificant
+MSBF, which stands for \textbf{M}ost \textbf{S}ignificant
 \textbf{B}its \textbf{F}irst and the second order we'll refer to as
-LSBF\index{MSBF}, which stands for \textbf{L}east \textbf{S}ignificant
+LSBF, which stands for \textbf{L}east \textbf{S}ignificant
 \textbf{B}its \textbf{F}irst.
 
 It is important that differ between these two orders, \textit{because

@@ -9,8 +9,7 @@ ${TARGET}.bbl: ${TARGET}.bib
 
 ${TARGET}.pdf: ${TARGETFILES} ${TARGET}.bbl
 	@pdflatex ${TARGET}.tex
-	makeindex ${TARGET}.idx
-	@pdflatex ${TARGET}.tex
+#	@pdflatex ${TARGET}.tex
 
 clean:
 	rm -f *.bbl

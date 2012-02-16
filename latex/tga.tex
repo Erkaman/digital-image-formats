@@ -11,7 +11,7 @@
 \label{sec:tga-introduction}
 
 In this chapter, we are to explore the first image format in this
-text: TGA\index{TGA}. But why are we beginning with TGA of all image
+text: TGA. But why are we beginning with TGA of all image
 formats?
 
 For the same reason that the image format first became popular: its
@@ -35,7 +35,7 @@ reference for this chapter.
 
 \section{Conventions Used In This Chapter}
 
-The TGA format is built up of things called fields\index{field}. A
+The TGA format is built up of things called fields. A
 field gives information about the image you're trying to open. It
 could give information like the name of the image, color depth, the
 color data of the image and so on. It could really contain any sort of
@@ -53,7 +53,7 @@ big the respective fields are in order to load them.
 \newcommand{\imgsubfield}[2]{\subsubsection*{#1(\fieldlength{#2})}}
 
 Fields are organized into larger units we will call
-\textit{sections}\index{section}. We will in this chapter cover these
+\textit{sections}. We will in this chapter cover these
 sections one after one and we will describe the fields in the order
 that they occur in their respective sections. The separate are
 organized in subheadings like this:
@@ -82,7 +82,7 @@ fields, as we soon will see several examples of.
 The first thing that can be found in a TGA image is always the File
 Header.
 
-\imgfield{ID Length\index{ID Length}}{1}
+\imgfield{ID Length}{1}
 
 Surprisingly enough, this is one the few image formats that doesn't
 have a set of magic numbers identifying the type of the file at the
@@ -90,20 +90,19 @@ beginning. Instead, something known as the ID Length is found. In a
 later field of the format, there is a field called the image ID and
 this field specifies the length of that field in bytes.
 
-\imgfield{Color Map Type\index{Color Map Type}}{1}
+\imgfield{Color Map Type}{1}
 
 The TGA format supports color palettes. An alternative term for
-palette used in the TGA specification is Color map\index{color
-  map}. This field could simply be seen as a boolean flag indicating
+palette used in the TGA specification is Color map. This field could simply be seen as a boolean flag indicating
 whether or not the image has a color map; if the value of this field
 is $1$, then the image has a color map and if it is $0$, then there is
 no color map in the image.
 
-\imgfield{Image Type\index{Image Type}}{1}
+\imgfield{Image Type}{1}
 
 The TGA format supports three different ways of storing color:
-grayscale\index{grayscale}, color-mapped color and
-true-color\index{true-color}.
+grayscale, color-mapped color and
+true-color.
 
 Grayscale color should be familiar to you by now. Color-mapped color
 obviously means that the color data are indexes to a
@@ -147,7 +146,7 @@ and only if the following holds true:
   imageType = 9 \OR imageType = 10 \OR imageType = 11
 \end{equation*}
 
-\imgfield{Color Map Specification\index{Color Map Specification}}{5}
+\imgfield{Color Map Specification}{5}
 
 The color map specification fields consists of a set of subfields
 describing the color map included in the image. If the image doesn't
@@ -155,7 +154,7 @@ even have a color map to begin with, these fields can simply be
 ignored. Remember that a TGA image only has a color map if and only if
 the color map type $1$.
 
-\imgsubfield{First Entry Index\index{First Entry Index}}{2}
+\imgsubfield{First Entry Index}{2}
 
 This entry consists of 2 bytes, so it's a 16-bit number and the
 maximum length of a 16-bit number is $2^{16} - 1$
@@ -165,12 +164,12 @@ of this field is how many of those colors that should be skipped in
 the beginning of that sequence. Don't know why you'd \textit{ever}
 want to do this, though. This value is most usually $0$.
 
-\imgsubfield{Color map length\index{Color map length}}{2}
+\imgsubfield{Color map length}{2}
 
 In this field, the length of the color map is specified. The
 length is the number of colors in the color map.
 
-\imgsubfield{Color map entry size\index{Color map entry size}}{1}
+\imgsubfield{Color map entry size}{1}
 
 Because the color map is just an array of colors, of course all
 these colors must have a specific color depth. That color depth is
@@ -199,7 +198,7 @@ array.
     \end{algorithmic}
   \end{algorithm}
 
-\imgfield{Image Specification\index{Image Specification}}{10}
+\imgfield{Image Specification}{10}
 
 Following the color map specification is the image specification. This
 field contains many values that are essential to loading the image data
@@ -214,9 +213,9 @@ screen. The values of both of these fields are usually $0$, and I have
 never used an image viewer that actually supports the usage of these
 fields. My advice is that you can simply ignore these two values.
 
-\imgsubfield{Image Width\index{Image Width}}{2}
+\imgsubfield{Image Width}{2}
 
-\imgsubfield{Image Height\index{Image Height}}{2}
+\imgsubfield{Image Height}{2}
 
 These two fields specify the size of the image in pixels. Let $W$ be
 the first of these two fields, and $H$ the second, then the total
@@ -225,14 +224,14 @@ color depth is $D$, and $D$ is measured in bits, then the total byte
 size of the image data is $\frac{W \cdot H \cdot D}{8}$. Note that
 this only holds true when the color data have been uncompressed.
 
-\imgsubfield{Pixel Depth\index{Pixel Depth}}{1}
+\imgsubfield{Pixel Depth}{1}
 
 If the image doesn't use a colormap then this is color depth of the
 colors in the image data. If the image uses a color palette then this
 is the bit size of the indexes that the color data consists of when a
 colormap is used.
 
-\imgsubfield{Image Descriptor\index{Image Descriptor}}{1}
+\imgsubfield{Image Descriptor}{1}
 
 The image descriptor stores the data of several subfields at different
 bits in a single byte.
@@ -279,7 +278,7 @@ stored in 16-bit color was discussed in section
 And the data of this image descriptor can trivially be parsed using
 the \textproc{getbits} function.
 
-\section{Color Data\index{Color Data}}
+\section{Color Data}
 \label{sec:color-data}
 
 I described the fields of the image header in the order that they must
@@ -287,7 +286,7 @@ be loaded. Following the image header is the color data section. Here
 the palette, if there is one, and the color data of the image can be
 found.
 
-\imgfield{Image ID\index{Image ID}}{0}
+\imgfield{Image ID}{0}
 
 This field contains identifying information about the image in form of
 an ASCII string. It could be described as the name of the image. The
@@ -296,7 +295,7 @@ field. Since the ID Length field was stored in a byte, the maximum
 length of this string is $255$. But if the ID Length field is 0, this field
 doesn't exist at all and should be ignored.
 
-\imgfield{Color Map Data\index{Color Map Data}}{0}
+\imgfield{Color Map Data}{0}
 
 The color map can trivially be loaded into an array by loading the
 same number colors that was specified in the color map length field. These
@@ -305,7 +304,7 @@ is the color map entry size. Back in algorithm
 \ref{alg:tga-read-colormap} it was shown to load the color map into an
 array.
 
-\imgfield{Color Data\index{Color Data}}{0}
+\imgfield{Color Data}{0}
 
 In this field, the color data of the image is stored. The way this
 data is stored depends on the values stored in the image header. In
@@ -385,7 +384,7 @@ you have fully understood it.
   \end{algorithmic}
 \end{algorithm}
 
-\section{File Footer\index{File Footer}}
+\section{File Footer}
 
 TGA images might also contain a file footer. The file footer is mainly
 used for getting other kinds of data than color data, mostly metadata,
@@ -421,7 +420,7 @@ the value $0$, then that section does not exist for that file.
 This field gives the offset of the less interesting developer area. I
 will briefly discuss this area section \ref{sec:developer-area}.
 
-\section{Developer Area\index{Developer Area}}
+\section{Developer Area}
 \label{sec:developer-area}
 
 The developer area allows programmers to add information to the TGA
@@ -439,7 +438,7 @@ refer you to
 \cite{murray1996encyclopedia,91:_truev_tga_file_format_specif} for
 further reading.
 
-\section{Extension Area\index{Extension Area}}
+\section{Extension Area}
 \label{sec:tga-extension-area}
 
 The extension area is an absolutely \textit{huge} section containing
