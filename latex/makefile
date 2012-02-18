@@ -8,8 +8,7 @@ ${TARGET}.bbl: ${TARGET}.bib
 	bibtex ${TARGET}
 
 ${TARGET}.pdf: ${TARGETFILES} ${TARGET}.bbl
-	@pdflatex ${TARGET}.tex
-#	@pdflatex ${TARGET}.tex
+	pdflatex ${TARGET}.tex
 
 clean:
 	rm -f *.bbl

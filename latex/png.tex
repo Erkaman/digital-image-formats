@@ -140,7 +140,7 @@ The bytes $80 78 71$ are the ASCII values for the string PNG, so they
 could simply be seen as the magic numbers for the PNG format.
 
 The following two bytes are $13 10$. This is a windows style newline,
-CRLF, as discussed section in \ref{cha:pseudocode-convent}. If a PNG
+CRLF, as discussed section in \ref{cha:preliminaries}. If a PNG
 file is accidentally transferred as text, there is another thing that
 may corrupt the file: line ending conversions. When, for example, you
 are transmitting a file from a window based operating system to a
@@ -373,7 +373,7 @@ After the scanline serialization process, filters are applied to the
 image data that is after the last step represented as a sequence of
 bytes. The filters are operations on the byte sequence that makes the
 data easier to compress. We'll discuss these filters in section
-??. \ref{ref prop}.
+%??. \ref{ref prop}.
 
 After that the data has optimized for compression by the filter, it is
 compressed using the DEFLATE algorithm, and stored using the ZLIB

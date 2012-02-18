@@ -652,11 +652,6 @@ is also equal to the max value of the current code size. If so, and
 the code size is not equal to it's maximum allowable value in the GIF
 format, $12$, then the value of the code size is increased by one.
 
-For reading the codes, the procedure outlined in algorithm
-\ref{alg:variable-codes-input} is used. Thanks to how flexibly
-designed this algorithm was, it is able to read codes of varying
-sizes and can therefore properly read the codes.
-
 \begin{algorithm}[H]
   \caption{GIF Decompression algorithm}
   \label{alg:gif-decompression}

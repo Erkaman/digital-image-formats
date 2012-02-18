@@ -19,8 +19,6 @@ LZ77 that was developed by Storer and Szymanski in 1982.
 The following description of the LZ77 algorihtm is based on
 \cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr_ziv_lempel}.
 
-\newcommand{\lzonestate}[5]{%
-  \framebox{\texttt{#1}}\framebox{\texttt{#2}}\ $\Rightarrow$ (#3,#4,``#5'')\\}
 
 The core parts of the LZ77 algorihtm are the so-called window and
 lookahead buffers. In the window buffer already compressed data is
@@ -37,13 +35,41 @@ operates. Let us see how good of a compression LZ77 can perform on the
 string \texttt{She sells sea shells on the sea shore}. But we will
 first have to decide on the size of the lookahead and window
 buffers. Since these buffers have to be stored in memory they
-obviously cannot be infinitely big. The size of the window 
+obviously cannot be infinitely big. The size of the window detemines
+how way book in the previously compressed data we can look for string
+matches. So the bigger window the better the compression tends to
+be. The size of the lookahead buffer determines how long strings we
+can match for in the window buffer. Usually, this number does not need
+to be that big since it is usually rather small strings that get
+matched for the window buffer. This size of almost always bigger than
+the size of the window buffer. For this example we give the window
+buffer a size of 20 characters, while the lookahead buffer is assigned
+10 characters.
 
-\begin{tabular}{l}
-  \lzonestate{\phantom{l}}{She sells sea shells on the sea shore}{0}{0}{a}
-\end{tabular}
+In the initial part of the algorihtm, the lookahead buffer is filled
+to its maximum capability with characters. The window buffer is at
+this part completely empty, since no characters has yet been
+processed.
 
-\section{LZ77}
+\newcommand{\windowsize}{20}
+\newcommand{\lookaheadsize}{10}
+
+\lzonedem{%
+  \lzonestates{}{She{\spc}sells{\spc}}{S}
+}
+
+Since the window buffer is empty, the token \lzonetokens{S} is simply
+output. This LZ77:s ways o signaling that match at all was found in
+the window buffer.
+
+Now the processed letter moved to the beginning of the window buffer a
+new letter is read to the lookahead buffer, replacing the
+
+%  \lzonestate{S}{he{\spc}sells{\spc}s}{0}{0}{h}
+%  \lzonestate{Sh}{e{\spc}sells{\spc}se}{0}{0}{e}
+%  \lzonestate{She}{{\spc}sells{\spc}sea}{0}{0}{{\spc}}
+
+\section{LZSS}
 
 The following description of the LZSS algorihtm is based on
 \cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr_lzss,okumura:_data_compr_algor_larc_lharc}.

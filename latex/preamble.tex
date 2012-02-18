@@ -25,11 +25,12 @@
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{etoolbox}
+\usepackage{expl3}
 \usepackage{path}
 \usepackage{xspace}
 \usepackage{amsmath}
 \usepackage{subfig}
-
+\usepackage{xstring}
 
 \usepackage{longtable}
 
@@ -70,7 +71,7 @@
 \usepackage{tikz}
 \usetikzlibrary{
   shapes,backgrounds,decorations.pathreplacing,
-  positioning,fit,shadings,fadings,matrix,calc,patterns}
+  positioning,fit,shadings,fadings,matrix,calc,patterns, shapes.multipart}
 
 \newenvironment{indentpar}[1][1cm]%
 {\begin{list}{}%
@@ -188,3 +189,59 @@
 \newcommand{\bin}[1]{\mbox{\ensuremath{#1}}}
 
 \newcommand{\answers}{\section{Answers to the exercises}}
+
+% LZ77 demonstration macros.
+
+\ExplSyntaxOn
+\cs_new_eq:NN \explRepeat \prg_replicate:nn
+\ExplSyntaxOff
+
+\makeatletter
+
+\def\@filling#1{\phantom{\explRepeat{#1}{a}}}
+
+\newcommand\@buffers[4]{%
+  \node[
+  rectangle split,
+  rectangle split parts=2,
+  draw,
+  anchor=text,
+  rectangle split horizontal]{%
+    \@filling{#1}\texttt{#2}\nodepart{two}\texttt{#3}\@filling{#4}}
+}
+
+\newcommand{\@lzonestate}[2]{%
+  \StrLen{#1}[\lena]%
+  \newcount\cnta%
+  \cnta\lena\relax%
+  \advance\cnta by -\windowsize\relax
+  \typeout{cnta: \the\cnta}
+  \StrLen{#2}[\lenb]%
+  \newcount\cntb%
+  \cntb\lenb\relax%
+  \advance\cntb by -\lookaheadsize\relax
+  \@buffers{-\cnta}{#1}{#2}{-\cntb}
+}
+
+\newcommand\lzonetoken[3]{$(#1,#2,$\,{\tt#3}$)$}
+\newcommand\lzonetokens[1]{\lzonetoken{0}{0}{#1}}
+
+
+\newcommand{\lzonestate}[5]{%
+\@lzonestate{#1}{#2}; \& \node[yshift=1mm]{$\Rightarrow$\lzonetoken{#3}{#4}{#5}}; \\}
+
+\newcommand{\lzonestates}[3]{%
+\@lzonestate{#1}{#2}; \& \node[yshift=1mm]{$\Rightarrow$ \lzonetokens{#3}}; \\}
+
+
+\def\lzonedem#1{%
+  \begin{center}
+  \begin{tikzpicture}[text height=1.5ex,text depth=.25ex]
+    \matrix[ampersand replacement=\&,row sep=5mm]{#1};
+  \end{tikzpicture}
+  \end{center}}
+
+\makeatother
+
+\newcommand{\spc}{\char32}
+
