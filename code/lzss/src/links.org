@@ -1,5 +1,0 @@
-* Milestones:Lempel-Ziv Data Compression Algorithm, 1977
-http://www.ieeeghn.org/wiki/index.php/Milestones:Lempel-Ziv_Data_Compression_Algorithm,_1977
-
-* A data compression primer
-http://www.ibm.com/developerworks/linux/library/l-compr/index.html
