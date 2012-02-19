@@ -13,13 +13,11 @@ const code emptyCh = -1;
 code outputCodes(
     codeStr cs,
     const std::vector<codeStr> & stringTable,
-    std::map<codeStr, std::vector<code> > & cache,
     std::FILE * out);
 
 std::vector<code> outputCodes(
     codeStr cs,
-    const std::vector<codeStr> & stringTable,
-    std::map<codeStr, std::vector<code> > & cache);
+    const std::vector<codeStr> & stringTable);
 
 std::vector<code> codeStrToVector(codeStr cs,const std::vector<codeStr> & stringTable);
 

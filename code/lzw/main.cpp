@@ -178,12 +178,10 @@ void LZW_Decompress(unsigned int codeSize, FILE * in,FILE * out)
 
     vector<codeStr> stringTable;
 
-    BitReader inbits(in, MSBF);
+    BitFileReader inbits(in, MSBF);
 
     code maxValue = (1 << codeSize) - 1;
     code maxCode =  maxValue - 1 ;
-
-    map<codeStr, vector<code> > cache;
 
     for(code c = 0; c < 256; ++c){
         codeStr cs;
@@ -214,7 +212,7 @@ void LZW_Decompress(unsigned int codeSize, FILE * in,FILE * out)
         } else
             str = stringTable[newCode];
 
-        ch = outputCodes(str, stringTable, cache, out);
+        ch = outputCodes(str, stringTable, out);
 
         /* add it the table */
         if(nextCode <= maxCode){

@@ -23,45 +23,26 @@ vector<code> codeStrToVector(codeStr cs,const vector<codeStr> & stringTable)
 
 vector<code> outputCodes(
     codeStr cs,
-    const vector<codeStr> & stringTable,
-    map<codeStr, vector<code> > & cache)
+    const vector<codeStr> & stringTable)
 {
     vector<code> outStr;
 
     map<codeStr, vector<code> >::iterator iter;
 
-    iter = cache.find(cs);
 
-    /* in the cache */
-    if(iter != cache.end())
-	outStr = iter->second;
-    else{
-	outStr = codeStrToVector(cs, stringTable);
-	cache[cs] = outStr;
-    }
-
-    return outStr;
+    return codeStrToVector(cs, stringTable);
 }
 
 code outputCodes(
     codeStr cs,
     const vector<codeStr> & stringTable,
-    map<codeStr, vector<code> > & cache,
     FILE * out)
 {
     vector<code> outStr;
 
     map<codeStr, vector<code> >::iterator iter;
 
-    iter = cache.find(cs);
-
-    /* in the cache */
-    if(iter != cache.end())
-	outStr = iter->second;
-    else{
-	outStr = codeStrToVector(cs, stringTable);
-	cache[cs] = outStr;
-    }
+    outStr = codeStrToVector(cs, stringTable);
 
     for(size_t i = 0;
         i < outStr.size();
