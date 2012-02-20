@@ -3,10 +3,6 @@
 \usepackage{inconsolata}
 \usepackage[charter]{mathdesign}
 
-%font alternatives:
-%\usepackage[mathlf]{MinionPro}
-%\usepackage[utopia]{mathdesign}
-
 \usepackage[kerning,spacing,stretch=10]{microtype}
 \microtypecontext{spacing=nonfrench}
 
@@ -46,13 +42,21 @@
 % date typesetting command
 \newcommand{\dt}[3]{\formatdate{#1}{#2}{#3}}
 
-
 \usepackage[shortlabels]{enumitem}
 
 % exercises.
 \usepackage{exercise,chngcntr}
 \counterwithin{Exercise}{chapter}
 \counterwithin{Answer}{chapter}
+\setlength{\Exeleftmargin}{15cm}
+
+\makeatletter
+% typeset answers and exercises in a smaller font.
+\renewenvironment{Exercise}{\small\global\beginExerciseEnv}%
+{\@ExeStaredfalse\endExerciseEnv}
+\renewenvironment{Answer}{\small\beginAnswerEnv}{\endAnswerEnv}
+\makeatother
+
 
 \usepackage{caption}
 \captionsetup{
@@ -65,7 +69,6 @@
 
 % references
 \usepackage[sorting=none]{biblatex}
-
 
 % tikz
 \usepackage{tikz}
@@ -160,14 +163,10 @@
 \tocfile{List of Algorithms}{loa}
 \endgroup}
 
-
 \newcommand*{\tikzname}{Ti\emph{k}Z\xspace}
 
 \newcommand{\fullbyte}{$11111111$\xspace}
 \newcommand{\emptybyte}{$00000000$\xspace}
-
-% Thanks to Philip and Konrad Rudolph:
-% http://tex.stackexchange.com/questions/2933/parse-comma-separated-list-of-command-names-with-spaces
 
 \newcommand*\acronymstyle{\scshape}
 \newcommand*\newacronym[1]{
@@ -215,7 +214,6 @@
   \newcount\cnta%
   \cnta\lena\relax%
   \advance\cnta by -\windowsize\relax
-  \typeout{cnta: \the\cnta}
   \StrLen{#2}[\lenb]%
   \newcount\cntb%
   \cntb\lenb\relax%
@@ -231,8 +229,10 @@
 \@lzonestate{#1}{#2}; \& \node[yshift=1mm]{$\Rightarrow$\lzonetoken{#3}{#4}{#5}}; \\}
 
 \newcommand{\lzonestates}[3]{%
-\@lzonestate{#1}{#2}; \& \node[yshift=1mm]{$\Rightarrow$ \lzonetokens{#3}}; \\}
+\@lzonestate{#1}{#2}; \& \node[yshift=1mm]{$\Rightarrow$
+  \lzonetokens{#3}}; \\}
 
+\newcommand{\lzonestatedots}{\node{$\vdots$}; \& \node{$\vdots$}; \\}
 
 \def\lzonedem#1{%
   \begin{center}
@@ -244,4 +244,3 @@
 \makeatother
 
 \newcommand{\spc}{\char32}
-

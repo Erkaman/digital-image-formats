@@ -2,72 +2,181 @@
   \bibliography{project.bib}
 \end{comment}
 
-\section{LZ77 and LZSS}
-\label{sec:lz77-lzss}
+\chapter{LZ77 and LZSS}
+\label{cha:lz77-lzss}
 
 \section{History}
 
 As familiar from section \ref{sec:hist-lzw}, LZ77 was the first of the
 two algorithms described by Lempel and Ziv that sparked the family of
 dictionary methods. We have partially discussed already LZ78, since
-LZW was based on this method so we will in this chapter discuss the
-LZ77 method. But we will also discuss LZSS, which is an improvement of
-LZ77 that was developed by Storer and Szymanski in 1982.
+LZW was based on it, so we will in this chapter discuss the LZ77. But
+we will also discuss LZSS, which is an improvement of LZ77 that was
+developed by Storer and Szymanski in 1982.
 
 \section{LZ77}
 
+\subsection{Compression}
+
 The following description of the LZ77 algorihtm is based on
 \cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr_ziv_lempel}.
-
 
 The core parts of the LZ77 algorihtm are the so-called window and
 lookahead buffers. In the window buffer already compressed data is
 stored. The lookahead buffer contains the data that hasn't yet been
 compressed and matched. Strings in the lookahead buffer are in the
 algorihtm matched for already processed strings in the window
-buffer. If it found a matching string for the string in the lookahead
+buffer. If it finds a matching string for the string in the lookahead
 buffer it outputs a so called \textit{token}. The token contains the
-values that are necessary for the decoder to locate the matched
-string in the window and decode it.
+information that is necessary for the decoder to locate the matched
+string in the window buffer.
 
 Now let us go though a simple example that demonstrates how LZ77
-operates. Let us see how good of a compression LZ77 can perform on the
-string \texttt{She sells sea shells on the sea shore}. But we will
-first have to decide on the size of the lookahead and window
-buffers. Since these buffers have to be stored in memory they
-obviously cannot be infinitely big. The size of the window detemines
-how way book in the previously compressed data we can look for string
-matches. So the bigger window the better the compression tends to
-be. The size of the lookahead buffer determines how long strings we
-can match for in the window buffer. Usually, this number does not need
-to be that big since it is usually rather small strings that get
-matched for the window buffer. This size of almost always bigger than
-the size of the window buffer. For this example we give the window
-buffer a size of 20 characters, while the lookahead buffer is assigned
-10 characters.
+operates. Let us study the LZ77 compression of the string \texttt{she
+  sells sea shells on the sea shore}. But we will first have to decide
+on the size of the lookahead and window buffers. Since these buffers
+have to be stored in memory they obviously cannot be infinitely
+big. The size of the window determines how long back in the previously
+compressed data we can look for string matches. The size of the
+lookahead buffer determines how long strings we can match for in the
+window buffer. This number does not need to be that big since it is
+usually rather small strings that get matched for the window
+buffer. The size of the lookahead size is almost always bigger than
+the size of the window buffer. For this example, we give the window
+buffer a size of 20 characters, while the lookahead buffer is given a
+length of 10 characters.
 
 In the initial part of the algorihtm, the lookahead buffer is filled
-to its maximum capability with characters. The window buffer is at
-this part completely empty, since no characters has yet been
-processed.
+to its maximum capacity with characters. The window buffer is at this
+point completely empty, since no characters has yet been processed:
 
 \newcommand{\windowsize}{20}
 \newcommand{\lookaheadsize}{10}
 
 \lzonedem{%
-  \lzonestates{}{She{\spc}sells{\spc}}{S}
+  \lzonestates{}{she{\spc}sells{\spc}}{s}
 }
 
 Since the window buffer is empty, the token \lzonetokens{S} is simply
-output. This LZ77:s ways o signaling that match at all was found in
-the window buffer.
+output. This LZ77:s ways of signaling that match at all was found in
+the window buffer. We will soon describe what the first two numbers in
+the token describe. The compressor then keeps outputting these single
+character tokens:
 
-Now the processed letter moved to the beginning of the window buffer a
-new letter is read to the lookahead buffer, replacing the
+\lzonedem{%
+  \lzonestates{s}{he{\spc}sells{\spc}s}{h}
+  \lzonestatedots{}
+  \lzonestates{she{\spc}sell}{s{\spc}sea{\spc}shel}{s}
+}
 
-%  \lzonestate{S}{he{\spc}sells{\spc}s}{0}{0}{h}
-%  \lzonestate{Sh}{e{\spc}sells{\spc}se}{0}{0}{e}
-%  \lzonestate{She}{{\spc}sells{\spc}sea}{0}{0}{{\spc}}
+While character keeps getting read to the lookahead buffer to get
+filled, processed characters get added to the window buffer. After the
+last character \textit{s} s has been matched interesting things start
+happening; the next three characters to the found in the lookahead
+buffer are \textit{{\spc{}se}}, and this sequence can also be found in
+the window buffer. How far back in the window buffer does this match
+begin? If we start counting from the end of the window buffer, then we
+have to go $6$(this count is one-based) characters back in the buffer
+to reach the match. This number is formally known as the
+\textit{offset} of the token, which is the first number of a
+token. The second number in a token is the \textit{length} of
+it. Since the matching string, \textit{{\spc{}se}}, has length of $3$,
+this will also be the second number of the token. The third part of
+the token will get set to the character following the matching
+string. Thus, the resulting token will be:
+
+\lzonedem{%
+  \lzonestate{she{\spc}sells}{{\spc}sea{\spc}shell}{6}{3}{a}
+%  \lzonestate{she{\spc}sells{\spc}se}{{\spc}shel}{5}{3}{a}
+}
+
+And following the character following the matched string another
+string can be matched:
+
+\lzonedem{%
+  \lzonestate{she{\spc}sells{\spc}sea}{{\spc}shells on}{4}{2}{h}
+}
+
+And in this fashion the rest of the compression proceeds. Once the end
+of the input data has been reached the lookahead buffer will start
+shrinking as the remaining character are compressed, while the size of
+the window buffer is managed so that it never rises above its fixed
+size.
+
+It is easy to see why LZ77 is able to perform compression working in
+this fashion. Consider for example the following extract from ``Alice in
+Wonderland'':
+
+\begin{quote}
+  `Then you should say what you mean,' the March Hare went on.
+
+  `I do,' Alice hastily replied; `at least--\underline{at least} I
+  mean what I say--that's the same thing, you know.'
+
+  `Not the \underline{same thing} a bit!' said \underline{the} Hatter.
+  `You might just as well say that ``I see what I eat'' is the
+  \underline{same thing} as ``\underline{I eat} \underline{what}
+  \underline{I see}''!'
+
+  `\underline{You might just as well say},' \underline{added the}
+  \underline{March Hare}, `that ``I like what I get'' is the same
+  thing as ``\underline{I get} what \underline{I like}''!'
+
+  `\underline{You might just as well say},' \underline{added the}
+  Dormouse, who seemed to be talking in his sleep, `that ``I breathe
+  when I \underline{sleep}'' is the same thing as ``\underline{I
+    sleep} \underline{when} \underline{I breathe''}!'
+
+\end{quote}
+
+Underlined in this extract are parts of this text that will get caught
+by the LZ77 compressor and represented more efficiently as
+tokens. Human language texts tend to be chock-full with repeated words,
+so they compress especially well under LZ77. Simple images can also
+compress very well using LZ77, but rarely photographs, because this
+data tends to be extremely random.
+
+\subsection{Decompression}
+
+A LZ77 compressed file will only consists of a sequence of LZ77
+tokens, so the only thing we really need to discuss is how to decode
+the separate tokens.
+
+A token where the values of the offset and length fields are set to
+$0$ is a token representing a single character, so the represented by
+such a token is just the third field.
+
+A decoding a token that represent a matched string is not much
+trickier. A token was encoded by finding a matching string in the
+window buffer, and the offset and length of said string. So the
+decoding step is simple: first, go back the number of characters in
+the so far compressed data indicated by the offset. Now add the first
+character of the found string to the decompressed data. And now, Since a new
+character was added, the size of the decompressed data will have
+increased by one. Now you can be again going back offset steps in the
+decompressed data reach the second character of the matched
+string. This process is then repeated until a string with the length
+indicated by the second field of the token has been constructed. This
+whole algorithm is outlined in algorihtm \label{alg:dec-lzone-token}.
+
+\begin{algorithm}[H]
+  \caption{Decoding a LZ77 token.}
+  \label{alg:dec-lzone-token}
+  \begin{algorithmic}[1]
+    \linecomment{$length$ is the length of the so far decompressed data. }
+    \Repeatn{$tokenLength}$
+      \Let{$decompressed[length]$}{$decompressed[length -
+        tokenOffet]$}
+      \Let{$length$}{$length + 1$}
+    \EndRepeatn
+  \end{algorithmic}
+\end{algorithm}
+
+
+\subsection{Token Sizes}
+
+but we have up until this point entirely omitted a discussion of the
+bit lengths of the separate numbers of LZ77 tokens.
 
 \section{LZSS}
 

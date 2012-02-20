@@ -220,7 +220,6 @@ void printZLIB_FLG(ZLIB_FLG flg)
 
 unsigned long adler32(const vector<BYTE> & data)
 {
-    /* also: check first implementation of this algorithm. */
     unsigned long a = 1, b = 0;
     unsigned long index;
 

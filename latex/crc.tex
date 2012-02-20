@@ -2,7 +2,7 @@
   \bibliography{project.bib}
 \end{comment}
 
-\chapter{Cyclic Redundancy Check}
+\chapter{Checksums}
 \label{cha:crc}
 
 \section{Checksums and error detection}
@@ -67,7 +67,7 @@ classified as a checksum.
 
 \section{CRC}
 
-One very well used checksum is a CRC, Cyclic Redundancy Check. I will
+One very well used checksum is a CRC, Cyclic Redundancy Check. we will
 in the following section discuss the computation of a CRC.
 
 The following description of CRC is based on the references
@@ -435,7 +435,7 @@ polynomial division for generator polynomials of width 8.
     the checksum for and $G(x)$ is the generator polynomial.
 
     \Procedure{crc8}{$bytes, G(x)$}
-    \Let{result}{$0$}
+    \Let{$result$}{$0$}
 
     \ForEach{$byte$}{$bytes$}
     \Let{$result$}{$result \BitXor byte$}
@@ -698,12 +698,77 @@ algorithm. As you can see, it is largely the same algorithm.
   \end{algorithmic}
 \end{algorithm}
 
-\section{CRC-32}
+\subsection{CRC-32}
 
 We will end this chapter by briefly discussing the CRC that is used in
 the PNG format
 
 \todo{discuss}
+
+\newcommand{\adlerchk}{Adler-32\xspace}
+
+\subsection{Adler-32}
+
+Another checksum is \adlerchk. It is for example used to verify data
+integrity in the ZLIB format\cite{feldspar:_explan_deflat_algor}. The
+ZLIB format is of interest to us, because that is the container format
+used to contain the color data in PNG images. But we will for only
+discuss \adlerchk, the checksum in the ZLIB format.
+
+Let us now describe \adlerchk based of the references
+\cite{gailly96:_zlib_compr_data_format_specif,maxino:_revis_fletc_adler_check,DBLP:journals-tdsc-MaxinoK09_koopman}.
+
+The algorithm to calculate the checksum is very simple: two variables
+$a=1$ and $b=0$ are set in the beginning. Then, for every byte $D_i$
+in the data the checksum is to be computed for, $a$ is set to $a +
+D_i$ modulo the constant $65521$. This constant is the largest prime
+number smaller than $2^{16}$. $b$ is then set to $a + b$ modulo the
+same constant.  This process is repeated for every byte $D_i$ in the
+data. Once it has, the 16 highest bits of the resulting checksum are
+set to $b$ and the 16 lowest bits are set to $a$. Hence, the \adlerchk
+checksum is always a 32-bit number, as is indicated by its name. In
+other words, for some data that has a length of $n$ bytes the checksum
+is calculated as follows:\footnote{Go back to exercise \ref{bit-equiv}
+  if you don't understand the conversion in the last line. }
+
+\begin{equation*}
+  \def\between{2mm}
+  \begin{array}{l}
+    a = 1 + D_1 + D_2 + \ldots + D_n (\bmod{65521}) = 1 +
+    \displaystyle\sum_{i = 1}^{n}D_i (\bmod{65521}) \\[\between]
+    b = (1 + D_1) + (1 + D_1 + D_2) + \ldots + (1 + D_1 + D_2 + \ldots +
+    D_n) (\bmod{65521}) = \\[\between]
+    = n + \displaystyle\sum_{i = 1}^{n}(D_i \cdot (n + 1 - i)) (\bmod{65521})   \\[\between]
+    \text{adler32} = (b \ShiftLeft 16) \BitOr a = (b \cdot 65536) + a \\[\between]
+  \end{array}
+\end{equation*}
+
+
+It is also shown in algorithm \ref{alg:adler32} how to calculate the
+\adlerchk checksum.
+
+\begin{algorithm}[H]
+  \caption{Computation of the \adlerchk checksum.}
+  \label{alg:adler32}
+  \begin{algorithmic}[1]
+    \Procedure{adler32}{$data$}
+
+    \Let{$a$}{$1$}
+    \Let{$b$}{$0$}
+    \ForEach{$byte$}{$data$}
+    \Let{$a$}{$a + byte \bmod{65521}$}
+    \Let{$b$}{$a + a \bmod{65521}$}
+    \EndForEach
+    \Return{$(b \ShiftLeft 16) \BitOr a$}
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\begin{Exercise}[label={ex-adler32}]
+
+  Compute the \adlerchk checksum for the data $42,43,67$.
+
+\end{Exercise}
 
 \section{Answers To The Exercises}
 
@@ -782,5 +847,23 @@ the PNG format
   \item Not a generator polynomial, because this polynomial is
     equivalent to $1x^3 + 1x^2 + 1x + 0x^0$.
   \end{enumerate}
+
+\end{Answer}
+
+\begin{Answer}[ref={ex-adler32}]
+
+  $1848105$, because $D_1 = 42$, $D_2 = 43$ and $D_3 = 67$, so
+
+
+  \begin{equation*}
+    \def\between{2mm}
+    \begin{array}{l}
+      a = 1 +  \displaystyle\sum_{i = 1}^{3}D_i (\bmod{65521}) = 1 + 42 +
+      43 + 67 (\bmod{65521}) = 153 \\[\between]
+      b = 3 + \displaystyle\sum_{i = 1}^{3}(D_i \cdot (3 + 1 - i))
+      (\bmod{65521}) = 3 + 42 \cdot 3 + 43 \cdot 2 + 67  = 282 \\[\between]
+      \text{adler32} = (b \cdot 65536) + a = 1848105 \\[\between]
+    \end{array}
+  \end{equation*}
 
 \end{Answer}

@@ -299,6 +299,32 @@ by using a palette has to compensate for the extra overhead of storing
 it. This has the important consequence that for small images a palette
 is rarely a good idea.
 
+\section{Color Layout}
+
+Now how are these colors laid out in a typical image file? They tends
+to be stored in a linear fashion rather than a two-dimensional way, as
+one might think. This means that the separate rows of an image are not
+at all indicated.
+
+Let us for example again consider the image on the front page. The
+image data of this would be stored as the sequence
+$4,4,4,4,,0,4,4,3,4,\dots$ and so on in an entirely linear
+fashion. The program reading the image can then split it up into rows
+using the earlier given measurement values(width:$6$, height:$6$). It
+should from this be obvious that there is no real need for an image
+format to split up an image into separate rows.
+
+It is also easy to see how the separate rows can be accessed. Let us
+say that we stored the color data of the image on the front page in
+the entirely linear array $data$. The indexes of this array are
+zero-based, meaning that, for example, $data[3]=4$, while
+$data[4]=0$. The index of the color in row $r$ and column $c$(there
+numbers are also zero-based) is then given by $r \cdot width + c$,
+where $width=5$, as was given in the image header. The index of the
+red color in the middle of the flower is then given by $2 \cdot 5 + 2
+= 12$. If you start counting from the top-left corner to this color
+you will also end up at this color. 
+
 \answers{}
 
 \begin{Answer}[ref={rgb-triplet}]

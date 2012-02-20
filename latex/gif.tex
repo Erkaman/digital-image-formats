@@ -6,7 +6,7 @@
 \label{cha:gif}
 
 The topic of this chapter will be the image format known as Graphics
-Interchange Format. We'll first discuss the rather complicated legal
+Interchange Format. We will first discuss the rather complicated legal
 history that the format has and then we'll discuss the inner workings
 of the format. Since many of the features of the TGA format can also
 be found in the GIF format, we won't be as detailed as we were in
@@ -57,8 +57,7 @@ discuss in chapter \ref{cha:png}.
 But since 2006 all LZW related patents have expired. Software
 developers are in other words finally free to use the LZW algorithm
 just as they please, without having to request a license from Unisys
-for doing so. And this also had the important consequence that the GIF
-format was finally free from the shackles of Unisys.
+for doing so.
 
 \section{Format Version}
 
@@ -124,16 +123,28 @@ have reached the end of a sub-blocks sequence.
 
 So how would the string $ERICA$ be stored using data sub-blocks? We
 first let the pair $(S,D)$ represent a sub-block, where $S$ is the
-size of the block and $D$ is the data is block. The block terminator
-is represented by the pair $(0,)$.
+size of the block and $D$ is the data of the block. The block
+terminator is represented by the pair $(0,)$. It is a single byte with
+the value $0$.
 
 The string $ERICA$ can then be represented by the sequence of
-sub-blocks $(5,ERICA)(0,)$. The block terminator must always terminate
-a sequence of sub-blocks. But this is not the only way of representing
-that string; $(3,ERI)(2,CA)(0,)$ is another perfectly legal way of
-doing it. But the first sequence of obviously more space efficient,
-since only $1 + 5 + 1 = 7$ bytes are required to store it, while the
-former sequence requires $1 + 3 + 1 + 2 + 1 = 8$ bytes of storage.
+sub-blocks
+
+\begin{equation*}
+  (5,ERICA)(0,)
+\end{equation*}
+
+The block terminator must always terminate a sequence of
+sub-blocks. But this is not the only way of representing that string;
+
+\begin{equation*}
+  (3,ERI)(2,CA)(0,)
+\end{equation*}
+
+is another perfectly legal way of doing it. But the first sequence is
+obviously more space efficient, since only $1 + 5 + 1 = 7$ bytes are
+required to store it, while the former sequence requires $1 + 3 + 1 +
+2 + 1 = 8$ bytes of storage.
 
 \subsection{Packed Fields}
 
@@ -141,7 +152,8 @@ Another kind of data storage mechanism found in the GIF format are
 packed fields. Packed fields simply means that data is stored in the
 separate bits of a single byte. We'll be using our normal conventions
 to denote the separate bits, so that in the number $0001\ 0011$ bits 0
-to 1 has the value $3$ while bit $4$ has the value $1$.
+to 1($11$) inclusive have the value $3$ while bit $4$ has the value
+$1$.
 
 \subsection{Extension Blocks}
 
@@ -160,7 +172,7 @@ of some extension blocks is necessary to properly render the image.
 \section{Header Blocks}
 
 Now we will be describing all the possible kinds of blocks that can
-occur in a GIF file. First of are the header blocks.
+occur in a GIF file. First of all are the header blocks.
 
 \subsection{Header(Required)}
 
@@ -168,13 +180,13 @@ This block will always be found first in a GIF file.
 
 \subsubsection*{Signature(3 bytes)}
 
-Identifies the file as a GIF-file. This field always has the value of
-the ASCII string ``GIF''(non-NULL-terminated).
+Identifies the file as a GIF-file. The value of this field will always
+be the ASCII string ``GIF''(non-NULL-terminated).
 
 \subsubsection{Version(3 bytes)}
 
 Gives the version of the GIF file. This field can only have two
-possible values: 87a and 89a. Both these two values are stored as
+possible values: 87a and 89a. Both of these two values are stored as
 ASCII strings.
 
 \subsection{Logical Screen Descriptor(Required)}
@@ -185,7 +197,7 @@ block.
 \subsubsection{Logical Screen Width(Unsigned)}
 \subsubsection{Logical Screen Height(Unsigned)}
 
-These give the size of area on the screen where the image will be
+These give the size of the area on the screen where the image will be
 rendered. So these fields are basically the measurements of the
 image. However, do note that the GIF format allows for several images
 to be stored in a GIF file. This makes the GIF format capable of
@@ -196,7 +208,7 @@ but not greater than the logical screen measurements.
 
 This packed field contains data about the global color table of the
 file. This field will always be found here, even if there is no global
-color table in the file to be found.
+color table in the file.
 
 \paragraph{Bit 7 --  Global Color Table Flag}
 
@@ -207,14 +219,19 @@ image.
 
 This field has a very misleading name. You may think this field is
 simply used to indicate the color depth of the image, but no, this
-field indicates the number of bits in the \textit{original image} per
-color channel, minus 1.
+field indicates the number of bits in the \textit{original image}, the
+image that was converted to a GIF image, per color channel minus 1.
 
 The GIF format only supports paletted color, and doesn't offer support
 for RGB triplets stored straight in the color data. It only permits
 for a palette of maximum length $256$, where every color has color
 depth of $24$ bits. The GIF format can in other words only a represent
-a very small subset of colors.
+a very small subset of colors. If the original image used mores color
+than the resulting GIF image is capable of representing then
+information had to be thrown away in the conversion process; colors
+that looked like each other had to be considered the same to fit all
+the colors on the smaller palette. This can however result in a
+significant loss of detail in the resulting GIF.
 
 But since this field gives no rendering information about the image,
 this field is pretty much useless and you can safely ignore it.
@@ -235,7 +252,7 @@ table. To cite the GIF specification \cite{gif89a}:
 So this field may come in use when a GIF image is to rendered in an
 environment with a very limited selection of colors, like old
 monitors.  But since the monitors of today support a very large subset
-of colors, so you can for the most part safely ignore this field.
+of colors, you can for the most part safely ignore this field.
 
 \paragraph{Bits 0-2 -- Color Table Size}
 
@@ -250,11 +267,11 @@ of the global color table is given by
 
 \subsubsection{Background Color Index(Byte)}
 
-This field's value is the index of the background color of the
-image. Parts of an image that are not covered by an image at all are
-rendered in this color. This is made possible, because the GIF format
-supports arbitrary position of images in a GIF image and it also
-supports a fully transparent color.
+This field's value is the palette index of the background color of the
+image. Parts of an image that are not covered by a subimage at all are
+rendered in this color. This is made possible because the GIF format
+supports arbitrarily positioning of subimages in a GIF image(remember,
+the GIF format can store several images in a single file.).
 
 \subsubsection{Pixel Aspect Ratio(Byte)}
 
@@ -277,17 +294,24 @@ in the color table is calculated according to equation \ref{eq:calc-global-color
 
 \subsection{Local Color Table(Optional)}
 
-If there is a not a global color table in the GIF image, a local color
-table is instead used. The local color table can be found right before
-the image data. This block is laid out and structured just like the
-global color table block. Its size is however given by a field in a
-block we will discus soon.
+A separate image in a GIF file can have a local color table, specific
+only to itself. If no global table can be found in the file, every
+image in the GIF file must have a local color table.
+
+However, if there exists a global color table, but there also exists a
+local color table before a subimage, that means that the local color
+table will be used instead of the global color table for that specific
+image.
+
+This block is laid out and structured just like the global color table
+block. Its size is however given by a field in a block we will discus
+soon.
 
 \section{Preimage Data Blocks}
 
-The preimage data blocks always occur before the color data and help
-the decoder in loading the color data. They also describe how the
-color data should be rendered.
+The preimage data blocks always occur before the color data of a
+subimage and they help the decoder in properly loading the color
+data. They also describe how the color data should be rendered.
 
 \subsection{Image Descriptor(Required)}
 
@@ -321,14 +345,6 @@ Specifies the size of the image.
 This flag indicates whether a local color table is found after this
 block.
 
-A separate image in a GIF file can have a local color table, specific
-to only itself. If no global table can be found in the file, every
-image in the GIF file must have a local color table.
-
-However, if an image do have a global color table, but the existence
-of a local color table is indicated by this field, that means that the
-local color table will be used instead of the global color table for
-this specific image.
 
 \paragraph{Bit 6 -- Interlace Flag}
 
@@ -338,12 +354,12 @@ based. So row number $1$ is written as row number $0$ instead.
 This flag indicates whether the image is interlaced. If an image is
 interlaced, that means the order of the image data is not from the top
 left corner to the bottom right corner. Rather, the rows of the image
-data is rearranged into four different passes. The first $n_1$ row
+data is rearranged into four different passes. The first $n_1$ rows
 constitutes of pass $1$. These rows are not the rows
 $0,1,\dots,n_1-1$, but instead are the rows $8 \cdot 0, 8 \cdot 1,
-\dots, 8(n_1-1)$. So pass 1 is every 8:th, starting from row $0$. The
-rest of the passes are, if we let $n_x$ represent the number is rows
-in pass $x$:
+\dots, 8(n_1-1)$. So pass 1 is every 8:th row starting from row
+$0$. The rest of the passes are, if we let $n_x$ represent the number
+of rows in pass $x$:
 
 \newcommand{\passrows}[3]{$#1 \cdot 0 + #2, #1 \cdot 1 + #2, \dots,
   #1(n_{#3}-1) + #2$}
@@ -354,10 +370,6 @@ in pass $x$:
 \item[Pass 3] Every 4:th row, starting with row 2: \passrows{4}{2}{3}
 \item[Pass 4] Every 2:th row, starting with row 1: \passrows{2}{1}{4}
 \end{description}
-
-The rows of pass $1$ will come first in the image data, then the rows
-of pass $2$, then pass $3$, and finally the rows of pass $4$ always
-comes last.
 
 For an image of height $20$ rows, the rows would assigned to the
 passes shown in table \ref{tab:gif-interlacing}. Here $n_1 =
@@ -376,15 +388,16 @@ row? Yes it is; this follows from the fact that
 \end{equation*}
 
 In algorithm \ref{alg:gif-decompression} it is shown how to
-uninterlace the interlaced decompressed image data. Since this
+uninterlace the interlaced decompressed image data.  Since this
 algorithm is pretty much self-explanatory, I will not include an in
-depth discussion of it.
+depth discussion of it. If you don't yet understand the linear storage
+of color data, we reccomend you to reread section ?.
 
 \begin{algorithm}[H]
   \caption{Undoing the interlacing of the uncompressed GIF color data.}
   \label{alg:gif-interlace}
   \begin{algorithmic}[1]
-    \linecomment{Set the array to the sequence of number $0,4,2,1$}
+    \linecomment{Set the array to the numbers $0,4,2,1$}
     \Let{$startingRow$}{$\{0,4,2,1\}$}
     \Let{$rowIncrement$}{$\{8,8,4,2\}$}
 
@@ -393,32 +406,36 @@ depth discussion of it.
 
     \linecomment{In this algorithm, the pass numbers are zero based}
     \ForTo{$pass$}{$0$}{$4$}
-      \Let{$row$}{$startingRow[pass]$}
+    \Let{$row$}{$startingRow[pass]$}
 
-      \While{$row < imageHeight$}
+    \While{$row < imageHeight$}
 
-        \ForTo{$column$}{$0$}{$imageWidth$}
+    \ForTo{$column$}{$0$}{$imageWidth$}
 
-          \Let{$j$}{$row * width + column$}
-          \Let{$uninterlacedColorData[j]$}{$uncompressedColorData[i]$}
-          \Let{$i$}{$i + 1$}
+    \Let{$j$}{$row \cdot width + column$}
+    \Let{$uninterlacedColorData[j]$}{$uncompressedColorData[i]$}
+    \Let{$i$}{$i + 1$}
 
-        \EndForTo
+    \EndForTo
 
-        \Let{$row$}{$row + rowIncrement[pass]$}
+    \Let{$row$}{$row + rowIncrement[pass]$}
 
-      \EndWhile
+    \EndWhile
 
     \EndForTo
 
   \end{algorithmic}
 \end{algorithm}
 
-% But why is interlacing even necessary? Why can't you just store the
-% pixels in order, from the bottom left corner of the image to the
-% bottom right corner?
-
-\todo{explain why interlacing is necessary.}
+But why is interlacing even necessary? Why can't you just store the
+pixels in the proper order? Interlacing allows you to get a much
+better general view of a GIF image while downloading it because the
+interlaced rows are more spread out from each than they are in
+noninterlaced image. You can then quickly check if you are downloading
+the right image to begin with, rather than having to wait until the
+entire image has been downloaded. And that is the only real advantage
+of interlacing. But with the fast Internet connections of today
+interlacing is rarely even necessary.
 
 \begin{table}
   \centering
@@ -455,18 +472,18 @@ depth discussion of it.
 \paragraph{Bit 5 -- Sort Flag}
 
 This indicates whether the color data in the local color table is
-sorted. This works in the exact same as it does in global color
+sorted. This works in the exact same way as it does in global color
 table.
 
 \paragraph{Bit 3-4 -- Reserved}
 
-These bits are reserved, meaning that their both values are always set
-to $0$. You should simply ignore these bits.
+These bits are reserved, meaning that their values are always set to
+$0$. You can simply ignore these bits.
 
 \paragraph{Bit 0-2 -- Size of Local Color Table}
 
-Helps calculate the size of the local color table. If this value is
-$n$, then the actual size is $2^{n + 1}$.
+If this value is $n$, then the actual size of the local color table is
+$2^{n + 1}$.
 
 \subsection{Graphic Control Extension(Optional)}
 
@@ -489,15 +506,17 @@ The data in the graphic control extension block is contained in one
 single sub-block. This is the size of that single sub-block, which is
 always $4$.
 
-\subsubsection{Bits 5-7 -- Reserved}
+\subsubsection{Packed Fields(Byte)}
+
+\paragraph{Bits 5-7 -- Reserved}
 
 Unused.
 
-\subsubsection{Bits 2-4 -- Disposal Method}
+\paragraph{Bits 2-4 -- Disposal Method}
 
 When a GIF image is animated, the file essentially contains a sequence
 of images. When viewing the GIF file, these images are displayed one
-after one to form an animation. After each image has been displayed,
+after one to form an animation. After each image has been displayed
 you can do different things to dispose of the previous image when
 current image is to be displayed. The action that will be performed in
 order to dispose of the former image is specified by this field. The
@@ -513,10 +532,9 @@ different possible actions are:
   will then cover parts of the previous image. The parts of the
   previous image that are not covered will still be visible. Remember
   that the GIF format allows for positioning of images. This is done
-  by the Image Position values in the Image Descriptor block.
-
-  This is very useful for when you in an animation only want change
-  small parts of an image.
+  by the Image Position values in the Image Descriptor block. This is
+  very useful for when you in an animation only want change small
+  parts of an image.
 
 \item[2] After the former image has been displayed, the area used by
   it must be restored to the background color before the next image is
@@ -532,17 +550,17 @@ different possible actions are:
 
 \end{description}
 
-\subsubsection{Bit 1  -- User Input Flag}
+\paragraph{Bit 1  -- User Input Flag}
 
 If this flag is true, the loading of the next block will continue only
-after user has entered some input determined by the application
+after the user has entered some input determined by the application
 loading the image. One example of such an input is simply the user
 pressing the Enter key.
 
 But in practice, this field is never used and practically no modern
 applications in existence support it.
 
-\subsubsection{Bit 0 -- Transparency Flag }
+\paragraph{Bit 0 -- Transparency Flag }
 
 This flag indicates whether the Transparency Index field should be
 used.
@@ -562,7 +580,7 @@ delay between the frames. A centisecond is a hundredth of a second:
 
 If this field is to be used(as is specified by the Transparency
 Flag.), it contains the color index that should not be rendered at all
-when encountered. This color can be seen as the transparent color in
+when encountered. This color can be seen as the transparent color of
 the color palette
 
 So as you can see from this field, the GIF format supports a very
@@ -577,8 +595,8 @@ consists of and always has the value $0$.
 
 \section{Graphic-Rendering blocks}
 
-For storing the data to be rendered from a GIF image these blocks
-are used.
+These blocks contains the data that will actually be visible to the
+user. One of the blocks contains the color data of the image.
 
 \subsection{Table Based Image Data}
 
@@ -596,11 +614,17 @@ for storing it's color data. The huge difference between the
 original LZW algorithm and the version used in GIF is that the
 code sizes of the individual codes increase as bigger codes are
 needed in the image data.  Let the value of this field be $n$, then
-the starting code size is $n + 1$.
+the starting LZW code size is $n + 1$.
+
+The variable code sizes fixes the code size problem that the original
+LZW algorithm had. Since codes of increasing size are used, larger
+files will compress just as well as smaller files, and no bits will be
+wasted as they were in plain LZW.
 
 \subsubsection{Compressed Image Data(Sub-blocks)}
 
-The compressed image data is stored in this sequence of sub-blocks.
+The compressed image data is stored in this sequence of sub-blocks. It
+is as usual terminated by the empty block.
 
 \subsubsection{The Compression Algorithm}
 
@@ -617,16 +641,25 @@ color table: the clear and the end codes. Let the size of the color
 palette be $n$, then the clear code has the code value $n$(the highest
 index in the palette has the code value $n-1$), and the end code has
 the value $n+1$. If the Clear Code is found, the compression table is
-reset and restored to it's initial state. This means that the codes
-added to the table during the compression are thrown away and that the
-code size is reset. If the End Code is found, that means that the end
-of the compressed data has been reached, and that the decompression is
-done.
+reset and restored to it's initial state and the codes added to the
+table during the compression are thrown away and the code size is
+reset. The clear code can improve compression, because it is not
+necessary that all parts of a image file looks the same. The codes and
+string that were added to the table during the early steps of the
+compression may prove useless in the later parts of the
+compression. And if furthermore the table is already filled at these
+later parts, then the compression will be absolutely horrible. Smart
+GIF compressor will detect when the compression rate starts falling
+and spit out clear codes in an attempt to improve the compression
+ratio.
+
+If the End Code is found, that means that the end of the compressed
+data has been reached, and that the decompression is done.
 
 If, for example, of our color table simply consisted of the colors
-black and white, the initial table that would be used in the beginning
-of then decompression algorithm is then given in table
-\ref{tab:example-gif-color-table}.
+black and white(in that order), the initial table that would be used
+in the beginning of then decompression algorithm would have been the
+table given in table \ref{tab:example-gif-color-table}.
 
 \begin{table}
   \centering
@@ -715,6 +748,7 @@ format, $12$, then the value of the code size is increased by one.
 
     \State \Call{$AddToStringTable$}{$nextCode, oldCode, character$}
 
+    \linecomment{The maximum code size in GIF LZW is $12$}
     \If{$nextCode == 2^{codeSize} - 1 \AND codeSize \neq 12$}
     \Inc{codeSize}{1}
     \EndIf
@@ -744,8 +778,8 @@ block at all.
 \subsection{Trailer(Required)}
 
 Once we have reached the trailer we have also reached to the end of
-the GIF file. Once the trailer block has been reached, the decoder's
-job is done. It is a single field block containing only one value:
+the GIF file meaning that the decoder's job is done. It is a single
+field block containing only one value:
 
 \subsubsection{GIF trailer(Byte)}
 
@@ -793,7 +827,7 @@ Identifies the block as an extension block. Always has the value
 
 \subsubsection{Extension Label(Byte)}
 
-Identifier the extension block as an application extension
+Identifies the extension block as an application extension
 block. Always has the value \hex{FF}.
 
 \subsubsection{Block Size}
@@ -808,9 +842,8 @@ affect.
 
 \subsubsection{Application Authentication Code(3 Bytes)}
 
-These values are used to show the that Application Identifier is
-authenticated to the application given in the application
-identifier.
+These values are used to authenticate the application given in the
+application identifier.
 
 \subsubsection{Application Data(Sub-blocks)}
 

@@ -50,64 +50,52 @@ ASCII encoding throughout this example, so the codes $0-255$ are
 assigned their respective ASCII characters, as is shown in table
 \ref{tab:str-tab-ascii}.
 
-\newcommand{\dotsrow}{\dots & \dots \\}
-\newcommand{\strrow}[2]{$#1$ & $#2$ \\}
-
 \begin{table}
   \centering
   \begin{tabular}{ll}
     \toprule
     Code & String\\
     \midrule
-
-    \dotsrow
-    \strrow{33}{!}
-    \strrow{34}{"}
-    \strrow{35}{\#}
-    \dotsrow
-    \strrow{97}{a}
-    \strrow{98}{b}
-    \strrow{99}{c}
-    \strrow{100}{d}
-    \strrow{101}{e}
-    \dotsrow
-    \strrow{255}{(\text{unassigned to in the ASCII set})}
-
+    \dots & \dots \\
+    $33$ & $!$ \\
+    $34$ & $"$ \\
+    $35$ & $\#$ \\
+    \dots & \dots \\
+    $97$ & $a$ \\
+    $98$ & $b$ \\
+    $99$ & $c$ \\
+    $100$ & $d$ \\
+    $101$ & $e$ \\
+    \dots & \dots \\
+    $255$ & unassigned to in the ASCII set \\
     \bottomrule
   \end{tabular}
   \caption{The initial LZW string table, assuming that we are ASCII encoding.}
   \label{tab:str-tab-ascii}
 \end{table}
 
-\newcommand{\acode}{$a$\xspace}
-\newcommand{\bcode}{$b$\xspace}
-\newcommand{\ccode}{$c$\xspace}
-\newcommand{\abcode}{$ab$\xspace}
-\newcommand{\bacode}{$ba$\xspace}
-\newcommand{\abccode}{$abc$\xspace}
-
 Now the actual compression of the string starts. First it reads in the
-character \acode. In the string table that letter has the code $97$,
-so the code $97$ is outputted. Next, the character \bcode is read,
+character $a$. In the string table that letter has the code $97$,
+so the code $97$ is outputted. Next, the character $b$ is read,
 which has the code $98$. So $98$ is outputted and then the two strings
-read so far are appended together to form the string \abcode. The
-string table is searched for the string \abcode, but it cannot be
+read so far are appended together to form the string $ab$. The
+string table is searched for the string $ab$, but it cannot be
 found in the string table, so it is added to the string table and is
 assigned the next available code, $256$.
 
-\acode is discarded, \bcode is kept and another \acode is
-read. First \bcode is outputted, and the appended string
-\bacode is formed. This string doesn't either exist in the table,
+$a$ is discarded, $b$ is kept and another $a$ is
+read. First $b$ is outputted, and the appended string
+$ba$ is formed. This string doesn't either exist in the table,
  so it is added to table and is given the code $257$.
 
- Discard \bcode, output \acode and read in another \bcode. The
- resulting appended string is this time \abcode. But wait a minute,
+ Discard $b$, output $a$ and read in another $b$. The
+ resulting appended string is this time $ab$. But wait a minute,
  isn't already that string in the string table? Yes it is, so instead
  of re-adding that string to table, it is kept for the next step in
  the algorithm.
 
-The code for \abcode is outputted, which is $256$, and the character \ccode is
-read. The string \abccode doesn't exist in the table, so it is
+The code for $ab$ is outputted, which is $256$, and the character $c$ is
+read. The string $abc$ doesn't exist in the table, so it is
 added to the string table and given the code $258$.
 
 And the algorithm just keeps going on like this. Table
@@ -140,19 +128,19 @@ outputted, and the appended string $Sc$ is added to the dictionary.
     \toprule
     String & Code \\
     \midrule
-    \strrow{97}{a}
-    \strrow{98}{b}
-    \strrow{99}{c}
-    \dotsrow
-    \strrow{256}{ab}
-    \strrow{257}{ba}
-    \strrow{258}{abc}
-    \strrow{259}{cb}
-    \strrow{260}{bab}
-    \strrow{261}{baba}
-    \strrow{262}{aa}
-    \strrow{263}{aaa}
-    \strrow{264}{aaaa}
+    $97$ & $a$ \\
+    $98$ & $b$ \\
+    $99$ & $c$ \\
+    \dots & \dots \\
+    $256$ & $ab$ \\
+    $257$ & $ba$ \\
+    $258$ & $abc$ \\
+    $259$ & $cb$ \\
+    $260$ & $bab$ \\
+    $261$ & $baba$ \\
+    $262$ & $aa$ \\
+    $263$ & $aaa$ \\
+    $264$ & $aaaa$ \\
     \bottomrule
   \end{tabular}
   \caption{The resulting string table after the LZW algorithm has been run on
