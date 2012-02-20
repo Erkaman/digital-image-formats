@@ -254,7 +254,7 @@ are shown in table \ref{tab:png-color-type}.
     \hline
 
   \end{tabular}
-  \caption{The allowed color depths for the PNG format.}
+  \caption{The allowed color depths of the PNG format.}
   \label{tab:png-color-depths}
 \end{table}
 
@@ -550,7 +550,7 @@ lower bits.
     \end{tikzpicture}
     \label{fig:gradient-blue-red}}
 
-  \caption{Different examples of gradients}
+  \caption{Examples of gradients}
 \end{figure}
 
 \begin{Exercise}[label={filter-1}]
@@ -646,12 +646,12 @@ filter computed as follows:
 
 Where \textsc{Paeth} is the so-called Paeth-predictor function, named
 after Alan W.~Paeth because it was first described by him in
-\cite{arvo1994graphics_gems} . It is defined as is shown in algorithm,
+\cite{arvo1994graphics_gems}. It is defined as is shown in algorithm,
 where $a=B_{i,j-t}$, $b=B_{i-1,j}$ and $c=B_{i-1,j-t}$.
 
 
 \begin{algorithm}[H]
-  \caption{.}
+  \caption{The Paeth filter.}
   \label{alg:paeth}
   \begin{algorithmic}[1]
     \Procedure{Paeth}{$a,b,c$}

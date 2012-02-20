@@ -741,8 +741,7 @@ common divisor of the two given numbers.
 \cite{cormen2009introduction_to_algo,weisstein:_euclid_algor}.
 
 \begin{algorithm}
-  \caption{Euclid's algorithm for computing the greatest common
-    divisor of two numbers.}
+  \caption{Euclid's algorithm.}
   \label{alg:euclid}
   \begin{algorithmic}[1]
     \Procedure{Euclid}{$a,b$}
@@ -1039,7 +1038,7 @@ to introduce several functions for handling file operations.
   with bytes, gets you the pattern $1111\ 1111$. Then, by shifting
   this pattern $len$ steps to the left, $3 \ShiftLeft 1111\ 1111$ we
   end up with the value $1111\ 1000$. Now, by simply using the bitwise
-  not operation again, $\BitNeg (1111\ 1000)$ ,we end up with the
+  not operation again, $\BitNeg (1111\ 1000)$, we end up with the
   desired pattern $0000\ 0111$. And now we can simply extract the bit
   pattern like this: $0000\ 0101 \BitAnd 0000\ 0111 = 101 = 5$.
 

@@ -41,14 +41,14 @@ compressing some example string, so we will in this example
 demonstrate how the compression of the string
 $ababcbababaaaaaaa$ is done in LZW.
 
-Central to the entire algorithm's process is a string table. In this
-table, numbers called \textit{codes} are assigned to strings. The
-algorithm starts by filling this string table with all the strings
-that are possible to fit in a byte. So all the codes $0-255$ are
-assigned their respective strings. We will for sake of simplicity use
-ASCII encoding throughout this example, so the codes $0-255$ are
-assigned their respective ASCII characters, as is shown in table
-\ref{tab:str-tab-ascii}.
+Central to the entire algorithm's process is a string table(also
+sometimes referred to as a dictionary). In this table, numbers called
+\textit{codes} are assigned to strings. The algorithm starts by
+filling this string table with all the strings that are possible to
+fit in a byte. So all the codes $0-255$ are assigned their respective
+strings. We will for sake of simplicity use ASCII encoding throughout
+this example, so the codes $0-255$ are assigned their respective ASCII
+characters, as is shown in table \ref{tab:str-tab-ascii}.
 
 \begin{table}
   \centering
@@ -67,10 +67,10 @@ assigned their respective ASCII characters, as is shown in table
     $100$ & $d$ \\
     $101$ & $e$ \\
     \dots & \dots \\
-    $255$ & unassigned to in the ASCII set \\
+    $255$ & unassigned to in ASCII \\
     \bottomrule
   \end{tabular}
-  \caption{The initial LZW string table, assuming that we are ASCII encoding.}
+  \caption{The initial LZW string table.}
   \label{tab:str-tab-ascii}
 \end{table}
 
@@ -143,8 +143,7 @@ outputted, and the appended string $Sc$ is added to the dictionary.
     $264$ & $aaaa$ \\
     \bottomrule
   \end{tabular}
-  \caption{The resulting string table after the LZW algorithm has been run on
-    the string $ababcbababaaaaaaa$.}
+  \caption{The string table after compression.}
   \label{tab:str-tab-str}
 \end{table}
 
@@ -172,7 +171,7 @@ outputted, and the appended string $Sc$ is added to the dictionary.
     \stoplzwrow{a}{97}
     \bottomrule
   \end{tabular}
-  \caption{The LZW compression process on the string $ababcbababaaaaaaa$.}
+  \caption{Detailed LZW compression process.}
   \label{tab:lzw-walkthru}
 \end{table}
 
@@ -180,13 +179,10 @@ outputted, and the appended string $Sc$ is added to the dictionary.
 \label{sec:lzw-enc-algorithm}
 
 In algorithm \ref{alg:lzw-compression} the complete LZW compression
-algorithm is presented. Try reading through it at least once, but I
-doubt you'd be able to understand much of it at this point. The
-implementation of the algorithm turns out not to be as easy as it may
-seem
+algorithm is presented. Let us now discuss the details of it.
 
 \begin{algorithm}[H]
-  \caption{The LZW compression algorithm.}
+  \caption{LZW compression algorithm.}
   \label{alg:lzw-compression}
   \begin{algorithmic}[1]
 
@@ -232,16 +228,13 @@ seem
 
 \subsection{Codes sizes}
 
-All a LZW compressed file will consist of after this algorithm has
-been run on it, is just a long sequence of outputted codes.  Since all
-the of the string codes added during the compression step will have
-code values over $255$, bytes will obviously not be sufficient to
-store these codes. In our version of the LZW algorithm, fixed code
-sizes are assigned to every code. So this means that the codes are
-stored in fixed $n$-bit numbers for some value $n$. The most typically
-used code sizes are in the range $9 \leq n \leq 15$, and this is the
-also the range of code sizes that that the sample compressor for this
-chapter supports.
+A LZW compressed file is just a long sequence of outputted codes.
+Since all the of the string codes added during the compression step
+will have code values over $255$, bytes will obviously not be
+sufficient to store these codes. In our version of the LZW algorithm,
+fixed code sizes are assigned to every code. This means that the codes
+are stored in fixed $n$-bit numbers for some value $n$. The most
+typically used code sizes are in the range $9 \leq n \leq 15$.
 
 This is of course not the only possible storage model for the
 codes. In the GIF format's variation of the LZW algorithm, increasing
@@ -251,66 +244,18 @@ efficiency of this algorithm. We'll discuss this variation in chapter
 
 \subsection{Knowing when to stop}
 
-The compressor has to be notified of when it is done compressing the
-data. The largest possible value of a valid code size is therefore
-outputted in the end of the algorithm.
+The decompressor has to be notified of when it is done decompressing
+the data. The largest possible value of a valid code size is therefore
+outputted in the end of the algorithm. Once the decompressor finds
+this value, it will know that it is done in decompressing the data.
 
 \subsection{Table size}
 
 Since we are using fixed code sizes there must be a limit on how large
 the string table can grow. For any fixed code size $n$, this code size
-can represent $2^n$ codes, and therefore the maximum length for the
-string table will also be $2^n$. For 12-bit codes the maximum length
-of the string table is $2^{12}=4096$.
-
-There is also another issue that we will need to discuss; how will the
-decompressor know when the end of the compressed data has been
-reached? Well, wouldn't it obviously know that when it has reached to
-the end of the file? That is one way of doing it, but many LZW
-compressors use another method: in these compressors, at the end the
-compressed data the maximum possible code value is outputted. For the
-code-size $n$ bits this is the value $2^n - 1$.
-
-But this has another important implication; since one code is
-reserved, the actual number of strings that the string table can store
-will be $2^n - 1$. And furthermore, the maximum code that can be
-assigned to a string will be $2^n - 2$, and not $2^n - 1$.
-
-\subsubsection{Packing order}
-
-When, for example, the codes $1011$ and $1100$ are to be packed, there
-can actually be two different resulting byte packets: $1011\ 1100$ or
-$1100\ 1011$. In the first case, the bits of the codes start to get
-packed from the \textit{most significant bits} to the \textit{least
-  significant bits} of the resulting packet. In the second case, the
-bits from the codes get packed from the \textit{least significant
-  bits} to the \textit{most significant bits} of the packet.
-
-The first of these two packing orders we'll from now on call
-MSBF, which stands for \textbf{M}ost \textbf{S}ignificant
-\textbf{B}its \textbf{F}irst and the second order we'll refer to as
-LSBF, which stands for \textbf{L}east \textbf{S}ignificant
-\textbf{B}its \textbf{F}irst.
-
-It is important that differ between these two orders, \textit{because
-  different packing orders are used in different formats}. In the GIF
-format the LSBF order is used, while in other implementation MSBF is
-instead used. The GIF format wile be the main
-subject of chapter
-\ref{cha:gif}.
-
-\begin{Exercise}[label={bit-packing-order}]
-
-  What packets would get outputted if the codes that we wanted to
-  output were $0110$, $1100$, $0001$ and $1111$, if the packing order
-  was
-
-  \begin{enumerate}[(a)]
-  \item MSBF
-  \item LSBF
-  \end{enumerate}
-
-\end{Exercise}
+can represent $2^n$ different codes. However, since the largest
+possible code is used to signify the end of the compressed data, the
+maximum length of the string table will be $2^n - 1$ rather than $2^n$
 
 \section{Description of the Decompression algorithm}
 
@@ -411,7 +356,7 @@ In \ref{alg:lzw-working-decompression} pseudocode of the algorithm we
 just described is given.
 
 \begin{algorithm}[H]
-  \caption{LZW working decompression algorithm.}
+  \caption{LZW decompression algorithm.}
   \label{alg:lzw-working-decompression}
   \begin{algorithmic}[1]
 
@@ -526,7 +471,7 @@ In table \ref{tab:lzw-test-results} we show the results of the test.
   \scriptsize
   \centering
   \input{../code/lzw/table.tex}
-  \caption{LZW compression test results. The percentages are compression ratios.}
+  \caption{LZW compression test results.}
   \label{tab:lzw-test-results}
 \end{table}
 
@@ -638,15 +583,6 @@ the compression ratio.
   \end{center}
 
   So the string is compressed down to $97,98,256,258,98$.
-\end{Answer}
-
-\begin{Answer}[ref={bit-packing-order}]
-
-  \begin{enumerate}[a]
-  \item $0110\ 1100$ and $0001\ 1111$.
-  \item $1100 \ 0110$ and $1111 \ 0001$
-  \end{enumerate}
-
 \end{Answer}
 
 \begin{Answer}[ref={lzw-decompress}]

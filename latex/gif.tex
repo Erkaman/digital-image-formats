@@ -391,8 +391,8 @@ row? Yes it is; this follows from the fact that
 In algorithm \ref{alg:gif-decompression} it is shown how to
 uninterlace the interlaced decompressed image data.  Since this
 algorithm is pretty much self-explanatory, I will not include an in
-depth discussion of it. If you don't yet understand the linear storage
-of color data, we reccomend you to reread section ?.
+depth discussion of it. Reread section \ref{sec:color-layout} if you
+don't fully understand this algorithm.
 
 \begin{algorithm}[H]
   \caption{Undoing the interlacing of the uncompressed GIF color data.}
@@ -430,13 +430,14 @@ of color data, we reccomend you to reread section ?.
 
 But why is interlacing even necessary? Why can't you just store the
 pixels in the proper order? Interlacing allows you to get a much
-better general view of a GIF image while downloading it because the
-interlaced rows are more spread out from each than they are in
+better general view of a GIF image while downloading it, because the
+interlaced rows are more spread out from each than they are in a
 noninterlaced image. You can then quickly check if you are downloading
 the right image to begin with, rather than having to wait until the
 entire image has been downloaded. And that is the only real advantage
 of interlacing. But with the fast Internet connections of today
 interlacing is rarely even necessary.
+
 
 \begin{table}
   \centering
@@ -466,7 +467,7 @@ interlacing is rarely even necessary.
     19 & 4 \\
     \bottomrule
   \end{tabular}
-  \caption{}
+  \caption{GIF interlacing table rows.}
   \label{tab:gif-interlacing}
 \end{table}
 
@@ -627,7 +628,7 @@ wasted as they were in plain LZW.
 The compressed image data is stored in this sequence of sub-blocks. It
 is as usual terminated by the empty block.
 
-\subsubsection{The Compression Algorithm}
+\subsubsection{The Decompression Algorithm}
 
 Now we are to discuss how to decompress the color data using the
 information given in the two previous fields. The full decompression
@@ -635,32 +636,35 @@ algorithm is given in algorithm \ref{alg:gif-decompression}. As you
 can see, it is very similar to the original LZW algorithm. Let us
 now go through the most important differences.
 
-At the beginning the algorithm all the indexes of the palette are
+At the beginning the algorithm, all the indexes of the palette are
 assigned codes in a compression table. The values of these codes are
 the values of the indexes. Two additional codes are also added to the
 color table: the clear and the end codes. Let the size of the color
 palette be $n$, then the clear code has the code value $n$(the highest
 index in the palette has the code value $n-1$), and the end code has
-the value $n+1$. If the Clear Code is found, the compression table is
-reset and restored to it's initial state and the codes added to the
-table during the compression are thrown away and the code size is
-reset. The clear code can improve compression, because it is not
-necessary that all parts of a image file looks the same. The codes and
-string that were added to the table during the early steps of the
-compression may prove useless in the later parts of the
-compression. And if furthermore the table is already filled at these
-later parts, then the compression will be absolutely horrible. Smart
-GIF compressor will detect when the compression rate starts falling
-and spit out clear codes in an attempt to improve the compression
-ratio.
+the value $n+1$.
+
+If the Clear Code is found, the compression table is reset and
+restored to it's initial state and the codes added to the table during
+the compression are thrown away and the code size is reset. The clear
+code can improve compression, because it is not necessary that all
+parts of a image file looks the same. The codes and strings that were
+added to the table during the early steps of the compression may prove
+useless in the later parts of the compression. And if furthermore the
+table is already filled at these later parts, then the compression
+will be absolutely horrible, because the compressor will be unable to
+add strings that improves the compression of the color data in these
+later sections. Clever GIF compressors will detect when the
+compression ratio starts falling and spit out clear codes in an
+attempt to improve the compression ratio.
 
 If the End Code is found, that means that the end of the compressed
 data has been reached, and that the decompression is done.
 
-If, for example, of our color table simply consisted of the colors
-black and white(in that order), the initial table that would be used
-in the beginning of then decompression algorithm would have been the
-table given in table \ref{tab:example-gif-color-table}.
+If, for example, our color table simply consisted of the colors black
+and white(in that order), the initial table that would be used in the
+beginning of then decompression algorithm would have been the table
+given in table \ref{tab:example-gif-color-table}.
 
 \begin{table}
   \centering
@@ -687,7 +691,7 @@ the code size is not equal to it's maximum allowable value in the GIF
 format, $12$, then the value of the code size is increased by one.
 
 \begin{algorithm}[H]
-  \caption{GIF Decompression algorithm}
+  \caption{GIF LZW Decompression algorithm}
   \label{alg:gif-decompression}
 
   \newcommand{\InputCodeSize}{\Call{inputCode}{$codeSize$}}
