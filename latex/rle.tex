@@ -309,7 +309,6 @@ specify the actual length of the packet.
 Because only 7 bits are used to specify the length of a run-length
 packet, the maximum length of a run-length packet in PackBits RLE is
 $2^7 = 128$.
-% mention maximum compression potential of a package here?
 
 But in exchange for a potentially lowered compression ratio, we did
 get something in return: raw packets. Raw packets essentially is the
@@ -386,60 +385,48 @@ length bit is assigned to an initial value of $1 \ShiftLeft 7 =
 \subsubsection{Compression And Decompression}
 \label{sec:compr-decompr}
 
-\todo{fix section(and algorithm?)}
-
 Now that we know how to write the packets, let us consider how to
-implement the actual PackBits RLE algorithm. This algorithm is
-significantly more complex than any other algorithm so far covered in
-this text, and I recommend the reader to read the following
-explanatory paragraphs carefully.
+implement the actual PackBits RLE algorithm. It is shown in algorithm
+\ref{alg:packbits-enc}.
 
 Since there are two kinds of packets allowed in the PackBits RLE
-method, we will need a away of telling which kind of packet we are
-creating at the moment. The two constant $RawPacket$ and
+method, we will need a way of telling which kind of packet we are
+creating at the time. The two constants $RawPacket$ and
 $RunLengthPacket$ are created for this purpose. The values of these
 two constants are then assigned to the variable $packetType$ for
 keeping track of the current packet type.
 
-We start the algorithm by setting up a starting package of length 1
-and of type raw packet. The first character of the file is then read
-to $c_1$ and following this the second character in the file is read
-to $c_2$. However, if there's only one character in the file, then the
+We start the algorithm by setting up a starting packet of length 1 of
+type raw packet. The first character of the file is then read to $c_1$
+and following this the second character in the file is read to
+$c_2$. However, if there's only one character in the file, then the
 main loop is stopped and the last packet is written. Since we were
 dealing with a raw packet the only character $c_1$ is put in the array
 $data$. The array $data$ stores the data of the current raw packet.
 
 If there however was more than one character, then it is first checked
-if the current packet is not at its maximum capacity. If so, then the
+if the current packet is at its maximum capacity. If so, then the
 current packet is written out. If the current packet is a run-length
 packet then the run-length packet is simply written out and
 preparations are made for writing a new raw packet. If the packet is a
 raw packet then the character $c_1$ is put at the end of the $data$
-array, and then the raw packet is written out.
+array, and then the raw packet is written out. The next character is
+read to $c_2$, which is why we beforehand assigns $c_1$ to $c_2$ after
+we have written the raw packet, to ensure that the value of $c_2$ is
+not destroyed.
 
 If on the other hand the current packet is not full then we are going
 to write a run-length packet. First however, we need to check if we
 are not already writing a raw packet. If so, then we finish the raw
-packet by outputting it setting resetting the $length$. The length of
-such a raw packet is $length - 1$, because in this length the
-first character that is to be packed into the run-length packet that is to
-be made is included.  Then the constructing of the run-length packet
-continues by incrementing the $length$ variable. It may also be that
-this is at the beginning of the construction of the run-packet, and it
-is therefore necessary that we set  $packetType$ to $RunLengthPacket$,
-to make sure that it doesn't try to write the raw packet again the
-time it reaches this branch.
+packet by outputting it. Then the construction of the run-length
+packet continues by incrementing the $length$ variable and setting the
+current packet type to run length packet.
 
-If the current packet isn't fill and $c_1 \neq c_2$,  then we are
-writing are raw packet. It may however be that at the same timing we
-are just finishign a run-length packet, it is therefore necessary that
-we write out this packet then set the current packet type to raw
-packet. In the next iteration the writing of the raw packet can then
-begin. In the writing of the raw packet $c_1$ is simply added to the
-$data$ array containing all the data of the raw packet, and the length
-is then incremented.
+If the current packet is not full and $c_1 \neq c_2$, then we are
+writing are raw packet. If we were also writing a run length packet at
+this time then we finish it by outputting it.
 
-And when the loop is over, the last, remaining package is finished and
+And when the loop is over, the last, remaining packet is finished and
 outputted.
 
 \begin{algorithm}
@@ -447,6 +434,7 @@ outputted.
   \label{alg:packbits-enc}
   \begin{algorithmic}[1]
 
+    \linecomment{(The indexes of arrays are zero-based.)}
     \linecomment{Two constant for signifying the current packet type
       are set up.}
     \Let{$RawPacket$}{$0$}
@@ -525,14 +513,6 @@ outputted.
 The decoding algorithm is thankfully not as complex. It is shown in
 algorithm \ref{alg:packbits-dec}.
 
-First the first byte $n-1$ of the packet is read in. To get the length
-part of this value, it is bitwise anded with 127, which has the binary
-value $0111\ 1111$.  Then, to get the type of the packet, the highest
-bit is checked. If it is toggled, the packet is a simple run-length
-packet and it is decompressed in the same way as it was in algorithm
-\ref{alg:rle-dec}. Otherwise, it is a raw packet and in that case the
-contents of the packet is read and outputted byte by byte.
-
 \begin{algorithm}
   \caption{Decoding a RLE packbits encoded file.}
   \label{alg:packbits-dec}
@@ -544,6 +524,7 @@ contents of the packet is read and outputted byte by byte.
 
       \Let{$length$}{$packet \BitAnd 127$}
 
+      \linecomment{Check if raw packet.}
       \If{$packet \BitAnd 128$}
         \Let{$data$}{\VoidCall{ReadByte}}
 
