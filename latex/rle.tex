@@ -433,14 +433,8 @@ outputted.
   \caption{Encoding a file using PackBits RLE.}
   \label{alg:packbits-enc}
   \begin{algorithmic}[1]
-
-    \linecomment{(The indexes of arrays are zero-based.)}
-    \linecomment{Two constant for signifying the current packet type
-      are set up.}
     \Let{$RawPacket$}{$0$}
     \Let{$RunLengthPacket$}{$1$}
-
-    \linecomment{Set up the first packet as a raw packet.}
     \Let{$packetType$}{$RawPacket$}
     \Let{$length$}{$0$}
     \Let{$c_1$}{ \VoidCall{ReadByte}}

@@ -96,6 +96,8 @@
 
 \newcommand*\Let[2]{\State #1 $\gets$ #2}
 
+\newcommand*\var[1]{\mathit{#1}}
+
 \algblockdefx[REPEATN]
 {Repeatn}
 {EndRepeatn}
@@ -223,7 +225,6 @@
 
 \newcommand\lzonetoken[3]{$(#1,#2,$\,{\tt#3}$)$}
 \newcommand\lzonetokens[1]{\lzonetoken{0}{0}{#1}}
-
 
 \newcommand{\lzonestate}[5]{%
 \@lzonestate{#1}{#2}; \& \node[yshift=1mm]{$\Rightarrow$\lzonetoken{#3}{#4}{#5}}; \\}

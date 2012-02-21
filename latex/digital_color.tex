@@ -308,12 +308,17 @@ way. This means that the separate rows of an image are not at all
 indicated.
 
 Let us for example again consider the image on the front page. The
-image data(which uses a palette) of this image would be stored as the
-sequence $4,4,4,4,,0,4,4,3,4,\dots$ and so on in an entirely linear
-fashion. The program reading the image can then split it up into rows
-using the earlier given measurement values(width:$5$, height:$6$). It
-should from this be obvious that there is no real need for an image
-format to split up an image into separate rows.
+image data of this image would be stored as the sequence
+
+\begin{equation*}
+  4,4,4,4,,0,4,4,3,4,\dots
+\end{equation*}
+
+and so on in an entirely linear fashion. The program reading the image
+can then split it up into rows using the earlier given measurement
+values(width:$5$, height:$6$). It should from this be obvious that
+there is no real need for an image format to split up an image into
+separate rows.
 
 It is also easy to see how the separate colors can be accessed in this
 model. Let us say that we stored the color data of the image on the
