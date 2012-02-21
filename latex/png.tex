@@ -2,23 +2,10 @@
   \bibliography{project.bib}
 \end{comment}
 
-% also, check the data compression book the complete reference on
-% PNG.
-
-% data compression handbook
-
-% paeth graphics gems.
-% http://en.wikipedia.org/wiki/Color_gradient
-% http://en.wikipedia.org/wiki/Gradient
-
 % filters:
 % http://www.libpng.org/pub/png/spec/1.0/PNG-Filters.html#Filter-type-2-Up
 % http://www.libpng.org/pub/png/book/chapter09.html
 
-% png iso spec?
-% http://www.y-adagio.com/public/confs/itsig/rep_itsgxml4/docs/html15948/C029581e%20HTML/png-fdis-png-screen.htm
-
-% http://www.sno.phy.queensu.ca/~phil/exiftool/TagNames/PNG.html
 \chapter{Portable Network Graphics}
 \label{cha:png}
 
@@ -28,82 +15,27 @@
 
 \section{History}
 
-As explained in section \ref{sec:gif-history}, the creation of the PNG
-format was was primarily motivated by the patents encumbering the
-already popular GIF format. To solve this problem, a bunch of
-developers in the graphics developer community decided to cooperate on
-creating a new format. \dt{1}{7}{1996}, version 1.0 of the PNG
-specification was released. Then version 1.1 was released on new years
-eve of 1998. And the latest version of the PNG specification is
-version 1.2, which was released in August 1999. After this it was
-finally standardized by ISO as ISO/IEC standard 15948:2004
+As stated in section \ref{sec:gif-history}, the creation of the PNG
+format was primarily motivated by the patents encumbering the already
+popular GIF format. To solve this problem, a bunch of developers in
+the graphics developer community decided to cooperate on creating a
+new format that came to be known as PNG. July 1 1996, version 1.0 of
+the PNG specification was released. Then version 1.1 was released on
+new years eve of 1998. And the latest version of the PNG specification
+is version 1.2, which was released in August 1999.
 \cite{roelofs09:_histor_portab_networ_graph_png_format,roelofs99:_png,roelofs:_portab_networ_graph_main}.
 
 What follows is a technical description of the PNG format. It is based
 on the references
 \cite{boutel:_png_portab_networ_graph_specif_version12,roelofs99:_png,boutel:_png_portab_networ_graph_specif_version11}.
 
-\cite{sivonen:_sad_story_png_gamma_correc}
-
-\section{The Buildings Blocks of the format}
+\section{Buildings Blocks}
 
 \subsection{Chunks}
 
 PNG images are fundamentally built up of chunks. The structure of the
 chunk is shown in figure \ref{fig:png-chunk}. It consists of four so
 called fields. Let us desribe them, one after one:
-
-\subsubsection*{Length (4 Bytes)}
-
-This 32-bit number is used to store the byte length of the data
-field.
-
-\todo{mention that it's max value is $2^{31} -1$, rather than $2^{32}
-  -1$}
-
-\subsubsection*{Chunk Type (4 Bytes)}
-
-This field stores 4 bytes that are used to store the type name of the
-chunk. Only the ASCII letters in the ranges A--Z and a--z are
-acceptable values of these bytes. So \chnk{abcd} is an acceptable
-chunk type while \chnk{a:e;} is not.
-
-There is a convention used in the naming of chunks. If the first
-letters in the type name of a chunk is uppercase, it is a
-\textit{critical} chunk. If the critical chunk is found in a PNG
-image, then it \textit{must} be loaded for the image to be
-successfully displayed.  if such a chunk is not loaded, the program
-will not have enough information to render the image. Critical chunks
-and their inner workings will for this reason be the main topic of
-this chapter.
-
-If on the other hand the first letter of the chunk type name is
-lowercase, then that means that the chunk is \textit{ancillary}. These
-chunks do not need to be loaded in order to successfully render the
-image. These can contain all kinds of data, like the creation date of
-the image or a textual comment. Since much of the data stored in
-ancillary chunks are things that we discussed in chapter \ref{cha:gif}
-and \ref{cha:tga}, we will not discuss these chunks are in depth as
-the critical chunks.
-
-\todo{explain better why we will cover the ancillary chunks as in
-  depth.}
-
-\subsubsection*{Data (Variable)}
-
-In this field the actual data of the chunk is stored. The length of
-this field was specified by the earlier length field.
-
-\subsubsection*{CRC (4 Byte)}
-
-This is a CRC that is used to validate the data in the chunk
-field. The CRC algorithm used is algorithm ??, which we discussed in
-chapter ??. The CRC is calculated using the chunk type data
-\textit{and} the chunk data. If the computed CRC doesn't match the CRC
-in this field, then the data in the chunk is corrupted, and you should
-stop reading the PNG image and report an error message to the user.
-
-\todo{reference the CRC-32 algorithm properly}
 
 \begin{figure}
   \centering
@@ -112,53 +44,107 @@ stop reading the PNG image and report an error message to the user.
   \label{fig:png-chunk}
 \end{figure}
 
+\subsubsection*{Length (4 Bytes)}
+
+This 32-bit number is used to store the byte length of the data
+field.
+
+\subsubsection*{Chunk Type (4 Bytes)}
+
+This field stores 4 bytes that are used to store the type of the
+chunk. Only the ASCII letters in the ranges A--Z and a--z are
+acceptable values of these bytes. So \chnk{abcd} is an acceptable
+chunk type while \chnk{a:e;} is not.
+
+There is a convention used in the naming of chunks. If the first
+letter in the type name of a chunk is uppercase, it is a
+\textit{critical} chunk. If a critical chunk is found in a PNG image,
+then it \textit{must} be loaded for the image to be successfully
+displayed.  If such a chunk is not loaded, the program will not have
+enough information to correctly render the image. Critical chunks and
+their inner workings will for this reason be the main topic of this
+chapter.
+
+If on the other hand the first letter of the chunk type name is
+lowercase, then that means that the chunk is \textit{ancillary}. These
+chunks do not need to be loaded in order to successfully render the
+image. These can contain all kinds of data, like the creation date of
+the image or a textual comment. Since much of the kind of data stored
+in ancillary chunks are things that we discussed in chapter
+\ref{cha:gif} and \ref{cha:tga}, we will not discuss these chunks at
+all.
+
+\subsubsection*{Data (Variable)}
+
+In this field the actual data of the chunk is stored. The length of
+this field was specified by the earlier length field.
+
+\subsubsection*{CRC (4 Byte)}
+
+This is a CRC that is used to validate the correctness of the data in
+the chunk field. The CRC used in this field is the one we discussed
+back in section \ref{sec:pngcrc} on page \pageref{sec:pngcrc}
+
 \subsection{PNG Signature}
 
 Only chunks can be found in a PNG image with one exception: the PNG
-signature. The PNG signature is 8 bytes that are \textit{always} found
-in the beginning of a legit PNG image. These bytes are $137 80 78 71
-13 10 26 10$. They were all chosen to detect certain kinds of errors
-that occur when transmitting a PNG file over a network.
+signature. The PNG signature is a sequence of 8 bytes that is
+\textit{always} found in the beginning of a legit PNG image. The byte
+sequence is the numbers
+
+\begin{equation*}
+  \text{137 80 78 71 13 10 26 10}
+\end{equation*}
+
+They were all chosen to detect certain kinds of errors that can occur
+when transmitting a PNG file over a network because such errors were
+very normal back in the days when PNG was invented.
 
 The first bit is $137$. In binary this number is $1000\ 1001$. The key
 part to notice is that this is a non-ASCII character, because since
 the 7:th bit toggled it will always have a value $\ge 128$. When data
-is tranmitted as ASCII-text over a network, the 7:th bit tends to be
-thrown away, as it is for example done in STMP \cite{rfc5321}. STMP is
- the Internet protocol used to transfer emails. To transmit non-ASCII
-binary, like image data, data one should instead use the MIME
-protocol, which is an extension to the STMP protocol.
+is tranmitted as ASCII-text over a network the 7:th bit tends to be
+thrown away, as it is for example done in STMP \cite{rfc5321}, the
+Internet protocol that is used to transfer emails. To transmit
+non-ASCII binary data, like image data is, one should instead use the
+MIME protocol, which is an extension to the STMP protocol.
 
-So to summarize, the main purpose of the first bit is to detect
-whether an image has accidentally been transmitted as ASCII text. If
-this byte doesn't have its proper value, then the image has been
-corrupted. Then also the bytes whose values are $\ge 128$ in the image
-data will also be corrupted, so there's little to no point in the
-decoder trying to open the corrupted image.
+So the main purpose of the first byte is to detect whether an image
+has accidentally been transmitted as ASCII text. If this byte doesn't
+have its proper value, then the image has been corrupted. Then also
+the bytes whose values are $\ge 128$ in the image file will also be
+corrupted, so there's little to no point in the decoder trying to open
+the corrupted image.
 
-The bytes $80 78 71$ are the ASCII values for the string PNG, so they
-could simply be seen as the magic numbers for the PNG format.
+The bytes
 
-The following two bytes are $13 10$. This is a windows style newline,
-CRLF, as discussed section in \ref{cha:preliminaries}. If a PNG
-file is accidentally transferred as text, there is another thing that
-may corrupt the file: line ending conversions. When, for example, you
-are transmitting a file from a window based operating system to a
+\begin{equation*}
+  \text{80 78 71}
+\end{equation*}
+
+are the ASCII values for the string PNG, so they could simply be seen
+as the magic numbers of the PNG format.
+
+The following two bytes are
+
+\begin{equation*}
+  \text{13 10}
+\end{equation*}
+
+This is a windows style new line, CRLF, as was discussed section in
+\ref{sec:glossary} on page \pageref{sec:glossary}. If a PNG file is
+accidentally transferred as text, there is another thing that may
+corrupt the file: line ending conversions. When, for example, you are
+transmitting a file from a window based operating system to a
 UNIX-based operating system, there is a chance that the proram doing
 the transmission may convert the windows-style line-endings to their
 Unix equivalents, LF. But for a binary image file this behavior is
 clearly undesirable, and is very likely to end up corrupting the image
 data. To detect such errors, these two bytes are used.
 
-The following byte $26$ is a bit peculiar in that it doesn't even in
-verifying the correctness of the data. In the operating system DOS,
-this is known as the end-of-file character. If such a character is
-found while printing the contents of a file in DOS, then the printing
-of the file stops. So thanks to this, you could only see the first few
-bytes and verify that the file is a PNG file without seeing all the
-garbage. \todo{clarify:
-  % http://www.libpng.org/pub/png/book/chapter08.html#png.ch08.div.2
-}
+The byte $26$ is a bit obscure and it basically does nothing to verify
+the correctness of the file. We will for these reasons a omit
+description of it here.
 
 The last byte $10$ is the newline character in UNIX-based operating
 systems, LF. So this is yet another byte that is used to verify that
@@ -168,9 +154,9 @@ windows based operating system is not transferred as ASCII text.
 
 \section{Critical Chunks}
 
-Following the PNG signature a sequence of chunks. Most kinds of chunks
-can simply be ignored, but the critical ones cannot for an image to be
-properly rendered. Let us discuss the critical chunks, one after one.
+Following the PNG signature is a sequence of chunks. Most kinds of
+chunks can simply be ignored, but the critical ones can not be
+ignored. Let us discuss the critical chunks, one after one.
 
 \subsection{IHDR -- Image Header}
 
@@ -188,25 +174,11 @@ format allows for quite huge images.
 
 \subsubsection*{Bit Depth (1 Byte)}
 
-In the bit depth the size of each channel in the color storage model
-used is stored. Let $b$ be the value of this field. If grayscale color
-is used, then $b$ of the color depth(the size of each pixel). If on
-the other hand RGB color is used, then the color depth is $3 \cdot
-b$. This makes sense, because the value of $b$ is the size of each
-channel, \textit{not} the color depth itself. The PNG format also
-allows for storing grayscale color with an alpha channel. In that case
-the color depth will be $2 \cdot b$. And similarly, for RGBA the color
-depth will be $4 \cdot b$. And if a color palette is used, the color
-depth of the indexes stored in the image data will be $b$. However,
-note the only the values 1, 2, 4, 8 and 16 are allowed values for this
-field. This is mainly to simplify the job of the programmers using the
-PNG format.
-
-\subsubsection*{Color Type (1 Byte)}
-
-The PNG format allows five different color storage models. The color
-storage model used varies depending on this value, as is shown in
-table \ref{tab:png-color-type}.
+In the bit depth field the \textit{size of each color channel} is
+stored. So this value is \textit{not} the color depth of the
+image. However, note the only the values 1, 2, 4, 8 and 16 are allowed
+values for this field. This is mainly to simplify the job for
+programmers using the PNG format.
 
 \begin{table}
   \centering
@@ -225,9 +197,15 @@ table \ref{tab:png-color-type}.
   \label{tab:png-color-type}
 \end{table}
 
+\subsubsection*{Color Type (1 Byte)}
+
+The PNG format allows five different ways of storing color. The color
+type used varies depending on this value, as is shown in table
+\ref{tab:png-color-type}.
+
 As you can from this field and the former, the PNG is very flexible
 and allows for a multitude of different ways of storing
-color. However, the simplify things for programmers, not all possible
+color. However, to simplify things for programmers, not all possible
 bit depths can be used with all color types. The allowed color depths
 are shown in table \ref{tab:png-color-type}.
 
@@ -238,7 +216,10 @@ are shown in table \ref{tab:png-color-type}.
 
   \begin{tabular}{|l|l|l|l|l|l|l|}
     \hline
-    \multirow{2}{*}{Color Type} & \multirow{2}{*}{Channels} & \multicolumn{5}{c|}{Color Depth} \\
+    \multicolumn{7}{|c|}{Color Depth} \\
+    \cline{1-7}
+    \multirow{2}{*}{Color Type} & \multirow{2}{*}{Channels} &
+    \multicolumn{5}{c|}{Bits per channel} \\
 
     \cline{3-7}
 
@@ -262,53 +243,45 @@ are shown in table \ref{tab:png-color-type}.
 
 This field is used to indicate the compression method used in the
 image data. But the only value defined for this field by the PNG
-specification is $0$, which means that ZLIB deflate compression is
-used.
+specification is $0$, which means that DEFLATE compression is used.
 
 \subsubsection*{Filter Method (1 Byte)}
 
-PNG also allows certain filter to be applied to the image data. These
-filters basically make the data compress better. Only the value $0$ is
-defined for this field, and this means that the four default filters
-pare used to perform the filtering. We'll discuss the filter in section
-??.  \todo{add reference to the section covering the filters}
+PNG also allows certain so-called filters to be applied to the image
+data. These filters basically make the image data compress
+better. Only the value $0$ is defined for this field, and this means
+that the four default filters are used to perform the filtering. We'll
+discuss the filters in section \ref{sec:png-filters}.
 
 \subsubsection*{Interlace Method (1 Byte)}
 
 If this field is $0$, then no interlacing is used in the image data; if it
 is $1$, then the image data is interlaced.
 
-The PNG format supports an interlacing method known Adam7. This method
-of interlacing is significantly more complex than that if GIF's, and
-is something that we will discuss the very much in depth in section
-??. \todo{add references}.
+The PNG format supports an interlacing method known Adam7, named so
+because it was invented by Adam Costello. This method of interlacing
+is significantly more complex than that of GIF's, and is something
+that we will discuss in depth in section \ref{png-interlacing}.
 
 \subsection{PLTE -- Image Palette}
 
-IF the image uses indexed color, then that means that it uses a
-palette. Such images of course need a palette of some kind, and that
-is the exact thing that is stored in this chunk.
-
-The palette chunk simply consists of a sequence of colors. These
-colors will always be 24 bits of size, so 8 bits are assigned to each
-color channel. The length of this palette must not exceed the bit
-depth field, given in the \chnk{IHDR} chunk.
+If the image uses indexed color, then that means that it uses a
+palette and that is what is stored in this chunk. The palette chunk
+simply consists of a sequence of RGB colors. These colors will always be
+24 bits of size, so 8 bits are assigned to each color channel.
 
 \subsection{IDAT -- Image Data}
 
 In this chunk the color data of the image is stored. The image data
-storage system of the PNG is so complex, compared to that ofother
-formats we have discussed, the discussion of this block discussed in
-its own section \ref{sec:png-image-data-storage}. We ask the reader to
-be patient, as we will shortly reach this section.
+storage system of the PNG format is very complex and it is discussed
+in depth in section \ref{sec:png-image-data-storage}.
 
 \subsection{IEND -- Image Trailer}
 
-The reading of chunks from the PNG image will go and on until the
-image trailer chunk, \chnk{IEND}, is found. Once this chunk is
-encountered in the image data, the entire image has been processed,
-and the decoder is done. The chunk data of this chunk type will always
-be empty.
+The reading of chunks from the PNG file will go and on until the image
+trailer chunk, \chnk{IEND}, is found. Once this chunk is encountered
+in the file, the entire image has been processed, and the decoder is
+done. The chunk data of this chunk type will \textit{always} be empty.
 
 \section{Image Data Storage Model}
 \label{sec:png-image-data-storage}
@@ -318,18 +291,20 @@ We will now describe how the color data is stored in the IDAT chunk.
 \subsection{The encoding process}
 
 To understand how the color data is stored in the \IDAT chunk, we must
-first understand how the data is encoded in the first place. Before
+first understand how the data is encoded in the first place. So before
 discussing the decoding process, we will now briefly discuss how the
 image data is encoded.
 
 The unencoded data is just a sequence of pixel color values. If the
-image is to be \textit{interlaced}, then the image data is rearranged in a certain
-order. This order we'll discuss in section ??. \todo{ref prop}.
+image is \textit{interlaced}, then the image data is rearranged in a
+certain order and divided into passes. This process is in the PNG
+specification referred to as \textit{pass extraction}. We'll discuss
+interlacing in section \ref{png-interlacing}.
 
-Not all images are interlaced, and if so, then the image data is just
+Not all images are interlaced, and if not, then the image data is just
 carried onto the next step. The next step is known as \textit{scanline
-  serialization}. Here, the colors are represented as bytes and these
-bytes are then divided into the lines.
+  serialization}. Here, the separate colors are partitioned up into
+byte values, and the byte values are divided up into separate rows.
 
 \newcommand{\checkerimg}{
   \tikz[scale=2]{
@@ -339,56 +314,51 @@ bytes are then divided into the lines.
     \fill[gray] (0.5ex,0.5ex) rectangle (1.0ex,1.0ex);
   }}
 
-It is important to understand how the scanline serialization is
-done. Say I have an image. This image has the size 2x2, meaning that
-it is two pixels wide and two pixels high. This image uses indexed
-color with a color depth of 1 to store the color. Now let's that the
-first row of this image consits of the color indexes $1$ and $0$ and
-that the second is the indexes $0$ and $1$. If we let the index $1$
-represent a gray color, and the index $0$ represent a fully black
-color, then this data would represent the image \checkerimg. Then,
-during after scanline serialization process, the first row of this
-image will get encoded as the byte $128$. The bit pattern for this
-number \bin{1000\ 0000}. The process is simple: the separate bits that
-the image consists of are written from the highest bits to the lowest
-bits. And furthermore, separate rows in the image data are kept
-separate from each other, so the second will always get encoded in a
-separate byte value $64$(\bin{0100\ 0000}).
+It is important to understand how exactly the scanline serialization
+is done. Say I have an image with the size 2x2, meaning that it is two
+pixels wide and two pixels high. This image uses indexed color with a
+color depth of 1 to store the color. Let the index $0$ represent a
+fully black color and the index $1$ represent gray color. Now let's
+that the first row of this image consists of the color indexes $1$ and
+$0$ and that the second consists of the indexes $0$ and $1$. Then this
+data would represent the image \checkerimg. Then, after scanline
+serialization process, the first row of this image will get encoded as
+a byte by writing from the highest bits to the lowest, meaning that
+the resulting byte will be $128$. The bit pattern for this number
+\bin{\textbf{10}00\ 0000}. Separate rows in the image data are kept
+separate from each other, so the second row will get encoded in a
+separate byte value $64$(\bin{\textbf{01}00\ 0000}).
 
 If on the other hand the color depth was 2, and the color values of
-the indexes of the data was kept the same, $01$; $00$; $00$; $01$,
-then the data would have been encoded as the bytes $64$(\bin{0100\
-  0000}) and $80$(\bin{0101\ 0000}).
+the indexes of the data were kept the same, $01$; $00$; $00$; $01$,
+then the data would have been encoded as the bytes
+$64$(\bin{\textbf{0100}\ 0000}) and $16$(\bin{\textbf{0001}\ 0000}).
 
 Grayscale color is dealt with in very much the same way as indexed
-color. The miscellaneous color types are too big to fit in a single
-bytes, so the separate channels are spread out over consecutive
-bytes. If the channels sizes are over 8 bits, then also the channels
-will get spread out over multiple bytes.
-
-% add exercise in which the use must encode the color data of a
-% pattern of checker color.
+color. The miscellaneous color types are often too big to fit in a
+single byte, so the separate channel values are spread out over
+consecutive bytes. If the channels sizes are over 8 bits, then also
+the channels will get spread out over several bytes.
 
 After the scanline serialization process, filters are applied to the
-image data that is after the last step represented as a sequence of
-bytes. The filters are operations on the byte sequence that makes the
-data easier to compress. We'll discuss these filters in section
-%??. \ref{ref prop}.
+image data that is now represented as a sequence of bytes. The filters
+are operations on the byte sequence that makes the data easier to
+compress. We'll discuss these filters in section
+\ref{sec:png-filters}.
 
 After that the data has optimized for compression by the filter, it is
 compressed using the DEFLATE algorithm, and stored using the ZLIB
-format. \todo{...}.
+format. We'll discuss this in more depth in section \ref{sec:png-dec}.
 
-And finally, the image data divided into \IDAT chunks and written to
-the image file.
+And after all these steps, the image data is finally divided into
+\IDAT chunks, and these chunks are written to the file.
 
 And that is the entire encoding process. It is, indeed, compared to
-that of the other formats we've described, one complicated
-process.
+that of the other formats we have described, one complicated process.
 
-To undo this process the separate subprocesses has to be reversed in
-the reverse that they were done. So let us start by describing how to
-undo the last of these subprocesses.
+To undo this entire process the separate subprocesses has to be
+reversed in the reverse order that they were done. So let us start by
+describing how to undo the last of these subprocesses.
 
 \subsection{Consecutive Chunks}
 
@@ -402,12 +372,14 @@ reading the next chunk, one should decode and deal with the image
 data.
 
 \subsection{Decompression}
+\label{sec:png-dec}
 
 Once all the data of the \IDAT chunk(s) has been gathered, it is time
 to start decoding the data. Performing the compression is something we
 discussed in chapter ??. \todo{...}
 
 \subsection{Filtering}
+\label{sec:png-filters}
 
 The main purpose of the filters is to make the image data easier to
 compress. So their purpose is not to actually compress the image data.
@@ -655,10 +627,10 @@ where $a=B_{i,j-t}$, $b=B_{i-1,j}$ and $c=B_{i-1,j-t}$.
   \label{alg:paeth}
   \begin{algorithmic}[1]
     \Procedure{Paeth}{$a,b,c$}
-    \Let{$estimate$}{$a+b-c$}
-    \Let{$\Delta a$}{$|estimate-a|$}
-    \Let{$\Delta b$}{$|estimate-b|$}
-    \Let{$\Delta c$}{$|estimate-c|$}
+    \Let{$\var{estimate}$}{$a+b-c$}
+    \Let{$\Delta a$}{$|\var{estimate}-a|$}
+    \Let{$\Delta b$}{$|\var{estimate}-b|$}
+    \Let{$\Delta c$}{$|\var{estimate}-c|$}
     \linecomment{Return the delta closest to the estimate.}
     \If{$\Delta a \le \Delta b \AND \Delta a \le \Delta c $}
     \State \Return{$\Delta a$}
@@ -675,8 +647,7 @@ where $a=B_{i,j-t}$, $b=B_{i-1,j}$ and $c=B_{i-1,j-t}$.
 \subsection{Scanline serialization}
 
 \subsection{Interlaced Color Data}
-
-\section{Ancillary Chunks of interests}
+\label{png-interlacing}
 
 \section{Answers to the exercises}
 

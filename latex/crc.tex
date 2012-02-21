@@ -680,6 +680,7 @@ algorithm. As you can see, it is largely the same algorithm.
 \end{algorithm}
 
 \subsection{CRC-32}
+\label{sec:pngcrc}
 
 We will end our discussion on CRCs by briefly discussing the CRC that
 is used in the PNG format as it is defined in
@@ -769,13 +770,14 @@ of $n$ bytes the checksum is calculated as follows:\footnote{Go back
 \end{equation*}
 
 The last line may however need some explanation. It was back in
-exercise \ref{bit-equiv} shown that $b \ShiftLeft 16$ is equivalent to
-$b \cdot 2^{16}$. Bitwise or is equivalent to plain addition in this
-case only because $b$ and $a$ were constantly taken modulo $65521$, so
-they can never be longer than $16$ bits. Hence, it is impossible for
-the separate bits in the numbers $a$ and $b$ to interfere with each
-other in the bitwise or operation, and therefore bitwise or is
-equivalent to plain addition in this case.
+exercise \ref{bit-equiv} on page \pageref{bit-equiv} shown that $b
+\ShiftLeft 16$ is equivalent to $b \cdot 2^{16}$. Bitwise or is
+equivalent to plain addition in this case only because $b$ and $a$
+were constantly taken modulo $65521$, so they can never be longer than
+$16$ bits. Hence, it is impossible for the separate bits in the
+numbers $a$ and $b$ to interfere with each other in the bitwise or
+operation, and therefore bitwise or is equivalent to plain addition in
+this case.
 
 It is also shown in algorithm \ref{alg:adler32} how to calculate the
 \adlerchk checksum.
