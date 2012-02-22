@@ -8,7 +8,9 @@ ${TARGET}.bbl: ${TARGET}.bib
 	bibtex ${TARGET}
 
 ${TARGET}.pdf: ${TARGETFILES} ${TARGET}.bbl
-	pdflatex ${TARGET}.tex
+	while (pdflatex ${TARGET}.tex ; \
+	grep -q "Rerun to get cross" ${TARGET}.log ) do true ; \
+	done
 
 clean:
 	rm -f *.bbl
