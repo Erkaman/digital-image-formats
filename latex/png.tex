@@ -397,11 +397,70 @@ LZ77 window size used during the DEFLATE compression, minus $8$ . Its
 maximum value is $7$, meaning that the maximum possible size of the LZ77 window
 will be $2^{7 + 8} = 2^{15} = 32768$.
 
+\subsubsection{FLG}
+
+The second value is the FLG byte. It divided into subfields as
+follows:
+
+\paragraph{Bits 0-4 -- FCHECK}
+
+This value serves as a sort of checksum on the CMF and FLG bytes. This
+value must be the value such that
+
+\begin{equation*}
+ CMF \cdot 256 + FLG (mod 31) = 0
+\end{equation*}
+
+So CMF and FLG when viewed as a 16-bit number must be made dividable
+by $31$ by this value. 
+
+\paragraph{Bits 5 -- FDICT}
+
+This value must always be $0$ for valid PNG files.
+
+\paragraph{Bits 6-7 -- FLEVEL}
+
+Compression level. This value used indicate the compression method used
+during the DEFLATE compression. It has $4$ possible values:
+
+\begin{description}
+\item[0] Fastest compression algorithm used.
+\item[1] Fast compression algorithm used.
+\item[2] Default compression algorithm used.
+\item[3] Maximum compression algorithm used.
+\end{description}
+
+The different compression method depends on how aggressive the LZ77
+window matching was during the DEFLATE compression. Because searching
+the LZ77 window for matches is such a slow operation, slower
+compression algorithm may give after a couple of tries to speed up the
+compression in favor of lost compression performance. However, the
+maximum compression algorithm will never give until it has searched
+the entire window for matches, and it will therefore result in the
+best possible DEFLATE compression in return for speed loss. But with
+the fast computer's of today the maximum compression algorithm is
+always used, but back in the days you always had to make this trade
+of speed in favor of compression performance or vice versa.
+
+\subsubsection{Compressed Data}
+
+Following FLG byte the DEFLATE compressed data can be found, which we
+discussed in chapter \ref{cha:deflate}.
+
+\subsubsection{Adler-32 checksum}
+
+This is the Adler-32 checksum of the \textit{uncompressed data} so
+this value is used validity the integrity of the uncompressed data. We
+discussed the Adler-32 checksum in section \ref{sec:adler32} on page
+\pageref{sec:adler32}.
+
 \subsection{Filtering}
 \label{sec:png-filters}
 
-The main purpose of the filters is to make the image data easier to
-compress. So their purpose is not to actually compress the image data.
+Before the color data was packet into the ZLIB format it was
+filtered. The main purpose of the filters is to make the image data
+easier to compress. So their purpose is not to actually compress the
+image data.
 
 In the filtering step, some sort of operation is performed on
 \textit{every row} of the image data. At the beginning of every row,
