@@ -218,17 +218,17 @@ to directly read the 1-bit and 5-bit numbers that 16-bit color
 consists of. These numbers have to be extracted using the bitwise
 operators. In algorithm \ref{alg:read-16-bit-rgb} it shown how to
 extract the separate channel values out of a 16-bit color value that
-has been stored in a variable named $color$.
+has been stored in a variable named $\var{color}$.
 
 \begin{algorithm}[H]
   \caption{Reading the separate color channels of a TGA 16-bit color
     value.}
   \label{alg:read-16-bit-rgb}
   \begin{algorithmic}[1]
-    \Let{$R$}{\Call{getbits}{$color, 10,14$}}
-    \Let{$G$}{\Call{getbits}{$color, 5,9$}}
-    \Let{$B$}{\Call{getbits}{$color, 0,4$}}
-    \Let{$A$}{\Call{getbits}{$color, 15,15$}}
+    \Let{$R$}{\Call{getbits}{$\var{color}, 10,14$}}
+    \Let{$G$}{\Call{getbits}{$\var{color}, 5,9$}}
+    \Let{$B$}{\Call{getbits}{$\var{color}, 0,4$}}
+    \Let{$A$}{\Call{getbits}{$\var{color}, 15,15$}}
   \end{algorithmic}
 \end{algorithm}
 
@@ -279,8 +279,8 @@ the beginning of the image. These colors are most typically stored as
 palette consists not of a sequence of RGB triplets nor grayscale
 color, but of a sequence of indexes to the palette.
 
-For example, say an image had the palette $(Red, Purple, Black,
-Green)$. Then the color Purple in the image would be represented by
+For example, say an image had the palette $(\var{Red}, \var{Purple}, \var{Black},
+\var{Green})$. Then the color Purple in the image would be represented by
 the number $1$. And note that $1$ is a \textit{zero based} index to
 the palette, and not one based. The color data using this palette can
 use a sequence of 2-bit values to store the color data.
@@ -322,9 +322,9 @@ separate rows.
 
 It is also easy to see how the separate colors can be accessed in this
 model. Let us say that we stored the color data of the image on the
-front page in the array $data$. The indexes of this array are
-zero-based, meaning that, for example, $data[3]=4$, while
-$data[4]=0$. The index to the array of the color in row $r$ and column
+front page in the array $\var{data}$. The indexes of this array are
+zero-based, meaning that, for example, $\var{data[3]}=4$, while
+$\var{data[4]}=0$. The index to the array of the color in row $r$ and column
 $c$(these numbers are also zero-based) is then given by $r \cdot 5 +
 c$. The index of the red color in the middle of the flower is then
 given by $2 \cdot 5 + 2 = 12$. This is also the number you end up with

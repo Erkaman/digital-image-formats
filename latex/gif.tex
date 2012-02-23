@@ -122,24 +122,24 @@ have reached the end of a sub-blocks sequence.
 
 \subsubsection{An example}
 
-So how would the string $ERICA$ be stored using data sub-blocks? We
+So how would the string $\var{ERICA}$ be stored using data sub-blocks? We
 first let the pair $(S,D)$ represent a sub-block, where $S$ is the
 size of the block and $D$ is the data of the block. The block
 terminator is represented by the pair $(0,)$. It is a single byte with
 the value $0$.
 
-The string $ERICA$ can then be represented by the sequence of
+The string $\var{ERICA}$ can then be represented by the sequence of
 sub-blocks
 
 \begin{equation*}
-  (5,ERICA)(0,)
+  (5,\var{ERICA})(0,)
 \end{equation*}
 
 The block terminator must always terminate a sequence of
 sub-blocks. But this is not the only way of representing that string;
 
 \begin{equation*}
-  (3,ERI)(2,CA)(0,)
+  (3,\var{ERI})(2,\var{CA})(0,)
 \end{equation*}
 
 is another perfectly legal way of doing it. But the first sequence is
@@ -399,27 +399,27 @@ don't fully understand this algorithm.
   \label{alg:gif-interlace}
   \begin{algorithmic}[1]
     \linecomment{Set the array to the numbers $0,4,2,1$}
-    \Let{$startingRow$}{$\{0,4,2,1\}$}
-    \Let{$rowIncrement$}{$\{8,8,4,2\}$}
+    \Let{$\var{startingRow}$}{$\{0,4,2,1\}$}
+    \Let{$\var{rowIncrement}$}{$\{8,8,4,2\}$}
 
     \Let{$i$}{$0$}
-    \Let{$row$}{$0$}
+    \Let{$\var{row}$}{$0$}
 
     \linecomment{In this algorithm, the pass numbers are zero based}
-    \ForTo{$pass$}{$0$}{$4$}
-    \Let{$row$}{$startingRow[pass]$}
+    \ForTo{$\var{pass}$}{$0$}{$4$}
+    \Let{$\var{row}$}{$\var{startingRow[pass]}$}
 
-    \While{$row < imageHeight$}
+    \While{$\var{row} < \var{imageHeight}$}
 
-    \ForTo{$column$}{$0$}{$imageWidth$}
+    \ForTo{$\var{column}$}{$0$}{$\var{imageWidth}$}
 
-    \Let{$j$}{$row \cdot width + column$}
-    \Let{$uninterlacedColorData[j]$}{$uncompressedColorData[i]$}
+    \Let{$j$}{$\var{row} \cdot \var{width} + \var{column}$}
+    \Let{$\var{uninterlacedColorData[j]}$}{$\var{uncompressedColorData[i]}$}
     \Let{$i$}{$i + 1$}
 
     \EndForTo
 
-    \Let{$row$}{$row + rowIncrement[pass]$}
+    \Let{$\var{row}$}{$\var{row} + \var{rowIncrement[pass]}$}
 
     \EndWhile
 
@@ -694,16 +694,16 @@ format, $12$, then the value of the code size is increased by one.
   \caption{GIF LZW Decompression algorithm}
   \label{alg:gif-decompression}
 
-  \newcommand{\InputCodeSize}{\Call{inputCode}{$codeSize$}}
+  \newcommand{\InputCodeSize}{\Call{inputCode}{$\var{codeSize}$}}
 
   \begin{algorithmic}[1]
 
-    \Let{$ClearCode$}{$colorTableSize$}
-    \Let{$EndCode$}{$colorTableSize + 1$}
+    \Let{$\var{ClearCode}$}{$\var{colorTableSize}$}
+    \Let{$\var{EndCode}$}{$\var{colorTableSize} + 1$}
 
-    \Let{$IntitalCodeSize$}{\VoidCall{ReadByte} $+ 1$} \Comment{
+    \Let{$\var{IntitalCodeSize}$}{\VoidCall{ReadByte} $+ 1$} \Comment{
       Read the initial code size}
-    \Let{$codeSize$}{$IntitalCodeSize$}
+    \Let{$\var{codeSize}$}{$\var{IntitalCodeSize}$}
 
     \linecomment{In the beginning of the compressed data a clear code
       is always found. By doing this, we skip the clear code.}
@@ -712,57 +712,57 @@ format, $12$, then the value of the code size is increased by one.
     \linecomment{Fill the table with the color palette and the two
       extra codes}
     \State \VoidCall{resetCompressionTable}
-    \Let{$nextCode$}{$colorTableSize + 2$}
+    \Let{$\var{nextCode}$}{$\var{colorTableSize} + 2$}
 
-    \Let{$oldCode$}{\InputCodeSize}
-    \State \Call{outputCode}{oldCode}
+    \Let{$\var{oldCode}$}{\InputCodeSize}
+    \State \Call{outputCode}{$\var{oldCode}$}
 
-    \Let{$character$}{$oldCode$}
-    \Let{$newCode$}{\InputCodeSize}
+    \Let{$\var{character}$}{$\var{oldCode}$}
+    \Let{$\var{newCode}$}{\InputCodeSize}
 
-    \While{$newCode != EndCode$}
+    \While{$\var{newCode} != \var{EndCode}$}
 
-    \If{$newCode = ClearCode$}
+    \If{$\var{newCode} = \var{ClearCode}$}
 
     \linecomment{Reset the compression table if a clear code is
       found}
 
     \State \VoidCall{resetCompressionTable}
-    \Let{$nextCode$}{$colorTableSize + 2$}
-    \Let{$codeSize$}{$IntitalCodeSize$}
+    \Let{$\var{nextCode}$}{$\var{colorTableSize} + 2$}
+    \Let{$\var{codeSize}$}{$\var{IntitalCodeSize}$}
 
-    \Let{$oldCode$}{\InputCodeSize}
-    \State \Call{outputCode}{oldCode}
+    \Let{$\var{oldCode}$}{\InputCodeSize}
+    \State \Call{outputCode}{$\var{oldCode}$}
 
-    \Let{$newCode$}{\InputCodeSize}
+    \Let{$\var{newCode}$}{\InputCodeSize}
 
     \EndIf
 
-    \If{$\NOT$ \Call{IsInTable}{$newCode$}}
-    \Let{$string$}{\Call{translate}{oldCode}}
-    \Let{$string$}{$string + character$}
+    \If{$\NOT$ \Call{IsInTable}{$\var{newCode}$}}
+    \Let{$\var{string}$}{\Call{translate}{$\var{oldCode}$}}
+    \Let{$\var{string}$}{$\var{string} + \var{character}$}
     \Else
-    \Let{$string$}{\Call{translate}{$newCode$}}
+    \Let{$\var{string}$}{\Call{translate}{$\var{newCode}$}}
     \EndIf
 
-    \State \Call{outputString}{$string$}
+    \State \Call{outputString}{$\var{string}$}
 
-    \Let{$character$}{$string[0]$}
+    \Let{$\var{character}$}{$\var{string[0]}$}
 
-    \If{$nextCode \leq (2^{12} - 1)$}
+    \If{$\var{nextCode} \leq (2^{12} - 1)$}
 
-    \State \Call{$AddToStringTable$}{$nextCode, oldCode, character$}
+    \State \Call{AddToStringTable}{$\var{nextCode}, \var{oldCode}, \var{character}$}
 
     \linecomment{The maximum code size in GIF LZW is $12$}
-    \If{$nextCode == 2^{codeSize} - 1 \AND codeSize \neq 12$}
-    \Inc{codeSize}{1}
+    \If{$\var{nextCode} == 2^{\var{codeSize}} - 1 \AND \var{codeSize} \neq 12$}
+    \Inc{\var{codeSize}}{1}
     \EndIf
-    \Inc{nextCode}{1}
+    \Inc{\var{nextCode}}{1}
     \EndIf
 
-    \Let{$oldCode$}{$newCode$}
+    \Let{$\var{oldCode}$}{$\var{newCode}$}
 
-    \Let{$newCode$}{\VoidCall{$ReadByte$}}
+    \Let{$\var{newCode}$}{\VoidCall{ReadByte}}
 
     \EndWhile
 

@@ -3,7 +3,11 @@
 \usepackage{inconsolata}
 \usepackage[charter]{mathdesign}
 
-\usepackage[kerning,spacing,stretch=10]{microtype}
+\usepackage[
+kerning,
+spacing,
+protrusion=true,
+expansion=true]{microtype}
 \microtypecontext{spacing=nonfrench}
 
 \usepackage[nottoc]{tocbibind}
@@ -131,12 +135,18 @@
 %\pagestyle{headings}
 
 \usepackage{fancyhdr}
+
 \pagestyle{fancy}
 
-\fancypagestyle{plain}{%
-\fancyhf{} % clear all header and footer fields
-\renewcommand{\headrulewidth}{0pt}
-\renewcommand{\footrulewidth}{0pt}}
+\renewcommand{\chaptermark}[1]{\markboth{\chaptername\ \thechapter\ -- \ #1}{}}
+
+\lhead{}
+\chead{}
+\lhead{{\textit{\leftmark}}}
+\rhead{\thepage}
+
+\rfoot{}
+\cfoot{}
 
 % macros
 
@@ -181,8 +191,8 @@
 }
 \newacronyms{C,pgf}
 
-\newcommand{\eof}{\ensuremath{\VoidCall{EndOfFileReached}}}
-\newcommand{\neof}{\ensuremath{\NOT \VoidCall{EndOfFileReached}}}
+\newcommand{\eof}{\VoidCall{EndOfFileReached}}
+\newcommand{\neof}{$\NOT\VoidCall{\textsc{EndOfFileReached}}$}
 
 \newcommand{\lzseven}{LZ77\xspace}
 \newcommand{\lzeight}{LZ78\xspace}

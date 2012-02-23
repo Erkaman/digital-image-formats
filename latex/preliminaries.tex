@@ -411,8 +411,8 @@ we're going to do for the rest of the chapter.
 \subsection{Typographical Conventions}
 
 \begin{description}
-\item[Keywords] will use \textbf{bold} font.
-\item[functions] will be signified by \textsc{caps}.
+\item[keywords] will use \textbf{bold} font.
+\item[functions] will be signified by \textsc{small caps}.
 \item[variables] can noticed by their $\var{cursive\ slant}$.
 \end{description}
 
@@ -555,7 +555,7 @@ to illustrate the difference between them:
 \begin{Exercise}[label={bitor}]
   \begin{enumerate}[(a)]
   \item $172 \BitOr 52$
-  \item $3 \ BitOr 3$
+  \item $3 \BitOr 3$
   \item $240 \BitOr 15$
   \end{enumerate}
 \end{Exercise}
@@ -687,7 +687,7 @@ algorithm \ref{alg:assign} is used.
   \caption{Syntax for assigning the value $n$ to the variable $var$.}
   \label{alg:assign}
   \begin{algorithmic}[1]
-    \Let{$var$}{$n$}
+    \Let{$\var{var}$}{$\var{n}$}
   \end{algorithmic}
 \end{algorithm}
 
@@ -711,7 +711,7 @@ in algorithm \ref{alg:for-each} is used.
     \linecomment{Go through every value $v$ in the
       array $a$. The variable  $v$ is assigned every element in the
       array $a$ in order.}
-    \ForEach{$v$}{$a$}
+    \ForEach{$\var{v}$}{$\var{a}$}
     \linecomment{Do something with $a$ here.}
     \EndForEach
   \end{algorithmic}
@@ -725,7 +725,7 @@ demonstrated.
   \label{alg:repeat}
   \begin{algorithmic}[1]
     \Repeatn{$n$}
-    \State $actions$ \Comment{$actions$ are repeated $n$ times.}
+    \State $\var{actions}$ \Comment{$actions$ are repeated $n$ times.}
     \EndRepeatn
   \end{algorithmic}
 \end{algorithm}
@@ -783,26 +783,26 @@ to introduce several functions for handling file operations.
   algorithm that a file has already been opened for reading. This
   function reads a byte from that file.
 
-\item[\Call{WriteByte}{$byte$}] At the beginning of every algorithm,
+\item[\Call{WriteByte}{$\var{byte}$}] At the beginning of every algorithm,
   we also assume that there is a file opened for output. This function
   writes a byte to that file.
 
 \item[\textproc{EndOfFileReached}] \True{} if the end the file we're
   reading from have been reached.
 
-\item[\Call{Read}{$size$}] Just being able to read a byte may not
+\item[\Call{Read}{$\var{size}$}] Just being able to read a byte may not
   always be enough. We may want to read a number of a specific size
   from a file. We will do that with this function. This functions
   reads a number of the size $size$ \textit{bytes}(not bits) from a
   file.
 
-\item[\Call{Inc}{\ensuremath{var,n}}] Increases the value of the
+\item[\Call{Inc}{\ensuremath{\var{var},n}}] Increases the value of the
   variable $var$ by $n$.
 
-\item[\Call{Dec}{\ensuremath{var,n}}] Decrease the value of the
+\item[\Call{Dec}{\ensuremath{\var{var},n}}] Decrease the value of the
   variable $var$ by $n$.
 
-\item[\Call{getbits}{$b, start, end$}] is used to extract a bit
+\item[\Call{getbits}{$b, \var{start}, \var{end}$}] is used to extract a bit
   pattern in the given bit range from $b$. This function will be
   derived in exercise \ref{bitcount}
 
@@ -818,7 +818,7 @@ to introduce several functions for handling file operations.
 
 \begin{Exercise}[label={getbits}]
 
-  Make a function named \Call{getbits}{$b, start, end$} that extracts
+  Make a function  \Call{getbits}{$b, \var{start}, \var{end}$} that extracts
   the bit pattern of a number $b$ from a given starting position to a
   given ending position. These positions are be zero-based. Example:
   \Call{getbits}{$80, 4, 6$}$=5$, because $80$ is represented by the
@@ -991,14 +991,14 @@ to introduce several functions for handling file operations.
 
   \begin{algorithmic}[1]
     \Procedure{bitcount}{$n$}
-    \Let{$count$}{$0$}
+    \Let{$\var{count}$}{$0$}
     \linecomment{Once the value $8$ is reached the for loop terminates.}
-    \ForTo{$shift$}{$0$}{$8$}
-    \If{$n \BitAnd (1 \ShiftLeft shift)$}
-    \State \Call{Inc}{$count$}
+    \ForTo{$\var{shift}$}{$0$}{$8$}
+    \If{$n \BitAnd (1 \ShiftLeft \var{shift})$}
+    \State \Call{Inc}{$\var{count}$}
     \EndIf
     \EndFor
-    \State \Return{$count$}
+    \State \Return{$\var{count}$}
     \EndProcedure
   \end{algorithmic}
 
@@ -1009,9 +1009,9 @@ to introduce several functions for handling file operations.
   \begin{algorithmic}[1]
     \Procedure{getbits}{$n$}
     \linecomment{Calculate the length of the bit pattern}
-    \Let{$len$}{$end - start + 1$}
-    \State \textbf{return} $(b \ShiftRight start) \BitAnd (\BitNeg
-    (\BitNeg 0 \ShiftLeft len))$
+    \Let{$\var{len}$}{$\var{end} - \var{start} + 1$}
+    \State \textbf{return} $(b \ShiftRight \var{start}) \BitAnd (\BitNeg
+    (\BitNeg 0 \ShiftLeft \var{len}))$
     \EndProcedure
   \end{algorithmic}
 

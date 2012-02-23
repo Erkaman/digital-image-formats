@@ -39,7 +39,7 @@ The LZW compression algorithm is best
 understood by walking through the LZW algorithm's process of
 compressing some example string, so we will in this example
 demonstrate how the compression of the string
-$ababcbababaaaaaaa$ is done in LZW.
+$\var{ababcbababaaaaaaa}$ is done in LZW.
 
 Central to the entire algorithm's process is a string table(also
 sometimes referred to as a dictionary). In this table, numbers called
@@ -78,33 +78,33 @@ Now the actual compression of the string starts. First it reads in the
 character $a$. In the string table that letter has the code $97$,
 so the code $97$ is outputted. Next, the character $b$ is read,
 which has the code $98$. So $98$ is outputted and then the two strings
-read so far are appended together to form the string $ab$. The
-string table is searched for the string $ab$, but it cannot be
+read so far are appended together to form the string $\var{ab}$. The
+string table is searched for the string $\var{ab}$, but it cannot be
 found in the string table, so it is added to the string table and is
 assigned the next available code, $256$.
 
 $a$ is discarded, $b$ is kept and another $a$ is
 read. First $b$ is outputted, and the appended string
-$ba$ is formed. This string doesn't either exist in the table,
+$\var{ba}$ is formed. This string doesn't either exist in the table,
  so it is added to table and is given the code $257$.
 
  Discard $b$, output $a$ and read in another $b$. The
- resulting appended string is this time $ab$. But wait a minute,
+ resulting appended string is this time $\var{ab}$. But wait a minute,
  isn't already that string in the string table? Yes it is, so instead
  of re-adding that string to table, it is kept for the next step in
  the algorithm.
 
-The code for $ab$ is outputted, which is $256$, and the character $c$ is
-read. The string $abc$ doesn't exist in the table, so it is
+The code for $\var{ab}$ is outputted, which is $256$, and the character $c$ is
+read. The string $\var{abc}$ doesn't exist in the table, so it is
 added to the string table and given the code $258$.
 
 And the algorithm just keeps going on like this. Table
 \ref{tab:str-tab-str} shows all the codes that were added during the
-compression of the sample string $ababcbababaaaaaaa$. Table
+compression of the sample string $\var{ababcbababaaaaaaa}$. Table
 \ref{tab:lzw-walkthru} gives a detailed walkthrough of the entire
 compression process of that same string. So the string
-$ababcbababaaaaaaa$ was in the end compressed down to the
-string $ab,256,c,257,260,a,262,263,a$.
+$\var{ababcbababaaaaaaa}$ was in the end compressed down to the
+string $\var{ab},256,c,257,260,a,262,263,a$.
 
 So to summarize, the LZW algorithm basically works like: the algorithm
 keeps accumulating and reading characters into the string $S$. This
@@ -117,7 +117,7 @@ outputted, and the appended string $Sc$ is added to the dictionary.
 
 \begin{Exercise}[label={lzw-compress}]
 
-  LZW compress the string $abababab$. Show the output of the
+  LZW compress the string $\var{abababab}$. Show the output of the
   compressor and the resulting string table.
 
 \end{Exercise}
@@ -132,26 +132,26 @@ outputted, and the appended string $Sc$ is added to the dictionary.
     $98$ & $b$ \\
     $99$ & $c$ \\
     \dots & \dots \\
-    $256$ & $ab$ \\
-    $257$ & $ba$ \\
-    $258$ & $abc$ \\
-    $259$ & $cb$ \\
-    $260$ & $bab$ \\
-    $261$ & $baba$ \\
-    $262$ & $aa$ \\
-    $263$ & $aaa$ \\
-    $264$ & $aaaa$ \\
+    $256$ & $\var{ab}$ \\
+    $257$ & $\var{ba}$ \\
+    $258$ & $\var{abc}$ \\
+    $259$ & $\var{cb}$ \\
+    $260$ & $\var{bab}$ \\
+    $261$ & $\var{baba}$ \\
+    $262$ & $\var{aa}$ \\
+    $263$ & $\var{aaa}$ \\
+    $264$ & $\var{aaaa}$ \\
     \bottomrule
   \end{tabular}
   \caption{The string table after compression.}
   \label{tab:str-tab-str}
 \end{table}
 
-\newcommand{\lzwrow}[6]{$#1$ = $#2$ & $#3$ = $#4$ &
-  $#1$ = $#2$ & $#5$ = $#6$ \\}
+\newcommand{\lzwrow}[6]{$\var{#1}$ = $#2$ & $\var{#3}$ = $#4$ &
+  $#1$ = $#2$ & $\var{#5}$ = $#6$ \\}
 
-\newcommand{\stoplzwrow}[2]{$#1$ = $#2$ & STOP &
-  $#1$ = $#2$ & STOP \\}
+\newcommand{\stoplzwrow}[2]{$\var{#1}$ = $#2$ & STOP &
+  $\var{#1}$ = $#2$ & STOP \\}
 
 \begin{table}
   \centering
@@ -186,43 +186,43 @@ algorithm is presented. Let us now discuss the details of it.
   \label{alg:lzw-compression}
   \begin{algorithmic}[1]
 
-    \Let{$maxValue$}{$2^{codeSize} - 1$}
-    \Let{$maxCode$}{$maxValue - 1$}
+    \Let{$\var{maxValue}$}{$2^{\var{codeSize}} - 1$}
+    \Let{$maxCode$}{$\var{maxValue} - 1$}
 
     \State Fill the string table for the codes $1-255$
-    \Let{$nextCode$}{$256$} \Comment{The code value the next string
+    \Let{$\var{nextCode}$}{$256$} \Comment{The code value the next string
       will be assigned to.}
-    \Let{$string$}{\VoidCall{$ReadByte$}}
-    \Let{$character$}{\VoidCall{$ReadByte$}}
+    \Let{$\var{string}$}{\VoidCall{$ReadByte$}}
+    \Let{$\var{character}$}{\VoidCall{$ReadByte$}}
 
     \While{\neof}
 
-      \If{\Call{InStringTable}{$string + character$}} \label{algl:hasingcheckintable}
+      \If{\Call{InStringTable}{$\var{string} + \var{character}$}} \label{algl:hasingcheckintable}
         \linecomment{Keep accumulating the string}
-        \Let{$string$}{$string + character$}
+        \Let{$\var{string}$}{$\var{string} + \var{character}$}
 
       \Else
 
-        \State \Call{outputCode}{$string$}
+        \State \Call{outputCode}{$\var{string}$}
 
         \linecomment{Only add the accumulated string to the table if
-          there's space for it.}  \If{$nextCode \leq maxCode$}
+          there's space for it.}  \If{$\var{nextCode} \leq maxCode$}
 
-          \State \Call{AddToStringTable}{$nextCode, string + character$}\label{algl:hashadd}
-          \Inc{nextCode}{1}
+          \State \Call{AddToStringTable}{$\var{nextCode}, \var{string} + \var{character}$}\label{algl:hashadd}
+          \Inc{\var{nextCode}}{1}
 
         \EndIf
 
-        \Let{$string$}{$character$}
+        \Let{$\var{string}$}{$\var{character}$}
 
       \EndIf
 
-      \Let{$character$}{\VoidCall{$ReadByte$}}
+      \Let{$\var{character}$}{\VoidCall{$ReadByte$}}
 
     \EndWhile
 
-    \State \Call{outputCode}{$string$}
-    \State \Call{outputCode}{$maxValue$}
+    \State \Call{outputCode}{$\var{string}$}
+    \State \Call{outputCode}{$\var{maxValue}$}
   \end{algorithmic}
 \end{algorithm}
 
@@ -259,11 +259,12 @@ maximum length of the string table will be $2^n - 1$ rather than $2^n$
 
 \section{Description of the Decompression algorithm}
 
-Using the compression algorithm LZW on the string $ababcbababaaaaaaa$
-produced the compressed data $ab, 256,c, 257, 260, a, 262, 263, 264,
-a,4095$. Since we were using 12-bit codes to encode the data, the
-number $2^{12} - 1 = 4095$ terminates the data. This number is used by
-the decompressor to check if it is done with the decompression.
+Using the compression algorithm LZW on the string
+$\var{ababcbababaaaaaaa}$ produced the compressed data $ab, 256,c,
+257, 260, a, 262, 263, 264, a,4095$. Since we were using 12-bit codes
+to encode the data, the number $2^{12} - 1 = 4095$ terminates the
+data. This number is used by the decompressor to check if it is done
+with the decompression.
 
 In a LZW compressed file the string table used to encode the file is
 not included. But how could you possibly decompress the file without
@@ -278,46 +279,47 @@ their corresponding single length strings, and makes the same table
 compression.
 
 The characters $a$ and $b$ are read and $a$ is outputted. Now $a$ and
-$b$ are appended together to form the string $ab$. This string is
+$b$ are appended together to form the string $\var{ab}$. This string is
 added to the string table and is given the code $256$.
 
 A new code $256$ is read, $a$ is discarded and $b$ is outputted. The
 code $256$ is according to our current string table the string
-$ab$.
+$\var{ab}$.
 
 Now we need to form the next string to be added to the table. To do
 this, we take the string $b$ and append it to the first character of
-the string $ab$, thus forming the string $ba$. This string is added to
+the string $\var{ab}$, thus forming the string $\var{ba}$. This string is added to
 the table with the code $257$.
 
 The character is read $c$, the old $b$ is discarded and the string
-$ab$ is now outputted. $ab$ and $c$ are appended together to form the
-string $abc$(The first character of the one length string $c$ is
-simply $c$) and then $abc$ is added to the string table with
-the code $258$.
+$\var{ab}$ is now outputted. $\var{ab}$ and $c$ are appended together
+to form the string $\var{abc}$(The first character of the one length
+string $c$ is simply $c$) and then $\var{abc}$ is added to the string
+table with the code $258$.
 
-The code $257$ is read in, which corresponds to the string $ba$. Since
-the former code was $c$, the string to be added to the table is $cb$,
-and this string is given the code $259$.
+The code $257$ is read in, which corresponds to the string
+$\var{ba}$. Since the former code was $c$, the string to be added to
+the table is $\var{cb}$, and this string is given the code $259$.
 
 Next the code $260$ is read. But we haven't even yet added that code
 to the table! How could this be?
 
-Up to this point, the compressor had compressed the string $ababc$ and
-had defined the code for the string $ba$ as $257$. What remained to be
-compressed after this was $bababaaaaaaa$. So it read the string $ba$
-and the character $b$, becuase $ba$ was already defined in the string
-table. After outputting the code for $ba$, it added the string $bab$
-to string the string table, assigning it the code $260$. Then it threw
-away $ba$ and kept $b$. Then it accumulated the string $bab$ until it
-found the character $a$. At this point, the code $260$ for the string
-$bab$ was outputted.  The important thing to realize here is that this
-happened before the decompressor even had the chance the define the
-code $260$.
+Up to this point, the compressor had compressed the string
+$\var{ababc}$ and had defined the code for the string $\var{ba}$ as
+$257$. What remained to be compressed after this was
+$\var{bababaaaaaaa}$. So it read the string $\var{ba}$ and the
+character $b$, becuase $\var{ba}$ was already defined in the string
+table. After outputting the code for $\var{ba}$, it added the string
+$\var{ba}b$ to string the string table, assigning it the code
+$260$. Then it threw away $\var{ba}$ and kept $b$. Then it accumulated
+the string $\var{bab}$ until it found the character $a$. At this
+point, the code $260$ for the string $\var{bab}$ was outputted.  The
+important thing to realize here is that this happened before the
+decompressor even had the chance the define the code $260$.
 
-\newcommand{\ko}{\ensuremath{k\omega}\xspace}
-\newcommand{\kok}{\ensuremath{\ko k}\xspace}
-\newcommand{\kokok}{\ensuremath{\kok \omega k}\xspace}
+\newcommand{\ko}{\ensuremath{\var{k\omega}}\xspace}
+\newcommand{\kok}{\ensuremath{\var{\ko k}}\xspace}
+\newcommand{\kokok}{\ensuremath{\var{\kok \omega k}}\xspace}
 
 So the general problem could described like this\cite{welch85:_u}: if
 the string \ko is already in the string table and if the string \kokok
@@ -361,40 +363,40 @@ just described is given.
   \begin{algorithmic}[1]
 
     \State \VoidCall{FillInitialStringTable}
-    \Let{$nextCode$}{$256$}
+    \Let{$\var{nextCode}$}{$256$}
 
-    \Let{$oldCode$}{\VoidCall{$InputCode$}}
-    \State \Call{writeByte}{$oldCode$}
+    \Let{$\var{oldCode}$}{\VoidCall{$InputCode$}}
+    \State \Call{writeByte}{$\var{oldCode}$}
 
-    \Let{$character$}{$oldCode$}
+    \Let{$\var{character}$}{$\var{oldCode}$}
 
-    \Let{$newCode$}{\VoidCall{$InputCode$}}
+    \Let{$\var{newCode}$}{\VoidCall{$InputCode$}}
 
-    \While{$newCode \neq maxValue$}
+    \While{$\var{newCode} \neq \var{maxValue}$}
 
-      \If{$\NOT$ \Call{IsInTable}{$newCode$}} \Comment{The special case}
-        \Let{$string$}{\Call{TranslateCodeToString}{oldCode}}
-        \Let{$string$}{$string + character$}
+      \If{$\NOT$ \Call{IsInTable}{$\var{newCode}$}} \Comment{The special case}
+        \Let{$string$}{\Call{TranslateCodeToString}{$\var{oldCode}$}}
+        \Let{$string$}{$string + \var{character}$}
       \Else
-        \Let{$string$}{\Call{TranslateCodeToString}{$newCode$}}
+        \Let{$string$}{\Call{TranslateCodeToString}{$\var{newCode}$}}
       \EndIf
 
       \State \Call{outputString}{$string$}
 
-      \Let{$character$}{$string[0]$} \Comment{Get the first character
+      \Let{$\var{character}$}{$string[0]$} \Comment{Get the first character
         of the string.}
 
-      \If{$nextCode \leq maxCode$}
-        \linecomment{Add the translation of $oldCode$ $+$ $character$
+      \If{$\var{nextCode} \leq maxCode$}
+        \linecomment{Add the translation of $\var{oldCode}$ $+$ $\var{character}$
           to the table}
-        \State \Call{$AddToStringTable$}{$nextCode,oldCode, character$}
+        \State \Call{$AddToStringTable$}{$\var{nextCode},\var{oldCode}, \var{character}$}
 
-        \Inc{nextCode}{1}
+        \Inc{\var{nextCode}}{1}
       \EndIf
 
-      \Let{$oldCode$}{$newCode$}
+      \Let{$\var{oldCode}$}{$\var{newCode}$}
 
-      \Let{$newCode$}{\VoidCall{$ReadByte$}}
+      \Let{$\var{newCode}$}{\VoidCall{$ReadByte$}}
 
     \EndWhile
   \end{algorithmic}
@@ -587,6 +589,6 @@ the compression ratio.
 
 \begin{Answer}[ref={lzw-decompress}]
 
-  The decompressed data you should get is $abababab$.
+  The decompressed data you should get is $\var{abababab}$.
 
 \end{Answer}

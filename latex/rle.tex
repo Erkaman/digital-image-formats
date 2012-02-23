@@ -177,7 +177,7 @@ consider the compression algorithm, which is shown in algorithm
   \label{alg:rle-enc}
   \begin{algorithmic}[1]
 
-    \Let{$length$}{$0$}
+    \Let{$\var{length}$}{$0$}
     \Let{$c_1$}{ \VoidCall{ReadByte}}
 
     \While{\True}
@@ -188,21 +188,21 @@ consider the compression algorithm, which is shown in algorithm
     \Break
     \EndIf
 
-    \If{$c_1 = c_2 \AND length < 255$}
-    \Let{$length$}{$1 + length$}
+    \If{$c_1 = c_2 \AND \var{length} < 255$}
+    \Let{$\var{length}$}{$1 + \var{length}$}
     \Else
     \linecomment{Write the packet}
-    \State \Call{WriteByte}{$length$}
+    \State \Call{WriteByte}{$\var{length}$}
     \State \Call{WriteByte}{$c_1$}
 
     \Let{$c_1$}{$c_2$}
-    \Let{$length$}{$1$}
+    \Let{$\var{length}$}{$1$}
     \EndIf
 
     \EndWhile
 
     \linecomment{Write the last packet.}
-    \State \Call{WriteByte}{$length$}
+    \State \Call{WriteByte}{$\var{length}$}
     \State \Call{WriteByte}{$c_1$}
   \end{algorithmic}
 \end{algorithm}
@@ -242,15 +242,15 @@ the end of the algorithm.
   \label{alg:rle-dec}
   \begin{algorithmic}[1]
 
-    \Let{$length$}{\VoidCall{ReadByte}}
+    \Let{$\var{length}$}{\VoidCall{ReadByte}}
     \Let{$c$}{\VoidCall{ReadByte}}
 
     \While{\neof}
-    \Repeatn{$length + 1$}
+    \Repeatn{$\var{length} + 1$}
     \State \Call{WriteByte}{$b$}
     \EndRepeatn
 
-    \Let{$length$}{\VoidCall{ReadByte}}
+    \Let{$\var{length}$}{\VoidCall{ReadByte}}
     \Let{$c$}{\VoidCall{ReadByte}}
 
     \EndWhile
@@ -353,10 +353,10 @@ packet,
   \caption{Writing a raw packet.}
   \label{alg:raw-packet}
   \begin{algorithmic}[1]
-    \Function{writeRawPacket}{$length,data$}
-    \State \Call{writeByte}{$length$}
-    \ForEach{$raw$}{$data$}
-    \State \Call{writeByte}{$raw$}
+    \Function{writeRawPacket}{$\var{length,data}$}
+    \State \Call{writeByte}{$\var{length}$}
+    \ForEach{$\var{raw}$}{$\var{data}$}
+    \State \Call{writeByte}{$\var{raw}$}
     \EndForEach
     \EndFunction
   \end{algorithmic}
@@ -372,12 +372,12 @@ length bit is assigned to an initial value of $1 \ShiftLeft 7 =
   \caption{Writing a run length packet.}
   \label{alg:rle-packet}
   \begin{algorithmic}[1]
-    \Require $length > 0$
-    \Function{writeRunLengthPacket}{$length,data$}
+    \Require $\var{length} > 0$
+    \Function{writeRunLengthPacket}{$\var{length,data}$}
     \Let{packetHead}{$128$}
-    \Let{packetHead}{$packetHead \BitOr length$}
-    \State \Call{writeByte}{$packetHead$}
-    \State \Call{writeByte}{$data$}
+    \Let{packetHead}{$\var{packetHead} \BitOr \var{length}$}
+    \State \Call{writeByte}{$\var{packetHead}$}
+    \State \Call{writeByte}{$\var{data}$}
     \EndFunction
   \end{algorithmic}
 \end{algorithm}
@@ -391,9 +391,9 @@ implement the actual PackBits RLE algorithm. It is shown in algorithm
 
 Since there are two kinds of packets allowed in the PackBits RLE
 method, we will need a way of telling which kind of packet we are
-creating at the time. The two constants $RawPacket$ and
-$RunLengthPacket$ are created for this purpose. The values of these
-two constants are then assigned to the variable $packetType$ for
+creating at the time. The two constants $\var{RawPacket}$ and
+$\var{RunLengthPacket}$ are created for this purpose. The values of these
+two constants are then assigned to the variable $\var{packetType}$ for
 keeping track of the current packet type.
 
 We start the algorithm by setting up a starting packet of length 1 of
@@ -402,14 +402,15 @@ and following this the second character in the file is read to
 $c_2$. However, if there's only one character in the file, then the
 main loop is stopped and the last packet is written. Since we were
 dealing with a raw packet the only character $c_1$ is put in the array
-$data$. The array $data$ stores the data of the current raw packet.
+$\var{data}$. The array $\var{data}$ stores the data of the current
+raw packet.
 
 If there however was more than one character, then it is first checked
 if the current packet is at its maximum capacity. If so, then the
 current packet is written out. If the current packet is a run-length
 packet then the run-length packet is simply written out and
 preparations are made for writing a new raw packet. If the packet is a
-raw packet then the character $c_1$ is put at the end of the $data$
+raw packet then the character $c_1$ is put at the end of the $\var{data}$
 array, and then the raw packet is written out. The next character is
 read to $c_2$, which is why we beforehand assigns $c_1$ to $c_2$ after
 we have written the raw packet, to ensure that the value of $c_2$ is
@@ -419,7 +420,7 @@ If on the other hand the current packet is not full then we are going
 to write a run-length packet. First however, we need to check if we
 are not already writing a raw packet. If so, then we finish the raw
 packet by outputting it. Then the construction of the run-length
-packet continues by incrementing the $length$ variable and setting the
+packet continues by incrementing the $\var{length}$ variable and setting the
 current packet type to run length packet.
 
 If the current packet is not full and $c_1 \neq c_2$, then we are
@@ -433,10 +434,10 @@ outputted.
   \caption{Encoding a file using PackBits RLE.}
   \label{alg:packbits-enc}
   \begin{algorithmic}[1]
-    \Let{$RawPacket$}{$0$}
-    \Let{$RunLengthPacket$}{$1$}
-    \Let{$packetType$}{$RawPacket$}
-    \Let{$length$}{$0$}
+    \Let{$\var{RawPacket}$}{$0$}
+    \Let{$\var{RunLengthPacket}$}{$1$}
+    \Let{$\var{packetType}$}{$\var{RawPacket}$}
+    \Let{$\var{length}$}{$0$}
     \Let{$c_1$}{ \VoidCall{ReadByte}}
 
     \While{\neof}
@@ -447,45 +448,45 @@ outputted.
         \Break
       \EndIf
       \linecomment{If the current packet is full.}
-      \If{$length = 127$}
+      \If{$\var{length} = 127$}
 
-        \If{$packetType = RunLengthPacket$}
+        \If{$\var{packetType} = \var{RunLengthPacket}$}
 
-         \State \Call{writeRunLengthPacket}{$length,c_1$}
-         \Let{$packetType$}{$RawPacket$}
-         \Let{$length$}{$0$}
+         \State \Call{writeRunLengthPacket}{$\var{length},c_1$}
+         \Let{$\var{packetType}$}{$\var{RawPacket}$}
+         \Let{$\var{length}$}{$0$}
 
-       \ElsIf{$packetType = RawPacket$}
+       \ElsIf{$\var{packetType} = \var{RawPacket}$}
 
-         \Let{$data[length]$}{$c_1$}
-         \State \Call{writeRawPacket}{$length,data,out$}
-         \Let{$length$}{$0$}
+         \Let{$\var{data[length]}$}{$c_1$}
+         \State \Call{writeRawPacket}{$\var{length},\var{data},\var{out}$}
+         \Let{$\var{length}$}{$0$}
          \Let{$c_1$}{$c_2$}
 
       \EndIf
     \ElsIf{$c_2 = c_1$}
 
       \linecomment{Finish the current raw packet, if necessary}
-      \If{$packetType = RawPacket \AND length > 0$}
-        \State \Call{writeRawPacket}{$length-1,data,out$}
-        \Let{$length$}{$0$}
+      \If{$\var{packetType} = \var{RawPacket} \AND \var{length} > 0$}
+        \State \Call{writeRawPacket}{$\var{length}-1,\var{data},\var{out}$}
+        \Let{$\var{length}$}{$0$}
       \EndIf
 
-      \Let{$length$}{$1 + length$}
-      \Let{$packetType$}{$RunLengthPacket$}
+      \Let{$\var{length}$}{$1 + \var{length}$}
+      \Let{$\var{packetType}$}{$\var{RunLengthPacket}$}
 
     \Else
 
-      \If{$packetType = RunLengthPacket$}
+      \If{$\var{packetType} = \var{RunLengthPacket}$}
 
-        \State \Call{writeRunLengthPacket}{$length,c_1$}
-       \Let{$packetType$}{$RawPacket$}
-       \Let{$length$}{$0$}
+        \State \Call{writeRunLengthPacket}{$\var{length},c_1$}
+       \Let{$\var{packetType}$}{$\var{RawPacket}$}
+       \Let{$\var{length}$}{$0$}
 
-      \ElsIf{$packetType = RawPacket$}
+      \ElsIf{$\var{packetType} = \var{RawPacket}$}
 
-        \Let{$data[length]$}{$c_1$}
-        \Let{$length$}{$length + 1$}
+        \Let{$\var{data[length]}$}{$c_1$}
+        \Let{$\var{length}$}{$\var{length} + 1$}
 
       \EndIf
 
@@ -495,11 +496,11 @@ outputted.
 
     \EndWhile
 
-    \If{$packetType = RunLengthPacket$}
-      \State \Call{$writeRunLengthPacket$}{$length,c_1$}
+    \If{$\var{packetType} = \var{RunLengthPacket}$}
+      \State \Call{$writeRunLengthPacket$}{$\var{length},c_1$}
     \Else
-      \Let{$data[length]$}{$c_1$}
-    \State \Call{$writeRawLengthPacket$}{$length,data$}
+      \Let{$\var{data[length]}$}{$c_1$}
+    \State \Call{$writeRawLengthPacket$}{$\var{length},\var{data}$}
     \EndIf
   \end{algorithmic}
 \end{algorithm}
@@ -512,29 +513,29 @@ algorithm \ref{alg:packbits-dec}.
   \label{alg:packbits-dec}
   \begin{algorithmic}[1]
 
-    \Let{$packet$}{\VoidCall{ReadByte}}
+    \Let{$\var{packet}$}{\VoidCall{ReadByte}}
 
     \While{\neof}
 
-      \Let{$length$}{$packet \BitAnd 127$}
+      \Let{$\var{length}$}{$\var{packet} \BitAnd 127$}
 
       \linecomment{Check if raw packet.}
-      \If{$packet \BitAnd 128$}
-        \Let{$data$}{\VoidCall{ReadByte}}
+      \If{$\var{packet} \BitAnd 128$}
+        \Let{$\var{data}$}{\VoidCall{ReadByte}}
 
-        \Repeatn{$length + 1$}
-        \State \Call{WriteByte}{$data$}
+        \Repeatn{$\var{length} + 1$}
+        \State \Call{WriteByte}{$\var{data}$}
         \EndRepeatn
       \Else
 
-        \Repeatn{$length + 1$}
-        \Let{$data$}{\VoidCall{ReadByte}}
-        \State \Call{WriteByte}{$data$}
+        \Repeatn{$\var{length} + 1$}
+        \Let{$\var{data}$}{\VoidCall{ReadByte}}
+        \State \Call{WriteByte}{$\var{data}$}
         \EndRepeatn
 
       \EndIf
 
-      \Let{$packet$}{\VoidCall{ReadByte}}
+      \Let{$\var{packet}$}{\VoidCall{ReadByte}}
 
     \EndWhile
   \end{algorithmic}

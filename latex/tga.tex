@@ -145,7 +145,7 @@ represent the value of this field, then a TGA image is compressed if
 and only if the following holds true:
 
 \begin{equation*}
-  imageType = 9 \OR imageType = 10 \OR imageType = 11
+  \var{imageType} = 9 \OR \var{imageType} = 10 \OR \var{imageType} = 11
 \end{equation*}
 
 \imgfield{Color Map Specification}{5}
@@ -191,11 +191,11 @@ array.
   \label{alg:tga-read-colormap}
   \begin{algorithmic}[1]
 
-    \State Move $colorMapStart$ bytes forward in the file.
+    \State Move $\var{colorMapStart}$ bytes forward in the file.
 
-    \ForTo{$i$}{$colorMapStart$}{$colorMapLength$}
-      \Let{$data$}{\Call{Read}{$colorMapEntrySize / 8$}}
-      \Let{$colorMap[i]$}{$data$}
+    \ForTo{$i$}{$\var{colorMapStart}$}{$\var{colorMapLength}$}
+      \Let{$\var{data}$}{\Call{Read}{$\var{colorMapEntrySize} / 8$}}
+      \Let{$\var{colorMap[i]}$}{$\var{data}$}
     \EndFor
     \end{algorithmic}
   \end{algorithm}
@@ -327,39 +327,39 @@ you have fully understood it.
 \begin{algorithm}[H]
   \caption{Reading and decompressing the color data of a TGA file.}
   \label{alg:TGA-read-colordata}
-  \newcommand{\process}{\State Process the color $data$ \dots}
+  \newcommand{\process}{\State Process the color $\var{data}$ \dots}
   \begin{algorithmic}[1]
-    \Let{$imageSize$}{$imageWidth \mul imageHeigth$}
-    \Let{$compressed$}{$imageType = 9 \OR imageType = 10 \OR imageType = 11$}
+    \Let{$\var{imageSize}$}{$\var{imageWidth} \mul \var{imageHeigth}$}
+    \Let{$\var{compressed}$}{$\var{imageType} = 9 \OR \var{imageType} = 10 \OR \var{imageType} = 11$}
     \Let{$i$}{$0$}
 
-    \While{$i < imageSize$}
-      \If{$compressed$}
+    \While{$i < \var{imageSize}$}
+      \If{$\var{compressed}$}
 
-      \Let{$packet$}{\VoidCall{ReadByte}}
-      \Let{$length$}{$packet \BitAnd 127$}
+      \Let{$\var{packet}$}{\VoidCall{ReadByte}}
+      \Let{$\var{length}$}{$\var{packet} \BitAnd 127$}
 
-      \If{$packet \BitAnd 128$}
+      \If{$\var{packet} \BitAnd 128$}
 
-        \Let{$data$}{\Call{Read}{$pixelDepth / 8$}}
+        \Let{$\var{data}$}{\Call{Read}{$\var{pixelDepth} / 8$}}
 
-        \If{$colorMapType = 1$}
-          \Let{$data$}{$colorMap[data]$}
+        \If{$\var{colorMapType} = 1$}
+          \Let{$\var{data}$}{$\var{colorMap[data]}$}
         \EndIf
 
-        \Repeatn{$length + 1$}
+        \Repeatn{$\var{length} + 1$}
           \process
           \Inc{$i$}{1}
         \EndRepeatn
 
     \Else
 
-      \Repeatn{$length + 1$}
+      \Repeatn{$\var{length} + 1$}
 
-        \Let{$data$}{\Call{Read}{$pixelDepth / 8$}}
+        \Let{$\var{data}$}{\Call{Read}{$\var{pixelDepth} / 8$}}
 
-        \If{$colorMapType = 1$}
-          \Let{$data$}{$colorMap[data]$}
+        \If{$\var{colorMapType} = 1$}
+          \Let{$\var{data}$}{$\var{colorMap[data]}$}
         \EndIf
 
         \process
@@ -371,10 +371,10 @@ you have fully understood it.
        \EndIf
     \Else
 
-      \Let{$data$}{\Call{Read}{pixelDepth / 8}}
+      \Let{$\var{data}$}{\Call{Read}{$\var{pixelDepth} / 8$}}
 
-      \If{$colorMapType = 1$}
-        \Let{$data$}{colorMap[data]}
+      \If{$\var{colorMapType} = 1$}
+        \Let{$\var{data}$}{$\var{colorMap[data]}$}
       \EndIf
 
       \process

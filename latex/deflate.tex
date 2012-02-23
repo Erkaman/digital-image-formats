@@ -27,14 +27,14 @@ variation to do compression. It in other words uses a system very
 similar to that of LZSS, which uses unmatched tokens and matched
 tokens.
 
-the alphabet $0-255$ is used to encode literal bytes, which are just
+the alphabet 0--255 is used to encode literal bytes, which are just
 like unmatched tokens for which for no match was found for in the LZ77
 window. The special value $256$ is used to indicate the end of the
 compressed data. Note that this value is part of the same alphabet as
 the literal bytes. Also part of the same alphabet are the length
-codes. They can be found in the range $257-285$, and they are used to
+codes. They can be found in the range 257--285, and they are used to
 indicate the length of the LZ77 matched strings. The entire alphabet
-consists of the values $0-285$ and this entire alphabet will get
+consists of the values 0--285 and this entire alphabet will get
 Huffman codes in the later parts of the algorithm, which we will get
 to soon.
 
@@ -69,8 +69,8 @@ code $278$ followed by the 4-bit number $12$
       262 & 0 & 8 \\
       263 & 0 & 9 \\
       264 & 0 & 10 \\
-      265 & 1 & 11-12 \\
-      266 & 1 & 13-14 \\
+      265 & 1 & 11--12 \\
+      266 & 1 & 13--14 \\
       \bottomrule
     \end{tabular}
   \end{minipage}
@@ -80,16 +80,16 @@ code $278$ followed by the 4-bit number $12$
       \toprule
       \hdr{} \\
       \midrule
-      267 & 1 & 15-16 \\
-      268 & 1 & 17-18 \\
-      269 & 2 & 19-22 \\
-      270 & 2 & 23-26\\
-      271 & 2 & 27-30 \\
-      272 & 2 & 31-34 \\
-      273 & 0 & 33-42 \\
-      274 & 3 & 43-50 \\
-      275 & 3 & 51-58 \\
-      276 & 3 & 59-66 \\
+      267 & 1 & 15--16 \\
+      268 & 1 & 17--18 \\
+      269 & 2 & 19--22 \\
+      270 & 2 & 23--26\\
+      271 & 2 & 27--30 \\
+      272 & 2 & 31--34 \\
+      273 & 0 & 33--42 \\
+      274 & 3 & 43--50 \\
+      275 & 3 & 51--58 \\
+      276 & 3 & 59--66 \\
       \bottomrule
     \end{tabular}
   \end{minipage}
