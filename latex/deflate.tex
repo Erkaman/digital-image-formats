@@ -197,10 +197,54 @@ be represented by a length code 29 followed by the 13-bit value
 
 \section{Fixed Huffman Codes}
 
-All the codes in the distance, litteral and length alphabets will be
-encoded in the compressed data using Huffman codes.
+All the codes in the distance, literal and length alphabets will be
+encoded in the compressed data using Huffman codes. But the Huffman
+tree must also be passed along with the data for it to be compressed
+properly. There are two sorts of ways of doing this: fixed and dynamic
+Huffman codes. Let us first discussed the most of simple of these two:
+fixed Huffman codes.
+
+Using fixed Huffman codes the Huffman codes of the both alphabets are
+precomputed(it is shown in section ? \todo{reference section} how
+these Huffman codes are computed). The precomputed Huffman codes for
+the first alphabet are shown in table
+\ref{tab:fixed-length-litteral-huffman}. Using this table, the end
+code, 256, will be represented by the 7-bit Huffman Code
+\bin{0000000}. The literal code 142 will on the other hand be
+represented by the 8-bit Huffman code \bin{10111110}. And the distance
+code 258 will be represented by the 7-bit Huffman code
+\bin{0000002}. The reader may however be confused by the two length
+codes 286 and 287. Did not the first alpha only span the range 0--285?
+\todo{explain}.
+
+The fixed Huffman Distance codes are on the other hand represented in
+a more simple way: Distance codes 0-29 are assigned 5-bit Huffman
+codes of their corresponding values, meaning that, for example, the
+distance code of 28 will be represented by a 5-bit number with the
+value 28. And of course, these distance codes encoded as Huffman codes
+will be followed by their accompanying extra bits. A 5-bit number can
+fit all the possible distance codes, because the maximum value of such
+a number is $2^{5} - 1 = 31$. The distance codes are also assigned
+Huffman codes even though they do not even exists, but according to
+the DEFLATE specification they will never ever occur in the compressed
+data.
+
+\begin{table}
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    Codes & Bits & Huffman Codes \\
+    \midrule
+    0--143 & 8 & \bin{00110000}--\bin{10111111} \\
+    144--255 & 9 & \bin{110010000}--\bin{111111111} \\
+    256--279 & 7 & \bin{0000000}--\bin{0010111} \\
+    280--287 & 8 & \bin{11000000}--\bin{11000111} \\
+    \bottomrule
+  \end{tabular}
+  \caption{Fixed Huffman codes for the first alphabet}
+  \label{tab:fixed-length-litteral-huffman}
+\end{table}
 
 \section{Dynamic Huffman Codes}
 
 \section{Storing the Huffman Codes}
-
