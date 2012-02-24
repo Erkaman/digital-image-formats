@@ -708,9 +708,18 @@ std::vector<Color> loadColorData(vector<BYTE> data, ImageHeader header)
     decompressed = ZLIB_Decompress(data);
     verbose = former;
 
+/*    printf("uncompressed:\n");
+    for(size_t i = 0; i < decompressed.size(); ++i){
+	printf("%d\n", decompressed[i]);
+    } */
+
     /* Unfilter. */
 
     unfiltered = unfilterImage(decompressed, header);
+/*    printf("unfiltered:\n");
+    for(size_t i = 0; i < unfiltered.size(); ++i){
+	printf("%d\n", unfiltered[i]);
+    } */
 
     /* Undo the Scanline serialization; that is, split up the bytes into colors. */
 
@@ -997,12 +1006,16 @@ std::vector<Color> splitUpColorDataSubImage(
     size_t dataCount
     )
 {
-    /* s01i3p01.png */
     size_t i;
     vector<Color> colorData;
     Color color;
 
+/*    printf("size:%ld\n", (width * height)); */
+
+
     for(i = 0; i < (width * height); ++i){
+
+/*	printf("i:%ld\n", i); */
 
         if(header.colorType == GREYSCALE_COLOR){
             color.greyscale = readNextChannel(colorStream, inBits, header);
@@ -1038,8 +1051,9 @@ std::vector<Color> splitUpColorDataSubImage(
         if((i+1) % width == 0 &&
 	   inBits.getPosition() != dataCount &&
 	   header.bitDepth < 8){
-	    inBits.nextByte();
+/*	    printf("next\n"); */
 
+	    inBits.readNextByte();
 	    /* read next byte in stream*/
         }
     }
@@ -1066,7 +1080,7 @@ vector<Color> splitUpColorData(vector<BYTE> data, ImageHeader header)
     }
 
     DataStream colorStream(data,PNG_ENDIAN);
-    BitIterReader inBits(data.begin(), data.begin(),MSBF);
+    BitIterReader inBits(data.begin(),MSBF);
 
     for(pass = 0; pass < passes; ++pass){
 
@@ -1088,7 +1102,10 @@ vector<Color> splitUpColorData(vector<BYTE> data, ImageHeader header)
     return fullImage;
 }
 
-unsigned long readNextChannel(DataStream & stream, BitReader & inBits,const ImageHeader & header)
+unsigned long readNextChannel(
+    DataStream & stream,
+    BitReader & inBits,
+    const ImageHeader & header)
 {
     unsigned long channel;
 
@@ -1099,6 +1116,8 @@ unsigned long readNextChannel(DataStream & stream, BitReader & inBits,const Imag
     else if(header.bitDepth < 8)
         /* Handle bit depths 1, 2 and 4*/
         channel = inBits.readBits(header.bitDepth);
+/*	printf("channel:%ld\n", channel); */
+
 
     return channel;
 }
@@ -1335,8 +1354,6 @@ vector<Color> uninterlace(const vector<Color> & data, const ImageHeader & header
     int rowIncrement[7] = { 8, 8, 8, 4, 4, 2, 2 };
     int colIncrement[7] = { 8, 8, 4, 4, 2, 2, 1 };
 
-    Color c;
-
     vector<Color> uninterlaced(header.width * header.height);
 
     i = 0;
@@ -1350,9 +1367,6 @@ vector<Color> uninterlace(const vector<Color> & data, const ImageHeader & header
             col = startingCol[pass];
 
             while(col < header.width){
-
-                c = data[i];
-                c = c;
 
                 uninterlaced[row * header.width + col] = data[i++];
 

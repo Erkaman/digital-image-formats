@@ -11,13 +11,18 @@ BitReader::BitReader(BitOrder order_)
     this->order = order_;
 }
 
+void BitReader::readNextByte()
+{
+    this->byte = getNextByte();
+    this->bits = 8;
+}
+
 BYTE BitReader::readBit(void)
 {
     BYTE ret = 0;
 
     if (this->bits == 0) {
-        this->byte = nextByte();
-        this->bits = 8;
+	readNextByte();
     }
 
     if(this->order == MSBF){
@@ -32,7 +37,7 @@ BYTE BitReader::readBit(void)
     return ret & 1;
 }
 
-BYTE BitFileReader::nextByte()
+BYTE BitFileReader::getNextByte()
 {
     return getc(in);
 }
@@ -87,7 +92,7 @@ BitIterReader::BitIterReader(Iter iter_, BitOrder order_):
     beg = this->iter;
 }
 
-BYTE BitIterReader::nextByte()
+BYTE BitIterReader::getNextByte()
 {
     BYTE b = *iter;
     ++iter;
@@ -98,7 +103,6 @@ size_t BitIterReader::getPosition()const
 {
     return this->iter - this->beg;
 }
-
 
 BitWriter::BitWriter(BitOrder order_)
 {

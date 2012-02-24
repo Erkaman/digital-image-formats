@@ -376,7 +376,7 @@ This value serves as a sort of checksum on the CMF and FLG bytes. This
 value must be the value such that
 
 \begin{equation*}
- \var{CMF} \cdot 256 + \var{FLG} (mod 31) = 0
+  \var{CMF} \cdot 256 + \var{FLG} (mod 31) = 0
 \end{equation*}
 
 So CMF and FLG, when viewed as a 16-bit number, must be made dividable
@@ -504,7 +504,7 @@ So each unfiltered byte is calculated from the filtered data $B$ in
 this way as follows:
 
 \begin{equation*}
- B_{i,j} + B_{i,j-1}
+  B_{i,j} + B_{i,j-1}
 \end{equation*}
 
 And remember that all addition is done modulo $256$
@@ -599,15 +599,15 @@ Where any values outside of the image boundaries are set to $0$.
   Filter the rows of the following image using filter type 1(remember
   that every filtered row must begin with the filter type):
 
-\[
- \begin{matrix}
-  2 & 3 & 4 & 5 \\
-  4 & 9 & 14 & 19 \\
-  2 & 12 & 3 & 20
- \end{matrix}
-\]
+  \[
+  \begin{matrix}
+    2 & 3 & 4 & 5 \\
+    4 & 9 & 14 & 19 \\
+    2 & 12 & 3 & 20
+  \end{matrix}
+  \]
 
-The color type is $0$, and the number of bits per channel is $8$.
+  The color type is $0$, and the number of bits per channel is $8$.
 
 \end{Exercise}
 
@@ -623,11 +623,11 @@ the former, operates only on bytes and not on pixels.
 So given the three rows
 
 \[
- \begin{matrix}
+\begin{matrix}
   4 & 5 \\
   5 & 9 \\
   6 & 13 \\
- \end{matrix}
+\end{matrix}
 \]
 
 If we let the first row get filtered by filter $0$, and the last two
@@ -635,11 +635,11 @@ rows get filtered by filter $2$, then these rows will be filtered as
 follows
 
 \[
- \begin{matrix}
+\begin{matrix}
   0 & 4 & 5 \\
   2 & 1 & 4 \\
   2 & 1 & 4 \\
- \end{matrix}
+\end{matrix}
 \]
 
 Unfiltering is trivially done by reversing the filter:
@@ -657,7 +657,7 @@ follows:
 
 \begin{equation*}
   B_{i,j} - \left \lfloor \frac{B_{i-1,j} +
-    B_{i,j-t}}{2} \right \rfloor
+      B_{i,j-t}}{2} \right \rfloor
 \end{equation*}
 
 However, do note that the PNG specification for requires that the sum
@@ -667,7 +667,7 @@ The transformation can then be trivially reversed:
 
 \begin{equation*}
   B_{i,j} + \left \lfloor \frac{B_{i-1,j} +
-    B_{i,j-t}}{2} \right \rfloor
+      B_{i,j-t}}{2} \right \rfloor
 \end{equation*}
 
 \subsubsection{Filter 4 -- Paeth}
@@ -747,23 +747,125 @@ the channels will get spread out over several bytes.
 \subsection{Interlacing}
 \label{png-interlacing}
 
+The main idea behind PNG interlacing is that the image to be
+interlaced is divided into 8x8 tiles, and then the data of these tiles
+are partitioned into $7$ distinct passes:
+
+\[
+\begin{matrix}
+  1 & 6 & 4 & 6 & 2 & 6 & 4 & 6\\
+  7 & 7 & 7 & 7 & 7 & 7 & 7 & 7\\
+  5 & 6 & 5 & 6 & 5 & 6 & 5 & 6\\
+  7 & 7 & 7 & 7 & 7 & 7 & 7 & 7\\
+  3 & 6 & 4 & 6 & 3 & 6 & 4 & 6\\
+  7 & 7 & 7 & 7 & 7 & 7 & 7 & 7\\
+  5 & 6 & 5 & 6 & 5 & 6 & 5 & 6\\
+  7 & 7 & 7 & 7 & 7 & 7 & 7 & 7\\
+\end{matrix}
+\]
+
+This is best understood by using an example. Consider, for example, an
+8-bit grayscale image that consisted of the grayscale data:
+
+\[
+\begin{matrix}
+  1 & 2 & 3 & 4 & 5 & 6 & 7 & 8\\
+  9 & 10 & 11 & 12 & 13 & 14 & 15 & 16\\
+  17 & 18 & 19 & 20 & 21 & 22 & 23 & 24\\
+  25 & 26 & 27 & 28 & 29 & 30 & 31 & 32\\
+  33 & 34 & 35 & 36 & 37 & 38 & 39 & 40\\
+  41 & 42 & 43 & 44 & 45 & 46 & 47 & 48\\
+  49 & 50 & 51 & 52 & 53 & 54 & 55 & 56\\
+  57 & 58 & 59 & 60 & 61 & 62 & 63 & 64\\
+
+\end{matrix}
+\]
+
+The first pass of this interlaced image would consist of the 1x1 image
+with a single color 1. Passes are treated like single images and these
+single images will get scanline serialized separately. The images that
+of the separate passes will then be found after each in the color
+data. Pass would get scanline serialized to the byte $1$. It would
+then followed by the 1x1 image that pass 2 also consists of. This
+image consists of the color $5$ and so it will get serialized to
+$5$. Pass 3 will on the other hand consist of the 2x1 image with the
+single row $33,37$ and so on.
+
+\begin{Exercise}[label={ex-interlace}]
+
+  What would pass 5 consist of?
+
+\end{Exercise}
+
+To undo the interlacing first all the separate images that the passes
+consists of will have to be read. Then the separate pixels must be
+rearranged in proper order. It is shown in algorithm ? how this is
+done.
+
+\begin{algorithm}[H]
+  \caption{Undoing the interlacing of the uncompressed PNG color data.}
+  \label{alg:gif-interlace}
+  \begin{algorithmic}[1]
+    \Let{$\var{startingRow}$}{$\{0, 0, 4, 0, 2, 0, 1\}$}
+    \Let{$\var{startingCol}$}{$\{0, 4, 0, 2, 0, 1, 0\}$}
+    \Let{$\var{rowIncrement}$}{$\{8, 8, 8, 4, 4, 2, 2\}$}
+    \Let{$\var{colIncrement}$}{$\{8, 8, 4, 4, 2, 2, 1\}$}
+
+    \Let{$i$}{$0$}
+
+    \linecomment{In this algorithm, the pass numbers are zero based}
+    \ForTo{$\var{pass}$}{$0$}{$7$}
+    \Let{$\var{row}$}{$\var{startingRow[pass]}$}
+
+    \While{$\var{row} < \var{imageHeight}$}
+
+    \Let{$column$}{$\var{startingCol[pass]}$}
+
+    \While{$\var{colmn} < \var{imageWidth}$}
+
+    \Let{$j$}{$\var{row} \cdot \var{width} + \var{column}$}
+    \Let{$\var{uninterlacedColorData[j]}$}{$\var{uncompressedColorData[i]}$}
+    \Let{$i$}{$i + $}
+
+    \Let{$\var{column}$}{$\var{column} + \var{colIncrement[pass]}$}
+
+    \EndWhile
+
+    \Let{$\var{row}$}{$\var{row} + \var{rowIncrement[pass]}$}
+
+    \EndWhile
+
+    \EndForTo
+
+  \end{algorithmic}
+\end{algorithm}
+
 
 
 \section{Answers to the exercises}
 
 \begin{Answer}[ref={filter-1}]
 
-\[
- \begin{matrix}
-  1 & 2 & 1 & 1 & 1 \\
-  1 & 4 & 5 & 5 & 5 \\
-  1 & 2 & 10 & 247 & 17
- \end{matrix}
-\]
+  \[
+  \begin{matrix}
+    1 & 2 & 1 & 1 & 1 \\
+    1 & 4 & 5 & 5 & 5 \\
+    1 & 2 & 10 & 247 & 17
+  \end{matrix}
+  \]
+
+\end{Answer}
+
+\begin{Answer}[ref={ex-interlace}]
+
+  \[
+  \begin{matrix}
+    17 & 19 & 21 & 23 \\
+    49 & 51 & 53 & 55
+  \end{matrix}
+  \]
 
 
 \end{Answer}
 
-% mention private chunks like imagemagick's  vpag
 
-% quickly summarize the ones that won't get in depth coverage.

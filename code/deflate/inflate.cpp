@@ -75,7 +75,7 @@ void readNonCompresedBlock(BitReader & compressedStream, vector<BYTE> & decompre
 /* if dynaic codes are used a new table is read in before the decompression
    of the data. */
 
-    compressedStream.nextByte();
+    compressedStream.readNextByte();
     /* FIXME: does this handle big and little endian? */
     /* Implement a routine for doing this. */
     b1 = compressedStream.readBits(8);
@@ -195,7 +195,6 @@ RevCodesList loadDistanceCodes(
     const RevCodesList & codeLengthCodes,
     BitReader * compressedStream)
 {
-    printf("hdist:%d\n", HDIST + 1);
     return loadUsingCodeLengthCodes(
         HDIST + 1,
         DISTANCE_CODES,
@@ -238,11 +237,9 @@ void readCompresedBlock(
         /* If the code is a simple literal value. */
         if(code <= LITTERAL_VALUES_MAX){
             /* */
-/*	    printf("literal:%ld\n", code);*/
             decompressedList.push_back((BYTE)code);
         }
         else if(code == END_OF_BLOCK){
-/*	    printf("end of block:%ld\n", code); */
 
             /* If the code is a end of block code, then stop.*/
             break;
@@ -282,20 +279,11 @@ void decodeLengthDistancePair(
 
     fullDistanceCode = readRestOfDistanceCode(distanceCode,compressedStream);
 
-
-
     Token token;
     token.length = fullLengthCode;
     token.offset = fullDistanceCode;
 
-/*    printf("length:%d\n", token.length);
-    printf("distance:%d\n", token.offset); */
-
-
-
     decodeToken(token, decompressedList);
-
-/*    outputLengthDistancePair(fullLengthCode, fullDistanceCode, decompressedList); */
 }
 
 unsigned int readRestOfDistanceCode(unsigned int code,BitReader * compressedStream)

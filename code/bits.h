@@ -26,7 +26,9 @@ protected:
     BitReader(BitOrder order_);
 public:
 
-    virtual BYTE nextByte() = 0;
+    virtual BYTE getNextByte() = 0;
+
+    void readNextByte();
 
     virtual size_t getPosition()const = 0;
 
@@ -45,7 +47,7 @@ public:
     BitFileReader(FILE * in_, BitOrder order_);
 
     size_t getPosition()const;
-    BYTE nextByte();
+    BYTE getNextByte();
 };
 
 class BitIterReader : public BitReader{
@@ -59,7 +61,7 @@ private:
 public:
     BitIterReader(Iter iter_, BitOrder order_);
 
-    BYTE nextByte();
+    BYTE getNextByte();
     size_t getPosition()const;
 };
 

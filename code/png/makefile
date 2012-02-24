@@ -3,7 +3,7 @@ include ../default
 
 objects = main.o  png.o $(commonobjects)
 
-deflateObjects = ../deflate/deflate.o ../deflate/zlib.o ../huffman/huffman.o ../huffman/node.o
+deflateObjects = ../deflate/deflate.o ../deflate/inflate.o ../deflate/zlib.o ../huffman/huffman.o ../huffman/node.o ../lzss/lzss_util.o ../deflate/common.o
 
 $(PROG) : $(objects)
 	cd .. && $(MAKE)

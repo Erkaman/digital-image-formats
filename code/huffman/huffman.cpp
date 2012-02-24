@@ -648,7 +648,6 @@ RevCodesList loadUsingCodeLengthCodes(
         }
 
         if(codesLenI == length){
-            printf("fin:%d\n", codesLenI);
             break;
         }
     }
