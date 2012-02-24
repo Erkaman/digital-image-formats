@@ -306,39 +306,7 @@ carried onto the next step. The next step is known as \textit{scanline
   serialization}. Here, the separate colors are partitioned up into
 byte values, and the byte values are divided up into separate rows.
 
-\newcommand{\checkerimg}{
-  \tikz[scale=2]{
-    \fill[gray] (0,0) rectangle (0.5ex,0.5ex);
-    \fill[black] (0.5ex,0) rectangle (1.0ex,0.5ex);
-    \fill[black] (0,0.5ex) rectangle (0.5ex,1.0ex);
-    \fill[gray] (0.5ex,0.5ex) rectangle (1.0ex,1.0ex);
-  }}
 
-It is important to understand how exactly the scanline serialization
-is done. Say I have an image with the size 2x2, meaning that it is two
-pixels wide and two pixels high. This image uses indexed color with a
-color depth of 1 to store the color. Let the index $0$ represent a
-fully black color and the index $1$ represent gray color. Now let's
-that the first row of this image consists of the color indexes $1$ and
-$0$ and that the second consists of the indexes $0$ and $1$. Then this
-data would represent the image \checkerimg. Then, after scanline
-serialization process, the first row of this image will get encoded as
-a byte by writing from the highest bits to the lowest, meaning that
-the resulting byte will be $128$. The bit pattern for this number
-\bin{\textbf{10}00\ 0000}. Separate rows in the image data are kept
-separate from each other, so the second row will get encoded in a
-separate byte value $64$(\bin{\textbf{01}00\ 0000}).
-
-If on the other hand the color depth was 2, and the color values of
-the indexes of the data were kept the same, $01$; $00$; $00$; $01$,
-then the data would have been encoded as the bytes
-$64$(\bin{\textbf{0100}\ 0000}) and $16$(\bin{\textbf{0001}\ 0000}).
-
-Grayscale color is dealt with in very much the same way as indexed
-color. The miscellaneous color types are often too big to fit in a
-single byte, so the separate channel values are spread out over
-consecutive bytes. If the channels sizes are over 8 bits, then also
-the channels will get spread out over several bytes.
 
 After the scanline serialization process, filters are applied to the
 image data that is now represented as a sequence of bytes. The filters
@@ -411,8 +379,9 @@ value must be the value such that
  \var{CMF} \cdot 256 + \var{FLG} (mod 31) = 0
 \end{equation*}
 
-So CMF and FLG when viewed as a 16-bit number must be made dividable
-by $31$ by this value. 
+So CMF and FLG, when viewed as a 16-bit number, must be made dividable
+by $31$ by this value. This value can \textit{always} do this because
+the maximum value of a 5-bit number is $2^5 - 1 = 31$.
 
 \paragraph{Bits 5 -- FDICT}
 
@@ -430,17 +399,18 @@ during the DEFLATE compression. It has $4$ possible values:
 \item[3] Maximum compression algorithm used.
 \end{description}
 
-The different compression method depends on how aggressive the LZ77
+What compression method was used depends on how aggressive the LZ77
 window matching was during the DEFLATE compression. Because searching
-the LZ77 window for matches is such a slow operation, slower
-compression algorithm may give after a couple of tries to speed up the
-compression in favor of lost compression performance. However, the
-maximum compression algorithm will never give until it has searched
-the entire window for matches, and it will therefore result in the
-best possible DEFLATE compression in return for speed loss. But with
-the fast computer's of today the maximum compression algorithm is
-always used, but back in the days you always had to make this trade
-of speed in favor of compression performance or vice versa.
+the LZ77 window for matches is such a slow operation, faster versions
+of DEFLATE may give up on the string matching after a couple of tries
+in order to speed up the compression in favor of lost compression
+performance. However, the maximum compression algorithm will never
+give until it has searched the entire window for matches, and it will
+therefore result in the best possible DEFLATE compression in return
+for a small speed loss. But with the fast computer's of today the
+maximum compression algorithm is almost always used, but back in the
+old days you always had to make this choice between speed and
+compression performance.
 
 \subsubsection{Compressed Data}
 
@@ -450,41 +420,39 @@ discussed in chapter \ref{cha:deflate}.
 \subsubsection{Adler-32 checksum}
 
 This is the Adler-32 checksum of the \textit{uncompressed data} so
-this value is used validity the integrity of the uncompressed data. We
+this value is used validate the integrity of the uncompressed data. We
 discussed the Adler-32 checksum in section \ref{sec:adler32} on page
 \pageref{sec:adler32}.
 
 \subsection{Filtering}
 \label{sec:png-filters}
 
-Before the color data was packet into the ZLIB format it was
-filtered. The main purpose of the filters is to make the image data
-easier to compress. So their purpose is not to actually compress the
-image data.
+Before the color data was compressed it was filtered. The main purpose
+of the filters is to make the image data more susceptible to
+compression.
 
 In the filtering step, some sort of operation is performed on
-\textit{every row} of the image data. At the beginning of every row,
-the identifying number of the filter applied on that row is then
-given. If for the example, after a has the been filtered, the data is
-$23,12,11$, and the filter had the identifying number $2$, then the
-resulting filtered row is $2,23,12,11$. There are five different
-filter types, and we will now discuss them one by one:
+\textit{every row} of the image data. A number is put at the beginning
+of every filtered row to indicate the kind of filtering used. So the
+row filtered down to $23,12,11$ by the filter $2$ will be represented
+by $2, 23,12,11$. There are five different filter types, and we will
+now discuss them one by one:
 
 \subsubsection{Filter 0 -- None}
 
 Henceforth, we will let $B_{i,j}$ represent the \textit{byte} that
 being filtered by a filter. This byte is the $j$:th byte in row $i$ of
-the color data. Notice that we do not reference the separate pixels
-using notation. Filters operate on bytes instead of pixels for reasons
-that we will explain later.
-
-
+the color data. As familiar, the scanline serialization process that
+occured before the filtering divided the pixel values into
+bytes. Notice that we do not reference the separate pixels using
+notation. Filters operate on bytes instead of pixels for reasons that
+we will explain later.
 
 The first filter has the simple name None. This filter does nothing to
-the row image data at all. So a row containing the data $1,2,3$ will
-simply get filtered to the row $0,1,2,3$ by this filter. This filter
-is mainly applied to rows in the image data where no filter can be
-used to effectively increase the compression rate.
+the row image data at all. So a row containing of the data $1,2,3$
+will simply get filtered to the row $0,1,2,3$ by this filter. This
+filter is mainly applied to rows in the image data where no filter can
+be used to effectively increase the compression rate.
 
 \subsubsection{Filter 1 -- Sub}
 
@@ -497,10 +465,12 @@ something. Consider the data sequence
 \end{equation}
 
 Assuming that we are using 8-bit grayscale color, this data sequence
-describes a slow but steady progression from black to white. This
+describes a slow but steady progression from black to white(reread
+section \ref{sec:grayscale-color} on page
+\pageref{sec:grayscale-color} if you don't understand this). This
 linear kind of color progression is in computer graphics known as a
 \textit{gradient}\cite{sayood2003lossless}. How this progression would
-look like in an actual image, is demonstrated in figure
+look like in an actual image is demonstrated in figure
 \ref{fig:gradient-black-white}. The key part here is to notice that
 since the difference between each number is always $1$,
 
@@ -519,9 +489,9 @@ like this
 So every byte $B_{i,j}$ in the image will be represented by the
 difference $B_{i,j} - B_{i,j-1}$. If $j \le 0$, then always $B_{i,j-1}
 = 0$, so all bytes outside the boundary of the image will always be
-equal to $0$. All subtraction and addition is done modulo $256$. And
-since bytes store contain negative numbers, numbers like $-2$ will be stored as
-$254$.
+equal to $0$. Since this is done on bytes, all subtraction and
+addition is done modulo $256$. And since bytes cannot store negative
+numbers, numbers like $-2$ will be stored as $254$.
 
 The original sequence can then be restored by iterating over the
 sequence (\ref{eq:filter1-seq}) and keeping a running sum, like this:
@@ -531,20 +501,26 @@ sequence (\ref{eq:filter1-seq}) and keeping a running sum, like this:
 \end{equation*}
 
 So each unfiltered byte is calculated from the filtered data $B$ in
-this way:  $B_{i,j} + B_{i,j-1}$. And remember that all addition is
-done modulo $256$
+this way as follows:
 
-This filter can increase greatly the compression rate, because surely
-the sequence given in \ref{eq:filter1-seq} is easier to compress than
-the one given in \ref{eq:1-seq}. Yes, because in the filtered sequence
-redundancies are abundant, while in the unfiltered sequence not a
-single redundancy can be found! In fact, even an extremely simple
-compression algorithm like RLE can do wonders compressing this data.
+\begin{equation*}
+ B_{i,j} + B_{i,j-1}
+\end{equation*}
+
+And remember that all addition is done modulo $256$
+
+This filter can increase greatly the compression rate, because the
+sequence given in \ref{eq:filter1-seq} is more susceptible to
+compression than the original sequence \ref{eq:1-seq}. This is because
+in the filtered sequence redundancies are abundant, while in the
+unfiltered sequence not a single redundancy can be found! In fact,
+even an extremely simple compression algorithm like RLE can do wonders
+compressing the filtered data.
 
 Now consider figure \ref{fig:gradient-blue-red}. Assuming 24-bit
 color, it is a gradient from the bluest of blue, $(0,0,255)$, to the
 reddest of red, $(255,0,0)$. This gradient is expressed by the
-following sequence of RGB triplets
+following sequence of RGB triplets:
 
 \begin{equation*}
   (0,0,255), (1,0,254), (2,0,253), \dots, (254,0,1), (255,0,0)
@@ -553,38 +529,38 @@ following sequence of RGB triplets
 In memory, this data laid out as sequence of 8-bit bytes. However, can
 we filter this row for better compression using the same method we
 described before for 8-bit grayscale data? No, because the
-redundancies lies in the difference between the color channels
-\textit{of different colors}, not between the separate color channels
-that describes the separate colors.
+redundancies lies in the difference between the \textit{color
+  channels} of following colors, not between the separate color
+channels that belongs so the same color.
 
 So the method of calculating each filtered byte to $B_{i,j} -
 B_{i,j-1}$ will not work very well. Rather, it should be calculated
-like $B_{i,j} - B_{i,j-3}$, because every 24-bit color has $3$
-channels in 24-bit color.
+like $B_{i,j} - B_{i,j-3}$, since $24 / 8 = 3$.
 
-Generally, for every color type, there is some value $t$ that is to
-calculate the filtered byte $B_{i,j} - B_{i,j-t}$. By the PNG
-specification this value is defined as
+Generally, for every color type and color depth, there is some value $t$ that is to
+calculate the filtered byte $B_{i,j} - B_{i,j-t}$. For a color type
+where the number of bits per pixel, in other words the color depth, is
+$c$, then this value is calculated as follows:
 
 \begin{equation*}
   t = \left\lceil \frac{c}{8} \right\rceil
 \end{equation*}
 
-Where $c$ is the number of bits per channel. Notice that by this
-definition this, this filter will not operate pixels but on bytes. For
-1-bit grayscale color, here $c=1$, will be $t=1$, despite the fact
-that a whole $8$ pixels can fit in a byte. The developers of the PNG
+Notice that by this definition, since $t$ is rounded up to whole
+bytes, this filter will not operate pixels but on bytes. For 1-bit
+grayscale color, here $c=1$, will be $t=1$, despite the fact that a
+whole $8$ pixels can fit in a byte. The developers of the PNG
 specification made this decision to simplify the work of implementing
 support for these filters. All the other filters will also operate on
-bytes for this reason.
+bytes for the same reason.
 
 Even for color types where the color channels are stored in channels
 of sizes over $8$ bits the filters will always operate on bytes. For
-48-bit color, where 16 bits are assigned to every channel, $t=6$. So
-for the red channel of a color, the value of the 8 highest bits, seen
-as a single byte, will be substracted the value of the of the 8
-highest bits of the former pixel. The same things is done for the 8
-lower bits.
+48-bit RGB color, where 16 bits are assigned to every channel,
+$t=6$. So for the red channel of a color, the value of the 8 highest
+bits is seen as a single byte and will be subtracted the value of the
+of the 8 highest bits of the same channel of the former pixel of that
+same. The same thing is done for the 8 lower bits.
 
 \begin{figure}[h!]
   \centering
@@ -603,6 +579,21 @@ lower bits.
   \caption{Examples of gradients}
 \end{figure}
 
+So to summarize, the filtered bytes are calculated using the Sub
+filter as follows:
+
+\begin{equation*}
+  B_{i,j} - B_{i,j-t}
+\end{equation*}
+
+And the bytes are unfiltered like this:
+
+\begin{equation*}
+  B_{i,j} + B_{i,j-t}
+\end{equation*}
+
+Where any values outside of the image boundaries are set to $0$.
+
 \begin{Exercise}[label={filter-1}]
 
   Filter the rows of the following image using filter type 1(remember
@@ -618,19 +609,16 @@ lower bits.
 
 The color type is $0$, and the number of bits per channel is $8$.
 
-% add more exercises, with 24-bit color and exercises showing
-% subgradient in image.
-
 \end{Exercise}
 
 \subsubsection{Filter 2 -- Up}
 
-The up filter works just like the Sub filter, expect that its purpose
-is to make horizontal gradient easier to compress rather than vertical
-gradients. So every byte will be filtered as $B_{i,j} - B_{i-1,j}$;
-that is, every byte is subtracted from the value of the corresponding
-byte in the former, unfiltered row. This filter, just as the former,
-operates only on bytes and not on pixels.
+The Up filter works just like the Sub filter, expect that its purpose
+is to make vertical gradients easier to compress rather than
+horizontal gradients. So every byte will be filtered as $B_{i,j} -
+B_{i-1,j}$; that is, every byte is subtracted from the value of the
+corresponding byte in the former, unfiltered row. This filter, just as
+the former, operates only on bytes and not on pixels.
 
 So given the three rows
 
@@ -654,40 +642,38 @@ follows
  \end{matrix}
 \]
 
-While it is true that the DEFLATE algorithm is one dimensional(it
-operates on the data as a long sequence of bytes), this filter has the
-positive effect that it also increase the redundancy of the data to be
-compressed. So it is not as useless as it may seem.
+Unfiltering is trivially done by reversing the filter:
+
+\begin{equation*}
+  B_{i,j} + B_{i-1,j}
+\end{equation*}
 
 \subsubsection{Filter 3 -- Average}
 
 This filter is essentially a combination of the two former
 filters. Here the filtered value of the byte will be equal to the
-value of the unfiltered byte subtracted from the average of the upper
-and former byte,
+average of $B_{i-1,j}$ and $B_{i,j-t}$, so it is calculated as
+follows:
 
 \begin{equation*}
   B_{i,j} - \left \lfloor \frac{B_{i-1,j} +
     B_{i,j-t}}{2} \right \rfloor
 \end{equation*}
 
-So the average is rounded down. However, do note that the sum $B_{i-1,j} +
-    B_{i,j-t}$ is \textit{not} done modulo $256$.
+However, do note that the PNG specification for requires that the sum
+$B_{i-1,j} + B_{i,j-t}$ is \textit{not} done modulo $256$.
 
-The transformation can then trivially reversed as follows
+The transformation can then be trivially reversed:
 
 \begin{equation*}
   B_{i,j} + \left \lfloor \frac{B_{i-1,j} +
     B_{i,j-t}}{2} \right \rfloor
 \end{equation*}
 
-%% exlpain why filter works and why the above addition mustn't be done
-%% modulo 256.
-
 \subsubsection{Filter 4 -- Paeth}
 
-In this filter third byte is added for the computation: the preceding
-byte of the upper byte, $B_{i-1,j-t}$. The filtered byte in this
+In this filter a third byte is added to the computation: the preceding
+byte of the upper byte, $B_{i-1,j-t}$. The filtered byte is in this
 filter computed as follows:
 
 \begin{equation*}
@@ -721,11 +707,47 @@ where $a=B_{i,j-t}$, $b=B_{i-1,j}$ and $c=B_{i-1,j-t}$.
   \end{algorithmic}
 \end{algorithm}
 
-
 \subsection{Scanline serialization}
 
-\subsection{Interlaced Color Data}
+\newcommand{\checkerimg}{
+  \tikz[scale=2]{
+    \fill[gray] (0,0) rectangle (0.5ex,0.5ex);
+    \fill[black] (0.5ex,0) rectangle (1.0ex,0.5ex);
+    \fill[black] (0,0.5ex) rectangle (0.5ex,1.0ex);
+    \fill[gray] (0.5ex,0.5ex) rectangle (1.0ex,1.0ex);
+  }}
+
+
+Now let us describe the scanline serialization process. Say I have an
+image with the size 2x2, meaning that it is two pixels wide and two
+pixels high. This image uses indexed color with a color depth of 1 to
+store the color. Let the index $0$ represent a fully black color and
+the index $1$ represent gray color. Now let's that the first row of
+this image consists of the color indexes $1$ and $0$ and that the
+second consists of the indexes $0$ and $1$. Then this data would
+represent the image \checkerimg. Then, after scanline serialization
+process, the first row of this image will get encoded as a byte by
+writing from the highest bits to the lowest, meaning that the
+resulting byte will be $128$. The bit pattern for this number
+\bin{\textbf{10}00\ 0000}. Separate rows in the image data are kept
+separate from each other, so the second row will get encoded in a
+separate byte value $64$(\bin{\textbf{01}00\ 0000}).
+
+If on the other hand the color depth was 2, and the color values of
+the indexes of the data were kept the same, $01$; $00$; $00$; $01$,
+then the data would have been encoded as the bytes
+$64$(\bin{\textbf{0100}\ 0000}) and $16$(\bin{\textbf{0001}\ 0000}).
+
+Grayscale color is dealt with in very much the same way as indexed
+color. The miscellaneous color types are often too big to fit in a
+single byte, so the separate channel values are spread out over
+consecutive bytes. If the channels sizes are over 8 bits, then also
+the channels will get spread out over several bytes.
+
+\subsection{Interlacing}
 \label{png-interlacing}
+
+
 
 \section{Answers to the exercises}
 

@@ -248,18 +248,20 @@ has been stored in a variable named $\var{color}$.
 \end{Exercise}
 
 \subsection{Grayscale Color}
+\label{sec:grayscale-color}
 
 \newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
 \newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
 
 Using 24-bit as an example, if a color is grayscale that means that
 the color is represented by a RGB triplet $(n,n,n)$, where $0 \le n
-\le 255$; that is, a shade of gray is a mixture of equal amounts of
-all the color channels. In 8-bit grayscale color the triplet $(n,n,n)$
-is simply represented by the number $n$, because this is much more
-space efficient. So in this new system, the number $43$ will in
-reality represent the triplet $(43,43,43)$, $12$ is really the triplet
-$(12,12,12)$ and so on.
+\le 255$, because a shade of gray turns out to be a mixture of equal
+amounts of all the color channels. In 8-bit grayscale color the
+triplet $(n,n,n)$ is simply represented by the number $n$, because
+this is much more space efficient. So in this new system, the number
+$43$ will in reality represent the triplet $(43,43,43)$, $0$
+represents the color black, $(0,0,0)$, and $255$ is white,
+$(255,255,255)$, and so on.
 
 In 8-bit grayscale there are $2^8 = 256$ different shades of gray. In
 1-bit grayscale, which is also quite common, there are only $2^1 = 2$
