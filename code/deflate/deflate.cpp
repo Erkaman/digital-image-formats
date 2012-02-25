@@ -26,11 +26,6 @@ vector<BYTE> deflate(const vector<BYTE> & data)
 
     BitVectorWriter * outBits = new BitVectorWriter(LSBF);
 
-/*    for(size_t i = 0; i <data.size(); ++i)
-      printf("%c,", data[i]);
-
-      printf("\n"); */
-
     vector<Token> LZSS_Tokens =
         compress(windowSize,lookAheadSize,data);
 
@@ -50,6 +45,7 @@ vector<BYTE> deflate(const vector<BYTE> & data)
 
     if(useFixedCodes) {
 
+	/* Last block. */
         outBits->writeBits(1, 1);
         outBits->writeBits(BTYPE_COMPRESSED_FIXED_HUFFMAN_CODES, 2);
 
@@ -60,80 +56,89 @@ vector<BYTE> deflate(const vector<BYTE> & data)
         outBits->writeBits(1, 1);
         outBits->writeBits(BTYPE_COMPRESSED_DYNAMIC_HUFFMAN_CODES, 2);
 
-	/* Get the code lengths for the literal and length alphabet. */
+        /* Get the code lengths for the literal and length alphabet. */
 
-	CodeLengths litteralAndLengthCodeLengths  = makeCodeLengths(
-	    litteralAndLengthCodes,
-	    286, /* 288?*/
-	    15);
-
-	/* Translate the code lengths to a code list.*/
-	litteralAndLengthCodesList = translateCodes(litteralAndLengthCodeLengths);
-
-	CodeLengths codeLengthAlphabetCodes;
-	CodeLengths temp;
-
-	/* Compress the litteral code lengths. */
-	CodeLengths compressedLitteralAndLengthCodeLengths = compressCodeLengths(
-	    litteralAndLengthCodeLengths,
-	    temp);
-
-	/* Gather the frequencies of the length codes. */
-	codeLengthAlphabetCodes.insert(
-	    codeLengthAlphabetCodes.end(),
-	    temp.begin(),
-	    temp.end());
-
-	/* Do the same thing for the distance codes.  */
-
-/*	for(size_t i = 0;  i < distanceCodes litteralAndLengthCodes.size(); ++i){
-	    printf("%d,", litteralAndLengthCodes[i]);
-	}
-	printf("\n"); */
+	/* Add the single end of block code*/
+	litteralAndLengthCodes.push_back(END_OF_BLOCK);
 
 
-	CodeLengths distanceCodeLengths  = makeCodeLengths(
-	    distanceCodes,
-	    30, /* 32?*/
-	    15);
+        CodeLengths litteralAndLengthCodeLengths  = makeCodeLengths(
+            litteralAndLengthCodes,
+            286, /* 288?*/
+            15);
 
-	distanceCodesList = translateCodes(distanceCodeLengths);
+        litteralAndLengthCodeLengths =
+            cutTrailingZeroCodeLengths(litteralAndLengthCodeLengths,257);
 
-	temp.clear();
+        /* Translate the code lengths to a code list.*/
+        litteralAndLengthCodesList = translateCodes(litteralAndLengthCodeLengths);
 
 
+        CodeLengths codeLengthAlphabetCodes;
+        CodeLengths temp;
 
-	CodeLengths compressedDistanceCodeLengths = compressCodeLengths(
-	    distanceCodeLengths,
-	    temp);
 
-	codeLengthAlphabetCodes.insert(
-	    codeLengthAlphabetCodes.end(),
-	    temp.begin(),
-	    temp.end());
+        /* Compress the litteral code lengths. */
+        CodeLengths compressedLitteralAndLengthCodeLengths = compressCodeLengths(
+            litteralAndLengthCodeLengths,
+            temp);
 
-	CodeLengths codeLengthCodeLengths =
-	    makeCodeLengths(codeLengthAlphabetCodes, 19,7);
+        /* Gather the frequencies of the length codes. */
+        codeLengthAlphabetCodes.insert(
+            codeLengthAlphabetCodes.end(),
+            temp.begin(),
+            temp.end());
 
-	CodesList codeLengthCodes = translateCodes(codeLengthCodeLengths);
+        /* Do the same thing for the distance codes.  */
 
-	/* Write the header. */
+        CodeLengths compressedDistanceCodeLengths;
 
-	outBits->writeBits(29, 5);
-	outBits->writeBits(31, 5);
+        CodeLengths distanceCodeLengths  = makeCodeLengths(
+            distanceCodes,
+            30, /* 32?*/
+            15);
 
-	/* Write the code lengths alphabet and HCLEN. */
-	writeCodeLengthCodeLengths(codeLengthCodeLengths, outBits);
+        distanceCodeLengths =
+            cutTrailingZeroCodeLengths(distanceCodeLengths,1);
 
-	writeCompressedCodeLengths(
-	    compressedLitteralAndLengthCodeLengths,
-	    codeLengthCodes,
-	    outBits);
+        distanceCodesList = translateCodes(distanceCodeLengths);
 
-	writeCompressedCodeLengths(
-	    compressedDistanceCodeLengths,
-	    codeLengthCodes,
-	    outBits);
+        temp.clear();
+
+        compressedDistanceCodeLengths = compressCodeLengths(
+            distanceCodeLengths,
+            temp);
+
+        codeLengthAlphabetCodes.insert(
+            codeLengthAlphabetCodes.end(),
+            temp.begin(),
+            temp.end());
+
+        CodeLengths codeLengthCodeLengths =
+            makeCodeLengths(codeLengthAlphabetCodes, 19,7);
+
+        CodesList codeLengthCodes = translateCodes(codeLengthCodeLengths);
+
+        /* Write the header. */
+
+        outBits->writeBits(
+	    litteralAndLengthCodeLengths.size() - 257,
+	    5);
+
+        outBits->writeBits(distanceCodeLengths.size() - 1, 5);
+
+        /* Write the code lengths alphabet and HCLEN. */
+        writeCodeLengthCodeLengths(codeLengthCodeLengths, outBits);
+
+        writeCompressedCodeLengths(
+            compressedLitteralAndLengthCodeLengths,
+            codeLengthCodes,
+            outBits);
+
+        writeCompressedCodeLengths(
+            compressedDistanceCodeLengths,
+            codeLengthCodes,
+            outBits);
     }
 
     for(size_t i = 0; i < deflateCodes.size(); ++i){
@@ -207,23 +212,16 @@ vector<unsigned int> tokensToDeflateCodes(
 
         if(token.type == SymbolToken){
 
-/*            printf("added symbol:%c\n", token.symbol); */
             deflateCodes.push_back(token.symbol);
             litteralAndLengthCodes.push_back(token.symbol);
 
         } else if(token.type == OffsetLengthToken) {
-
-/*            printf("length:%d\n", token.length);
-              printf("offset:%d\n", token.offset);*/
 
             unsigned int length;
             /* Brute force find the matching length code. */
             for(length = LENGTH_MIN; length <= LENGTH_MAX; ++length){
 
                 LengthTableEntry len = lengthTable[length - LENGTH_MIN];
-
-/*                printf("len:%d\n", len.minLength); */
-
 
                 unsigned int lower = len.minLength;
                 unsigned int upper = len.minLength + pow(2, len.extraBits) - 1;
@@ -232,13 +230,7 @@ vector<unsigned int> tokensToDeflateCodes(
                     deflateCodes.push_back(length);
                     litteralAndLengthCodes.push_back(length);
 
-                    /* TODO: does this work? */
-/*                    printf("found length code:%d\n", length);*/
-
                     if(len.extraBits > 0){
-
-/*                        printf("extra bits:%d\n", token.length - len.minLength); */
-
                         deflateCodes.push_back(token.length - len.minLength);
                     }
                     break;
@@ -263,14 +255,10 @@ vector<unsigned int> tokensToDeflateCodes(
                     deflateCodes.push_back(distance);
                     distanceCodes.push_back(distance);
 
-/*                    printf("found distance code:%d\n",distance); */
-
                     /* TODO: does this work? */
                     if(dist.extraBits > 0){
 
                         /* Add the extra bits. */
-
-/*                        printf("extra bits:%d\n", token.offset - dist.minDist);*/
 
                         deflateCodes.push_back(token.offset - dist.minDist);
                     }

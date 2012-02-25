@@ -10,7 +10,6 @@
 
 using std::vector;
 
-
 typedef struct {
     unsigned short HLIT; /* 5 bits. number of literal/length codes - 257(257-286).   */
     unsigned short HDIST; /* 5 bits. Number of distance codes - 1 (1 - 32)  */
@@ -150,8 +149,6 @@ vector<BYTE> inflate(vector<BYTE> data)
     return decompressedList;
 }
 
-
-
 void loadDynamicTables(
     RevCodesList * huffmanCodes,
     RevCodesList * distanceCodes,
@@ -176,6 +173,7 @@ void loadDynamicTables(
         codeLengthCodes,
         compressedStream);
 }
+
 
 RevCodesList loadLiteralLengthCodes(
     unsigned short HLIT,

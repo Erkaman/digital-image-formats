@@ -120,5 +120,8 @@ void writeCodeLengthCodeLengths(
     CodeLengths codeLengthCodeLengths,
     BitWriter * outBits);
 
-#endif /* _HUFFMAN_H_ */
+size_t findBegTrail(CodeLengths codeLengthCodeLengths);
 
+CodeLengths cutTrailingZeroCodeLengths(CodeLengths codeLengths, size_t minSize);
+
+#endif /* _HUFFMAN_H_ */

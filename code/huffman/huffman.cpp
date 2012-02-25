@@ -60,7 +60,6 @@ void getCodeLengths(
 
 Node * constructHuffmanTree(FrequencyTable freqTable, unsigned long & len)
 {
-
     vector<Node *> trees = makeTrees(freqTable);
     len = trees.size();
 
@@ -80,6 +79,7 @@ Node * constructHuffmanTree(FrequencyTable freqTable, unsigned long & len)
         *mins.first = newTree;
         trees.erase(mins.second);
     }
+
     return trees.front();
 }
 
@@ -115,10 +115,24 @@ CodeLengths makeCodeLengths(
     CodeLength maxCodeLength)
 {
     unsigned long len;
-   Node * huffman = constructHuffmanTree(freqTable,len);
 
+    printf("codeDepths:\n");
+    for(size_t i = 0; i < freqTable.size(); ++i)
+	printf("%ld,", freqTable[i]);
+    printf("\n");
+
+    /* first a normal, condition-less Huffman tree is constructed*/
+    Node * huffman = constructHuffmanTree(freqTable,len);
+
+    /* Get the code depths of all the codes of the condition-less Huffman tree*/
     vector<unsigned int> codeDepths = getCodeDepths(freqTable, huffman);
 
+    printf("codeDepths:\n");
+    printCodeLengths(codeDepths);
+
+    delete huffman;
+
+    /* contains the frequencies of the different code lengths */
     vector<unsigned long> blCount(maxCodeLength+1);
 
     unsigned int sum = 0;
@@ -131,6 +145,11 @@ CodeLengths makeCodeLengths(
             sum += 1 << (maxCodeLength - depth);
         }
     }
+
+    printf("blCount:\n");
+    for(size_t i = 0; i < blCount.size(); ++i)
+	printf("%ld,", blCount[i]);
+    printf("\n");
 
     /* HERE BE DRAGONS */
     unsigned int overflow = sum > (unsigned int)(1 << maxCodeLength) ? sum - (1 << maxCodeLength) : 0;
@@ -146,8 +165,12 @@ CodeLengths makeCodeLengths(
         blCount[maxCodeLength]--;
     }
 
+    /* Sort the symbols by increasing frequency */
+
     vector<SymbolFreq> symbols;
 
+    /* the table is went through in order. Therefore the symbols will
+     * also get sorted by order. The order of the separate code length groups will be maintained in the sorting process.*/
     for(size_t i = 0; i < freqTable.size(); ++i){
 
         SymbolFreq s;
@@ -158,11 +181,40 @@ CodeLengths makeCodeLengths(
         symbols.push_back(s);
     }
 
+    for(size_t i = 0; i < symbols.size(); ++i){
+
+	SymbolFreq s;
+
+	s = symbols[i];
+
+	printf("%d:%d,\n", s.symbol, s.freq);
+    }
+
+    printf("\n");
+
     sort(symbols.begin(), symbols.end(), symbolFreqCmp);
+
+    printf("sorted:\n");
+
+    for(size_t i = 0; i < symbols.size(); ++i){
+
+	SymbolFreq s;
+
+	s = symbols[i];
+
+	printf("%d:%d,\n", s.symbol, s.freq);
+    }
+
+    printf("\n");
+
+    /* */
 
     SymbolFreq zeroFreqSymbol;
     zeroFreqSymbol.freq = 0;
 
+    /* The code are sorted by increasing frequency,
+     so find the beginning of the non-zero frequency codes
+    at the end of the array*/
     size_t beginCodeLengths =
         upper_bound(symbols.begin(), symbols.end(), zeroFreqSymbol, symbolFreqCmp) -
         symbols.begin();
@@ -174,13 +226,15 @@ CodeLengths makeCodeLengths(
 
     unsigned int bits = maxCodeLength;
     for(size_t i = beginCodeLengths; i < symbols.size(); ++i){
-        while (blCount[bits] == 0)
+        while (blCount[bits] == 0){
+	    printf("bits:%d\n", bits);
             bits--;
+	}
+
+	printf("symbol:%d assigned length of %d\n", symbols[i].symbol, bits);
         codeLengths[symbols[i].symbol] = bits;
         blCount[bits]--;
     }
-
-    delete huffman;
 
     return codeLengths;
 }
@@ -284,6 +338,7 @@ CodesList translateCodes(const CodeLengths & codeLengths)
         translatedCodes.push_back(newCode);
     }
 
+
     for(size_t i = 0; i < codeLengths.size() /*alphabetSize*/; ++i){
 
         len = codeLengths[i];
@@ -295,6 +350,10 @@ CodesList translateCodes(const CodeLengths & codeLengths)
             nextCode[len]++;
         }
     }
+
+
+    printf("codes list\n");
+    printCodesList(translatedCodes);
 
     return translatedCodes;
 }
@@ -367,11 +426,14 @@ vector<unsigned int> getCodeDepths(
     FrequencyTable freqTable,
     Node * node)
 {
+    /* get size of alphabet. */
     size_t maxSymbol = freqTable.end() - 1 - freqTable.begin();
 
+    /* Initialize all the code depths to that of empty codes. */
     vector<unsigned int> codeDepths(maxSymbol + 1);
     fill(codeDepths.begin(), codeDepths.end(), 0);
 
+    /* Get the code depths */
     getCodeDepths(0, node, codeDepths);
 
     return codeDepths;
@@ -578,15 +640,23 @@ CodeLengths makeCodeLengths(
     unsigned int alphabetSize,
     CodeLength maxCodeLength)
 {
+    printf("size:%ld\n", fileData.size());
     /* Handle the special case in which there is no data at all. */
-/*    if(fileData.size() == 0){
-	CodeLengths cls;
-	for(size_t i = 0; i < alphabetSize; ++i){
-	    cls.push_back(0);
+    if(fileData.size() == 0 || fileData.size() == 1){
+
+	printf("lul\n");
+        CodeLengths cls(alphabetSize);
+	fill(cls.begin(), cls.end(), 0);
+
+	if(fileData.size() == 0)
+	    return cls;
+	else {
+	    cls[fileData.front()] = 1;
+	    return cls;
 	}
-	return cls;
-    }*/
+    }
     FrequencyTable freqTable = constructFrequencyTable(fileData, alphabetSize);
+
     return makeCodeLengths(freqTable, maxCodeLength);
 }
 
@@ -609,6 +679,9 @@ RevCodesList loadUsingCodeLengthCodes(
     BitReader * compressedStream)
 {
     size_t i;
+
+    printf("alphabetLength:%d\n", alphabetLength);
+    printf("length:%d\n", length);
 
     CodeLengths codeLengths(alphabetLength);
     unsigned int translatedCode;
@@ -643,14 +716,19 @@ RevCodesList loadUsingCodeLengthCodes(
                 repeated = repeatZeroLengthCode(11,7, compressedStream);
             }
 
-            for(i = 0; i < repeated.size(); ++i)
+            for(i = 0; i < repeated.size(); ++i){
                 codeLengths[codesLenI++] = repeated[i];
+            }
         }
 
         if(codesLenI == length){
             break;
         }
     }
+
+    printf("codeLengths\n");
+    printCodeLengths(codeLengths);
+
 
     return reverseCodesList(translateCodes(codeLengths));
 }
@@ -702,6 +780,16 @@ void writeCompressedCodeLengths(
     }
 }
 
+size_t findBegTrail(CodeLengths codeLengthCodeLengths)
+{
+    size_t begTrail;
+    for(begTrail = codeLengthCodeLengths.size() - 1; begTrail != 0; --begTrail)
+        if(codeLengthCodeLengths[begTrail] != 0)
+            return begTrail;
+
+    return begTrail;
+}
+
 /* First writes HCLEN and then writes the code lengths for the code length alphabet. */
 void writeCodeLengthCodeLengths(
     CodeLengths codeLengthCodeLengths,
@@ -710,15 +798,24 @@ void writeCodeLengthCodeLengths(
     permuteCodelengths(codeLengthCodeLengths);
 
     /* Find the end of the trailing zeroes. */
-    size_t begTrail;
-    for(begTrail = codeLengthCodeLengths.size() - 1; begTrail != 0; --begTrail)
-        if(codeLengthCodeLengths[begTrail] != 0)
-            break;
-
+    size_t begTrail = findBegTrail(codeLengthCodeLengths);
     outBits->writeBits(begTrail + 1 - 4, 4);
 
     /* these codes are used to encode the byte codes. */
     for(size_t i = 0; i < (begTrail + 1); ++i){
         outBits->writeBits(codeLengthCodeLengths[i], 3);
     }
+}
+
+CodeLengths cutTrailingZeroCodeLengths(CodeLengths codeLengths, size_t minSize)
+{
+    size_t begTrail = findBegTrail(codeLengths);
+    size_t size = begTrail + 1;
+
+    if(size < minSize)
+	size = minSize;
+
+    codeLengths.resize(size);
+
+    return codeLengths;
 }

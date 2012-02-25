@@ -35,6 +35,13 @@ int def(FILE *source, FILE *dest, int level)
     strm.zfree = Z_NULL;
     strm.opaque = Z_NULL;
     ret = deflateInit(&strm, level);
+/*        deflateInit2(&strm,
+		     level,
+                     Z_DEFLATED,
+                     15,
+                     8,
+                     Z_HUFFMAN_ONLY); */
+
     if (ret != Z_OK)
         return ret;
 
@@ -171,7 +178,7 @@ int main(int argc, char **argv)
     in = fopen(argv[1],"rb");
     out = fopen(argv[2],"wb");
 
-    ret = def(in, out,9);
+    ret = inf(in, out);
 
     if (ret != Z_OK)
         zerr(ret);

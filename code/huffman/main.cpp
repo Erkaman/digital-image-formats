@@ -20,8 +20,6 @@ void printHelp(void);
 void huffmanCompress(FILE * in,FILE * out);
 void huffmanDecompress(FILE * in,FILE * out);
 
-
-
 int main(int argc, char *argv[])
 {
     FILE * in;
@@ -97,6 +95,8 @@ void huffmanCompress(FILE * in,FILE * out)
 
     CodesList byteCodes = translateCodes(byteCodeLengths);
 
+    byteCodeLengths = cutTrailingZeroCodeLengths(byteCodeLengths, 0);
+
     CodeLengths codeLengthalphabetCodeLengths;
     CodeLengths compressedByteCodeLengths = compressCodeLengths(
         byteCodeLengths,
@@ -107,6 +107,9 @@ void huffmanCompress(FILE * in,FILE * out)
     CodesList codeLengthCodes = translateCodes(codeLengthCodeLengths);
 
     BitFileWriter * outBits = new BitFileWriter(out, LSBF);
+
+    /* Write number of litteral codes. */
+    outBits->writeBits(byteCodeLengths.size(), 8);
 
     writeCodeLengthCodeLengths(codeLengthCodeLengths, outBits);
 
@@ -136,14 +139,17 @@ void huffmanDecompress(FILE * in,FILE * out)
 {
     BitFileReader * inBits = new BitFileReader(in, LSBF);
 
+    size_t litteralCodes = inBits->readBits(8);
+
     unsigned int HCLEN =  inBits->readBits(4);
 
     RevCodesList codeLengthCodeLengths = loadCodeLengthCodes(HCLEN, inBits);
 
     /* The code lengths are compressed! */
 
+
     RevCodesList lookup = loadUsingCodeLengthCodes(
-        256,
+        litteralCodes,
         256,
         codeLengthCodeLengths,
         inBits);
@@ -156,4 +162,3 @@ void huffmanDecompress(FILE * in,FILE * out)
 
     delete inBits;
 }
-
