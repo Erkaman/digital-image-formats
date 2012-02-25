@@ -5,3 +5,49 @@
 \chapter{Conclusion}
 \label{cha:conclus}
 
+\section{Answer to the question}
+
+So how are images represented numerically? The answer to that question
+is simple: by using a color model separate pixel colors are
+represented numerically and by storing a long sequence of such colors
+model numbers images are formed.
+
+However, since raw color take up so much space, it often absolutely
+necessary to compress it. And here is where things truly gets
+tough. Or is it really that hard? Because when you really look into
+compression algorithms like Huffman coding and LZW, you will notice
+that they have an almsot frighting beauty in their simplicity. The
+main idea behind Huffman coding is simply:
+
+\begin{quote}
+  If we assume that some symbols are more frequent in the data, then
+  by making these symbols more space efficient we can achieve
+  significant compression.
+\end{quote}
+
+The LZ-family methods could also be said to reason in the same way;
+here the main goal is to instead frequently assign formations of
+symbols, words, more space efficient representations. And as was shown
+by the DEFLATE algorithm, these word representation can also be
+Huffman coded to even further increase compression.
+
+And Once you have gotten rid of your initial fright of compression
+algorithm, then you will truly see how simple image formats truly
+are.
+
+\section{Difficulties}
+
+But despite this, a great difficulty during the entire project was
+understanding compression algorithms. The difficulty of the
+litterature I had found on the subject of data compression is partly
+to blame for this; these texts often reasoned in a very mathematical
+and succinct way, often making them very hard to read.
+
+% mention difficulties during coding.
+
+\section{Final thoughts}
+
+But overall I had very fun doing this project because these is nothing
+I enjoy more than programming and learning new things. And as the
+length of this written part probably indicates, there were quite a lot
+to learn from this project!  
