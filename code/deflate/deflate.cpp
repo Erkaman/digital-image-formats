@@ -16,7 +16,7 @@ vector<unsigned int> tokensToDeflateCodes(
 
 vector<BYTE> deflate(const vector<BYTE> & data)
 {
-    const bool useFixedCodes = false;
+    const bool useFixedCodes = true;
 
     /* The maximum size of the window buffer. */
     const unsigned int windowSize = pow(2,15);

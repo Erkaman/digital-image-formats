@@ -249,11 +249,12 @@ std::vector<BYTE> ZLIB_Compress(const std::vector<BYTE> & data)
     /* The maximum achievable compression is done by our implementation. */
     const BYTE flevel  = FLEVEL_SLOWEST_ALGORITHM;
 
-    const BYTE fcheck  = 0/* compute here*/;
-
-    flgByte |= fcheck;
     flgByte |= (fdict << 5);
     flgByte |= (flevel << 6);
+
+    const BYTE fcheck  = 31 - (256 * cmfByte + flgByte) % 31;/* compute here*/;
+
+    flgByte |= fcheck;
 
     /* compress. */
     vector<BYTE> compressed = deflate(data);
