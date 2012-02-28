@@ -116,19 +116,11 @@ CodeLengths makeCodeLengths(
 {
     unsigned long len;
 
-    printf("codeDepths:\n");
-    for(size_t i = 0; i < freqTable.size(); ++i)
-	printf("%ld,", freqTable[i]);
-    printf("\n");
-
     /* first a normal, condition-less Huffman tree is constructed*/
     Node * huffman = constructHuffmanTree(freqTable,len);
 
     /* Get the code depths of all the codes of the condition-less Huffman tree*/
     vector<unsigned int> codeDepths = getCodeDepths(freqTable, huffman);
-
-    printf("codeDepths:\n");
-    printCodeLengths(codeDepths);
 
     delete huffman;
 
@@ -145,11 +137,6 @@ CodeLengths makeCodeLengths(
             sum += 1 << (maxCodeLength - depth);
         }
     }
-
-    printf("blCount:\n");
-    for(size_t i = 0; i < blCount.size(); ++i)
-	printf("%ld,", blCount[i]);
-    printf("\n");
 
     /* HERE BE DRAGONS */
     unsigned int overflow = sum > (unsigned int)(1 << maxCodeLength) ? sum - (1 << maxCodeLength) : 0;
@@ -181,31 +168,7 @@ CodeLengths makeCodeLengths(
         symbols.push_back(s);
     }
 
-    for(size_t i = 0; i < symbols.size(); ++i){
-
-	SymbolFreq s;
-
-	s = symbols[i];
-
-	printf("%d:%d,\n", s.symbol, s.freq);
-    }
-
-    printf("\n");
-
     sort(symbols.begin(), symbols.end(), symbolFreqCmp);
-
-    printf("sorted:\n");
-
-    for(size_t i = 0; i < symbols.size(); ++i){
-
-	SymbolFreq s;
-
-	s = symbols[i];
-
-	printf("%d:%d,\n", s.symbol, s.freq);
-    }
-
-    printf("\n");
 
     /* */
 
@@ -226,12 +189,8 @@ CodeLengths makeCodeLengths(
 
     unsigned int bits = maxCodeLength;
     for(size_t i = beginCodeLengths; i < symbols.size(); ++i){
-        while (blCount[bits] == 0){
-	    printf("bits:%d\n", bits);
+        while (blCount[bits] == 0)
             bits--;
-	}
-
-	printf("symbol:%d assigned length of %d\n", symbols[i].symbol, bits);
         codeLengths[symbols[i].symbol] = bits;
         blCount[bits]--;
     }
@@ -640,11 +599,8 @@ CodeLengths makeCodeLengths(
     unsigned int alphabetSize,
     CodeLength maxCodeLength)
 {
-    printf("size:%ld\n", fileData.size());
     /* Handle the special case in which there is no data at all. */
     if(fileData.size() == 0 || fileData.size() == 1){
-
-	printf("lul\n");
         CodeLengths cls(alphabetSize);
 	fill(cls.begin(), cls.end(), 0);
 
