@@ -4,10 +4,6 @@
 
 % drawing trees with latex:
 % http://forcecore.tistory.com/1023#recentTrackback
-% http://tex.stackexchange.com/questions/2340/how-to-make-a-3-level-deep-tree-with-tikz
-% http://tex.stackexchange.com/questions/19541/how-to-draw-a-tree-diagram-where-its-rectangular-nodes-have-a-floating-numbering
-% http://tex.stackexchange.com/questions/39103/how-to-change-the-level-distance-in-tikz-qtree-for-one-level-only
-% http://www.texample.net/tikz/examples/rule-based-diagram/
 
 \chapter{Huffman Coding}
 \label{cha:huffman}
@@ -149,33 +145,6 @@ code list was ambiguous in the first place.
 
 \end{Exercise}
 
-% http://books.google.se/books?id=CyCcRAm7eQMC&pg=PA36&redir_esc=y#v=onepage&q&f=false
-
-\newenvironment{huffman}
-{\begin{tikzpicture}
-    [level distance=10mm,
-    % every node/.style={circle,inner sep=1pt,draw=black},
-    hnode/.style={circle,inner sep=1pt,draw=black},
-    level 1/.style={sibling distance=20mm},
-    level 2/.style={sibling distance=10mm},
-    level 3/.style={sibling distance=5mm},
-    text height=1.5ex,text depth=.25ex]}{\end{tikzpicture}}
-
-\newenvironment{huffmanc}
-{\begin{center}\begin{huffman}}
-    {\end{huffman}\end{center}}
-
-\newcommand{\charnodeoffset}{1.0cm}
-
-\newcommand{\nodechar}[2]{\node[below=of #1, yshift=\charnodeoffset] {#2};}
-
-\newcommand{\firstcharnode}[3]{  \node (#1) [hnode] {#2};
-  \nodechar{#1}{#3}}
-
-\newcommand{\restcharnode}[4]{
-  \node (#1) [hnode,right=of #2] {#3};
-  \nodechar{#1}{#4}
-}
 
 \section{Trees}
 
@@ -200,7 +169,7 @@ respectively. You can also say that the node with the value $2$ is
 \subsection{Finding The Codes}
 
 Let us consider finding the Huffman codes for the letters of the
-string $ababaacdd$ for the alphabet $a$,$b$,$c$, and $d$. First the
+string $\var{ababaacdd}$ for the alphabet $a$,$b$,$c$, and $d$. First the
 number of times every letter occurs in the data, the frequency of the
 letter, is assigned to a node of its own:
 
@@ -254,7 +223,6 @@ to form an even bigger tree:
 And the same thing is done for the two remaining trees:
 
 \begin{huffmanc}
-
   \node[hnode] {9}
   child {node[hnode]{5}
     child{node[hnode]{3}
@@ -267,7 +235,6 @@ And the same thing is done for the two remaining trees:
   \nodechar{bnode}{b}
   \nodechar{dnode}{d}
   \nodechar{anode}{a}
-
 \end{huffmanc}
 
 The tree we end up with is known as the Huffman tree of the input
@@ -278,33 +245,30 @@ that these are more than two nodes with a minimum frequency.
 To finally create the code list, the following is done: starting from
 the root of the tree, it is followed along its branches to reach its
 leaves. If a left branch is followed then a cleared bit($0$) is added
-to the resulting code, else a toggled bit($1$) is added. So to get the
-resulting code for $b$, we follow the tree from its to the leaf that
-has character $b$. To reach $b$ we go left,left and then right, so $b$
-has the code \bin{001}. The final huffman tree and the rest of the
-codes are given in table ?.
+to the resulting code, else a toggled bit($1$) is added.
 
-\begin{figure}
+So to get the resulting code for $b$, we follow the tree from its root
+to the leaf that has character $b$. To reach $b$ we go left,left and
+then right, so $b$ has the code \bin{001}. The final code list is
+given in table \ref{tab:code-list}. And as you can see, the code list
+does have to prefix property.
+
+\begin{table}
   \centering
-  \begin{huffmanc}
+  \begin{tabular}{ll}
+    \toprule
+    letter & Code \\
+    \midrule
+    $a$ & \bin{1} \\
+    $b$ & \bin{001} \\
+    $c$ & \bin{000} \\
+    $d$ & \bin{01} \\
+    \bottomrule
+  \end{tabular}
+  \caption{The computed code list}
+  \label{tab:code-list}
+\end{table}
 
-    \node[hnode] {9}
-    child {node[hnode]{5}
-      child{node[hnode]{3}
-        child{node(cnode)[hnode] {1}}
-        child{node(bnode)[hnode] {2}}}
-      child{node (dnode) [hnode] {2}}}
-    child{node (anode) [hnode] {4}};
-    \nodechar{cnode}{c}
-    \nodechar{bnode}{b}
-    \nodechar{dnode}{d}
-    \nodechar{anode}{a}
-
-  \end{huffmanc}
-
-  \caption{Computed Huffman Tree.}
-  \label{fig:huff}
-\end{figure}
 
 \begin{Exercise}[label={nuther}]
   Give an example of another valid Huffman that could have been

@@ -247,4 +247,312 @@ data.
 
 \section{Dynamic Huffman Codes}
 
+\subsection{Computing the Huffman Tree}
+
+The Huffman codes can also be computed in the DEFLATE algorithm. Using
+dynamic Huffman codes the token will be assigned Huffman codes that
+are, in most cases, more space efficent than those of the fixed
+Huffman codes. For very short this may however make little different
+in space savings, and dynamic Huffman codes tend not be used for small
+files for these reasons. But for larger files dynamic Huffman will in
+general pay off.
+
+These Huffman code are actually computed in a very peculiar way, and
+this is what we will be discussing for the rest of this section. As should
+familiar from chapter \ref{cha:huffman}, the computed Huffman is
+rarely unique, but many different Huffman tree can be computed. In
+chapter \ref{cha:huffman} we constructed a Huffman tree for the string
+$\var{ababaacdd}$ and ended up with the Huffman tree:
+
+\begin{huffmanc}
+  \node[hnode] {9}
+  child {node[hnode]{5}
+    child{node[hnode]{3}
+      child{node(cnode)[hnode] {1}}
+      child{node(bnode)[hnode] {2}}}
+    child{node (dnode) [hnode] {2}}}
+  child{node (anode) [hnode] {4}};
+
+  \nodechar{cnode}{c}
+  \nodechar{bnode}{b}
+  \nodechar{dnode}{d}
+  \nodechar{anode}{a}
+\end{huffmanc}
+
+But as was shown in exercise \ref{nuther}, this Huffman tree was not
+by any means unique. However, if add the following requirements to the
+construction of the Huffman tree it is guaranteed to be unique:
+
+\begin{enumerate}
+\item Shorter codes will always be to right in the Huffman tree, while
+  longer codes will always be found on the left.
+\item And for codes of the same length, these codes are sorted by
+  lexographic order, meaning that they are sorted by order of the
+  alphabet, so letters that are lexographically shorter be always be
+  placed on the left.
+\end{enumerate}
+
+Placing these requirements on the former tree, the only possible
+Huffman tree for the string $\var{ababaacdd}$ will be
+
+\begin{huffmanc}
+  \node[hnode] {9}
+  child{node (anode) [hnode] {4}}
+  child{node[hnode]{5}
+    child{node (dnode) [hnode] {2}}
+    child{node[hnode]{3}
+      child{node(bnode)[hnode] {2}}
+      child{node(cnode)[hnode] {1}}
+    }};
+
+  \nodechar{cnode}{c}
+  \nodechar{bnode}{b}
+  \nodechar{dnode}{d}
+  \nodechar{anode}{a}
+\end{huffmanc}
+
+\begin{table}
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    Letter & Code \\
+    \midrule
+    $a$ & $0$ \\
+    $b$ & $110$ \\
+    $c$ & $111$ \\
+    $d$ & $10$ \\
+    \bottomrule
+  \end{tabular}
+  \caption{Sorted Huffman Codes}
+  \label{tab:huffman-codes-sorted}
+\end{table}
+
+The letters we then be assigned the codes shown in table
+\ref{tab:huffman-codes-sorted}. This tree will always be unique,
+because it is sorted by the only two properties that a code can have:
+its length and the symbol it represents.
+
+But one very important thing that most literature on DEFLATE often
+omits is exactly how this sorted Huffman tree is made, and this
+what well spend the rest of this section explaining.
+
+The algorithm used by the most DEFLATE implementation is the
+following: first, a non-unique and unsorted Huffman tree is built
+
+\begin{huffmanc}
+  \node[hnode] {9}
+  child {node[hnode]{5}
+    child{node[hnode]{3}
+      child{node(cnode)[hnode] {1}}
+      child{node(bnode)[hnode] {2}}}
+    child{node (dnode) [hnode] {2}}}
+  child{node (anode) [hnode] {4}};
+
+  \nodechar{cnode}{c}
+  \nodechar{bnode}{b}
+  \nodechar{dnode}{d}
+  \nodechar{anode}{a}
+\end{huffmanc}
+
+Note that this tree can really be any if the possible Huffman trees that can
+be constructed from the input.
+
+\subsection{Representing the Huffman Tree}
+
+Now, how is now the Huffman tree passed along with the compressed
+tokens? It turns out that it is actually fully possible to represent
+the sorted Huffman by the code lengths of the codes represented by the
+tree, assuming that these codes are sorted in the lexicographic order
+by the symbols which they are supposed to represent. From the input
+string $\var{ababaacdd}$ the sorted Huffman codes shown in table
+\ref{tab:huffman-codes-sorted} are shown. We will now show that is
+fully possible to represent these codes by the respective code lengths
+in lexicographical order:
+
+\begin{equation*}
+  1,3,3,2
+\end{equation*}
+
+What follows is the algorithm to convert the code lengths to sorted
+Huffman codes:
+
+\begin{enumerate}
+\item The frequencies of the code lengths are put into an array that
+  is often called $\var{blCount}$ in the DEFLATE literature. For our
+  example, $\var{blCount[1]} = 1$, $\var{blCount[2]} = 1$ and
+  $\var{blCount[3]} = 2$.
+
+\item The numerical value of the smallest code for each code length is then
+  found. Once these values have been computed most of the job in
+  computing the codes is done. Because since the codes of the same
+  code lengths we be sorted in lexographic order, the difference
+  between single codes in the same code lengths groups will always be
+  one. The most leftmost code in a code length will have the minimum
+  code length computed in this step, and the code to the left of this
+  group, assuming that it has the same length, will have a code with a
+  value $+1$ the previous code length.
+
+  However, computing these smallest codes values for each code lengths
+  turns out to be more easily said than done. But we take several
+  things into consideration, we will see that this is not very
+  difficult. First of all, the smallest value of each the first group
+  of code lengths will always be $0$. This follows from the fact that
+  codes of smaller code lengths will always be placed leftmost in the
+  tree. Since left branches represents cleared bits($0$), the minimum
+  value of that smallest code lengths will be $0$. This fact can also
+  be easily interpreted from our example tree:
+
+\begin{huffmanc}
+  \node[hnode] {9}
+  child{node (anode) [hnode] {4}}
+  child{node[hnode]{5}
+    child{node (dnode) [hnode] {2}}
+    child{node[hnode]{3}
+      child{node(bnode)[hnode] {2}}
+      child{node(cnode)[hnode] {1}}
+    }};
+
+  \nodechar{cnode}{c}
+  \nodechar{bnode}{b}
+  \nodechar{dnode}{d}
+  \nodechar{anode}{a}
+\end{huffmanc}
+
+\todo{now explain why the addition and shifting step makes sense.}
+
+  \begin{algorithm}[H]
+    \caption{Finding the smallest code of each code length}
+    \label{alg:smallest-code-length}
+    \begin{algorithmic}[1]
+      \Let{$\var{code}$}{0}
+      \linecomment{The minimum value of the smallest code length group
+      be always be $0$}
+      \Let{$\var{blCount[0]}$}{0}
+      \linecomment{(Every bit from 1 $MAXBITS$ is counted,$MAXBITS+1$
+        is not included)}
+      \ForTo{$\var{bits}$}{1}{$\var{MAXBITS+1}$}
+        \Let{$\var{code}$}{$(\var{code} + \var{blCount[bits-1]})
+          \ShiftLeft 1$}
+        \Let{$\var{minCodes[bits]}$}{$\var{code}$}
+      \EndForTo
+    \end{algorithmic}
+  \end{algorithm}
+
+  \item Now that we have computed the minimum values of each code
+    length, we can very easily compute the rest of the codes. This is
+    simply done be assigning the increasing values of the minimum code
+    lengths to our code length groups. To compute the code for $c$,
+    $110 + 001 = 111$ is computed; this is the value following the
+    minimum code value for that code length group, since $c$ is found
+    directly next to the value to the leftmost, $b$, in its group.
+
+\end{enumerate}
+
+And one last thing: to signify that a symbol will not get assigned a
+code at all, meaning that it is not used in the data at all, it is
+assigned a code length of $0$. If for example only ASCII letters are
+used in our compressed data, then all the control character will be
+assigned code lengths of $0$. So there will be a long sequence of
+zeroes in the beginning of the code length sequence, since the code
+length of \textit{every} character has to be included for the proper
+codes to be computed; the computer cannot be expected to guess that
+some codes are not at all assigned, it has to be indicated of this
+exlicitly. However, this also has the unfortunate consequence that the
+sequence of code lengths would in the beginning just be a long
+sequence of zeroes, and this is not particulary space efficent
+considering how redundant such a sequence would be. These code lengths
+are this reason compressed in the DEFLATE algorithm, which is the
+something we will discuss in the next section.
+
 \section{Storing the Huffman Codes}
+
+Now let us discuss how that compression is done. First we will remind
+the reader that the maximum length of code from any of the two
+alphabets(litteral/length- and distancealphabets) must be less than
+16. So the range values reqired to encode the code lengths of both the
+alphabets is 0--15. For compressing the two alphabets another alphabet
+named the code length alphabet is introduced. This alphabet will
+\textit{also} get Huffman coded, but we will get to that later.
+
+Codes 0--15 are in this alphabet used to specify simple code
+lengths.
+
+A code of 16 is used the specify that the previous code is to be
+repeated a number of times. Following this is code is always a 2-bit
+number indicating the repetition count. Do not that while a 2-bit can
+specify the range 0-2, this number is in fact used to specify the
+range 3-6. This is because repetions in the former range makes little
+to sense out a compression performance perspective, because a run of
+two identical code lengths is specified just as all with two unencoded
+code lengths than a single code followed the code 16 to be followed
+the a 2-bit repetition specifier.
+
+So to indicate a run of 11 repeated code lengths of $3$, the following
+codes would be used.
+
+\begin{equation*}
+  3, 16, \bin{11}, 16, \bin{00}
+\end{equation*}
+
+This will indicates a run of $1 + 6 + 4 = 11$ repeated codes with the
+value $3$.
+
+Long runs of zero are however very common in the sequences of code
+lengths and the former code is not particularly good at specifying
+very long runs. For this purpose the codes $17$ and $18$ were
+invented. Codes of $17$ will be followed by 3-bit numbers for
+indicating runs of zero, and \textit{only} zero, in the range
+3--10. In the same way, $18$ will be followed 7-bit numbers for
+specifying runs of zero in the range 11--138.
+
+Using the code lengths alphabet the two former alphabets can be
+represented much more succinctly. But introducing this alphabet the
+question yet again comes up: how do we represent this new alphabet as
+efficiently as possible?
+
+First of all, the alphabet of code lengths is Huffman coded. The
+Huffman codes will be stored as code lengths in 3-bit numbers, meaning
+that the maximum length of a code from this alphabet will be $2^3 - 1
+= 7$. Only the codes are used in the computation of the Huffman codes,
+\textit{not the repetition specifier}, as is wrongly indicated by
+\cite{Salomon:2004:DCC}.
+
+We are almost done now. The last thing we need to discuss is how the
+code lengths for the Huffman codes of the code lengths alphabet are
+stored, because in this case it is done in a very peculiar way.
+
+The alphabet for the code lengths is 0--18. The code lengths are not
+however stored in this order. Rather, they are permuted in the
+following order:
+
+\begin{equation*}
+  16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
+\end{equation*}
+
+This for example means that the code length of code $16$ will be
+stored first. The rationale for this permutation is that the lengths
+at the end of this permutation are much more likelier to be zero. Left
+out all values be defaulted to zero, meaning that they will get left
+our of the code construction process.
+
+And this permutation makes sense out of that perspective; the codes
+for specifying repetitions, $16$, $17$, $18$, will often be used in
+comrpessing code lengths, since runs of zero tend to be very
+common. This is because it is for most kinds of data very unusual that
+all possible values in a byte, 0--255, are even used in the data. For
+most control characters will often be left out, resulting in long runs
+of zero.
+
+And the permutation being ended by values such as $1$ and $15$ and
+$14$ sort of also makes sense. It is very unusual for Huffman trees to
+reach sizes so big that code lengths of $15$ and $14$ are even used or
+necessary. They will for this reason often be left out, and therefore
+be set to $0$. Small trees are also rather unusual and therefore code
+sizes of $1$ and $2$ will also be rarely used. In general, most
+typical Huffman trees are averagely sized; neither to big nor to
+small.
+
+\section{The DEFLATE format}
+
+Now we are finally ready to discuss the DEFLATE format.
+

@@ -79,6 +79,8 @@ expansion=true]{microtype}
 
 % tikz
 \usepackage{tikz}
+\usepackage{tikz-qtree}
+
 \usetikzlibrary{
   shapes,backgrounds,decorations.pathreplacing,
   positioning,fit,shadings,fadings,matrix,calc,patterns, shapes.multipart}
@@ -200,7 +202,7 @@ expansion=true]{microtype}
 \newcommand{\lzeight}{LZ78\xspace}
 
 \newcommand{\hex}[1]{\ensuremath{\mathrm{0x#1}}}
-\newcommand{\bin}[1]{\mbox{\ensuremath{#1}}}
+\newcommand{\bin}[1]{\mbox{\ensuremath{#1_2}}}
 
 \newcommand{\answers}{\section{Answers to the exercises}}
 
@@ -264,3 +266,28 @@ expansion=true]{microtype}
 \hyphenation{brow-ser}
 \hyphenation{Ha-ru-hi-ko}
 
+\newenvironment{huffman}
+{\begin{tikzpicture}
+    [level distance=10mm,
+    % every node/.style={circle,inner sep=1pt,draw=black},
+    hnode/.style={circle,inner sep=1pt,draw=black},
+    level 1/.style={sibling distance=20mm},
+    level 2/.style={sibling distance=10mm},
+    level 3/.style={sibling distance=5mm},
+    text height=1.5ex,text depth=.25ex]}{\end{tikzpicture}}
+
+\newenvironment{huffmanc}
+{\begin{center}\begin{huffman}}
+    {\end{huffman}\end{center}}
+
+\newcommand{\charnodeoffset}{1.0cm}
+
+\newcommand{\nodechar}[2]{\node[below=of #1, yshift=\charnodeoffset] {#2};}
+
+\newcommand{\firstcharnode}[3]{  \node (#1) [hnode] {#2};
+  \nodechar{#1}{#3}}
+
+\newcommand{\restcharnode}[4]{
+  \node (#1) [hnode,right=of #2] {#3};
+  \nodechar{#1}{#4}
+}
