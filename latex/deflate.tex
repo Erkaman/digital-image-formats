@@ -196,6 +196,7 @@ be represented by a length code 29 followed by the 13-bit value
 \end{table}
 
 \section{Fixed Huffman Codes}
+\label{sec:fixed-huffman-codes}
 
 All the codes in the distance, literal and length alphabets will be
 encoded in the compressed data using Huffman codes. But the Huffman
@@ -554,5 +555,72 @@ small.
 
 \section{The DEFLATE format}
 
-Now we are finally ready to discuss the DEFLATE format.
+\subsection{The header bits}
 
+Now we are finally ready to discuss the DEFLATE format. DEFLATE
+compressed data is structured into \textit{blocks}. Every block
+begins with a 3-bit header(the three \textit{lowest} bits are
+used). These 3 bits are used to specify two kinds of information about
+the block:
+
+\subsubsection{BFINAL(1 bit(the lowest one))}
+
+DEFLATE compressed data will consist of a sequence of blocks. These
+blocks are compressed and the uncompressed data of all blocks will
+when concatenated together form the original data. This bit is used to
+specify whether this block is the final block in the file, meaning
+that it is used to indicate the of the compressed data. If it is the
+toggled bit, $1$, that means that the end of the blocks has been
+reached; otherwise, there are more blocks following this block.
+
+\subsubsection{BTYPE(2 bits(1--2))}
+
+This values is used to indicate the compression type used in the
+block, and therefore decides the format of the current block. It can
+have $2^2 = 4$ different kinds of values, but since the value \bin{11}
+is reserved, unsused, there are reality only three possible
+ways of the compressing the data in the block. What types of
+compression the tree possible values of this field is indicated is
+what we will be discussing for the rest of this chapter.
+
+\subsection{Non-compressed block (BTYPE=00)}
+
+The most simple way of storing the data in a block is by simply not
+compressing it at all, which is what is done by this block type. The
+rest of the remaining 5 bits of the header byte are ignored, and
+following this are the following values:
+
+\subsubsection{LEN(2 bytes)}
+
+This value is used to specify the length of the non-compressed
+block. So the maximum length of a block will be $2 ^{16}$.
+
+\subsubsection{NLEN(2 bytes)}
+
+This field is basically useless, superfluous, , and we will not discuss it.
+
+\subsubsection{Non-compressed, literal Data(bytes)}
+
+This contains a sequence of non-compressed blocks. Obvious, the length
+of this sequence is the value of the LEN field.
+
+While the non-compressed block-type may seem useless, it does have
+several usages. It can for example store section of data in a file
+which is inflated by compression. As we saw in chapter \ref{cha:rle},
+it is fully possible for a compression algorithm to explode the size
+of the compressed data. But for DEFLATE, this is something that most
+typically happens for very random data. Data in which there are close
+to redundancies at all.
+
+\subsection{Compression with fixed Huffman codes (BTYPE=01))}
+
+The data in the block is compressed using the fixed, precomputed,
+Huffman codes we discussed in section
+\ref{sec:fixed-huffman-codes}. So the compressed data will in other
+words just contain a sequence of Huffman codes for the two alphabets,
+and since the end of the block is indicated by the end of block code
+256, this block can in theory go on infinitely long. The 5 remaining
+bits of the header byte of the block will be used for storing some
+Huffman code, so they are not skipped in this case.
+
+\subsection{Compression with fixed Huffman codes (BTYPE=1))}
