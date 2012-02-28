@@ -247,6 +247,7 @@ data.
 \end{table}
 
 \section{Dynamic Huffman Codes}
+\label{sec:dynamic-huffman-codes}
 
 \subsection{Computing the Huffman Tree}
 
@@ -466,6 +467,7 @@ are this reason compressed in the DEFLATE algorithm, which is the
 something we will discuss in the next section.
 
 \section{Storing the Huffman Codes}
+\label{sec:storing-huffman-codes}
 
 Now let us discuss how that compression is done. First we will remind
 the reader that the maximum length of code from any of the two
@@ -623,4 +625,58 @@ and since the end of the block is indicated by the end of block code
 bits of the header byte of the block will be used for storing some
 Huffman code, so they are not skipped in this case.
 
-\subsection{Compression with fixed Huffman codes (BTYPE=1))}
+\subsection{Compression with dynamic Huffman codes (BTYPE=11))}
+
+In the last block type dynamic Huffman codes are instead computed. We
+already discussed in depth how this is done in section
+\ref{sec:dynamic-huffman-codes}, so we will not delve to deep into
+details here.
+
+\subsection{HLIT (5 bits)}
+
+These for bits are used to specify the number of code lengths used to
+encode the literal/length code alphabet. The number of code lengths
+from this alphabet will actually be $\var{HLIT} + 257$ and the max
+value of this sum $286$, and \textit{not} $288$, because this is the
+number specified by the DEFLATE specification. By specifying different
+values if $\var{HLIT}$ you can leave out trailing zeroes in the code
+length data, increasing compression a bit. This is perfectly legal,
+because left out code lengths are defaulted to 0, meaning that they
+will not participate the code construction process at all.
+
+How it also makes sense why the code lengths from the code length
+alphabet are permuted in an order that is likely to result in trailing zeroes.
+
+\subsection{HDIST (5 bits)}
+
+In the same way, the code lengths of the distance alphabet is
+specified as the sum $\var{HDIST} + 1$. The allowed range for this sum
+is 1--32.
+
+\todo{discuss edgecases where only one or no codes at all are used
+  from this alphabet.}
+
+\subsection{HCLEN (4 bits)}
+
+The number of code lengths from the code lengths alphabet is specified
+by the sum $\var{HCLEN} + 4$, in the range 4--19.
+
+\subsection{Code Length Alphabet Code Lengths}
+
+And finally, here comes the code length for the alphabet of code
+lengths, permuted in the order we discussed in section
+\ref{sec:storing-huffman-codes}. The code lengths of this alphabet
+were limited to 7 bits of length, meaning that these code lengths are
+stored using 3-bit numbers; more specifically, the length of this
+sequence will be $(\var{HCLEN} + 4) \cdot 3$ bits.
+
+\subsection{Literal/Length Alphabet Code Lengths}
+
+The literal/length alphabet is encoded using code lengths that are in
+turn using the Huffman codes code length alphabet. $\var{HLIT} + 257$
+code lengths will, as familiar, be found in this sequence.
+
+\subsection{Distance Alphabet Code Lengths}
+
+And in the exact same way, the $\var{HDIST} + 1$ code lengths for the
+distances codes are stored.
