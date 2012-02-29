@@ -204,11 +204,11 @@ could be made, then literal bytes are simply used.
 \section{Fixed Huffman Codes}
 \label{sec:fixed-huffman-codes}
 
-All the codes in the distance, literal and length alphabets will be
+All the codes in the distance/literal and length alphabets will be
 encoded in the compressed data using Huffman codes. But the Huffman
-tree must also be passed along with the data for it to be compressed
+tree must also be passed along with the data for it to be decompressed
 properly. There are two sorts of ways of doing this: fixed and dynamic
-Huffman codes. Let us first discussed the most of simple of these two:
+Huffman codes. Let us first discuss the most of simple of these two:
 fixed Huffman codes.
 
 Using fixed Huffman codes the Huffman codes of the both alphabets are
@@ -217,24 +217,24 @@ these Huffman codes are computed). The precomputed Huffman codes for
 the first alphabet are shown in table
 \ref{tab:fixed-length-litteral-huffman}. Using this table, the end
 code, 256, will be represented by the 7-bit Huffman Code
-\bin{0000000}. The literal code 142 will on the other hand be
-represented by the 8-bit Huffman code \bin{10111110}. And the distance
+\bin{0000000}, the literal code 142 will on the other hand be
+represented by the 8-bit Huffman code \bin{10111110} and the length
 code 258 will be represented by the 7-bit Huffman code
-\bin{0000002}. The reader may however be confused by the two length
-codes 286 and 287. Did not the first alpha only span the range 0--285?
-\todo{explain}.
+\bin{0000010}. The reader may however be confused by the inclusion of
+the two length codes 286 and 287. Did not the literal/length alphabet
+only span the range 0--285? The two codes 286 and 287 will according
+to the DEFLATE specification never be found in the compressed data. So
+it is to us incomprehensible why these two codes are given assigned
+Huffman codes. But since they will never occur in the data we can
+safely ignore them. The Huffman encoded length codes will obviously,
+if there are any, also be followed by their accompanying extra bits.
 
 The fixed Huffman Distance codes are on the other hand represented in
 a more simple way: Distance codes 0-29 are assigned 5-bit Huffman
 codes of their corresponding values, meaning that, for example, the
 distance code of 28 will be represented by a 5-bit number with the
 value 28. And of course, these distance codes encoded as Huffman codes
-will be followed by their accompanying extra bits. A 5-bit number can
-fit all the possible distance codes, because the maximum value of such
-a number is $2^{5} - 1 = 31$. The distance codes are also assigned
-Huffman codes even though they do not even exists, but according to
-the DEFLATE specification they will never ever occur in the compressed
-data.
+will be followed by their accompanying extra bits.
 
 \begin{table}
   \centering

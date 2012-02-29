@@ -145,7 +145,6 @@ code list was ambiguous in the first place.
 
 \end{Exercise}
 
-
 \section{Trees}
 
 A tree is a recursive data structure that is used to implement Huffman
@@ -303,6 +302,12 @@ therefore they will get assigned the shorter codes. And similarly,
 since the least occurring codes will get assigned small values, they
 also get added into the tree early, so will get placed deep down in
 the tree, and they will therefore get assigned the longer codes.
+
+And one final thing: what if the frequency of one the characters above
+would have been 0? Then that character would be left out from the
+Huffman tree computation, since there is no need to compute the
+Huffman codes for characters that do not at all occur in the input
+data!
 
 \subsection{Transmitting The Huffman Tree}
 
