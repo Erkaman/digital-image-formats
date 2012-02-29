@@ -5,52 +5,53 @@
 \chapter{DEFLATE}
 \label{cha:deflate}
 
-The following description of the DEFLATE algorithm is based on \cite{pkware:_appnot,deutsch96:_deflat_compr_data_format_specif,Salomon:2004:DCC,feldspar:_explan_deflat_algor}
+We will in this chapter discuss the DEFLATE algorithm based on the
+references
+\cite{pkware:_appnot,deutsch96:_deflat_compr_data_format_specif,Salomon:2004:DCC,feldspar:_explan_deflat_algor}
 
 \section{History}
 
 The DEFLATE algorithm was devised by Phil Katz for usage in the Zip
 format he had also invented and it was first formally defined in
-\cite{deutsch96:_deflat_compr_data_format_specif}.
+\cite{deutsch96:_deflat_compr_data_format_specif}. The algorithm
+itself uses a combination of LZ77 and Huffman coding.
 
-\section{Algorithm}
+\section{Length and Distance Codes}
 
-There is a general format of DEFLATE compressed data, but we will not
-yet describe that because we first of all need a good view of the
-algorithm operates to begin with.
+DEFLATE compressed data has a prespecified format. But before we can
+describe that format, we first need a good view of the algorithm
+operates to begin with.
 
-\subsection{Length and Distance Codes}
+DEFLATE compressed data on the basic level consists of two kinds of
+data: literal bytes and length-distance pairs. This means that it uses
+a LZ77 variation to do compression. It uses a system very similar to
+that of LZSS, as we will soon see.
 
-DEFLATE compressed data on the basic level consists of two datatypes:
-literal bytes and length-distance pairs, meaning that it uses a LZ77
-variation to do compression. It in other words uses a system very
-similar to that of LZSS, which uses unmatched tokens and matched
-tokens.
-
-the alphabet 0--255 is used to encode literal bytes, which are just
-like unmatched tokens for which for no match was found for in the LZ77
-window. The special value $256$ is used to indicate the end of the
-compressed data. Note that this value is part of the same alphabet as
-the literal bytes. Also part of the same alphabet are the length
-codes. They can be found in the range 257--285, and they are used to
-indicate the length of the LZ77 matched strings. The entire alphabet
-consists of the values 0--285 and this entire alphabet will get
-Huffman codes in the later parts of the algorithm, which we will get
-to soon.
+An alphabet of 0--255 is used to encode literal bytes, which are just
+like unmatched tokens; that is, tokens for which for no match was
+found for in the LZ77 window. The special value $256$ is used to
+indicate the end of the compressed data. Note that this value is part
+of the \textit{same} alphabet as the literal bytes. Also part of the
+same alphabet are the length codes. They can be found in the range
+257--285, and they are used to indicate the length of the LZ77 matched
+strings. All these values forms an alphabet of values 0--285. This
+entire alphabet will also get Huffman coded in the later parts of the
+algorithm.
 
 The length codes are a bit tricky to use, though. Please observe table
 \ref{tab:deflate-length-codes}. This table means that if a code of
-$257$ then that means that this code in reality represents a length of
-$3$, and in the same way a code of $262$ represents a length of
-$8$. But how should a code like $265$ be parsed? First, we will remark
-the minimum length this can represent is $11$. This code is then
-followed by an extra bit, as indicated by the table. The extra bit is
-added to minimum code length to get the true code length. In other
+$257$ is found then that means that this code in reality represents a
+length of $3$, and in the same way a code of $262$ represents a length
+of $8$. But how should a code like $265$ be parsed? First, we will
+remark that the minimum length this code can represent is $11$. This
+code is then followed by a single extra bit, as indicated by the
+table. The value of the extra bit is added to minimum code length to
+get the true code length represented by the previous code. In other
 words, a code of $265$ followed by the extra bit $1$ will represent
 the code length $12$, but had it on the other hand been followed by
 the single bit $0$, then it would have represented the code length
 $11$. In the same way, a length of $95$ is indicated by the length
-code $278$ followed by the 4-bit number $12$.
+code $278$ followed by the 4-bit number $\bin{1100}=12$.
 
 \begin{table}
 
@@ -86,7 +87,7 @@ code $278$ followed by the 4-bit number $12$.
       270 & 2 & 23--26\\
       271 & 2 & 27--30 \\
       272 & 2 & 31--34 \\
-      273 & 0 & 33--42 \\
+      273 & 3 & 33--42 \\
       274 & 3 & 43--50 \\
       275 & 3 & 51--58 \\
       276 & 3 & 59--66 \\
@@ -119,16 +120,21 @@ code $278$ followed by the 4-bit number $12$.
 \end{table}
 
 Following a length code and its accompanying extra bits is always a
-distance code. Offsets are termed distances in the DEFLATE
+distance code. By the way, offsets are termed distances in the DEFLATE
 literature. The distance codes are drawn from the alphabet 0--29 and
 they are stored in very much the same way as length codes, as is shown
-in table \ref{tab:deflate-distance-codes}. So distance of $30000$ will
-be represented by a length code 29 followed by the 13-bit value
+in table \ref{tab:deflate-distance-codes}. So a distance of $30000$
+will be represented by a distance code 29 followed by the 13-bit value
 5423, since
 
 \begin{equation*}
   24577 + 5423 = 30000
 \end{equation*}
+
+Length distance codes form pair to represent strings that have been
+matched for in the window. First comes the length code and its extra
+bits, and after the distance code and its extra bits. If no matches
+could be made, then literal bytes are simply used.
 
 \begin{table}
 
