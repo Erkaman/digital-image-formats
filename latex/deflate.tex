@@ -475,26 +475,27 @@ something we will discuss in the next section.
 \section{Storing the Huffman Codes}
 \label{sec:storing-huffman-codes}
 
-Now let us discuss how that compression is done. First we will remind
-the reader that the maximum length of code from any of the two
-alphabets(litteral/length- and distancealphabets) must be less than
-16. So the range values reqired to encode the code lengths of both the
-alphabets is 0--15. For compressing the two alphabets another alphabet
+Now let us discuss how the code length compression is done. First we
+will remind the reader that the maximum length of a code from any of
+the two alphabets(litteral/length- and distance alphabets) must be
+less than 16. So the range values reqired to encode the code lengths
+of both the alphabets is 0--15. For compressing the \textit{code
+  lengths of the Huffman codes} of two alphabets another alphabet
 named the code length alphabet is introduced. This alphabet will
 \textit{also} get Huffman coded, but we will get to that later.
 
-Codes 0--15 are in this alphabet used to specify simple code
-lengths.
+Codes 0--15 are in this alphabet used to specify simple,
+noncompressed code lengths.
 
 A code of 16 is used the specify that the previous code is to be
 repeated a number of times. Following this is code is always a 2-bit
-number indicating the repetition count. Do not that while a 2-bit can
-specify the range 0-2, this number is in fact used to specify the
-range 3-6. This is because repetions in the former range makes little
-to sense out a compression performance perspective, because a run of
-two identical code lengths is specified just as all with two unencoded
-code lengths than a single code followed the code 16 to be followed
-the a 2-bit repetition specifier.
+number indicating the repetition count. Do note that while a 2-bit
+number specifies the range 0--2, this number is in fact used to specify
+the range 3--6. This is because repetions in the former range makes
+little to sense out a compression performance perspective, because a
+run of two identical code lengths is specified just as well with two
+unencoded code lengths than a single code followed by the code 16 and
+its 2-bit repetition specifier.
 
 So to indicate a run of 11 repeated code lengths of $3$, the following
 codes would be used.
@@ -503,28 +504,32 @@ codes would be used.
   3, 16, \bin{11}, 16, \bin{00}
 \end{equation*}
 
-This will indicates a run of $1 + 6 + 4 = 11$ repeated codes with the
+This will indicate a run of $1 + 6 + 4 = 11$ repeated codes with the
 value $3$.
 
 Long runs of zero are however very common in the sequences of code
 lengths and the former code is not particularly good at specifying
 very long runs. For this purpose the codes $17$ and $18$ were
 invented. Codes of $17$ will be followed by 3-bit numbers for
-indicating runs of zero, and \textit{only} zero, in the range
-3--10. In the same way, $18$ will be followed 7-bit numbers for
-specifying runs of zero in the range 11--138.
+indicating runs of zero, and \textit{only} zero, with lengths in the
+range 3--10. In the same way, $18$ will be followed a 7-bit numbers
+for specifying runs of zero in the with lengths in the range 11--138.
 
 Using the code lengths alphabet the two former alphabets can be
-represented much more succinctly. But introducing this alphabet the
-question yet again comes up: how do we represent this new alphabet as
-efficiently as possible?
+represented much more succinctly. The code lengths of the alphabets
+are obviously sorted before they are compressed and stored. So the
+code length for ``a'' will always come before the code length for
+``b''. But introducing this alphabet the question yet again comes up:
+how do we represent this new alphabet as efficiently as possible?
 
-First of all, the alphabet of code lengths is Huffman coded. The
+The alphabet of code lengths will first of all be Huffman coded. The
+frequencies of the codes are gathered from the compressed data of the
+code lengths of the two former alphabets. Only the codes are used in
+the computation of the Huffman codes, \textit{not the repetition
+  specifiers}, as is wrongly indicated by \cite{Salomon:2004:DCC}. The
 Huffman codes will be stored as code lengths in 3-bit numbers, meaning
 that the maximum length of a code from this alphabet will be $2^3 - 1
-= 7$. Only the codes are used in the computation of the Huffman codes,
-\textit{not the repetition specifier}, as is wrongly indicated by
-\cite{Salomon:2004:DCC}.
+= 7$.
 
 We are almost done now. The last thing we need to discuss is how the
 code lengths for the Huffman codes of the code lengths alphabet are
@@ -539,27 +544,28 @@ following order:
 \end{equation*}
 
 This for example means that the code length of code $16$ will be
-stored first. The rationale for this permutation is that the lengths
-at the end of this permutation are much more likelier to be zero. Left
-out all values be defaulted to zero, meaning that they will get left
-our of the code construction process.
+stored first. The rationale for this is that the lengths at the end
+are much more likelier to be zero in this permutation. Left out values
+will be defaulted to zero, meaning that they will get left out of the
+code construction process. If there are trailing zeroes then these
+zeroes can be left out, since they will be defaulted to zero anyways,
+saving some space.
 
 And this permutation makes sense out of that perspective; the codes
 for specifying repetitions, $16$, $17$, $18$, will often be used in
-comrpessing code lengths, since runs of zero tend to be very
+compressing code lengths, since runs of zero tend to be very
 common. This is because it is for most kinds of data very unusual that
 all possible values in a byte, 0--255, are even used in the data. For
-most control characters will often be left out, resulting in long runs
-of zero.
+example, most ASCII control characters will often never occur in
+English language texts, resulting in long runs of zero.
 
 And the permutation being ended by values such as $1$ and $15$ and
 $14$ sort of also makes sense. It is very unusual for Huffman trees to
 reach sizes so big that code lengths of $15$ and $14$ are even used or
 necessary. They will for this reason often be left out, and therefore
 be set to $0$. Small trees are also rather unusual and therefore code
-sizes of $1$ and $2$ will also be rarely used. In general, most
-typical Huffman trees are averagely sized; neither to big nor to
-small.
+sizes of $1$ and $2$ will also be rarely used. Typically, most Huffman
+trees are averagely sized; neither to big nor to small.
 
 \section{The DEFLATE format}
 
