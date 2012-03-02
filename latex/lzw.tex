@@ -88,17 +88,17 @@ assigned the next available code, $256$.
 
 $a$ is discarded, $b$ is kept and another $a$ is
 read. First $b$ is outputted, and the appended string
-$\var{ba}$ is formed. This string doesn't either exist in the table,
+$\var{ba}$ is formed. This string does neither exist in the table,
  so it is added to table and is given the code $257$.
 
  Discard $b$, output $a$ and read in another $b$. The
  resulting appended string is this time $\var{ab}$. But wait a minute,
- isn't already that string in the string table? Yes it is, so instead
+ is not already that string in the string table? Yes it is, so instead
  of re-adding that string to table, it is kept for the next step in
  the algorithm.
 
 The code for $\var{ab}$ is outputted, which is $256$, and the character $c$ is
-read. The string $\var{abc}$ doesn't exist in the table, so it is
+read. The string $\var{abc}$ does not exist in the table, so it is
 added to the string table and given the code $258$.
 
 And the algorithm just keeps going on like this. Table
@@ -209,7 +209,7 @@ algorithm is presented. Let us now discuss the details of it.
         \State \Call{outputCode}{$\var{string}$}
 
         \linecomment{Only add the accumulated string to the table if
-          there's space for it.}  \If{$\var{nextCode} \leq maxCode$}
+          there is space for it.}  \If{$\var{nextCode} \leq maxCode$}
 
           \State \Call{AddToStringTable}{$\var{nextCode}, \var{string} + \var{character}$}\label{algl:hashadd}
           \Inc{\var{nextCode}}{1}
@@ -242,7 +242,7 @@ typically used code sizes are in the range $9 \leq n \leq 15$.
 This is of course not the only possible storage model for the
 codes. In the GIF format's variation of the \lzw algorithm, increasing
 codes sizes are used to even further improve the compression
-efficiency of this algorithm. We'll discuss this variation in chapter
+efficiency of this algorithm. We will discuss this variation in chapter
 \ref{cha:gif}.
 
 \subsection{Knowing when to stop}
@@ -304,7 +304,7 @@ The code $257$ is read in, which corresponds to the string
 $\var{ba}$. Since the former code was $c$, the string to be added to
 the table is $\var{cb}$, and this string is given the code $259$.
 
-Next the code $260$ is read. But we haven't even yet added that code
+Next the code $260$ is read. But we have not even yet added that code
 to the table! How could this be?
 
 Up to this point, the compressor had compressed the string
@@ -509,7 +509,7 @@ compressed.
 For the smallest file, \verb|asyoulik.txt|, the best compression ratio
 was not achieved for the largest code size. This is because for
 smaller files it is unlikely that the string table even gets fully
-built up. If the size of the code doesn't get used to its full
+built up. If the size of the code does not get used to its full
 potential, then unnecessary bits are only added when the code size is
 increased. These unnecessary bits has the consequence that the codes
 are stored in larger numbers, and this in turn can unnecessarily
@@ -518,11 +518,11 @@ increase the size and worsen the compression.
 \subsubsection{Program code}
 
 For the two source code files, \verb|fields.c| and \verb|grammar.lsp|,
-the compression ratio doesn't get very good at all, compared to the
+the compression ratio is not get very good at all, compared to the
 compression ratio of the text files. This is surprising, because
 source code tends to contain tons of keywords, like
 \verb|for|,\verb|while| \verb|return| that are repeated throughout the
-entire file. You'd think that by replacing all these repeated words by
+entire file. You would think that by replacing all these repeated words by
 small codes this would result a good compression ratio.
 
 But the worse compression ratio for higher codes sizes is in this case

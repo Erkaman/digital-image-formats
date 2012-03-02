@@ -207,7 +207,8 @@ expansion=true]{microtype}
 \newcommand{\fullbyte}{$11111111$\xspace}
 \newcommand{\emptybyte}{$00000000$\xspace}
 
-\newcommand{\hex}[1]{\ensuremath{\mathrm{0x#1}}}
+%\newcommand{\hex}[1]{\ensuremath{\mathrm{0x#1}}}
+\newcommand{\hex}[1]{\mbox{\ensuremath{\mathrm{#1}_{16}}}}
 \newcommand{\bin}[1]{\mbox{\ensuremath{#1_2}}}
 
 \newcommand{\answers}{\section{Answers to the exercises}}
@@ -315,7 +316,8 @@ expansion=true]{microtype}
   \docsvlist
 }
 \newacronyms{pgf,im,ascii,exif,tga,gif,png,crc,gcc,emacs,git,rle,lzw,lzss,
-nul, soh,stx,lf,rgb,rgba, argb,gimp,lzma}
+nul, soh,stx,lf,rgb,rgba, argb,gimp,lzma,
+etx,eot,enq,ack,bel,bs,vt,ff,dle,nak,syn,etb,can,sub,esc,fs,gs,rs,us,del}
 
 % LZ77 and LZ78 are sometimes also referred to as LZ1 and LZ2.
 \newcommand*{\lzone}{{\acronymstyle lz\oldstylenums{77}}\xspace}
@@ -326,6 +328,14 @@ nul, soh,stx,lf,rgb,rgba, argb,gimp,lzma}
 \newcommand*{\htab}{{\acronymstyle ht}\xspace}
 \newcommand*{\nullm}{{\acronymstyle null}\xspace}
 \newcommand*{\lzfam}{{\acronymstyle lz}-family\xspace}
+\newcommand*{\sout}{{\acronymstyle so}\xspace}
+\newcommand*{\shiftin}{{\acronymstyle si}\xspace}
+\newcommand*{\emed}{{\acronymstyle em}\xspace}
+
+\newcommand*{\crlf}{{\acronymstyle crlf}\xspace}
+
+
+\newcommand*{\dc}[1]{{\acronymstyle dc#1}\xspace}
 
 %idat?
 

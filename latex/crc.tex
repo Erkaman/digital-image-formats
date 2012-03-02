@@ -2,6 +2,15 @@
   \bibliography{project.bib}
 \end{comment}
 
+
+\begingroup
+% arrays are used to display the CRC polynomial divisions.
+% This value is temporarily in this chapter
+% to make a smaller distance between the separate bits in polynomial
+% divisions.
+\arraycolsep=0.05em
+
+
 \chapter{Checksums}
 \label{cha:crc}
 
@@ -756,17 +765,15 @@ $a$. Hence, the \adlerchk checksum is always a 32-bit number, as is
 indicated by its name. In other words, for some data that has a length
 of $n$ bytes the checksum is calculated as follows:
 
-\begin{equation*}
-  \def\between{2mm}
-  \begin{array}{l}
-    a = 1 + D_1 + D_2 + \ldots + D_n (\bmod{65521}) = 1 +
-    \displaystyle\sum_{i = 1}^{n}D_i (\bmod{65521}) \\[\between]
-    b = (1 + D_1) + (1 + D_1 + D_2) + \ldots + (1 + D_1 + D_2 + \ldots +
-    D_n) (\bmod{65521}) = \\[\between]
-    = n + \displaystyle\sum_{i = 1}^{n}(D_i \cdot (n + 1 - i)) (\bmod{65521})   \\[\between]
-    \text{adler32} = (b \ShiftLeft 16) \BitOr a = (b \cdot 2^{16}) + a \\[\between]
-  \end{array}
-\end{equation*}
+\begin{align*}
+    & a = 1 + D_1 + D_2 + \ldots + D_n (\bmod{65521}) = 1 +
+    \displaystyle\sum_{i = 1}^{n}D_i (\bmod{65521}) \\
+    & b = (1 + D_1) + (1 + D_1 + D_2) + \ldots + (1 + D_1 + D_2 + \ldots +
+    D_n) (\bmod{65521}) = \\
+    & = n + \displaystyle\sum_{i = 1}^{n}(D_i \cdot (n + 1 - i))
+    (\bmod{65521}) \\
+    & \text{adler32} = (b \ShiftLeft 16) \BitOr a = (b \cdot 2^{16}) + a
+\end{align*}
 
 The last line may however need some explanation. It was back in
 exercise \ref{bit-equiv} on page \pageref{bit-equiv} shown that $b
@@ -888,16 +895,14 @@ It is also shown in algorithm \ref{alg:adler32} how to calculate the
 
   $1848105$, because $D_1 = 42$, $D_2 = 43$ and $D_3 = 67$, so
 
-
-  \begin{equation*}
-    \def\between{2mm}
-    \begin{array}{l}
-      a = 1 +  \displaystyle\sum_{i = 1}^{3}D_i (\bmod{65521}) = 1 + 42 +
-      43 + 67 (\bmod{65521}) = 153 \\[\between]
-      b = 3 + \displaystyle\sum_{i = 1}^{3}(D_i \cdot (3 + 1 - i))
-      (\bmod{65521}) = 3 + 42 \cdot 3 + 43 \cdot 2 + 67  = 282 \\[\between]
-      \text{adler32} = (b \cdot 65536) + a = 1848105 \\[\between]
-    \end{array}
-  \end{equation*}
+  \begin{align*}
+      & a = 1 +  \displaystyle\sum_{i = 1}^{3}D_i (\bmod{65521}) = 1 + 42 +
+      43 + 67 (\bmod{65521}) = 153 \\
+      & b = 3 + \displaystyle\sum_{i = 1}^{3}(D_i \cdot (3 + 1 - i))
+      (\bmod{65521}) = 3 + 42 \cdot 3 + 43 \cdot 2 + 67  = 282 \\
+      & §\text{adler32} = (b \cdot 65536) + a = 1848105
+  \end{align*}
 
 \end{Answer}
+
+\endgroup
