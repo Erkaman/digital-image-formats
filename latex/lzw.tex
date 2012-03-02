@@ -5,7 +5,7 @@
 \chapter{LZW}
 \label{cha:lzw}
 
-In this chapter, we will discuss the data compression algorithm LZW,
+In this chapter, we will discuss the data compression algorithm \lzw,
 as it is defined and described in
 \cite{Nelson:1989:LDC:77102.77104,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC,mark1996data_compression_book,nelson:_lzw_revis}. We
 will first discuss the history behind the algorithm, then the
@@ -16,30 +16,33 @@ efficiency of this algorithm.
 \section{History}
 \label{sec:hist-lzw}
 
+\newcommand*{\lzonev}{{\acronymstyle lz\oldstylenums{1}}\xspace}
+\newcommand*{\lztwov}{{\acronymstyle lz\oldstylenums{2}}\xspace}
+
 In the years 1977 to 1978, the two Israeli researchers Abraham Lempel
 and Jacob Ziv published two papers; in the first of these papers,
 \cite{Ziv77auniversal}, they described the algorithm that came to be
-known as LZ77(sometimes also known as LZ1) and in the second of these
-papers, \cite{Ziv78compressionof}, they defined the algorithm that
-would from then on become known as LZ78(also known as LZ2)
+known as \lzone(sometimes also known as \lzonev) and in the second of
+these papers, \cite{Ziv78compressionof}, they defined the algorithm
+that would from then on become known as \lztwo(also known as \lztwov)
 \cite{roelofs09:_histor_portab_networ_graph_png_format,Salomon:2004:DCC,winters:_us_paten_adapt}.
 
 These two methods started the family of compression algorithms that is
 known as the \textit{dictionary methods}. Examples of algorithms in
-the family of dictionary methods is LZMA, which is based on LZ78
-\cite{palov11}, LZW, which is also based on LZ78, and LZSS,which was
-based on LZ77 \cite{Salomon:2004:DCC}. LZW is the method that we will
-discuss in this chapter. It was invented by Terry Welch and he
+the family of dictionary methods is \lzma, which is based on \lztwo
+\cite{palov11}, \lzw, which is also based on \lztwo, and \lzss,which
+was based on \lzone \cite{Salomon:2004:DCC}. \lzw is the method that
+we will discuss in this chapter. It was invented by Terry Welch and he
 published the algorithm in \cite{welch85:_u}.
 
 \section{The Compression algorithm}
 \label{sec:lzw-comp-desc}
 
-The LZW compression algorithm is best
-understood by walking through the LZW algorithm's process of
+The \lzw compression algorithm is best
+understood by walking through the \lzw algorithm's process of
 compressing some example string, so we will in this example
 demonstrate how the compression of the string
-$\var{ababcbababaaaaaaa}$ is done in LZW.
+$\var{ababcbababaaaaaaa}$ is done in \lzw.
 
 Central to the entire algorithm's process is a string table(also
 sometimes referred to as a dictionary). In this table, numbers called
@@ -70,7 +73,7 @@ characters, as is shown in table \ref{tab:str-tab-ascii}.
     $255$ & unassigned to in ASCII \\
     \bottomrule
   \end{tabular}
-  \caption{The initial LZW string table.}
+  \caption{The initial \lzw string table}
   \label{tab:str-tab-ascii}
 \end{table}
 
@@ -106,7 +109,7 @@ compression process of that same string. So the string
 $\var{ababcbababaaaaaaa}$ was in the end compressed down to the
 string $\var{ab},256,c,257,260,a,262,263,a$.
 
-So to summarize, the LZW algorithm basically works like: the algorithm
+So to summarize, the \lzw algorithm basically works like: the algorithm
 keeps accumulating and reading characters into the string $S$. This
 process goes on as long as, for the read in character $c$, the string
 $Sc$, where $Sc$ represents the string that is formed when the
@@ -117,7 +120,7 @@ outputted, and the appended string $Sc$ is added to the dictionary.
 
 \begin{Exercise}[label={lzw-compress}]
 
-  LZW compress the string $\var{abababab}$. Show the output of the
+  \lzw compress the string $\var{abababab}$. Show the output of the
   compressor and the resulting string table.
 
 \end{Exercise}
@@ -143,7 +146,7 @@ outputted, and the appended string $Sc$ is added to the dictionary.
     $264$ & $\var{aaaa}$ \\
     \bottomrule
   \end{tabular}
-  \caption{The string table after compression.}
+  \caption{The string table after compression}
   \label{tab:str-tab-str}
 \end{table}
 
@@ -171,18 +174,18 @@ outputted, and the appended string $Sc$ is added to the dictionary.
     \stoplzwrow{a}{97}
     \bottomrule
   \end{tabular}
-  \caption{Detailed LZW compression process.}
+  \caption{Detailed \lzw compression process}
   \label{tab:lzw-walkthru}
 \end{table}
 
 \section{Implementation of The Compression Algorithm}
 \label{sec:lzw-enc-algorithm}
 
-In algorithm \ref{alg:lzw-compression} the complete LZW compression
+In algorithm \ref{alg:lzw-compression} the complete \lzw compression
 algorithm is presented. Let us now discuss the details of it.
 
 \begin{algorithm}[H]
-  \caption{LZW compression algorithm.}
+  \caption{\lzw compression algorithm}
   \label{alg:lzw-compression}
   \begin{algorithmic}[1]
 
@@ -228,16 +231,16 @@ algorithm is presented. Let us now discuss the details of it.
 
 \subsection{Codes sizes}
 
-A LZW compressed file is just a long sequence of outputted codes.
+A \lzw compressed file is just a long sequence of outputted codes.
 Since all the of the string codes added during the compression step
 will have code values over $255$, bytes will obviously not be
-sufficient to store these codes. In our version of the LZW algorithm,
+sufficient to store these codes. In our version of the \lzw algorithm,
 fixed code sizes are assigned to every code. This means that the codes
 are stored in fixed $n$-bit numbers for some value $n$. The most
 typically used code sizes are in the range $9 \leq n \leq 15$.
 
 This is of course not the only possible storage model for the
-codes. In the GIF format's variation of the LZW algorithm, increasing
+codes. In the GIF format's variation of the \lzw algorithm, increasing
 codes sizes are used to even further improve the compression
 efficiency of this algorithm. We'll discuss this variation in chapter
 \ref{cha:gif}.
@@ -259,14 +262,14 @@ maximum length of the string table will be $2^n - 1$ rather than $2^n$
 
 \section{Description of the Decompression algorithm}
 
-Using the compression algorithm LZW on the string
+Using the compression algorithm \lzw on the string
 $\var{ababcbababaaaaaaa}$ produced the compressed data $ab, 256,c,
 257, 260, a, 262, 263, 264, a,4095$. Since we were using 12-bit codes
 to encode the data, the number $2^{12} - 1 = 4095$ terminates the
 data. This number is used by the decompressor to check if it is done
 with the decompression.
 
-In a LZW compressed file the string table used to encode the file is
+In a \lzw compressed file the string table used to encode the file is
 not included. But how could you possibly decompress the file without
 such essential information? It turns out that only from the compressed
 data the decompressor is able to rebuild an exact copy of the string
@@ -358,7 +361,7 @@ In \ref{alg:lzw-working-decompression} pseudocode of the algorithm we
 just described is given.
 
 \begin{algorithm}[H]
-  \caption{LZW decompression algorithm.}
+  \caption{\lzw decompression algorithm}\algohack{}
   \label{alg:lzw-working-decompression}
   \begin{algorithmic}[1]
 
@@ -405,12 +408,12 @@ just described is given.
 \section{Compression Efficiency Of LZW}
 
 In this section, we will be showing and discussing the results of a
-test that tested how the compression ratio of the LZW algorithm varied
+test that tested how the compression ratio of the \lzw algorithm varied
 for different sorts of files and data with different codes sizes.
 
 \subsection{How compression is achieved in LZW}
 
-The main idea behind LZW compression is that strings that occur often
+The main idea behind \lzw compression is that strings that occur often
 within a file will get replaced by shorter codes. And in general, the
 longer the algorithm runs, the longer the strings that get added to
 the table get. This has the consequence that larger files typically
@@ -446,7 +449,7 @@ Corpus. They can all be downloaded at \cite{powell:desc-corp}.
     \bottomrule
 
   \end{tabular}
-  \caption{The Canterbury Corpus.}
+  \caption{The Canterbury Corpus}
   \label{tab:corp-files}
 \end{table}
 
@@ -473,7 +476,7 @@ In table \ref{tab:lzw-test-results} we show the results of the test.
   \scriptsize
   \centering
   \input{../code/lzw/table.tex}
-  \caption{LZW compression test results.}
+  \caption{\lzw compression test results}
   \label{tab:lzw-test-results}
 \end{table}
 

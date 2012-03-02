@@ -35,8 +35,8 @@ stores.
 And so I realized that it would probably require a great amount of
 research in order to truly understand how file formats work. But I
 still didn't want to give up; my thirst for knowledge was too great
-for such an action.  For this reason a spent a great deal of the
-summer of 2011 in exploring how two different categories of file
+for such a pitiful action.  For this reason I spent a great deal of
+the summer of 2011 in exploring how two different categories of file
 formats work: image and sound formats. And while it is true that I
 made progress in exploring how these kinds of formats work, progress
 was being made too slow. The summer was coming to an end, and I was at
@@ -44,7 +44,7 @@ the same time desperately trying to come up with what sort school
 project I should do for my last term.
 
 And then it suddenly struck me: exploring how one category of file
-format works would be a great idea for a school project! I needed to
+formats works would be a great idea for a school project! So I needed to
 make a choice: image or sound formats? But the real question was
 rather: which kind of format would be the most manageable to explore?
 Then the choice was simple: image formats, because while it is true
@@ -55,11 +55,11 @@ different areas in order to fully understand them, so a project based
 on image formats would still be quite challenging. These areas are:
 
 \begin{itemize}
-\item Data Compression
+\item Information Theory(mainly from the subarea of data compression)
 \item Color Science
 \end{itemize}
 
-pAnd Color Science was by far the hardest of these two areas to study,
+And Color Science was by far the hardest of these two areas to study,
 which is why only a small segment of this text is dedicated to it,
 while pretty must the rest is dedicated to the art of data
 compression.
@@ -72,28 +72,28 @@ very simplified model of how all image formats in general are built
 and I will spend the rest of this section explaining the numbers that
 this image consists of. I will in other words write a
 \textit{specification} of the image format that the image on the front
-page is stored in. This format will from now on be known as IM, the
-IMaginary image format.
+page is stored in. This format will from now on be known as \im, the
+imaginary image format.
 
 \subsection{Image Header}
 
 The first gray section of the image is known as the image header of
 the image. It will \textit{always} be found first in an image. Let us
-go through to parts of the header number by number:
+go through the parts of the header number by number:
 
 \subsubsection{Magic Numbers}
 
-The first two numbers are the two letters IM. Even letters are
+The first two numbers are the two letters \im. Even letters are
 represented by numbers in a computer. How these letters are mapped to
 different numbers is determined by the \textit{encoding} of them. An
 encoding is basically a table that maps all the letters and
 miscellaneous symbols of the human language to numbers. One very
-common encoding is known as ASCII, and in ASCII the letter I is
-represented by the number 73 and the letter I is mapped to the number
-77. So if these letters where encoded in ASCII, a better way to
+common encoding is known as \ascii, and in \ascii the letter ``I'' is
+represented by the number 73 and the letter ``M'' is mapped to the
+number 77. So if these letters were encoded in \ascii, a better way to
 represent them would have been to simply use the numbers 73 and
-77. But I did not do this because it is much easier for the reader to
-understand letters than numbers.
+77. But I did not do this because it is in this case much easier for
+the reader to understand letters than numbers.
 
 These two first numbers are known as the magic numbers of the file
 format. At the beginning of every image file, there are a couple
@@ -101,14 +101,14 @@ numbers called magic numbers that are common to all images of that
 specific format. They are sort like file name extensions(for example,
 a file named ``essay.doc'' has a file name extension ``doc''), meaning
 that they help you identify the type of the file you are currently
-reading.
+dealing with.
 
 \subsubsection{Measurements}
 
 And following the magic number is the width and the height of this
 image. In practically every image format this information is
-included. This information is included to make it easier for programs
-dealing with digital images to parse the image data in the file.
+included. This information is included to make it easier for image
+reader programs to parse the image data in the file.
 
 \subsubsection{Metadata}
 
@@ -120,17 +120,17 @@ represented, but it rather gives information about things like:
 \begin{itemize}
 \item The program used to create the image
 \item A descriptive name for the image.
-\item The name of the creator of the image.
+\item The the creator of the image.
 \item The creation date of the image.
 \item The camera that was used to take the image.
 \end{itemize}
 
 One much used method for embedding metadata about the camera used to
-take an image is known as Exif\cite{camera:_cipa_dc_trans_exchan}. But
-since Exif is a quite complex method for storing such data, we will
-not discuss it in this text. We will only be concerned in exploring
-how to extract simple metadata, like the creation date of the image
-and the creator of the image.
+take an image is known as
+\exif\cite{camera:_cipa_dc_trans_exchan}. But since \exif is a quite
+complex method for storing such data, we will not discuss it in this
+text. We will only be concerned in exploring how to extract simple
+metadata.
 
 \subsection{Color Palette}
 
@@ -145,30 +145,32 @@ that the colors will be represented by in the color data. In other
 words, the color data in this image doesn't contain any actual color
 data, but rather contains indexes to a list of colors known as the
 color palette. But in real image formats the colors in the palette are
-not actually assigned numbers. It is the order in which they appear in
-the palette that decide which numbers they are assigned.
+not actually explicitly assigned numbers but it is the order in which
+they appear in the palette that decide which numbers they are
+assigned.
 
 \subsection{The Color Data}
 
 Following the header and the color palette is the actual color data.
 An image is simply a grid of colors. As you can see on the front cover
-image, an image really only consists of a lot of colored
+image, an image really only consists of a lot of colored small
 squares. These squares as referred to as
 pixels\cite{murray1996encyclopedia}. Every pixel has \textit{one} and
 only one color. It is easy to see that even very big images can be
 broken down to small colored squares.
 
 Since a color palette was used, the image data simply consists of a
-small sequence of indexes to the palette. If the image didn't use a
-color palette, the image would just contain a grid of raw colors. The
-color would in that case have been represented like they were in the
-palette, using a color model.
+small sequence of indexes to the palette. If the image did not use a
+color palette at all, the image would just have consisted of a grid of
+raw colors. The colors would in that case have been represented like
+they were in the palette, using a color model.
 
 \subsection{Done\dots?}
 
 But it's not really that simple. A majority of all image formats have
 had some sort of compression applied to their color data. Compression
-is usually necessary because raw color data usually tends to take up a
+almost always necessary because raw color data tends to take up a
 \textit{lot} of space. Compression algorithms are hands down the most
 difficult part in understanding how image formats work, which is why
-the majority of this text will be spent explaining them.
+the majority of this text will be spent on explaining them.
+

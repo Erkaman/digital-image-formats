@@ -2,10 +2,6 @@
   \bibliography{project.bib}
 \end{comment}
 
-% http://www.svgopen.org/2005/papers/abstractsvgopen/
-
-\newcommand{\lzwdotsrow}{eric}
-
 \chapter{Truevision Graphics Adapter}
 \label{cha:tga}
 
@@ -13,7 +9,7 @@
 \label{sec:tga-introduction}
 
 In this chapter, we are to explore the first image format in this
-text: TGA. But why are we beginning with TGA of all image
+text: \tga. But why are we beginning with \tga of all image
 formats?
 
 For the same reason that the image format first became popular: its
@@ -26,18 +22,18 @@ data itself is compressed with a very simple compression algorithm:
 PackBits RLE, which we discussed very much in depth in section
 \ref{sec:packbits-rle}. \cite{murray1996encyclopedia}
 
-However, there are also some more complex features of the TGA format,
-but we will not cover all of them because few of them are rarely ever
+However, there are also some more complex features of the \tga format,
+but we will not cover all of them because very few of them are rarely ever
 used in the real world. Only the features that are actually used in a
-majority of TGA images are going to be covered in depth.
+majority of \tga images are going to be covered in depth.
 
-The TGA specification is the document
+The \tga specification is the document
 \cite{91:_truev_tga_file_format_specif} and it is going to be the main
 reference for this chapter.
 
 \section{Conventions Used In This Chapter}
 
-The TGA format is built up of things called fields. A
+The \tga format is built up of things called fields. A
 field gives information about the image you're trying to open. It
 could give information like the name of the image, color depth, the
 color data of the image and so on. It could really contain any sort of
@@ -81,7 +77,7 @@ fields, as we soon will see several examples of.
 
 \section{File Header}
 
-The first thing that can be found in a TGA image is always the File
+The first thing that can be found in a \tga image is always the File
 Header.
 
 \imgfield{ID Length}{1}
@@ -94,24 +90,24 @@ this field specifies the length of that field in bytes.
 
 \imgfield{Color Map Type}{1}
 
-The TGA format supports color palettes. An alternative term for
-palette used in the TGA specification is Color map. This field could simply be seen as a boolean flag indicating
+The \tga format supports color palettes. An alternative term for
+palette used in the \tga specification is Color map. This field could simply be seen as a boolean flag indicating
 whether or not the image has a color map; if the value of this field
 is $1$, then the image has a color map and if it is $0$, then there is
 no color map in the image.
 
 \imgfield{Image Type}{1}
 
-The TGA format supports three different ways of storing color:
+The \tga format supports three different ways of storing color:
 grayscale, color-mapped color and
 true-color.
 
 Grayscale color should be familiar to you by now. Color-mapped color
 obviously means that the color data are indexes to a
-color-map. True-color simply means that the color uses the RGB or the
-RGBA color models.
+color-map. True-color simply means that the color uses the \rgb or the
+\rgba color models.
 
-%The color depths supported by the TGA format are 16,24 and 32.
+%The color depths supported by the \tga format are 16,24 and 32.
 
 Since the color data can also be PackBits RLE compressed, this all amounts to $6$
 different kinds of image types. The image type is specified by the
@@ -136,12 +132,12 @@ omitted any discussion of it.}.
     11 & Compressed, Grayscale\\
     \bottomrule
   \end{tabular}
-  \caption{TGA Image Type values}
+  \caption{\tga Image Type values}
   \label{tab:imgtype}
 \end{table}
 
 From table \ref{tab:imgtype}, we can derive that, if we let $T$
-represent the value of this field, then a TGA image is compressed if
+represent the value of this field, then a \tga image is compressed if
 and only if the following holds true:
 
 \begin{equation*}
@@ -153,7 +149,7 @@ and only if the following holds true:
 The color map specification fields consists of a set of subfields
 describing the color map included in the image. If the image doesn't
 even have a color map to begin with, these fields can simply be
-ignored. Remember that a TGA image only has a color map if and only if
+ignored. Remember that a \tga image only has a color map if and only if
 the color map type $1$.
 
 \imgsubfield{First Entry Index}{2}
@@ -187,7 +183,7 @@ skipped $I$ colors at the beginning of the color map. In algorithm
 array.
 
 \begin{algorithm}[H]
-  \caption{Reading the color map of a TGA file.}
+  \caption{Reading the color map of a \tga file}
   \label{alg:tga-read-colormap}
   \begin{algorithmic}[1]
 
@@ -272,7 +268,7 @@ The last four bits are the alpha channel bits. These specify how many
 bits in a separate color is used for the alpha channel. For images
 without an alpha channel this value will always be zero. For 16-bit
 images it will be 1, and for 32-bit images it will be 8. 32-bit color
-uses the ARGB color channel ordering, meaning that the 8 highest bits,
+uses the \argb color channel ordering, meaning that the 8 highest bits,
 bits 24-31, are used to store the alpha. How the alpha channel is
 stored in 16-bit color was discussed in section
 \ref{sec:other-channel-sizes}.
@@ -291,7 +287,7 @@ found.
 \imgfield{Image ID}{0}
 
 This field contains identifying information about the image in form of
-an ASCII string. It could be described as the name of the image. The
+an \ascii string. It could be described as the name of the image. The
 ID Length field found in the header describes the size of this
 field. Since the ID Length field was stored in a byte, the maximum
 length of this string is $255$. But if the ID Length field is 0, this field
@@ -325,7 +321,7 @@ this point and you should study it carefully and not go on reading until
 you have fully understood it.
 
 \begin{algorithm}[H]
-  \caption{Reading and decompressing the color data of a TGA file.}
+  \caption{Reading and decompressing the color data of a \tga file}\algohack{}
   \label{alg:TGA-read-colordata}
   \newcommand{\process}{\State Process the color $\var{data}$ \dots}
   \begin{algorithmic}[1]
@@ -388,19 +384,19 @@ you have fully understood it.
 
 \section{File Footer}
 
-TGA images might also contain a file footer. The file footer is mainly
+\tga images might also contain a file footer. The file footer is mainly
 used for getting other kinds of data than color data, mostly metadata,
 about an image. But this data only exists in the image if the file has
-a File Footer and not all TGA images even have one.
+a File Footer and not all \tga images even have one.
 
 If there is a file footer, then the last 26 bytes of the file
 constitutes of it. And if the 26 last bytes really is a file footer,
-then bytes 8-23 for this footer is the ASCII string
+then bytes 8-23 for this footer is the \ascii string
 ``TRUEVISION-XFILE''. If this is true then these 26 bytes is the file
 footer of the image; otherwise, the image doesn't have a file footer.
 
-Byte 24 of this footer is the ASCII character ``.''(a dot) and byte 25
-is the NULL terminator(the ASCII character whose ASCII value is
+Byte 24 of this footer is the \ascii character ``.''(a dot) and byte 25
+is the \null terminator(the \ascii character whose \ascii value is
 0). Only bytes 0-7 in the file footer contain information that is of
 any significance and the fields that these bytes form are what I am
 going to cover now:
@@ -425,12 +421,12 @@ will briefly discuss this area section \ref{sec:developer-area}.
 \section{Developer Area}
 \label{sec:developer-area}
 
-The developer area allows programmers to add information to the TGA
+The developer area allows programmers to add information to the \tga
 format that is specific to their applications. But this information is
 basically useless if you're only trying to load the color data from
-the TGA image, hence why we will not cover this section at all.
+the \tga image, hence why we will not cover this section at all.
 
-Even if you were to find a TGA image out in the wild that uses this
+Even if you were to find a \tga image out in the wild that uses this
 feature, you can only really guess on how you are supposed to use this
 data, as this is entirely dependent on the program that created the
 image.
@@ -486,7 +482,7 @@ numbers are stored in this order:
 \imgfield{Job Name/ID}{41}
 
 This is used to tie an image with a specific job. That is the best
-explanation I can give you, because I didn't understand the TGA
+explanation I can give you, because I could not understand the \tga
 specification's description of this field.
 
 \imgfield{Job Time}{6}
@@ -503,7 +499,7 @@ This is the time invested in creating the image, as described by the 3
 \imgfield{Software ID}{41}
 
 A NULL-padded C string storing the name of program that was used to
-create the image. This string could for example be GIMP or
+create the image. This string could for example be \gimp or
 Photoshop(Two image editing programs).
 
 \imgfield{Software Version}{3}
@@ -520,9 +516,9 @@ number $123$ would get stored in this field.
 
 \imgsubfield{Version Letter}{1}
 
-In this field, an ASCII letter that is used to indicated the version
+In this field, an \ascii letter that is used to indicated the version
 letter of the software is stored. If the software that created this
-image was in alpha version when the image was created, then the ASCII
+image was in alpha version when the image was created, then the \ascii
 letter ``a'' would get stored in this field.
 
 \imgfield{Key Color}{4}
@@ -532,7 +528,7 @@ that is displayed under the rendered image, so to say, when it is
 shown by an image viewer. This color will be visible only if the
 transparency feature is used in the image. Under transparent pixels
 this color will be visible. The key color is stored as a basic 32-bit
-color in the ARGB order.
+color in the \argb order.
 
 \imgfield{Pixel Aspect Ratio}{4}
 
@@ -554,7 +550,7 @@ cases you can simply ignore this value.
 \imgfield{Color Correction Offset}{4}
 
 This gives the offset to the color correction table. However, this is
-a feature that practically no TGA images actually use, and we will
+a feature that practically no \tga images actually use, and we will
 therefore not discuss this feature in depth.
 
 \imgfield{Postage Stamp Offset}{4}
@@ -569,7 +565,7 @@ should therefore be loaded in the same way, as it is specified in
 algorithm \ref{alg:TGA-read-colordata}.
 
 The postage stamp image is mainly useful when you want to preview a
-TGA image, without loading the entire full-size image. This may come
+\tga image, without loading the entire full-size image. This may come
 in use when the full-size image is very big and you just want a small
 preview of it.
 
@@ -596,7 +592,7 @@ file. The following are valid values for this field:
   \item[4] The color uses pre-multiplied alpha.
 
     But what does that mean? Let the quadruplet $(A,R,G,B)$ represent
-    a 32-bit ARGB color. How would one specify a half transparent
+    a 32-bit \argb color. How would one specify a half transparent
     fully red color? One obvious suggestion is
     $\left(\frac{255}{2},255,0,0\right)$. However, using
     pre-multiplied alpha, the alpha channel gets multiplied into the
@@ -618,8 +614,4 @@ file. The following are valid values for this field:
     pre-multiplied alpha will not be treated in this text, but a brief
     discussion of this can be found in \cite{porter84_compos_dig_img}.
 
-    % pre-multiplied alpha exercise?
-
 \end{description}
-
-

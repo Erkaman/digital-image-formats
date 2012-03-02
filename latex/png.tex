@@ -15,17 +15,17 @@
 
 \section{History}
 
-As stated in section \ref{sec:gif-history}, the creation of the PNG
+As stated in section \ref{sec:gif-history}, the creation of the \png
 format was primarily motivated by the patents encumbering the already
 popular GIF format. To solve this problem, a bunch of developers in
 the graphics developer community decided to cooperate on creating a
-new format that came to be known as PNG. July 1 1996, version 1.0 of
-the PNG specification was released. Then version 1.1 was released on
-new years eve of 1998. And the latest version of the PNG specification
+new format that came to be known as \png. July 1 1996, version 1.0 of
+the \png specification was released. Then version 1.1 was released on
+new years eve of 1998. And the latest version of the \png specification
 is version 1.2, which was released in August 1999.
 \cite{roelofs09:_histor_portab_networ_graph_png_format,roelofs99:_png,roelofs:_portab_networ_graph_main}.
 
-What follows is a technical description of the PNG format. It is based
+What follows is a technical description of the \png format. It is based
 on the references
 \cite{boutel:_png_portab_networ_graph_specif_version12,roelofs99:_png,boutel:_png_portab_networ_graph_specif_version11}.
 
@@ -33,14 +33,14 @@ on the references
 
 \subsection{Chunks}
 
-PNG images are fundamentally built up of chunks. The structure of the
+\png images are fundamentally built up of chunks. The structure of the
 chunk is shown in figure \ref{fig:png-chunk}. It consists of four so
 called fields. Let us desribe them, one after one:
 
 \begin{figure}
   \centering
   \inputtikz{png_chunk.tex}
-  \caption{The PNG chunk datatype}
+  \caption{The \png chunk datatype}
   \label{fig:png-chunk}
 \end{figure}
 
@@ -58,7 +58,7 @@ chunk type while \chnk{a:e;} is not.
 
 There is a convention used in the naming of chunks. If the first
 letter in the type name of a chunk is uppercase, it is a
-\textit{critical} chunk. If a critical chunk is found in a PNG image,
+\textit{critical} chunk. If a critical chunk is found in a \png image,
 then it \textit{must} be loaded for the image to be successfully
 displayed.  If such a chunk is not loaded, the program will not have
 enough information to correctly render the image. Critical chunks and
@@ -87,9 +87,9 @@ back in section \ref{sec:pngcrc} on page \pageref{sec:pngcrc}
 
 \subsection{PNG Signature}
 
-Only chunks can be found in a PNG image with one exception: the PNG
-signature. The PNG signature is a sequence of 8 bytes that is
-\textit{always} found in the beginning of a legit PNG image. The byte
+Only chunks can be found in a \png image with one exception: the \png
+signature. The \png signature is a sequence of 8 bytes that is
+\textit{always} found in the beginning of a legit \png image. The byte
 sequence is the numbers
 
 \begin{equation*}
@@ -97,8 +97,8 @@ sequence is the numbers
 \end{equation*}
 
 They were all chosen to detect certain kinds of errors that can occur
-when transmitting a PNG file over a network because such errors were
-very normal back in the days when PNG was invented.
+when transmitting a \png file over a network because such errors were
+very normal back in the days when \png was invented.
 
 The first bit is $137$. In binary this number is $1000\ 1001$. The key
 part to notice is that this is a non-ASCII character, because since
@@ -122,8 +122,8 @@ The bytes
   \text{80 78 71}
 \end{equation*}
 
-are the ASCII values for the string PNG, so they could simply be seen
-as the magic numbers of the PNG format.
+are the ASCII values for the string \png, so they could simply be seen
+as the magic numbers of the \png format.
 
 The following two bytes are
 
@@ -132,7 +132,7 @@ The following two bytes are
 \end{equation*}
 
 This is a windows style new line, CRLF, as was discussed section in
-\ref{sec:glossary} on page \pageref{sec:glossary}. If a PNG file is
+\ref{sec:glossary} on page \pageref{sec:glossary}. If a \png file is
 accidentally transferred as text, there is another thing that may
 corrupt the file: line ending conversions. When, for example, you are
 transmitting a file from a window based operating system to a
@@ -154,22 +154,22 @@ windows based operating system is not transferred as ASCII text.
 
 \section{Critical Chunks}
 
-Following the PNG signature is a sequence of chunks. Most kinds of
+Following the \png signature is a sequence of chunks. Most kinds of
 chunks can simply be ignored, but the critical ones can not be
 ignored. Let us discuss the critical chunks, one after one.
 
 \subsection{IHDR -- Image Header}
 
-The image header of the PNG format, the \chnk{IHDR} chunk, is by the
-PNG specification guaranteed to always occur first in a PNG file,
-after the PNG signature. It contains data that is absolutely necessary
+The image header of the \png format, the \chnk{IHDR} chunk, is by the
+\png specification guaranteed to always occur first in a \png file,
+after the \png signature. It contains data that is absolutely necessary
 for loading the image data.
 
 \subsubsection*{Width (4 Bytes)}
 \subsubsection*{Height (4 Bytes)}
 
 These two consecutive fields contains the size of the image. Since
-they are stored in two 32-bit numbers each, this means that the PNG
+they are stored in two 32-bit numbers each, this means that the \png
 format allows for quite huge images.
 
 \subsubsection*{Bit Depth (1 Byte)}
@@ -178,7 +178,7 @@ In the bit depth field the \textit{size of each color channel} is
 stored. So this value is \textit{not} the color depth of the
 image. However, note the only the values 1, 2, 4, 8 and 16 are allowed
 values for this field. This is mainly to simplify the job for
-programmers using the PNG format.
+programmers using the \png format.
 
 \begin{table}
   \centering
@@ -187,23 +187,23 @@ programmers using the PNG format.
     Color Type & Description \\
     \midrule
     0 & Grayscale color \\
-    2 & Truecolor, meaning that RGB is used \\
+    2 & Truecolor, meaning that \rgb is used \\
     3 & Indexed color, meaning that a color palette is used \\
     4 & Grayscale with an alpha channel \\
-    6 & Truecolor with alpha, meaning that RGBA is used \\
+    6 & Truecolor with alpha, meaning that \rgba is used \\
     \bottomrule
   \end{tabular}
-  \caption{The different color types of the PNG format}
+  \caption{The different color types of the \png format}
   \label{tab:png-color-type}
 \end{table}
 
 \subsubsection*{Color Type (1 Byte)}
 
-The PNG format allows five different ways of storing color. The color
+The \png format allows five different ways of storing color. The color
 type used varies depending on this value, as is shown in table
 \ref{tab:png-color-type}.
 
-As you can from this field and the former, the PNG is very flexible
+As you can from this field and the former, the \png is very flexible
 and allows for a multitude of different ways of storing
 color. However, to simplify things for programmers, not all possible
 bit depths can be used with all color types. The allowed color depths
@@ -235,19 +235,19 @@ are shown in table \ref{tab:png-color-type}.
     \hline
 
   \end{tabular}
-  \caption{The allowed color depths of the PNG format.}
+  \caption{The allowed color depths of the \png format}
   \label{tab:png-color-depths}
 \end{table}
 
 \subsubsection*{Compression method (1 Byte)}
 
 This field is used to indicate the compression method used in the
-image data. But the only value defined for this field by the PNG
+image data. But the only value defined for this field by the \png
 specification is $0$, which means that DEFLATE compression is used.
 
 \subsubsection*{Filter Method (1 Byte)}
 
-PNG also allows certain so-called filters to be applied to the image
+\png also allows certain so-called filters to be applied to the image
 data. These filters basically make the image data compress
 better. Only the value $0$ is defined for this field, and this means
 that the four default filters are used to perform the filtering. We'll
@@ -258,7 +258,7 @@ discuss the filters in section \ref{sec:png-filters}.
 If this field is $0$, then no interlacing is used in the image data; if it
 is $1$, then the image data is interlaced.
 
-The PNG format supports an interlacing method known Adam7, named so
+The \png format supports an interlacing method known Adam7, named so
 because it was invented by Adam Costello. This method of interlacing
 is significantly more complex than that of GIF's, and is something
 that we will discuss in depth in section \ref{png-interlacing}.
@@ -273,12 +273,12 @@ simply consists of a sequence of RGB colors. These colors will always be
 \subsection{IDAT -- Image Data}
 
 In this chunk the color data of the image is stored. The image data
-storage system of the PNG format is very complex and it is discussed
+storage system of the \png format is very complex and it is discussed
 in depth in section \ref{sec:png-image-data-storage}.
 
 \subsection{IEND -- Image Trailer}
 
-The reading of chunks from the PNG file will go and on until the image
+The reading of chunks from the \png file will go and on until the image
 trailer chunk, \chnk{IEND}, is found. Once this chunk is encountered
 in the file, the entire image has been processed, and the decoder is
 done. The chunk data of this chunk type will \textit{always} be empty.
@@ -297,7 +297,7 @@ image data is encoded.
 
 The unencoded data is just a sequence of pixel color values. If the
 image is \textit{interlaced}, then the image data is rearranged in a
-certain order and divided into passes. This process is in the PNG
+certain order and divided into passes. This process is in the \png
 specification referred to as \textit{pass extraction}. We'll discuss
 interlacing in section \ref{png-interlacing}.
 
@@ -385,7 +385,7 @@ the maximum value of a 5-bit number is $2^5 - 1 = 31$.
 
 \paragraph{Bits 5 -- FDICT}
 
-This value must always be $0$ for valid PNG files.
+This value must always be $0$ for valid \png files.
 
 \paragraph{Bits 6-7 -- FLEVEL}
 
@@ -549,7 +549,7 @@ $c$, then this value is calculated as follows:
 Notice that by this definition, since $t$ is rounded up to whole
 bytes, this filter will not operate pixels but on bytes. For 1-bit
 grayscale color, here $c=1$, will be $t=1$, despite the fact that a
-whole $8$ pixels can fit in a byte. The developers of the PNG
+whole $8$ pixels can fit in a byte. The developers of the \png
 specification made this decision to simplify the work of implementing
 support for these filters. All the other filters will also operate on
 bytes for the same reason.
@@ -660,7 +660,7 @@ follows:
       B_{i,j-t}}{2} \right \rfloor
 \end{equation*}
 
-However, do note that the PNG specification for requires that the sum
+However, do note that the \png specification for requires that the sum
 $B_{i-1,j} + B_{i,j-t}$ is \textit{not} done modulo $256$.
 
 The transformation can then be trivially reversed:
@@ -747,7 +747,7 @@ the channels will get spread out over several bytes.
 \subsection{Interlacing}
 \label{png-interlacing}
 
-The main idea behind PNG interlacing is that the image to be
+The main idea behind \png interlacing is that the image to be
 interlaced is divided into 8x8 tiles, and then the data of these tiles
 are partitioned into $7$ distinct passes:
 
@@ -799,12 +799,12 @@ single row $33,37$ and so on.
 
 To undo the interlacing first all the separate images that the passes
 consists of will have to be read. Then the separate pixels must be
-rearranged in proper order. It is shown in algorithm ? how this is
-done.
+rearranged in proper order. It is shown in algorithm
+\ref{alg:png-interlace} how this is done.
 
 \begin{algorithm}[H]
-  \caption{Undoing the interlacing of the uncompressed PNG color data.}
-  \label{alg:gif-interlace}
+  \caption{Undoing the interlacing of the uncompressed \png color data}
+  \label{alg:png-interlace}
   \begin{algorithmic}[1]
     \Let{$\var{startingRow}$}{$\{0, 0, 4, 0, 2, 0, 1\}$}
     \Let{$\var{startingCol}$}{$\{0, 4, 0, 2, 0, 1, 0\}$}
@@ -867,5 +867,6 @@ done.
 
 
 \end{Answer}
+
 
 

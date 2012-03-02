@@ -2,38 +2,38 @@
   \bibliography{project.bib}
 \end{comment}
 
-\chapter{DEFLATE}
+\chapter{Deflate}
 \label{cha:deflate}
 
-We will in this chapter discuss the DEFLATE algorithm based on the
+We will in this chapter discuss the \deflate algorithm based on the
 references
 \cite{pkware:_appnot,deutsch96:_deflat_compr_data_format_specif,Salomon:2004:DCC,feldspar:_explan_deflat_algor}
 
 \section{History}
 
-The DEFLATE algorithm was devised by Phil Katz for usage in the Zip
+The \deflate algorithm was devised by Phil Katz for usage in the Zip
 format he had also invented and it was first formally defined in
 \cite{deutsch96:_deflat_compr_data_format_specif}. The algorithm
-itself uses a combination of LZ77 and Huffman coding.
+itself uses a combination of \lzone and Huffman coding.
 
 \section{Length and Distance Codes}
 
-DEFLATE compressed data has a prespecified format. But before we can
+\deflate compressed data has a prespecified format. But before we can
 describe that format, we first need a good view of the algorithm
 operates to begin with.
 
-DEFLATE compressed data on the basic level consists of two kinds of
+\deflate compressed data on the basic level consists of two kinds of
 data: literal bytes and length-distance pairs. This means that it uses
-a LZ77 variation to do compression. It uses a system very similar to
-that of LZSS, as we will soon see.
+a \lzone variation to do compression. It uses a system very similar to
+that of lzss, as we will soon see.
 
 An alphabet of 0--255 is used to encode literal bytes, which are just
 like unmatched tokens; that is, tokens for which for no match was
-found for in the LZ77 window. The special value $256$ is used to
+found for in the \lzone window. The special value $256$ is used to
 indicate the end of the compressed data. Note that this value is part
 of the \textit{same} alphabet as the literal bytes. Also part of the
 same alphabet are the length codes. They can be found in the range
-257--285, and they are used to indicate the length of the LZ77 matched
+257--285, and they are used to indicate the length of the \lzone matched
 strings. All these values forms an alphabet of values 0--285. This
 entire alphabet will also get Huffman coded in the later parts of the
 algorithm.
@@ -115,12 +115,12 @@ code $278$ followed by the 4-bit number $\bin{1100}=12$.
     \end{tabular}
   \end{minipage}
 
-  \caption{DEFLATE length codes}
+  \caption{\deflate length codes}
   \label{tab:deflate-length-codes}
 \end{table}
 
 Following a length code and its accompanying extra bits is always a
-distance code. By the way, offsets are termed distances in the DEFLATE
+distance code. By the way, offsets are termed distances in the \deflate
 literature. The distance codes are drawn from the alphabet 0--29 and
 they are stored in very much the same way as length codes, as is shown
 in table \ref{tab:deflate-distance-codes}. So a distance of $30000$
@@ -197,7 +197,7 @@ could be made, then literal bytes are simply used.
     \end{tabular}
   \end{minipage}
 
-  \caption{DEFLATE distance codes}
+  \caption{\deflate distance codes}
   \label{tab:deflate-distance-codes}
 \end{table}
 
@@ -223,7 +223,7 @@ code 258 will be represented by the 7-bit Huffman code
 \bin{0000010}. The reader may however be confused by the inclusion of
 the two length codes 286 and 287. Did not the literal/length alphabet
 only span the range 0--285? The two codes 286 and 287 will according
-to the DEFLATE specification never be found in the compressed data. So
+to the \deflate specification never be found in the compressed data. So
 it is to us incomprehensible why these two codes are given assigned
 Huffman codes. But since they will never occur in the data we can
 safely ignore them. The Huffman encoded length codes will obviously,
@@ -257,7 +257,7 @@ will be followed by their accompanying extra bits.
 
 \subsection{Computing the Huffman Tree}
 
-The Huffman codes can also be computed in the DEFLATE algorithm. Using
+The Huffman codes can also be computed in the \deflate algorithm. Using
 dynamic Huffman codes the token will be assigned Huffman codes that
 are, in most cases, more space efficent than those of the fixed
 Huffman codes. For very short this may however make little different
@@ -340,11 +340,11 @@ The letters we then be assigned the codes shown in table
 because it is sorted by the only two properties that a code can have:
 its length and the symbol it represents.
 
-But one very important thing that most literature on DEFLATE often
+But one very important thing that most literature on \deflate often
 omits is exactly how this sorted Huffman tree is made, and this
 what well spend the rest of this section explaining.
 
-The algorithm used by the most DEFLATE implementation is the
+The algorithm used by the most \deflate implementation is the
 following: first, a non-unique and unsorted Huffman tree is built
 
 \begin{huffmanc}
@@ -386,7 +386,7 @@ Huffman codes:
 
 \begin{enumerate}
 \item The frequencies of the code lengths are put into an array that
-  is often called $\var{blCount}$ in the DEFLATE literature. For our
+  is often called $\var{blCount}$ in the \deflate literature. For our
   example, $\var{blCount[1]} = 1$, $\var{blCount[2]} = 1$ and
   $\var{blCount[3]} = 2$.
 
@@ -429,8 +429,7 @@ Huffman codes:
 \todo{now explain why the addition and shifting step makes sense.}
 
   \begin{algorithm}[H]
-    \caption{Finding the smallest code of each code length}
-    \label{alg:smallest-code-length}
+    \caption{Finding the smallest code of each code length}\algohack{}    \label{alg:smallest-code-length}
     \begin{algorithmic}[1]
       \Let{$\var{code}$}{0}
       \linecomment{The minimum value of the smallest code length group
@@ -469,7 +468,7 @@ exlicitly. However, this also has the unfortunate consequence that the
 sequence of code lengths would in the beginning just be a long
 sequence of zeroes, and this is not particulary space efficent
 considering how redundant such a sequence would be. These code lengths
-are this reason compressed in the DEFLATE algorithm, which is the
+are this reason compressed in the \deflate algorithm, which is the
 something we will discuss in the next section.
 
 \section{Storing the Huffman Codes}
@@ -477,7 +476,7 @@ something we will discuss in the next section.
 
 Now let us discuss how the code length compression is done. First we
 will remind the reader that the maximum length of a code from any of
-the two alphabets(litteral/length- and distance alphabets) must be
+the two alphabets(literal/length- and distance alphabets) must be
 less than 16. So the range values reqired to encode the code lengths
 of both the alphabets is 0--15. For compressing the \textit{code
   lengths of the Huffman codes} of two alphabets another alphabet
@@ -567,11 +566,11 @@ be set to $0$. Small trees are also rather unusual and therefore code
 sizes of $1$ and $2$ will also be rarely used. Typically, most Huffman
 trees are averagely sized; neither to big nor to small.
 
-\section{The DEFLATE format}
+\section{The Deflate format}
 
 \subsection{The header bits}
 
-Now we are finally ready to discuss the DEFLATE format. DEFLATE
+Now we are finally ready to discuss the \deflate format. \deflate
 compressed data is structured into \textit{blocks}. Every block begins
 with a 3-bit header(the three \textit{lowest} bits of the first byte
 are used). These 3 bits are used to specify how the data is compressed
@@ -579,7 +578,7 @@ in the block.
 
 \subsubsection{BFINAL(1 bit(0,the lowest one))}
 
-DEFLATE compressed data will consist of a sequence of compressed
+\deflate compressed data will consist of a sequence of compressed
 blocks. The uncompressed data of all blocks will when concatenated
 together form the original data. This bit is used to specify whether
 this block is the final block in the file, meaning that it is used to
@@ -621,7 +620,7 @@ While the non-compressed block-type may seem useless, it does have
 several usages. It can for example store sections of data in a file
 which is inflated by compression. As we saw in chapter \ref{cha:rle},
 it is fully possible for a compression algorithm to explode the size
-of the compressed data. But for DEFLATE, this is something that most
+of the compressed data. But for \deflate, this is something that most
 typically happens for very random data. Data in which there are close
 to redundancies at all. So to summarize, this block can be useful for
 storing parts of a file that contains \textit{very} random data.
@@ -649,7 +648,7 @@ These bits are used to specify the number of code lengths used to
 encode the literal/length code alphabet. The number of code lengths
 from this alphabet will actually be $\var{HLIT} + 257$ and the max
 value of this sum $286$, and \textit{not} $288$, because this is the
-number specified by the DEFLATE specification. By specifying different
+number specified by the \deflate specification. By specifying different
 values if $\var{HLIT}$ you can leave out trailing zeroes in the code
 length data, increasing compression a bit. But you cannot of course
 leave out non-zero code lengths, because these actually used in

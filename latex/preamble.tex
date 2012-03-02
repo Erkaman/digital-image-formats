@@ -1,7 +1,14 @@
 % fonts
 \usepackage[T1]{fontenc}
-\usepackage{inconsolata}
-\usepackage[charter]{mathdesign}
+%usepackage{inconsolata}
+\usepackage[scaled=0.75]{luximono}
+
+%\usepackage[charter]{mathdesign}
+%\usepackage[notextcomp]{kpfonts}
+
+% tgpagella doesn't have a math font.
+\RequirePackage[sc]{mathpazo}
+\RequirePackage[scale=0.95]{tgpagella}\normalfont
 
 %\usepackage{fouriernc}
 
@@ -12,60 +19,90 @@ protrusion=true,
 expansion=true]{microtype}
 \microtypecontext{spacing=nonfrench}
 
-\usepackage[nottoc]{tocbibind}
 % reduce section header spacing to save some poor trees.
-\usepackage[compact]{titlesec}
+%\usepackage[compact]{titlesec}
 \interfootnotelinepenalty=10000
 
-% miscellaneous packages
+% color in table.
 \usepackage[table]{xcolor}
-\usepackage{float}
-\usepackage[hyperindex,colorlinks]{hyperref}
-\hypersetup{colorlinks=false}
+
+% colored hyperlinks
+%\usepackage[hyperindex,colorlinks]{hyperref}
+\usepackage[]{hyperref}
+%\hypersetup{colorlinks=false}
 \usepackage{verbatim}
+
+% SI units
 \usepackage{siunitx}
+
+% for leaving todonotes
 \usepackage{todonotes}
-\usepackage{placeins}
+
+% for \FloatBarrier macro
+\usepackage[section]{placeins}
+
+% professional looking tables.
 \usepackage{booktabs}
-\usepackage{graphicx}
+
+% used in coding abbreviations.
 \usepackage{etoolbox}
+
 \usepackage{expl3}
+
+% paths
 \usepackage{path}
+
+% controlling spaces in macros.
 \usepackage{xspace}
+
+% math
 \usepackage{amsmath}
+
+% for subfigures
 \usepackage{subfig}
+
+% string macros.
 \usepackage{xstring}
 
-\usepackage{longtable}
+% used only for abbreviations.
+\usepackage{soul}
 
-\usepackage{datetime}
+% used for the very long ASCII table.
+\usepackage{longtable}
 
 \usepackage{multirow}
 
-\usdate
+% customize table of contents.
+\usepackage{tocstyle}
+\usetocstyle{nopagecolumn}
 
-%\newdateformat{newdateformat}{\THEMONTH} \THEDAY \THEYEAR}
-%\customdateformat
+% normal font
+\settocfeature[toc][1]{entryhook}{\normalfont}
+\settocfeature[toc][0]{entryhook}{\normalfont}
 
-% date typesetting command
-\newcommand{\dt}[3]{\formatdate{#1}{#2}{#3}}
+\usepackage{graphicx}
+\newcommand\meddot{\scalebox{0.7}{\textbullet}}
+\settocfeature{leaders}{\enskip\meddot\enskip}
 
+% less detailed TOC, otherwise it ends up being WAY to long.
+\setcounter{tocdepth}{1}
+
+% more customizable lists.
 \usepackage[shortlabels]{enumitem}
 
 % exercises.
 \usepackage{exercise,chngcntr}
 \counterwithin{Exercise}{chapter}
 \counterwithin{Answer}{chapter}
-\setlength{\Exeleftmargin}{15cm}
 
-\makeatletter
 % typeset answers and exercises in a smaller font.
+\makeatletter
 \renewenvironment{Exercise}{\small\global\beginExerciseEnv}%
 {\@ExeStaredfalse\endExerciseEnv}
 \renewenvironment{Answer}{\small\beginAnswerEnv}{\endAnswerEnv}
 \makeatother
 
-
+% custom captions.
 \usepackage{caption}
 \captionsetup{
   margin=10pt,
@@ -76,22 +113,13 @@ expansion=true]{microtype}
 }
 
 % references
+% references are ordered by the time they first appear.
 \usepackage[sorting=none]{biblatex}
 
 % tikz
 \usepackage{tikz}
 \usepackage{tikz-qtree}
-
-\usetikzlibrary{
-  shapes,backgrounds,decorations.pathreplacing,
-  positioning,fit,shadings,fadings,matrix,calc,patterns, shapes.multipart}
-
-\newenvironment{indentpar}[1][1cm]%
-{\begin{list}{}%
-    {\setlength{\leftmargin}{#1}}%
-  \item[]%
-  }
-  {\end{list}}
+\usetikzlibrary{positioning,fit,shadings,fadings,matrix,calc,patterns, shapes.multipart}
 
 % algorithms typesetting.
 \usepackage[chapter]{algorithm}
@@ -136,9 +164,12 @@ expansion=true]{microtype}
 \newcommand{\Dec}[2]{\State \Call{Dec}{\ensuremath{#1,#2}}}
 \newcommand{\Inc}[2]{\State \Call{Inc}{\ensuremath{#1,#2}}}
 
-% miscellaneous configurations
-%\pagestyle{headings}
+\newcommand{\eof}{\VoidCall{EndOfFileReached}}
+\newcommand{\neof}{$\NOT\VoidCall{\textsc{EndOfFileReached}}$}
 
+% end algorithms macros.
+
+% headers.
 \usepackage{fancyhdr}
 
 \pagestyle{fancy}
@@ -171,36 +202,10 @@ expansion=true]{microtype}
 \newcommand*\ShiftRight{\gg}
 \newcommand*\BitNeg{\ensuremath{\mathord{\sim}}}
 
-% Fixes list of algorithms formatting.
-% Thanks Dan: http://newsgroups.derkeiler.com/Archive/Comp/comp.text.tex/2005-10/msg01179.html
-\makeatletter
-\let\l@algorithm\l@figure
-\makeatother
-
-\renewcommand{\listofalgorithms}{\begingroup
-\tocfile{List of Algorithms}{loa}
-\endgroup}
-
 \newcommand*{\tikzname}{Ti\emph{k}Z\xspace}
 
 \newcommand{\fullbyte}{$11111111$\xspace}
 \newcommand{\emptybyte}{$00000000$\xspace}
-
-\newcommand*\acronymstyle{\scshape}
-\newcommand*\newacronym[1]{
-  \expandafter\newcommand\csname#1\endcsname[1][]{{\acronymstyle#1}##1\xspace}}
-
-\newcommand*{\newacronyms}{%
-  \let\do\newacronym
-  \docsvlist
-}
-\newacronyms{C,pgf}
-
-\newcommand{\eof}{\VoidCall{EndOfFileReached}}
-\newcommand{\neof}{$\NOT\VoidCall{\textsc{EndOfFileReached}}$}
-
-\newcommand{\lzseven}{LZ77\xspace}
-\newcommand{\lzeight}{LZ78\xspace}
 
 \newcommand{\hex}[1]{\ensuremath{\mathrm{0x#1}}}
 \newcommand{\bin}[1]{\mbox{\ensuremath{#1_2}}}
@@ -266,6 +271,7 @@ expansion=true]{microtype}
 \hyphenation{Net-Sca-pe}
 \hyphenation{brow-ser}
 \hyphenation{Ha-ru-hi-ko}
+\hyphenation{li-te-ral}
 
 \newenvironment{huffman}
 {\begin{tikzpicture}
@@ -276,6 +282,7 @@ expansion=true]{microtype}
     level 2/.style={sibling distance=10mm},
     level 3/.style={sibling distance=5mm},
     text height=1.5ex,text depth=.25ex]}{\end{tikzpicture}}
+
 
 \newenvironment{huffmanc}
 {\begin{center}\begin{huffman}}
@@ -292,3 +299,37 @@ expansion=true]{microtype}
   \node (#1) [hnode,right=of #2] {#3};
   \nodechar{#1}{#4}
 }
+
+% see http://www.latex-community.org/forum/viewtopic.php?f=5&t=6218&p=63092
+\newcommand*\algohack{\addtocontents{loa}{\vskip 9pt}}
+
+% Thanks to Philip and Konrad Rudolph:
+% http://tex.stackexchange.com/questions/2933/parse-comma-separated-list-of-command-names-with-spaces
+
+\newcommand*\acronymstyle{\scshape}
+\newcommand*\newacronym[1]{
+  \expandafter\newcommand\csname#1\endcsname[1][]{{\acronymstyle#1}##1\xspace}}
+
+\newcommand*{\newacronyms}{%
+  \let\do\newacronym
+  \docsvlist
+}
+\newacronyms{pgf,im,ascii,exif,tga,gif,png,crc,gcc,emacs,git,rle,lzw,lzss,
+nul, soh,stx,lf,rgb,rgba, argb,gimp,lzma}
+
+% LZ77 and LZ78 are sometimes also referred to as LZ1 and LZ2.
+\newcommand*{\lzone}{{\acronymstyle lz\oldstylenums{77}}\xspace}
+\newcommand*{\lztwo}{{\acronymstyle lz\oldstylenums{78}}\xspace}
+
+% \cr and \ht are already defined.
+\newcommand*{\cret}{{\acronymstyle cr}\xspace}
+\newcommand*{\htab}{{\acronymstyle ht}\xspace}
+\newcommand*{\nullm}{{\acronymstyle null}\xspace}
+\newcommand*{\lzfam}{{\acronymstyle lz}-family\xspace}
+
+%idat?
+
+% sixteen
+\newcommand*{\crcst}{{\acronymstyle crc-16}\xspace}
+
+\newcommand{\deflate}{Deflate\xspace}

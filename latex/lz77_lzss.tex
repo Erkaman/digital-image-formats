@@ -7,21 +7,21 @@
 
 \section{History}
 
-As familiar from section \ref{sec:hist-lzw}, LZ77 was the first of the
+As familiar from section \ref{sec:hist-lzw}, \lzone was the first of the
 two algorithms described by Lempel and Ziv that sparked the family of
-dictionary methods. We have partially discussed already LZ78, since
-LZW was based on it, and we will in this chapter discuss the LZ77
-method. But we will also discuss LZSS, which is an improvement of LZ77
+dictionary methods. We have partially discussed already \lztwo, since
+\lzw was based on it, and we will in this chapter discuss the \lzone
+method. But we will also discuss \lzss, which is an improvement of \lzone
 that was developed by Storer and Szymanski in 1982.
 
 \section{LZ77}
 
-The following description of the LZ77 algorihtm is based on
+The following description of the \lzone algorihtm is based on
 \cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr_ziv_lempel}.
 
 \subsection{Compression}
 
-The core parts of the LZ77 algorihtm are the so-called window and
+The core parts of the \lzone algorihtm are the so-called window and
 lookahead buffers. In the window buffer already compressed data is
 stored. The lookahead buffer contains the data that hasn't yet been
 compressed and matched. Strings in the lookahead buffer are in the
@@ -31,8 +31,8 @@ buffer, it outputs a \textit{token}. The token contains the
 information that is necessary for the decoder to locate the matched
 string in the window buffer.
 
-Now let us go though a simple example that demonstrates how LZ77
-operates. Let us study the LZ77 compression of the string \texttt{she
+Now let us go though a simple example that demonstrates how \lzone
+operates. Let us study the \lzone compression of the string \texttt{she
   sells sea shells on the sea shore}. But we will first have to decide
 on the size of the lookahead and window buffers. Since these buffers
 have to be stored in memory they obviously cannot be infinitely
@@ -57,8 +57,8 @@ point completely empty, since no characters has yet been processed:
 }
 
 Since the window buffer is empty no matching string can be found in
-it. So the token \lzonetokens{s} is simply output. This LZ77:s ways of
-signaling that no match at all was found in the window buffer. We will
+it. So the token \lzonetokens{s} is simply output. This is how \lzone
+signals that no match at all was found in the window buffer. We will
 soon describe what the first two numbers in the token describe. The
 compressor then keeps outputting these single character tokens:
 
@@ -68,7 +68,7 @@ compressor then keeps outputting these single character tokens:
   \lzonestates{she{\spc}sell}{s{\spc}sea{\spc}shel}{s}
 }
 
-(The LZ77 compressor does not bother in matching single character
+(The \lzone compressor does not bother in matching single character
 strings)While characters keeps getting read to the lookahead buffer,
 processed characters get added to the window buffer. After the token
 for the last character \texttt{s} has been outputted, interesting
@@ -102,7 +102,7 @@ the lookahead buffer will start shrinking as the remaining characters
 are compressed, while the size of the window buffer is managed so that
 it never rises above its fixed size value.
 
-It is easy to see why LZ77 works. Consider for example the following
+It is easy to see why \lzone works. Consider for example the following
 extract from ``Alice in Wonderland'':
 
 \begin{quote}
@@ -128,16 +128,16 @@ extract from ``Alice in Wonderland'':
 \end{quote}
 
 Underlined in this extract are the longest parts of this text that
-will get caught by the LZ77 compressor and get represented more
-efficiently as tokens. (Not all strings that will get caught by LZ77
+will get caught by the \lzone compressor and get represented more
+efficiently as tokens. (Not all strings that will get caught by \lzone
 are underlined, only the longest ones are.) Human language texts tend
 to be chock-full with repeated words, no matter how well written they
-are ,so they compress especially well under LZ77. And the same thing
+are ,so they compress especially well under \lzone. And the same thing
 could be said for simple images.
 
 \subsection{Decompression}
 
-A LZ77 compressed file will consists of a sequence of LZ77 tokens, so
+A \lzone compressed file will consists of a sequence of \lzone tokens, so
 the only thing we really need to discuss is how to decode the separate
 tokens.
 
@@ -161,7 +161,7 @@ been decoded. This whole process is outlined in algorithm
 the match token is also added to the decompressed data.
 
 \begin{algorithm}[H]
-  \caption{Decoding a LZ77 token.}
+  \caption{Decoding a \lzone token}\algohack{}
   \label{alg:dec-lzone-token}
   \begin{algorithmic}[1]
     \linecomment{$\var{length}$ is the length of the so far decompressed data. }
@@ -177,7 +177,7 @@ the match token is also added to the decompressed data.
 \subsection{Token Sizes}
 
 But we have up until this point entirely omitted a discussion of the
-bit sizes of the three fields of LZ77 tokens. The bit size of the
+bit sizes of the three fields of \lzone tokens. The bit size of the
 third field is the easiest; since it must store an unmatched byte it
 has the bit size 8. Deciding the size of the offset part is a bit
 harder. This field must have a bit size such that it has the capacity
@@ -221,15 +221,15 @@ the same way similarly.
 
 \section{LZSS}
 
-The following brief description of the LZSS algorihtm is based on
+The following brief description of the \lzss algorihtm is based on
 \cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr_lzss,okumura:_data_compr_algor_larc_lharc}.
 
-LZ77 can perform excellent compression but it is also very wasteful in
+\lzone can perform excellent compression but it is also very wasteful in
 how it outputs unmatched characters. For a window size of $2^8$ and a
 lookahead size of $2^4$, $4 + 8 + 8 = 20$ whole bits are required for
 specifying a number that would otherwise have been stored as 8 bits!
 
-LZSS fixes that problem as follows: unmatched character are
+\lzss fixes that problem as follows: unmatched character are
 represented by a single toggled bit, 1, followed by the 8-bit value of
 the unmatched character. So the unmatched character \texttt{A}, which
 has an ASCII code of $65$, would be represented by the bit pattern

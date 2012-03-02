@@ -54,15 +54,15 @@ will henceforth be known as a code \textit{list}.
 All values stored in a file are 8-bit numbers. Out of a compression
 performance perspective this system is catastrophic, because for
 practically all non-random data some byte-values will always be more
-frequent than others. For English ASCII text the ASCII code for the
+frequent than others. For English \ascii text, the \ascii code for the
 letter ``e'', 101, will be one of the most common characters, so it
 would make sense to represent this number by a binary number of a
-small length. However, do take in mind that the 8-bit system is used
-because that 8-bit numbers are one heck of a lot easier to deal with
-than variably sized codes. To read all the contents of a normal file
-all you have to do is read it 8 bits for value. Reading values whose
-numbers are of different bit lengths is on the other hand much harder
-and error prone for the programmer.
+small bit length. However, do take in mind that the 8-bit system is
+used because that 8-bit numbers are one heck of a lot easier to deal
+with than variably sized codes. To read all the contents of a normal
+file all you have to do is read it 8 bits for value. Reading values
+whose numbers are of different bit lengths is on the other hand much
+harder and error prone for the programmer.
 
 \subsection{The Prefix Property}
 
@@ -82,7 +82,7 @@ satisfy. Are all possible code lists acceptable?
     $D$ & $0.15$ & \bin{000} & \bin{101} \\
     \bottomrule
   \end{tabular}
-  \caption{Examples of code lists.}
+  \caption{Examples of code lists}
   \label{tab:codes-ex}
 \end{table}
 

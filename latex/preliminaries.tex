@@ -43,11 +43,11 @@ absolutely to understand in order to read this text.
   \end{Exercise}
 
 \item[bit] The separate digits of a binary numbers are often referred
-  to as bits. An $n$-bit number is simply a number with $n$ binary digits.
+  to as bits. An n-bit number is simply a number with $n$ binary digits.
 
   \begin{Exercise}[label={n-bits-max-val}]
-    What is the maximum value of a $n$-bit number?  How many different
-    possible values can a $n$-bit number have?
+    What is the maximum value of a n-bit number?  How many different
+    possible values can a n-bit number have?
   \end{Exercise}
 
 \item[toggled bit] If we say that a bit is \textit{toggled}, we mean that
@@ -66,7 +66,7 @@ absolutely to understand in order to read this text.
 \item[lowest bit] Bit 0 will also commonly be referred to as the
   lowest bit.
 
-\item[highest bit] bit $n-1$ of a $n$-bit number. In order words, the
+\item[highest bit] bit $n-1$ of a n-bit number. In order words, the
   last bit of a binary number. In the number $100$ the highest bit
   toggled and the 2 lowest bits are cleared.
 
@@ -87,29 +87,27 @@ absolutely to understand in order to read this text.
   image represented digitally is just a sequence of bytes.
 
 \item[ASCII] A very common text encoding that will be used a lot in
-  this text. ASCII is a 7-bit encoding and therefore covers 128
-  different characters. But ASCII values are for the sake of
-  convenience always stored in 8-bit bytes. The entire ASCII table is
+  this text. \ascii is a 7-bit encoding and therefore covers 128
+  different characters. But \ascii values are for the sake of
+  convenience always stored in 8-bit bytes. The entire \ascii table is
   given in table \ref{tab:ascii-table}\cite{rfc20}. Characters 33--126
   are printable characters. Characters 0--32 are on the other hand
   control characters. These are used to affect how the text is
-  processed. HT(9) is for an ordinary tab while SP(32) represents
+  processed. \htab(9) is for an ordinary tab while {\acronymstyle sp}(32) represents
   space. However, many of these control characters are obsolete and
   are practically never used. The control codes that are actually used
-  in modern files encoded using ASCII are NUL, HT, LF and CR
+  in modern files encoded using \ascii are \nul, \htab, \lf and \cret
   \cite{maini2007digital}.
 
-  The usage of the two special codes CR and LF is something that we
+  The usage of the two special codes \cret and \lf is something that we
   need to further discuss. They are used to start a new line in text
   and therefore serves to end the current line. But representing
   newlines turns out to be a surprisingly complex issue. In Windows
   based operating systems newlines are represented by a Carriage
-  Return, CR, followed by a linefeed, LF. Unix based operating
-  systems; like Linux, Mac OS X and Xenix; simply uses a line feed,
-  LF, to represent newlines. But for Mac OS version 9 and lower, CR
-  was used
-  \cite{robbins:_common_newline,noria:_under_newlin_oreilly,editor:_end_line_story_rfc,tancig01:_apart_no_more_newline,corporation08:_creat_telep_applic_both_window_linux}.
-
+  Return, \cret, followed by a linefeed, \lf. Unix based operating
+  systems; like Linux and Mac OS X; simply uses a line feed, \lf, to
+  represent newlines. But for Mac OS version 9 and lower, \cret was
+  used\cite{robbins:_common_newline,noria:_under_newlin_oreilly,editor:_end_line_story_rfc,tancig01:_apart_no_more_newline,corporation08:_creat_telep_applic_both_window_linux}.
 
   If a text file is to be used on only one operating system this will
   never pose a problem. But if the file is to be shared between
@@ -118,7 +116,7 @@ absolutely to understand in order to read this text.
   user. It is really only of importance to programmers who want their
   software to flawlessly run on different operating systems.
 
-  The usage of the NUL ASCII character is something that we will
+  The usage of the \nul character is something that we will
   discuss soon.
 
     \begin{longtable}{lll}
@@ -136,9 +134,9 @@ absolutely to understand in order to read this text.
       \endfoot
       \bottomrule
       \endlastfoot
-      0 & NUL & Null Character \\
-      1 & SOH & Start of Heading \\
-      2 & STX & Start of Text \\
+      0 & \nul & Null Character \\
+      1 & \soh & Start of Heading \\
+      2 & \stx & Start of Text \\
       3 & ETX & End of Text \\
       4 & EOT & End of Transmission \\
       5 & ENQ & Enquiry \\
@@ -168,7 +166,7 @@ absolutely to understand in order to read this text.
       29 & GS & Group Separator \\
       30 & RS & Record Separator \\
       31 & US & Unit Separator \\
-      32 & SP & Space \\
+      32 & {\acronymstyle sp} & Space \\
       33 & ! & Exclamation Point \\
       34 & " & Quotation Mark \\
       35 & \# & Number Sign \\
@@ -274,7 +272,7 @@ absolutely to understand in order to read this text.
     \end{longtable}
 
   \begin{Exercise}[label={ascii-to-num}]
-    Convert the following ASCII characters to their corresponding ASCII
+    Convert the following \ascii characters to their corresponding \ascii
     values:
 
     \begin{enumerate}[(a)]
@@ -285,7 +283,7 @@ absolutely to understand in order to read this text.
   \end{Exercise}
 
   \begin{Exercise}[label={num-to-ascii}]
-    Convert the following ASCII values to their corresponding characters:
+    Convert the following \ascii values to their corresponding characters:
     \begin{enumerate}[(a)]
     \item $35$
     \item $122$
@@ -295,8 +293,8 @@ absolutely to understand in order to read this text.
 
   \begin{Exercise}[label={ascii-uppercase}]
 
-    What is always true for the ASCII values of uppercase characters(A--Z)
-    in the ASCII table?
+    What is always true for the \ascii values of uppercase characters(A--Z)
+    in the \ascii table?
 
     (Hint: write them out binary)
 
@@ -304,7 +302,7 @@ absolutely to understand in order to read this text.
 
   \begin{Exercise}[label={uppercase-conv}]
 
-    How do you convert an uppercase ASCII value to it's corresponding
+    How do you convert an uppercase \ascii value to it's corresponding
     lower case value? How do you do the reverse transformation,
     lowercase to uppercase?
 
@@ -315,7 +313,7 @@ absolutely to understand in order to read this text.
 \item[Hexadecimal] We'll also be using the hexadecimal numeral system
   in this text a lot. To signify that a number is hexadecimal, it is
   prefixed by the characters \hex{}. In the hexadecimal system the
-  numbers 0-9 are given their usual values, while the letters A-F are
+  numbers 0--9 are given their usual values, while the letters A--F are
   assigned to the values 10-15, so that the hexadecimal number
   \hex{D3} has the value $13 \cdot 16^1 + 3 \cdot 16^0 = 13 \cdot 16 +
   3 = 208 + 3 = 211$.
@@ -345,19 +343,19 @@ absolutely to understand in order to read this text.
 
 
 \item[String] A string is simply a sequence of letters in some
-  encoding. The most commonly used encoding in this text will be ASCII
+  encoding. The most commonly used encoding in this text will be \ascii
   \cite{rfc20}.
 
 \item[C string] String as they are represented in the C programming
   language. In this language, strings are always terminated by the
-  ASCII NUL character\cite{kernighan1988c}. The NULL(alternative
-  spelling of NUL) character has, as
-  familiar, a value of $0$. This means that the string ``eric'' will
-  be represented by the sequence of bytes $101,114,105,99, 0$ in the C
-  programming language. This is important to know, because in a lot of
-  image formats strings are stored as C strings.
+  \nul character\cite{kernighan1988c}. The \nullm(alternative spelling
+  of \nul) character has, as familiar, a value of $0$. This means that
+  the string ``eric'' will be represented by the sequence of bytes
+  $101,114,105,99, 0$ in the C programming language. This is important
+  to know, because in a lot of image formats strings are stored as C
+  strings.
 
-  Why the NULL character at the end of the string even is necessary is
+  Why the \nullm character at the end of the string even is necessary is
   for rather complex reasons that I will not treat in this text.
 
 \item[File] We are going to be talking a lot about files in this text,
@@ -411,7 +409,7 @@ we're going to do for the rest of the chapter.
 \subsection{Typographical Conventions}
 
 \begin{description}
-\item[keywords] will use \textbf{bold} font.
+\item[keywords] will use a \textbf{bold} font.
 \item[functions] will be signified by \textsc{small caps}.
 \item[variables] can noticed by their $\var{cursive\ slant}$.
 \end{description}
@@ -443,7 +441,7 @@ tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
     $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\False}$ \\ \hline
     $\mathbf{\True}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
   \end{tabular}
-  \caption{Logical and truth table.}
+  \caption{Logical and truth table}
   \label{tab:log-and-table}
 \end{table}
 
@@ -455,7 +453,7 @@ tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
     $\mathbf{\False}$ & $\False$ & $\True$ \\ \hline
     $\mathbf{\True}$ & $\True$ & $\True$ \\ \hline
   \end{tabular}
-  \caption{Logical or truth table.}
+  \caption{Logical or truth table}
   \label{tab:log-or-table}
 \end{table}
 
@@ -467,7 +465,7 @@ tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
     $\True$ & $\False$ \\ \hline
     $\False$ & $\True$ \\ \hline
   \end{tabular}
-  \caption{Logical not truth table.}
+  \caption{Logical not truth table}
   \label{tab:log-not-table}
 \end{table}
 
@@ -489,8 +487,8 @@ tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
 \subsubsection{Notation}
 
 The bitwise operators will also be used in this text. We will use
-notation introduced in \C{}\cite{kernighan1988c} to represent them in
-pseudocode:
+notation introduced in the C programming language\cite{kernighan1988c}
+to represent them in pseudocode:
 
 \begin{description}
 \item[$\BitAnd$] Bitwise \textit{AND}
@@ -502,7 +500,7 @@ pseudocode:
 \end{description}
 
 Notice that we are using $\BitXor$ for representing bitwise
-\textit{XOR} rather than the traditional \C notation $\AND$. This is due to
+\textit{XOR} rather than the traditional C notation $\AND$. This is due to
 the fact that we'd otherwise confuse it with logical and, $\AND$.
 
 What follows is a short introduction to the very simple bitwise
@@ -568,7 +566,7 @@ to illustrate the difference between them:
     $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
     $\mathbf{\True}$ & $\mathbf{\True}$ & $\mathbf{\False}$ \\ \hline
   \end{tabular}
-  \caption{Logical exclusive or truth table.}
+  \caption{Logical exclusive or truth table}
   \label{tab:log-exlusive-or-table}
 \end{table}
 
@@ -684,7 +682,7 @@ To assign the value $n$ to the variable $var$, the notation shown in
 algorithm \ref{alg:assign} is used.
 
 \begin{algorithm}[H]
-  \caption{Syntax for assigning the value $n$ to the variable $var$.}
+  \caption{Syntax for assigning the value $n$ to the variable $var$}
   \label{alg:assign}
   \begin{algorithmic}[1]
     \Let{$\var{var}$}{$\var{n}$}
@@ -705,7 +703,7 @@ To to go through each value in the array $a$, the syntax demonstrated
 in algorithm \ref{alg:for-each} is used.
 
 \begin{algorithm}[H]
-  \caption{The for each control structure.}
+  \caption{The for each control structure}
   \label{alg:for-each}
   \begin{algorithmic}[1]
     \linecomment{Go through every value $v$ in the
@@ -721,7 +719,7 @@ In algorithm \ref{alg:repeat} the control structure repeat is
 demonstrated.
 
 \begin{algorithm}[H]
-  \caption{The repeat control structure.}
+  \caption{The repeat control structure}
   \label{alg:repeat}
   \begin{algorithmic}[1]
     \Repeatn{$n$}
@@ -742,7 +740,7 @@ common divisor of the two given numbers.
 \cite{cormen2009introduction_to_algo,weisstein:_euclid_algor}.
 
 \begin{algorithm}
-  \caption{Euclid's algorithm.}
+  \caption{Euclid's algorithm}
   \label{alg:euclid}
   \begin{algorithmic}[1]
     \Procedure{Euclid}{$a,b$}
@@ -763,7 +761,7 @@ the for to loop is used to count from $1$ to $9$. Note that it in
 reality counts up to $10$, then stops.
 
 \begin{algorithm}
-  \caption{For to loop.}
+  \caption{For to loop}\algohack{}
   \label{alg:forto}
   \begin{algorithmic}[1]
     \ForTo{$i$}{$1$}{$10$}
@@ -855,7 +853,7 @@ to introduce several functions for handling file operations.
 \end{Answer}
 
 \begin{Answer}[ref={n-bits-max-val}]
-  The maximum value of a $n$-bit number is $2^n - 1$.
+  The maximum value of a n-bit number is $2^n - 1$.
 
   Since every binary digit only has two possible values, an n-bit
   number has $2^n$ possible values.

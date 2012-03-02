@@ -15,10 +15,11 @@ To explore how the aforementioned image formats works, I decided to
 write small programs that would analyze the numbers that images in the
 formats consists of and dump the raw color data of the images in
 files. My programming language of choice for this was \CC{} and my
-compiler was GCC\credits{http://gcc.gnu.org/}. For doing the memory
+compiler was \gcc\credits{http://gcc.gnu.org/}. For doing the memory
 debugging that is often necessary in \CC{} programming I used
 Valgrind\credits{http://valgrind.org/}, which at times was a real life
-saver. My editor of choice for writing the code was \textsc{Emacs}\credits{http://www.gnu.org/software/emacs/}.
+saver. My editor of choice for writing the code was
+\emacs\credits{http://www.gnu.org/software/emacs/}.
 
 To learn the theory necessary to write these programs I had to read
 several books and many articles.
@@ -28,16 +29,18 @@ This document was created and typeset using
 \LaTeX{} rather than Word because I, as a programmer, find it a lot
 easier to use than Word.
 
-The text is typeset in the fonts Charter(main body) and
-\texttt{inconsolata}(monospace)\credits{http://levien.com/type/myfonts/inconsolata.html}. The
-\LaTeX{} source files were also edited in \textsc{Emacs}, using the
+The body text is typeset in the font \TeX{} Gyre Pagella, a clone of
+Hermann Zapf's Palatino. The monospace text uses the font
+\texttt{Luxi}.
+
+The \LaTeX{} source files were also edited in \emacs, using the
 AUC\TeX{}\credits{http://www.gnu.org/software/auctex/} package.
 
 All the graphics of this document were created using
 \tikzname \& \pgf\credits{http://sourceforge.net/projects/pgf/}
 
 All the source files for both this document and the programs were
-managed using \textsc{Git}\credits{http://git-scm.com/}, the version control system.
+managed using \git\credits{http://git-scm.com/}, the version control system.
 
 \section{Structure Of This Text}
 
@@ -53,37 +56,36 @@ The chapters in this text are laid out as follows:
 \item[Chapter 5] We will in this chapter discuss how color is
   represented digitally; that is, using numbers.
 
-\item[Chapter 6] The main topic of this chapter will be the RLE
-  compression algorithm. This algorithm is used in the TGA format.
+\item[Chapter 6] The main topic of this chapter will be the \rle
+  compression algorithm. This algorithm is used in the \tga format.
 
-\item[Chapter 7] The TGA format is discussed.
+\item[Chapter 7] The \tga format is discussed.
 
-\item[Chapter 8] The LZW algorithm will be explained.
+\item[Chapter 8] The \lzw algorithm will be explained.
 
-\item[Chapter 9] The GIF format will be the subject of this chapter.
+\item[Chapter 9] The \gif format will be the subject of this chapter.
 
 \item[Chapter 10] To ensure the data integrity of PNG images something
-  known as a CRC is used, which is the topic of this chapter.
+  known as a \crc is used, which is the topic of this chapter.
 
 \item[Chapter 11] The compression algorithm used in the PNG format,
-  known as DEFLATE, is a rather complex algorithm that consists of
+  known as \deflate, is a rather complex algorithm that consists of
   several subalgorithms. One of these subalgorithms is known as
   Huffman Coding, which is what we will be discussing in this chapter.
 
-\item[Chapter 12] The second subalgorithm of the DEFLATE algorithm is
-  known as LZ77, which is the algorihtm we will discuss in this
-  chapter. An improvement of LZ77 called LZSS is also discussed in
+\item[Chapter 12] The second subalgorithm of the \deflate algorithm is
+  known as \lzone, which is the algorihtm we will discuss in this
+  chapter. An improvement of \lzone called \lzss is also discussed in
   this chapter.
 
-\item[Chapter 13] In this chapter we will combine LZ77 and Huffman
-  Coding into the final DEFLATE algorihtm.
+\item[Chapter 13] In this chapter we will combine \lzone and Huffman
+  Coding into the final \deflate algorihtm.
 
-\item[Chapter 14] In this chapter the PNG format will finally be
+\item[Chapter 14] In this chapter the \png format will finally be
   discussed.
 
 \item[Chapter 14] All the former chapter will be discussed and we will
   attempt to draw a final conclusion from the project.
-
 
 \end{description}
 

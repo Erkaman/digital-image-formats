@@ -84,20 +84,20 @@ file size was saved by the compression.
 \section{RLE}
 \label{sec:rle}
 
-This following description of the RLE algorithm uses the references
+This following description of the \rle algorithm uses the references
 \cite{nagarajan11:_enhan_approac_run_lengt_encod_schem,murray1996encyclopedia,mark1996data_compression_book}.
 
 One the most simple compression algorithms is known as
-\textit{Run-Length Encoding}, abbreviated
-RLE. The compression performed in the third question of
-exercise \ref{compression-ratio} is actually RLE compression.
+\textit{Run-Length Encoding}, abbreviated \rle. The compression
+performed in the third question of exercise \ref{compression-ratio} is
+actually \rle compression.
 
 In this algorithm, sequences of length $n$ of the same value $b$ are
 compressed down to $(n-1,b)$. So the sequence $b,b,b,...,b$ of length
 $n$ gets compressed down to $(n-1,b)$. The pairs that represents these
 sequences of repeating values are known as \textit{packets}, and these
 sequences of repeating values will from known on be known as
-\textit{runs}. In our version of the RLE algorithm these runs are just
+\textit{runs}. In our version of the \rle algorithm these runs are just
 sequences of repeating bytes, and the two values in the packets $n-1$
 and $b$ are for this reason stored in bytes.
 
@@ -135,20 +135,21 @@ which is a quite superb compression ratio!
 
 So when data the contains a lot runs for which $n > 2$, then this
 algorithm can indeed do great compression. English text is however not
-one kind of data that is best compressed by RLE, since there are very
-few English words where letters of repeated more than two times. True,
-there does exist plenty of words with double consonants in the English
-language, but, remember, RLE compression method does no compression
-whatsoever for runs where $n=2$.
+one kind of data that is best compressed by \rle, since there are very
+few English words where letters are repeated more than two
+times. True, there does exist plenty of words with double consonants
+in the English language, but, remember, \rle compression does no
+compression whatsoever for runs where $n=2$.
 
 But there also examples of data that could be very efficiently
-compressed by RLE. One example of this is grayscale data. The page on
-which this text was printed on could be seen as many long runs of
-grayscale data. So an image of this page is a good example of data
-that could get quite efficient compression ratios using RLE.
+compressed by \rle. One example of this is certain kinds of grayscale
+data. The page on which this text was printed on could be seen as many
+long runs of white and black grayscale data. So an image of this page
+is a good example of data that could get quite efficient compression
+ratios using \rle.
 
 \begin{Exercise}[label={rle-compression}]
-  Using RLE, compress the following strings and also compute the
+  Using \rle, compress the following strings and also compute the
   compression ratio of the compression:
 
   \begin{enumerate}[(a)]
@@ -159,10 +160,10 @@ that could get quite efficient compression ratios using RLE.
 
 \end{Exercise}
 
-So for only certain kinds of data can RLE achieve efficient
+So for only certain kinds of data can \rle achieve efficient
 compression, otherwise it is best avoided, since it could in worst
-cases double the size of the data. We will in section ? discuss how
-improve RLE by removing this limitation from the algorithm.
+cases double the size of the data. We will in section \todo{reference} discuss how we
+can improve \rle by removing this limitation from the algorithm.
 
 \subsection{The RLE Algorithm}
 
@@ -173,7 +174,7 @@ consider the compression algorithm, which is shown in algorithm
 \ref{alg:rle-enc}. What follows is the explanation of this algorithm.
 
 \begin{algorithm}
-  \caption{Encoding a file using RLE.}
+  \caption{Encoding a file using \rle}
   \label{alg:rle-enc}
   \begin{algorithmic}[1]
 
@@ -238,7 +239,7 @@ the end of the algorithm.
 \subsubsection{RLE Decompression Algorithm}
 
 \begin{algorithm}
-  \caption{Decoding a RLE encoded file.}
+  \caption{Decoding a \rle encoded file}
   \label{alg:rle-dec}
   \begin{algorithmic}[1]
 
@@ -257,7 +258,7 @@ the end of the algorithm.
   \end{algorithmic}
 \end{algorithm}
 
-The ridiculously simple RLE decoding algorithm is shown in algorithm
+The ridiculously simple \rle decoding algorithm is shown in algorithm
 \ref{alg:rle-dec}.
 
 It is very simple: pairs of $(n-1,b)$ are read in pair by pair. These
@@ -274,17 +275,17 @@ The information in the following section is based on the sources
 The algorithm that we are about to describe is in
 \cite{96:_techn_note_tn102,apple1994inside} known as the PackBits
 method. But in \cite{91:_truev_tga_file_format_specif}, however, this
-algorithm is simply known as RLE. I will therefore try and create a
+algorithm is simply known as \rle. I will therefore try and create a
 compromise between these two names and we therefore will call the
-method PackBits RLE from now on.
+method PackBits \rle from now on.
 
-As familiar, the RLE algorithm can do great compression on certain
+As familiar, the \rle algorithm can do great compression on certain
 kind of data, while it on the other can double the size of other kinds
 of data, like English text. The question is, can we remove this
 limitation from the algorithm, while still preserving its great
 compression ratio for certain kinds of data?
 
-And yes, it turns out that we can. In PackBits RLE, the highest bit of
+And yes, it turns out that we can. In PackBits \rle, the highest bit of
 the packet length specifier for a packet $(n-1,b)$, is reserved not
 for specifying the length of the packet, but for specifying the
 \textit{type} of the packet.
@@ -298,38 +299,38 @@ the bit is toggled.
 These two packets differ in what kind of data they contain. The
 run-length packet contains run-length encoded, compressed,
 data. Run-length packets are used in exactly the same way as they are
-in plain RLE.
+in plain \rle.
 
-To give an example, the data $5,5,5$, will in PackBits RLE get
+To give an example, the data $5,5,5$, will in PackBits \rle get
 compressed down to ``130,5''. This makes sense because $130$ in binary
 is $1000\ 0010$. The highest bit is here used to specify that the
 packet is a run-length packet and the 7 lowest bits are used to
 specify the actual length of the packet.
 
 Because only 7 bits are used to specify the length of a run-length
-packet, the maximum length of a run-length packet in PackBits RLE is
+packet, the maximum length of a run-length packet in PackBits \rle is
 $2^7 = 128$.
 
 But in exchange for a potentially lowered compression ratio, we did
 get something in return: raw packets. Raw packets essentially is the
 fix to the problem of potentially doubling the size of ``compressed''
-files that plain RLE had.
+files that plain \rle had.
 
 What the $n$ value in raw packets specify, is the length of a
 following sequence of raw data. This packet type could in other words
-be used to store strings that RLE can't really compress, like the data
-$1,2,3,4$ for example. In PackBits RLE, the string $1,2,3,4$ would
+be used to store strings that \rle can't really compress, like the data
+$1,2,3,4$ for example. In PackBits \rle, the string $1,2,3,4$ would
 most efficiently get encoded as $3,1,2,3,4$. $3$ is in binary form
 $0000\ 0011$, and the since the highest bit is cleared, this means
 that this is a proper raw packet.
 
-Because PackBits RLE now lacks the ability to explode the size of the
-data in the way plain RLE can, the main advantage PackBits RLE has
-over plain RLE is that it is a lot more \textit{reliable}.
+Because PackBits \rle now lacks the ability to explode the size of the
+data in the way plain \rle can, the main advantage PackBits \rle has
+over plain \rle is that it is a lot more \textit{reliable}.
 
 \begin{Exercise}[label={packbits-rle}]
 
-  Compress the following data using the PackBits RLE method, and
+  Compress the following data using the PackBits \rle method, and
   calculate the compression ratio:
 
   \begin{enumerate}[(a)]
@@ -350,7 +351,7 @@ length of the packet, which is followed by all the data of the raw
 packet,
 
 \begin{algorithm}
-  \caption{Writing a raw packet.}
+  \caption{Writing a raw packet}
   \label{alg:raw-packet}
   \begin{algorithmic}[1]
     \Function{writeRawPacket}{$\var{length,data}$}
@@ -369,7 +370,7 @@ length bit is assigned to an initial value of $1 \ShiftLeft 7 =
 7 lower bits with the actual length of the packet subtracted by 1.
 
 \begin{algorithm}
-  \caption{Writing a run length packet.}
+  \caption{Writing a run-length packet}
   \label{alg:rle-packet}
   \begin{algorithmic}[1]
     \Require $\var{length} > 0$
@@ -386,10 +387,10 @@ length bit is assigned to an initial value of $1 \ShiftLeft 7 =
 \label{sec:compr-decompr}
 
 Now that we know how to write the packets, let us consider how to
-implement the actual PackBits RLE algorithm. It is shown in algorithm
+implement the actual PackBits \rle algorithm. It is shown in algorithm
 \ref{alg:packbits-enc}.
 
-Since there are two kinds of packets allowed in the PackBits RLE
+Since there are two kinds of packets allowed in the PackBits \rle
 method, we will need a way of telling which kind of packet we are
 creating at the time. The two constants $\var{RawPacket}$ and
 $\var{RunLengthPacket}$ are created for this purpose. The values of these
@@ -421,17 +422,17 @@ to write a run-length packet. First however, we need to check if we
 are not already writing a raw packet. If so, then we finish the raw
 packet by outputting it. Then the construction of the run-length
 packet continues by incrementing the $\var{length}$ variable and setting the
-current packet type to run length packet.
+current packet type to run-length packet.
 
 If the current packet is not full and $c_1 \neq c_2$, then we are
-writing are raw packet. If we were also writing a run length packet at
+writing are raw packet. If we were also writing a run-length packet at
 this time then we finish it by outputting it.
 
 And when the loop is over, the last, remaining packet is finished and
 outputted.
 
 \begin{algorithm}
-  \caption{Encoding a file using PackBits RLE.}
+  \caption{Encoding a file using PackBits \rle}
   \label{alg:packbits-enc}
   \begin{algorithmic}[1]
     \Let{$\var{RawPacket}$}{$0$}
@@ -509,7 +510,7 @@ The decoding algorithm is thankfully not as complex. It is shown in
 algorithm \ref{alg:packbits-dec}.
 
 \begin{algorithm}
-  \caption{Decoding a RLE packbits encoded file.}
+  \caption{Decoding a \rle packbits encoded file}\algohack{}
   \label{alg:packbits-dec}
   \begin{algorithmic}[1]
 
@@ -573,7 +574,7 @@ algorithm \ref{alg:packbits-dec}.
     The compression ratio is $1$, meaning that no compression
     whatsoever ended up being performed in the long run.
 
-    This data was compressed using the RLE algorithm, and we will
+    This data was compressed using the \rle algorithm, and we will
     discuss this algorithm in section \ref{sec:rle}.
 
   \end{enumerate}
