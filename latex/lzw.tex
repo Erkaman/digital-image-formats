@@ -5,8 +5,8 @@
 \chapter{LZW}
 \label{cha:lzw}
 
-In this chapter, we will discuss the data compression algorithm \lzw,
-as it is defined and described in
+In this chapter, we will discuss the compression algorithm \lzw, as it
+is defined and described in
 \cite{Nelson:1989:LDC:77102.77104,Welch:1984:THD:1319729.1320134,Salomon:2004:DCC,mark1996data_compression_book,nelson:_lzw_revis}. We
 will first discuss the history behind the algorithm, then the
 compression algorithm itself, after this we will describe the
@@ -38,19 +38,18 @@ published the algorithm in \cite{welch85:_u}.
 \section{The Compression algorithm}
 \label{sec:lzw-comp-desc}
 
-The \lzw compression algorithm is best
-understood by walking through the \lzw algorithm's process of
-compressing some example string, so we will in this example
-demonstrate how the compression of the string
-$\var{ababcbababaaaaaaa}$ is done in \lzw.
+The \lzw compression algorithm is best understood by walking through
+its process of compressing some example string, so we will in this
+example demonstrate how it compresses the string
+\texttt{ababcbababaaaaaaa}.
 
 Central to the entire algorithm's process is a string table(also
 sometimes referred to as a dictionary). In this table, numbers called
 \textit{codes} are assigned to strings. The algorithm starts by
 filling this string table with all the strings that are possible to
-fit in a byte. So all the codes $0-255$ are assigned their respective
-strings. We will for sake of simplicity use ASCII encoding throughout
-this example, so the codes $0-255$ are assigned their respective ASCII
+fit in a byte. So all the codes 0--255 are assigned their respective
+strings. We will for sake of simplicity use \ascii encoding throughout
+this example, so the codes 0--255 are assigned their respective \ascii
 characters, as is shown in table \ref{tab:str-tab-ascii}.
 
 \begin{table}
@@ -70,7 +69,7 @@ characters, as is shown in table \ref{tab:str-tab-ascii}.
     $100$ & $d$ \\
     $101$ & $e$ \\
     \dots & \dots \\
-    $255$ & unassigned to in ASCII \\
+    $255$ & unassigned to in \ascii \\
     \bottomrule
   \end{tabular}
   \caption{The initial \lzw string table}
@@ -78,36 +77,39 @@ characters, as is shown in table \ref{tab:str-tab-ascii}.
 \end{table}
 
 Now the actual compression of the string starts. First it reads in the
-character $a$. In the string table that letter has the code $97$,
-so the code $97$ is outputted. Next, the character $b$ is read,
-which has the code $98$. So $98$ is outputted and then the two strings
-read so far are appended together to form the string $\var{ab}$. The
-string table is searched for the string $\var{ab}$, but it cannot be
-found in the string table, so it is added to the string table and is
-assigned the next available code, $256$.
+character \texttt{a}. In the string table that letter has the code
+$97$, so the code $97$ is outputted. Next, the character \texttt{b} is
+read, which has the code $98$. So $98$ is outputted and then the two
+strings read so far are appended together to form the string
+\texttt{ab}. The string table is searched for appended string, but
+it cannot be found in the string table, so it is added to the string
+table and is assigned the next available code, $256$.
 
-$a$ is discarded, $b$ is kept and another $a$ is
-read. First $b$ is outputted, and the appended string
-$\var{ba}$ is formed. This string does neither exist in the table,
- so it is added to table and is given the code $257$.
+\texttt{a} is discarded, \texttt{b} is kept and another \texttt{a} is
+read. First \texttt{b} is outputted, and the appended string
+\texttt{ba} is formed. This string does neither exist in the table, so
+it is added to table and is given the code $257$.
 
- Discard $b$, output $a$ and read in another $b$. The
- resulting appended string is this time $\var{ab}$. But wait a minute,
- is not already that string in the string table? Yes it is, so instead
- of re-adding that string to table, it is kept for the next step in
- the algorithm.
+Discard \texttt{b}, output \texttt{a} and read in another
+\texttt{b}. The resulting appended string is this time
+\texttt{ab}. But wait a minute, is not already that string in the
+string table? Yes it is, so instead of re-adding that string to table,
+it is kept for the next step in the algorithm.
 
-The code for $\var{ab}$ is outputted, which is $256$, and the character $c$ is
-read. The string $\var{abc}$ does not exist in the table, so it is
-added to the string table and given the code $258$.
+The code for \texttt{ab} is outputted, which is $256$, and the
+character \texttt{c} is read. The string \texttt{abc} does not exist
+in the table, so it is added to the string table and given the code
+$258$.
+
 
 And the algorithm just keeps going on like this. Table
-\ref{tab:str-tab-str} shows all the codes that were added during the
-compression of the sample string $\var{ababcbababaaaaaaa}$. Table
 \ref{tab:lzw-walkthru} gives a detailed walkthrough of the entire
-compression process of that same string. So the string
-$\var{ababcbababaaaaaaa}$ was in the end compressed down to the
-string $\var{ab},256,c,257,260,a,262,263,a$.
+compression process. So the string \texttt{ababcbababaaaaaaa} was in
+the end compressed down to
+
+\begin{equation*}
+ 97,98,256,99,257,260,97,262,263,97
+\end{equation*}
 
 So to summarize, the \lzw algorithm basically works like: the algorithm
 keeps accumulating and reading characters into the string $S$. This
@@ -120,41 +122,16 @@ outputted, and the appended string $Sc$ is added to the dictionary.
 
 \begin{Exercise}[label={lzw-compress}]
 
-  \lzw compress the string $\var{abababab}$. Show the output of the
+  \lzw compress the string \texttt{abababab}. Show the output of the
   compressor and the resulting string table.
 
 \end{Exercise}
 
-\begin{table}
-  \centering
-  \begin{tabular}{ll}
-    \toprule
-    String & Code \\
-    \midrule
-    $97$ & $a$ \\
-    $98$ & $b$ \\
-    $99$ & $c$ \\
-    \dots & \dots \\
-    $256$ & $\var{ab}$ \\
-    $257$ & $\var{ba}$ \\
-    $258$ & $\var{abc}$ \\
-    $259$ & $\var{cb}$ \\
-    $260$ & $\var{bab}$ \\
-    $261$ & $\var{baba}$ \\
-    $262$ & $\var{aa}$ \\
-    $263$ & $\var{aaa}$ \\
-    $264$ & $\var{aaaa}$ \\
-    \bottomrule
-  \end{tabular}
-  \caption{The string table after compression}
-  \label{tab:str-tab-str}
-\end{table}
+\newcommand{\lzwrow}[6]{\texttt{#1} = $#2$ & \texttt{#3} = $#4$ &
+  \texttt{#1} = $#2$ & \texttt{#5} = $#6$ \\}
 
-\newcommand{\lzwrow}[6]{$\var{#1}$ = $#2$ & $\var{#3}$ = $#4$ &
-  $#1$ = $#2$ & $\var{#5}$ = $#6$ \\}
-
-\newcommand{\stoplzwrow}[2]{$\var{#1}$ = $#2$ & STOP &
-  $\var{#1}$ = $#2$ & STOP \\}
+\newcommand{\stoplzwrow}[2]{\texttt{#1} = $#2$ & \texttt{STOP} &
+  \texttt{#1} = $#2$ & \texttt{STOP} \\}
 
 \begin{table}
   \centering
@@ -241,10 +218,10 @@ are stored in fixed $n$-bit numbers for some value $n$. The most
 typically used code sizes are in the range $9 \leq n \leq 15$.
 
 This is of course not the only possible storage model for the
-codes. In the GIF format's variation of the \lzw algorithm, increasing
-codes sizes are used to even further improve the compression
-efficiency of this algorithm. We will discuss this variation in chapter
-\ref{cha:gif}.
+codes. In the \gif format's variation of the \lzw algorithm,
+increasing codes sizes are used to even further improve the
+compression efficiency of this algorithm. We will discuss this
+variation in chapter \ref{cha:gif}.
 
 \subsection{Knowing when to stop}
 
@@ -264,11 +241,15 @@ maximum length of the string table will be $2^n - 1$ rather than $2^n$
 \section{Description of the Decompression algorithm}
 
 Using the compression algorithm \lzw on the string
-$\var{ababcbababaaaaaaa}$ produced the compressed data $ab, 256,c,
-257, 260, a, 262, 263, 264, a,4095$. Since we were using 12-bit codes
-to encode the data, the number $2^{12} - 1 = 4095$ terminates the
-data. This number is used by the decompressor to check if it is done
-with the decompression.
+\texttt{ababcbababaaaaaaa} produced the compressed data
+
+\begin{equation*}
+ 97,98,256,99,257,260,97,262,263,97,4095
+\end{equation*}
+
+Since we were using 12-bit codes to encode the data, the number
+$2^{12} - 1 = 4095$ terminates the data. This number is used by the
+decompressor to check if it is done with the decompression.
 
 In a \lzw compressed file the string table used to encode the file is
 not included. But how could you possibly decompress the file without
@@ -276,54 +257,56 @@ such essential information? It turns out that only from the compressed
 data the decompressor is able to rebuild an exact copy of the string
 table built during the compression.
 
-We wanted to decompress $ab, 256,c, 257, 260, a, 262, 263, 264,
-a,4095$. The decompressor first assign the code values $0-255$ to
-their corresponding single length strings, and makes the same table
+The decompressor first assign the code values 0--255 to their
+corresponding single length strings, and constructs the same table
 \ref{tab:str-tab-ascii} that was also built in the beginning of the
 compression.
 
-The characters $a$ and $b$ are read and $a$ is outputted. Now $a$ and
-$b$ are appended together to form the string $\var{ab}$. This string is
-added to the string table and is given the code $256$.
+The codes for the characters \texttt{a} and \texttt{b} are read and
+\texttt{a} is outputted. Now \texttt{a} and \texttt{b} are appended
+together to form the string \texttt{ab}. This string is added to the
+string table and is given the code $256$.
 
-A new code $256$ is read, $a$ is discarded and $b$ is outputted. The
-code $256$ is according to our current string table the string
-$\var{ab}$.
+A new code $256$ is read, \texttt{a} is discarded and \texttt{b} is
+outputted. The code $256$ is according to our current string table the
+string \texttt{ab}.
 
 Now we need to form the next string to be added to the table. To do
-this, we take the string $b$ and append it to the first character of
-the string $\var{ab}$, thus forming the string $\var{ba}$. This string is added to
-the table with the code $257$.
+this, we take the string \texttt{b} and append it to the first
+character of the string \texttt{ab}, thus forming the string
+\texttt{ba}. This string is added to the table with the code $257$.
 
-The character is read $c$, the old $b$ is discarded and the string
-$\var{ab}$ is now outputted. $\var{ab}$ and $c$ are appended together
-to form the string $\var{abc}$(The first character of the one length
-string $c$ is simply $c$) and then $\var{abc}$ is added to the string
+The character is read \texttt{c}, the old \texttt{b} is discarded and the string
+\texttt{ab} is now outputted. \texttt{ab} and \texttt{c} are appended together
+to form the string \texttt{abc}(The first character of the one length
+string \texttt{c} is simply \texttt{c}) and then \texttt{abc} is added to the string
 table with the code $258$.
 
 The code $257$ is read in, which corresponds to the string
-$\var{ba}$. Since the former code was $c$, the string to be added to
-the table is $\var{cb}$, and this string is given the code $259$.
+\texttt{ba}. Since the former code was \texttt{c}, the string to be
+added to the table is \texttt{cb}, and this string is given the code
+$259$.
 
 Next the code $260$ is read. But we have not even yet added that code
 to the table! How could this be?
 
 Up to this point, the compressor had compressed the string
-$\var{ababc}$ and had defined the code for the string $\var{ba}$ as
+\texttt{ababc} and had defined the code for the string \texttt{ba} as
 $257$. What remained to be compressed after this was
-$\var{bababaaaaaaa}$. So it read the string $\var{ba}$ and the
-character $b$, becuase $\var{ba}$ was already defined in the string
-table. After outputting the code for $\var{ba}$, it added the string
-$\var{ba}b$ to string the string table, assigning it the code
-$260$. Then it threw away $\var{ba}$ and kept $b$. Then it accumulated
-the string $\var{bab}$ until it found the character $a$. At this
-point, the code $260$ for the string $\var{bab}$ was outputted.  The
-important thing to realize here is that this happened before the
-decompressor even had the chance the define the code $260$.
+\texttt{bababaaaaaaa}. So it read the string \texttt{ba} and the
+character \texttt{b}, becuase \texttt{ba} was already defined in the
+string table. After outputting the code for \texttt{ba}, it added the
+string \texttt{bab} to the string table, assigning it the code
+$260$. Then it threw away \texttt{ba} and kept \texttt{b}. Then it
+accumulated the string \texttt{bab} until it found the character
+\texttt{a}. At this point, the code $260$ for the string \texttt{bab}
+was outputted.  The important thing to realize here is that this
+happened \textit{before} the decompressor even had the chance the
+define the code $260$.
 
-\newcommand{\ko}{\ensuremath{\var{k\omega}}\xspace}
-\newcommand{\kok}{\ensuremath{\var{\ko k}}\xspace}
-\newcommand{\kokok}{\ensuremath{\var{\kok \omega k}}\xspace}
+\newcommand{\ko}{\ensuremath{k\omega}\xspace}
+\newcommand{\kok}{\ensuremath{k\omega{}k}\xspace}
+\newcommand{\kokok}{\ensuremath{k\omega{}k \omega{} k}\xspace}
 
 So the general problem could described like this\cite{welch85:_u}: if
 the string \ko is already in the string table and if the string \kokok
@@ -337,29 +320,22 @@ be $\kok$. This string is equivalent to the string represented by the
 undefined code.
 
 Now let us return to our example string. The codes we currently had at
-hand were $ba$ and $260$. We want to get the characters $k$ and
-$\omega$, so that we may construct the string $\kok$. Since $ba$ are
-the first two letters of the string $\kokok$, then $k = b$ and $\omega
-= a$, so the string represented by the $260$ is $\kok = bab$.
+hand were \texttt{ba} and $260$. We want to get the characters $k$ and
+$\omega$, so that we may construct the string $\kok$. Since
+\texttt{ba} are the first two letters of the string $\kokok$, then $k
+=\ $\texttt{b} and $\omega =\ $\texttt{a}, so the string represented
+by $260$ is $\kok =\ $\texttt{bab}.
 
-And the decompressor just keeps working through the data like this,
-while at the same time reconstructing the string table that was used
-to compress the data in the first place. This just keeps on going
-until it encounters the maximum value of the current code size $n$,
-$2^{n}-1$. For 12-bit codes this value is $2^{12} - 1 = 4095$, as it
-can be seen from our example data $97, 98, 256, 99, 257, 260, 97, 262,
-263, 264, 4095$.
+In algorithm \ref{alg:lzw-working-decompression} pseudocode of the
+algorithm we just described is given.
 
 \begin{Exercise}[label={lzw-decompress}]
 
-  Assuming that 12-bit codes were in the compression of exercise
-  \ref{lzw-compress}, then compress the resulting data
-  $97,98,256,258,98,4095$.
+  \lzw decompress $97,98,256,258,98,4095$. Codes sizes of 12 are used.
 
 \end{Exercise}
 
-In \ref{alg:lzw-working-decompression} pseudocode of the algorithm we
-just described is given.
+
 
 \begin{algorithm}[H]
   \caption{\lzw decompression algorithm}\algohack{}
@@ -463,24 +439,26 @@ $n$ in the range $9 \leq n \leq 15$.
 The program that was used to do the compression was \verb|LZW|, which
 also is the program that was written to demonstrate the techniques
 discussed in this chapter. The source code for the program can be find
-in \verb|code/lzw/|.
+in the directory \verb|code/lzw/|.
 
-To run the run the program on all the test files and accumulate the
-gathered data into a \LaTeX{} table, a Python\footnote{\url{http://python.org/}} script was written. This
+To run the program on all the test files and accumulate the gathered
+data into a \LaTeX{} table, a
+Python\footnote{\url{http://python.org/}} script was written. This
 script can be found at the location \verb|code/lzw/test.py|.
 
 \subsection{The Test Results}
 
 In table \ref{tab:lzw-test-results} we show the results of the test.
 
-\begin{table}
-  \scriptsize
-  \centering
-  \input{../code/lzw/table.tex}
-  \caption{\lzw compression test results}
-  \label{tab:lzw-test-results}
-\end{table}
-
+\begin{sidewaystable}
+%  \begin{table}
+    \small
+    \centering
+    \input{../code/lzw/table.tex}
+    \caption{\lzw compression ratio test results}
+    \label{tab:lzw-test-results}
+%  \end{table}
+\end{sidewaystable}
 \subsection{Discussion}
 
 Now we will discuss the results gathered in table
@@ -511,10 +489,9 @@ For the smallest file, \verb|asyoulik.txt|, the best compression ratio
 was not achieved for the largest code size. This is because for
 smaller files it is unlikely that the string table even gets fully
 built up. If the size of the code does not get used to its full
-potential, then unnecessary bits are only added when the code size is
-increased. These unnecessary bits has the consequence that the codes
-are stored in larger numbers, and this in turn can unnecessarily
-increase the size and worsen the compression.
+potential, then there is a risk that the highest bits of the codes are
+not used at all(these are used for bigger codes), and these bits may
+because of this go completely to waste.
 
 \subsubsection{Program code}
 
@@ -523,8 +500,8 @@ the compression ratio is not get very good at all, compared to the
 compression ratio of the text files. This is surprising, because
 source code tends to contain tons of keywords, like
 \verb|for|,\verb|while| \verb|return| that are repeated throughout the
-entire file. You would think that by replacing all these repeated words by
-small codes this would result a good compression ratio.
+entire file. You would think that by replacing all these repeated
+words by small codes this would result in a good compression ratio.
 
 But the worse compression ratio for higher codes sizes is in this case
 attributed to the very low size of the files. Since these files are so
@@ -534,7 +511,7 @@ that of the huge English text files.
 \subsubsection{Both text and code}
 
 The files \verb|cp.html| and \verb|xargs.1| could be said to contain a
-combination of both English human-readable text and source
+combination of both English text and source
 code. \verb|xargs.1| is a pretty small file and hence gets its maximum
 compression ratio for the rather small code size of $11$. The file
 \verb|cp.html| is bit larger than the former, but the compression
@@ -569,8 +546,6 @@ the compression ratio.
 
 \begin{Answer}[ref={lzw-compress}]
 
-%\texttt{abababab}
-
   \begin{center}
     \begin{tabular}{llll}
       \toprule
@@ -593,6 +568,6 @@ the compression ratio.
 
 \begin{Answer}[ref={lzw-decompress}]
 
-  The decompressed data you should get is $\var{abababab}$.
+  The decompressed data you should get is \texttt{abababab}.
 
 \end{Answer}
