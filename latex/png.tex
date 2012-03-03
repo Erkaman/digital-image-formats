@@ -13,7 +13,7 @@
 
 As stated in section \ref{sec:gif-history}, the creation of the \png
 format was primarily motivated by the patents encumbering the already
-popular GIF format. To solve this problem, a bunch of developers in
+popular \gif format. To solve this problem, a bunch of developers in
 the graphics developer community decided to cooperate on creating a
 new format that came to be known as \png. July 1 1996, version 1.0 of
 the \png specification was released. Then version 1.1 was released on
@@ -97,19 +97,19 @@ when transmitting a \png file over a network because such errors were
 very normal back in the days when \png was invented.
 
 The first bit is $137$. In binary this number is $1000\ 1001$. The key
-part to notice is that this is a non-ASCII character, because since
+part to notice is that this is a non-\ascii character, because since
 the 7:th bit toggled it will always have a value $\ge 128$. When data
-is tranmitted as ASCII-text over a network the 7:th bit tends to be
+is tranmitted as \ascii-text over a network the 7:th bit tends to be
 thrown away, as it is for example done in STMP \cite{rfc5321}, the
 Internet protocol that is used to transfer emails. To transmit
-non-ASCII binary data, like image data is, one should instead use the
+non-\ascii binary data, like image data is, one should instead use the
 MIME protocol, which is an extension to the STMP protocol.
 
 So the main purpose of the first byte is to detect whether an image
-has accidentally been transmitted as ASCII text. If this byte doesn't
+has accidentally been transmitted as \ascii text. If this byte does not
 have its proper value, then the image has been corrupted. Then also
 the bytes whose values are $\ge 128$ in the image file will also be
-corrupted, so there's little to no point in the decoder trying to open
+corrupted, so there is little to no point in the decoder trying to open
 the corrupted image.
 
 The bytes
@@ -118,7 +118,7 @@ The bytes
   \text{80 78 71}
 \end{equation*}
 
-are the ASCII values for the string \png, so they could simply be seen
+are the \ascii values for the string \png, so they could simply be seen
 as the magic numbers of the \png format.
 
 The following two bytes are
@@ -146,7 +146,7 @@ The last byte $10$ is the newline character in UNIX-based operating
 systems, LF. So this is yet another byte that is used to verify that
 the image was not transferred as text. This byte is used to verify
 that an image transferred from a UNIX-based operating system to a
-windows based operating system is not transferred as ASCII text.
+windows based operating system is not transferred as \ascii text.
 
 \section{Critical Chunks}
 
@@ -246,7 +246,7 @@ specification is $0$, which means that DEFLATE compression is used.
 \png also allows certain so-called filters to be applied to the image
 data. These filters basically make the image data compress
 better. Only the value $0$ is defined for this field, and this means
-that the four default filters are used to perform the filtering. We'll
+that the four default filters are used to perform the filtering. We will
 discuss the filters in section \ref{sec:png-filters}.
 
 \subsubsection*{Interlace Method (1 Byte)}
@@ -256,14 +256,14 @@ is $1$, then the image data is interlaced.
 
 The \png format supports an interlacing method known Adam7, named so
 because it was invented by Adam Costello. This method of interlacing
-is significantly more complex than that of GIF's, and is something
+is significantly more complex than that of \gif, and is something
 that we will discuss in depth in section \ref{png-interlacing}.
 
 \subsection{PLTE -- Image Palette}
 
 If the image uses indexed color, then that means that it uses a
 palette and that is what is stored in this chunk. The palette chunk
-simply consists of a sequence of RGB colors. These colors will always be
+simply consists of a sequence of \rgb colors. These colors will always be
 24 bits of size, so 8 bits are assigned to each color channel.
 
 \subsection{IDAT -- Image Data}
@@ -294,7 +294,7 @@ image data is encoded.
 The unencoded data is just a sequence of pixel color values. If the
 image is \textit{interlaced}, then the image data is rearranged in a
 certain order and divided into passes. This process is in the \png
-specification referred to as \textit{pass extraction}. We'll discuss
+specification referred to as \textit{pass extraction}. We will discuss
 interlacing in section \ref{png-interlacing}.
 
 Not all images are interlaced, and if not, then the image data is just
@@ -307,12 +307,12 @@ byte values, and the byte values are divided up into separate rows.
 After the scanline serialization process, filters are applied to the
 image data that is now represented as a sequence of bytes. The filters
 are operations on the byte sequence that makes the data easier to
-compress. We'll discuss these filters in section
+compress. We will discuss these filters in section
 \ref{sec:png-filters}.
 
 After that the data has optimized for compression by the filter, it is
 compressed using the DEFLATE algorithm, and stored using the \zlib
-format. We'll discuss this in more depth in section \ref{sec:png-dec}.
+format. We will discuss this in more depth in section \ref{sec:png-dec}.
 
 And after all these steps, the image data is finally divided into
 \IDAT chunks, and these chunks are written to the file.
@@ -403,7 +403,7 @@ in order to speed up the compression in favor of lost compression
 performance. However, the maximum compression algorithm will never
 give until it has searched the entire window for matches, and it will
 therefore result in the best possible DEFLATE compression in return
-for a small speed loss. But with the fast computer's of today the
+for a small speed loss. But with the fast computers of today the
 maximum compression algorithm is almost always used, but back in the
 old days you always had to make this choice between speed and
 compression performance.
@@ -463,7 +463,7 @@ something. Consider the data sequence
 Assuming that we are using 8-bit grayscale color, this data sequence
 describes a slow but steady progression from black to white(reread
 section \ref{sec:grayscale-color} on page
-\pageref{sec:grayscale-color} if you don't understand this). This
+\pageref{sec:grayscale-color} if you do not understand this). This
 linear kind of color progression is in computer graphics known as a
 \textit{gradient}\cite{sayood2003lossless}. How this progression would
 look like in an actual image is demonstrated in figure
@@ -510,13 +510,13 @@ sequence given in \ref{eq:filter1-seq} is more susceptible to
 compression than the original sequence \ref{eq:1-seq}. This is because
 in the filtered sequence redundancies are abundant, while in the
 unfiltered sequence not a single redundancy can be found! In fact,
-even an extremely simple compression algorithm like RLE can do wonders
+even an extremely simple compression algorithm like \rle can do wonders
 compressing the filtered data.
 
 Now consider figure \ref{fig:gradient-blue-red}. Assuming 24-bit
 color, it is a gradient from the bluest of blue, $(0,0,255)$, to the
 reddest of red, $(255,0,0)$. This gradient is expressed by the
-following sequence of RGB triplets:
+following sequence of \rgb triplets:
 
 \begin{equation*}
   (0,0,255), (1,0,254), (2,0,253), \dots, (254,0,1), (255,0,0)
@@ -552,7 +552,7 @@ bytes for the same reason.
 
 Even for color types where the color channels are stored in channels
 of sizes over $8$ bits the filters will always operate on bytes. For
-48-bit RGB color, where 16 bits are assigned to every channel,
+48-bit \rgb color, where 16 bits are assigned to every channel,
 $t=6$. So for the red channel of a color, the value of the 8 highest
 bits is seen as a single byte and will be subtracted the value of the
 of the 8 highest bits of the same channel of the former pixel of that
@@ -718,7 +718,7 @@ Now let us describe the scanline serialization process. Say I have an
 image with the size 2x2, meaning that it is two pixels wide and two
 pixels high. This image uses indexed color with a color depth of 1 to
 store the color. Let the index $0$ represent a fully black color and
-the index $1$ represent gray color. Now let's that the first row of
+the index $1$ represent gray color. Now let us that the first row of
 this image consists of the color indexes $1$ and $0$ and that the
 second consists of the indexes $0$ and $1$. Then this data would
 represent the image \checkerimg. Then, after scanline serialization

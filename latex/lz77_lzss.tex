@@ -23,7 +23,7 @@ The following description of the \lzone algorihtm is based on
 
 The core parts of the \lzone algorihtm are the so-called window and
 lookahead buffers. In the window buffer already compressed data is
-stored. The lookahead buffer contains the data that hasn't yet been
+stored. The lookahead buffer contains the data that has not yet been
 compressed and matched. Strings in the lookahead buffer are in the
 algorihtm matched for already processed strings in the window
 buffer. If it finds a matching string for the string in the lookahead
@@ -232,7 +232,7 @@ specifying a number that would otherwise have been stored as 8 bits!
 \lzss fixes that problem as follows: unmatched character are
 represented by a single toggled bit, 1, followed by the 8-bit value of
 the unmatched character. So the unmatched character \texttt{A}, which
-has an ASCII code of $65$, would be represented by the bit pattern
+has an \ascii code of $65$, would be represented by the bit pattern
 \bin{1\ 0100\ 0001}. Match tokens are represented by a cleared bit, 0,
 followed by the offset and length values.
 

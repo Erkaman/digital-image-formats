@@ -457,7 +457,7 @@ Huffman codes:
 
 And one last thing: to signify that a symbol will not get assigned a
 code at all, meaning that it is not used in the data at all, it is
-assigned a code length of $0$. If for example only ASCII letters are
+assigned a code length of $0$. If for example only \ascii letters are
 used in our compressed data, then all the control character will be
 assigned code lengths of $0$. So there will be a long sequence of
 zeroes in the beginning of the code length sequence, since the code
@@ -555,7 +555,7 @@ for specifying repetitions, $16$, $17$, $18$, will often be used in
 compressing code lengths, since runs of zero tend to be very
 common. This is because it is for most kinds of data very unusual that
 all possible values in a byte, 0--255, are even used in the data. For
-example, most ASCII control characters will often never occur in
+example, most \ascii control characters will often never occur in
 English language texts, resulting in long runs of zero.
 
 And the permutation being ended by values such as $1$ and $15$ and
