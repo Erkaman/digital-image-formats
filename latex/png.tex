@@ -2,10 +2,6 @@
   \bibliography{project.bib}
 \end{comment}
 
-% filters:
-% http://www.libpng.org/pub/png/spec/1.0/PNG-Filters.html#Filter-type-2-Up
-% http://www.libpng.org/pub/png/book/chapter09.html
-
 \chapter{Portable Network Graphics}
 \label{cha:png}
 
@@ -52,7 +48,7 @@ field.
 \subsubsection*{Chunk Type (4 Bytes)}
 
 This field stores 4 bytes that are used to store the type of the
-chunk. Only the ASCII letters in the ranges A--Z and a--z are
+chunk. Only the \ascii letters in the ranges A--Z and a--z are
 acceptable values of these bytes. So \chnk{abcd} is an acceptable
 chunk type while \chnk{a:e;} is not.
 
@@ -315,7 +311,7 @@ compress. We'll discuss these filters in section
 \ref{sec:png-filters}.
 
 After that the data has optimized for compression by the filter, it is
-compressed using the DEFLATE algorithm, and stored using the ZLIB
+compressed using the DEFLATE algorithm, and stored using the \zlib
 format. We'll discuss this in more depth in section \ref{sec:png-dec}.
 
 And after all these steps, the image data is finally divided into
@@ -342,13 +338,13 @@ decode and deal with the image data.
 \label{sec:png-dec}
 
 The compressed image data, which may or may not be split up over
-several \IDAT chunks, is stored using the ZLIB format. Let us briefly
+several \IDAT chunks, is stored using the \zlib format. Let us briefly
 outline the structure of this format, as it is specified by
 \cite{gailly96:_zlib_compr_data_format_specif}:
 
 \subsubsection{CMF}
 
-The first value found in the ZLIB format will always be the CMF
+The first value found in the \zlib format will always be the CMF
 byte. It is divided into two subfields:
 
 \paragraph{Bits 0-3 -- CM}
@@ -361,8 +357,8 @@ DEFLATE in chapter \ref{cha:deflate}.
 \paragraph{Bits 4-7 -- CINFO}
 
 The compression info. It is the base 2 logarithm, $\log_2$, of the
-LZ77 window size used during the DEFLATE compression, minus $8$ . Its
-maximum value is $7$, meaning that the maximum possible size of the LZ77 window
+\lzone window size used during the DEFLATE compression, minus $8$ . Its
+maximum value is $7$, meaning that the maximum possible size of the \lzone window
 will be $2^{7 + 8} = 2^{15} = 32768$.
 
 \subsubsection{FLG}
@@ -399,9 +395,9 @@ during the DEFLATE compression. It has $4$ possible values:
 \item[3] Maximum compression algorithm used.
 \end{description}
 
-What compression method was used depends on how aggressive the LZ77
+What compression method was used depends on how aggressive the \lzone
 window matching was during the DEFLATE compression. Because searching
-the LZ77 window for matches is such a slow operation, faster versions
+the \lzone window for matches is such a slow operation, faster versions
 of DEFLATE may give up on the string matching after a couple of tries
 in order to speed up the compression in favor of lost compression
 performance. However, the maximum compression algorithm will never
