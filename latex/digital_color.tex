@@ -7,7 +7,7 @@
 
 As we stated in the introduction, raster graphics is going to be the
 main subject of this text. And images represented as raster graphics
-is simply a grid of colors. Therefore, in this chapter we'll discuss
+is simply a grid of colors. Therefore, in this chapter we will discuss
 how these color are represented.
 
 \section{What is color?}
@@ -18,16 +18,15 @@ The following introductory discussion on color is based on
 \newcommand{\bluewave}{\ensuremath{\SI{400}{\nano\meter}}}
 
 Light is composed of tiny particles traveling at different
-wavelengths. When light of different wavelengths hit
-our eyes, they are processed so that we perceive these as
-colors. Different colors we perceive as traveling at different
-wavelengths. For example, blue has a wavelength of \bluewave.
+wavelengths. When light of different wavelengths hit our eyes, they
+are processed so that we perceive these as colors. For example, blue
+has a wavelength of \bluewave.
 
 Now, how do our eyes \textit{see} these light waves? In our eyes,
 there are cone cells for perceiving three different kinds of
-wavelengths of light: red, blue and green. When these cells absorb
+wavelengths of light: red, green and blue. When these cells absorb
 red, green or blue light, we see color. And when these cells absorb
-mixed amounts of red, blue and green light, we are able to perceive
+mixed amounts of red, green and blue light, we are able to perceive
 colors that are mixtures of red, green and blue color.
 
 \subsection{RGB}
@@ -47,29 +46,25 @@ very widely used color model for representing color in computers is
 
 The \rgb color model is based on how our eyes perceive color, which we
 discussed in the previous section, so in \rgb color made by mixing
-different amounts of red, green and blue. As it can be seen in figure
-\ref{fig:rgb}, the colors cyan, magenta and yellow can in this model
-be achieved by mixing red, blue and green. Also note that white is
-achieved by mixing all of three colors. Black is represented by no
-color at all. The rest of the colors can be achieved by mixing
-different amounts of red,green and blue.
+different amounts of red, green and blue. It can be seen in figure
+\ref{fig:rgb} how the colors cyan, magenta and yellow are achieved in
+\rgb. Also note that white is achieved by mixing all of three colors
+and that black is represented by no color at all. The rest of the
+colors can be achieved by mixing different amounts of red, green and
+blue.
 
 Color channels describe the different amounts of the basic colors red,
-green and blue in a color. So the amount of red in a color is
-described by the red color channel. These are represented by numbers,
-and how exactly this is done is discussed in section
-\ref{sec:color-depth}.
+green and blue in a color. The amount of red in a color is described
+by the red color channel. These are represented by numbers, and how
+exactly this is done is discussed in section \ref{sec:color-depth}.
 
 \subsection{RGBA}
 
-% png definitive guide alpha channel
-% http://www.vias.org/pngguide/chapter01_03_02.html
-
 But there is actually even more to \rgb. There is an extended color
-model of \rgb that's called \rgba. In this model, a new channel is
-added: the alpha channel. This new channel
-represents the opacity of a color. Opacity is simply the opposite of
-transparency \cite{porter84_compos_dig_img,murray1996encyclopedia,niederst1999webdesign}.
+model of \rgb called called \rgba. In this model, a new channel is
+added: the alpha channel. This new channel represents the opacity of a
+color. Opacity is simply the opposite of transparency
+\cite{porter84_compos_dig_img,murray1996encyclopedia,niederst1999webdesign}.
 
 Take a good look at figure \ref{fig:alpha}. This demonstrates how a
 color with the same values for its red, blue and green channels gets a
@@ -94,7 +89,7 @@ is at its minimum the color turns fully transparent.
 
 But up until this point, we have said nothing about how the computer
 numerically represents these color models. In the following section
-this is discussed for the \rgb color model. The discussion is based on
+this is discussed for the \rgb color model, based on
 \cite{murray1996encyclopedia,neider93:_openg_progr_guide,niederst1999webdesign,sitts2000handbook}.
 
 \subsection{24-bit Color}
@@ -104,18 +99,18 @@ this is discussed for the \rgb color model. The discussion is based on
 
 
 In the \rgb color model, each color is just a combination of red,
-green and blue color, So every color can be represented as a triplet
+green and blue color, so every color can be represented as a triplet
 $(R, G, B)$. Since triplets are specified by numbers they are quite
 difficult to imagine visually, but they are on the other hand very
 easy for the computer to interpret. It can trivially display a triplet
-on the screen by combining different ammounts of red, blue and green
+on the screen by combining different ammounts of red, green and blue
 light.
 
 In 24-bit color every color channel is assigned to an 8-bit byte,
 meaning that every single color will take up 24 bits of storage, since
-there are $3$ color channel. You also refer to 24-bit colors as having
-a color depth of 24 bits. This is also called the pixel
-depth of the color.
+there are $3$ color channels. You also refer to 24-bit colors as
+having a color depth of 24 bits. This is also called the pixel depth
+of the color.
 
 Using this color depth, the maximum value of a channel will be $2^8 -
 1 = 255$, so the reddest of red is represented by the triplet
@@ -143,18 +138,28 @@ channel in the triplet is a byte, it is stored as a sequence of 3
 bytes.
 
 But you can also see it this way: the triplet is stored as the 24-bit
-number $R \cdot 256^2 + G \cdot 256 + B$. Here the 8 highest bits of
-the number stores the red channel, the 8 middle bits store the green
-channel, and the 8 lowest bits stores the blue channel, so that the
-color yellow,$(255,255,0)$, would be stored as the 24-bit number $255
-\cdot 256^2 + 255 \cdot 256 + 0 = 16776960$, which is equal to the
-binary number $11111111\ 11111111\ 00000000$.
+number
+
+\begin{equation*}
+ R \cdot 256^2 + G \cdot 256 + B
+\end{equation*}
+
+Here the 8 highest bits of the number store the red channel, the 8
+middle bits the green channel, and the 8 lowest bits the blue
+channel. So the color yellow,$(255,255,0)$, would be stored as the
+24-bit number
+
+\begin{equation*}
+  255 \cdot 256^2 + 255 \cdot 256 + 0 = 16776960,
+\end{equation*}
+
+which is equal to the binary number $\bin{11111111\ 11111111\ 00000000}$.
 
 \subsubsection{Channel ordering}
 
-As is stated in \cite{murray1996encyclopedia}, there's nothing from
-stopping you from storing the color channels in another than order R,G
-then B. B,G,R is an order that is also commonly used. The
+As is stated in \cite{murray1996encyclopedia}, there is nothing
+stopping you from storing the color channels in another order than
+$R$, $G$ then $B$. $B,G,R$ is an order that is also commonly used. The
 specification of the image format usually specifies in which order the
 color channels are stored, so do remember to read the specification
 carefully.
@@ -163,22 +168,28 @@ carefully.
 
 So how many different colors can you represent using 24-bit color?
 Every color channel can have $2^8 = 256$ different values and there
-are $3$ channels; hence, $256^3 = 16777216 \approx 16\ 000\ 000$ different colors
-can represented using 24-bits.
+are $3$ channels; hence,
+
+\begin{equation*}
+ 256^3 = 16777216 \approx 16\ 000\ 000
+\end{equation*}
+
+different colors can be represented using only 24-bits.
 
 Then how many different colors can us humans see? Scientists do not
 really know the answer to that question yet. Popular guesses include
-one million \cite{roth:_tetrachromat} and $2^{24} = 256^3$
+one million \cite{roth:_tetrachromat} and $256^3$
 \cite{murray1996encyclopedia}.
 
 \subsection{RGBA}
 
 Adding alpha channels to this color representation is trivial, just
 add a fourth channel by adding another 8-bit byte. So \rgba color data
-is in other words stored as a quadruplet $(R,G,B,A)$. And as I stated
+is in other words stored as a quadruplet $(R,G,B,A)$. And as stated
 before, there is absolutely nothing stopping you from storing these
-channels in a different order. The $(A,R,G,B)$ and $(A,B,G,R)$ orders
+channels in a different order; the $(A,R,G,B)$ and $(A,B,G,R)$ orders
 are also fully acceptable.
+
 
 \subsection{Other Color Depths}
 \label{sec:other-channel-sizes}
@@ -187,11 +198,8 @@ are also fully acceptable.
 
 Other kinds of numbers than 8-bit numbers can be assigned to the
 separate channels as well. Assigning a 16-bit number to each channel
-is also common, and is supported by the PNG
-format\cite{boutel:_png_portab_networ_graph_specif_version12}, which
-we'll discuss in chapter \ref{cha:png}. This is for obvious reasons
-known as 48-bit color. By adding an alpha channel to this model get
-64-bit color.
+is also common. This is for obvious reasons known as 48-bit color. By
+adding an alpha channel to this model get 64-bit color.
 
 In 48-bit color the maximum value of a color channel is obviously
 $2^{16} - 1 = 65535$, meaning that the reddest of red is represented
@@ -199,28 +207,26 @@ by the triplet $(65535, 0, 0)$
 
 \subsubsection{16-bit color}
 
-A color depths of 16 is also used sometimes. TGA format supports
-16-bit color \cite{91:_truev_tga_file_format_specif}. Note that there
-are actually several ways of representing 16-bit color, but in this
-section we'll only discuss how this is done in the TGA format.
+A color depth of 16 is also used sometimes. \tga format supports 16-bit
+color \cite{91:_truev_tga_file_format_specif}. Note that there are
+actually several ways of representing 16-bit color, but in this
+section we will only discuss how this is done in the \tga format.
 
-In the TGA version of 16-bit color, the single highest bit number 15
-is used to store transparency information. If this bit is toggled, the
+In the \tga version of 16-bit color, the single highest bit, 15, is
+used to store transparency information. If this bit is toggled, the
 color is visible, otherwise it is fully invisible. The \rgb color
-channels are given 5 bits of storage each. Bits 0--4 are reserved
-for blue, 5--9 are given to green, and 10--14 are assigned to red.
+channels are given 5 bits of storage each. Bits 0--4 are reserved for
+blue, 5--9 are given to green, and 10--14 are assigned to red.
 
 Most programming languages do not support reading numbers from a file
 whose bit lengths are not multiples of 8. It is therefore not possible
 to directly read the 1-bit and 5-bit numbers that 16-bit color
 consists of. These numbers have to be extracted using the bitwise
-operators. In algorithm \ref{alg:read-16-bit-rgb} it shown how to
-extract the separate channel values out of a 16-bit color value that
-has been stored in a variable named $\var{color}$.
+operators. In algorithm \ref{alg:read-16-bit-rgb} it is shown how to
+parse 16-bit color.
 
 \begin{algorithm}[H]
-  \caption{Reading the separate color channels of a TGA 16-bit color
-    value}\algohack{}
+  \caption{Parsing \tga 16-bit color}\algohack{}
   \label{alg:read-16-bit-rgb}
   \begin{algorithmic}[1]
     \Let{$R$}{\Call{getbits}{$\var{color}, 10,14$}}
@@ -230,45 +236,28 @@ has been stored in a variable named $\var{color}$.
   \end{algorithmic}
 \end{algorithm}
 
-\begin{Exercise}[label={tga-16-bit}]
-
-  In a \tga image file the following 16-bit color values were found:
-
-  \begin{enumerate}[(a)]
-  \item $64435$
-  \item $31744$
-  \item $31775$
-  \end{enumerate}
-
-  What colors does these numbers represent? Also, indicate whether
-  these colors are transparent or opaque.
-
-\end{Exercise}
-
 \subsection{Grayscale Color}
 \label{sec:grayscale-color}
 
 \newcommand{\selfrgbtrip}[3]{\mbox{\textcolor[RGB]{#1,#2,#3}{(#1,#2,#3)}}}
 \newcommand{\selfrgbtripgray}[1]{\selfrgbtrip{#1}{#1}{#1}}
 
-Using 24-bit as an example, if a color is grayscale that means that
-the color is represented by a triplet $(n,n,n)$, where $0 \le n \le
-255$, because a shade of gray turns out to be a mixture of equal
-amounts of all the color channels. In 8-bit grayscale color the
-triplet $(n,n,n)$ is simply represented by the number $n$, because
-this is much more space efficient. So in this new system, the number
-$43$ will in reality represent the triplet $(43,43,43)$, $0$
-represents the color black, $(0,0,0)$, and $255$ is white,
-$(255,255,255)$, and so on.
+In shades of gray the values of the color channels are equal, so the
+24-bit grayscale value $(n,n,n)$ can more succinctly be represented by
+the single byte $n$. Using 8-bit grayscale, the number $43$ will in
+reality represent the triplet $(43,43,43)$, $0$ will represent the
+color black, $(0,0,0)$, and $255$ is white, $(255,255,255)$, and so
+on.
 
 In 8-bit grayscale there are $2^8 = 256$ different shades of gray. In
 1-bit grayscale, which is also quite common, there are only $2^1 = 2$
 different shades of gray: black and white. And stated as generally as
 possible, this means that in n-bit grayscale there are $2^n$ different
-shades of gray. So there can indeed be many different kind of
-greyscale, the \png format, for example, supports supports grayscale of
-the bit depths $1$, 2, 4, 8 and
-16\cite{boutel:_png_portab_networ_graph_specif_version12}.
+shades of gray.
+
+Note that grayscale can only be used if the all the colors of the
+image are shades of gray. But if it can be used for an image it
+should, because it \textit{will} result in huge space savings!
 
 \subsection{Color palettes}
 
@@ -287,22 +276,22 @@ use a sequence of 2-bit values to store the color data.
 
 Color palettes are most useful when an image uses a limited subset of
 colors. Say a 10 by 10 image uses only 4 different colors and that
-these colors are stored in 24-bit triplets. Then the color data
+these colors are stored as 24-bit triplets. Then the color data
 requires $100 \cdot 3 \cdot 8 = 2400$ bits of storage. If the image on
 the other hand put these four colors into a palette at the beginning
 of the image, then the these colors could be represented as 2-bit
 numbers in the image data instead. Then it would only take $2 \cdot
 100 + 4 \cdot 3 \cdot 8 = 296$ bits to store the image. Note that
 storing the palette requires an extra overhead of $96$ bits in this
-case. So for the usage of palettes to really pay off, the space gained
-by using a palette has to compensate for the extra overhead of storing
-it. This has the important consequence that for small images a palette
-is rarely a good idea.
+case. So for the usage of a palette to really pay off, the space
+gained by using a palette has to compensate for the extra overhead of
+storing it. This has the important consequence that for small images a
+palette is rarely a good idea.
 
-\section{Color Layout}
+\section{Color Memory Layout}
 \label{sec:color-layout}
 
-Now how are these colors laid out in a typical image file? They tend
+Now, how are these colors laid out in a typical image file? They tend
 to be stored in a linear fashion rather than a two-dimensional
 way. This means that the separate rows of an image are not at all
 indicated.
@@ -311,7 +300,7 @@ Let us for example again consider the image on the front page. The
 image data of this image would be stored as the sequence
 
 \begin{equation*}
-  4,4,4,4,,0,4,4,3,4,\dots
+  4,4,4,4,0,4,4,3,4,\dots
 \end{equation*}
 
 and so on in an entirely linear fashion. The program reading the image
@@ -343,14 +332,4 @@ image row by row to that color.
   \item Cyan(light blue)
   \item Magenta(purplish red)
   \end{enumerate}
-\end{Answer}
-
-\begin{Answer}[ref={tga-16-bit}]
-
-  \begin{enumerate}[(a)]
-  \item A fully opaque white color.
-  \item A transparent red color.
-  \item A transparent magenta color.
-  \end{enumerate}
-
 \end{Answer}
