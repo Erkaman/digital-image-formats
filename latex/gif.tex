@@ -7,11 +7,11 @@
 
 The topic of this chapter will be the image format known as Graphics
 Interchange Format. We will first discuss the rather complicated legal
-history that the format has and then we'll discuss the inner workings
-of the format. Since many of the features of the \tga format can also
-be found in the \gif format, we won't be as detailed as we were in
-chapter \ref{cha:tga} when we are describing all the features of the
-\gif format.
+history that the format has and then we will discuss the inner
+workings of the format. Since many of the features of the \tga format
+can also be found in the \gif format, we will not be as detailed as we
+were in chapter \ref{cha:tga} when we are describing all the features
+of the \gif format.
 
 \section{History}
 \label{sec:gif-history}
@@ -37,7 +37,7 @@ algorithm. And once Unisys had gained the patent and informed the rest
 of the world of this, the \gif format had already been released by
 \compus.
 
-But it wasn't until 1993 that Unisys seriously started pursuing
+But it was not until 1993 that Unisys seriously started pursuing
 companies that were selling software using the \lzw algorithm. And one
 of those companies that Unisys started attacking because of this was
 \compus. And on 28 December 1994, Unisys and \compus finally came to
@@ -65,9 +65,9 @@ for doing so.
 There are actually two version of the \gif format: version 87a,
 \cite{gif87a}, and 89a, \cite{gif89a}. Version 89a is the newer of
 these two versions and was released in 1989. \gif images that are of
-version 87a don't support all of the features of version 89a and they
+version 87a do not support all of the features of version 89a and they
 are nowadays very rare. And since version 89a is backwards compatible
-with version 87a, we'll only be discussing version 89a in this
+with version 87a, we will only be discussing version 89a in this
 chapter.
 
 \section{Building Blocks of the format}
@@ -96,7 +96,7 @@ file.
 Data Sub-blocks are used to store data that by definition is
 sequential. An example of such data is the compressed color data,
 which is just a long sequence codes that were outputted during the
-compression of the image. Let's go through the parts of a single data
+compression of the image. Let us go through the parts of a single data
 sub-block:
 
 \subsubsection*{Block Size(Byte)}
@@ -122,24 +122,24 @@ have reached the end of a sub-blocks sequence.
 
 \subsubsection{An example}
 
-So how would the string $\var{ERICA}$ be stored using data sub-blocks? We
+So how would the string $\var{erica}$ be stored using data sub-blocks? We
 first let the pair $(S,D)$ represent a sub-block, where $S$ is the
 size of the block and $D$ is the data of the block. The block
 terminator is represented by the pair $(0,)$. It is a single byte with
 the value $0$.
 
-The string $\var{ERICA}$ can then be represented by the sequence of
+The string $\var{erica}$ can then be represented by the sequence of
 sub-blocks
 
 \begin{equation*}
-  (5,\var{ERICA})(0,)
+  (5,\var{erica})(0,)
 \end{equation*}
 
 The block terminator must always terminate a sequence of
 sub-blocks. But this is not the only way of representing that string;
 
 \begin{equation*}
-  (3,\var{ERI})(2,\var{CA})(0,)
+  (3,\var{eri})(2,\var{ca})(0,)
 \end{equation*}
 
 is another perfectly legal way of doing it. But the first sequence is
@@ -151,9 +151,9 @@ required to store it, while the former sequence requires $1 + 3 + 1 +
 
 Another kind of data storage mechanism found in the \gif format are
 packed fields. Packed fields simply means that data is stored in the
-separate bits of a single byte. We'll be using our normal conventions
-to denote the separate bits, so that in the number $0001\ 0011$ bits 0
-to 1($11$) inclusive have the value $3$ while bit $4$ has the value
+separate bits of a single byte. We will be using our normal conventions
+to denote the separate bits, so that in the number \bin{0001\ 0011} bits 0
+to 1($\bin{11}$) inclusive have the value $3$ while bit $4$ has the value
 $1$.
 
 \subsection{Extension Blocks}
@@ -182,13 +182,13 @@ This block will always be found first in a \gif file.
 \subsubsection*{Signature(3 bytes)}
 
 Identifies the file as a \gif-file. The value of this field will always
-be the ASCII string ``\gif''(non-null-terminated).
+be the \ascii string ``\gif''(non-null-terminated).
 
 \subsubsection{Version(3 bytes)}
 
 Gives the version of the \gif file. This field can only have two
 possible values: 87a and 89a. Both of these two values are stored as
-ASCII strings.
+\ascii strings.
 
 \subsection{Logical Screen Descriptor(Required)}
 
@@ -223,7 +223,7 @@ simply used to indicate the color depth of the image, but no, this
 field indicates the number of bits in the \textit{original image}, the
 image that was converted to a \gif image, per color channel minus 1.
 
-The \gif format only supports paletted color, and doesn't offer support
+The \gif format only supports paletted color, and does not offer support
 for \rgb triplets stored straight in the color data. It only permits
 for a palette of maximum length $256$, where every color has color
 depth of $24$ bits. The \gif format can in other words only a represent
@@ -284,9 +284,8 @@ specific, we discussed it in section \ref{sec:tga-extension-area}.
 \subsection{Global Color Table(Optional)}
 
 After the logical screen descriptor comes the global color
-table. However, if the Global Color Table flag is set to
-\textbf{false} the global color table will not occur at all within
-the image!
+table. However, if the Global Color Table flag is set to false the
+global color table will not occur at all within the image!
 
 The global color table is, just as in any other image format, a long
 array of colors. Every color is given 24 bits of storage and every
@@ -392,7 +391,7 @@ In algorithm \ref{alg:gif-decompression} it is shown how to
 uninterlace the interlaced decompressed image data.  Since this
 algorithm is pretty much self-explanatory, I will not include an in
 depth discussion of it. Reread section \ref{sec:color-layout} if you
-don't fully understand this algorithm.
+do not fully understand this algorithm.
 
 \begin{algorithm}[H]
   \caption{Undoing the interlacing of the uncompressed \gif color data}
@@ -427,7 +426,7 @@ don't fully understand this algorithm.
   \end{algorithmic}
 \end{algorithm}
 
-But why is interlacing even necessary? Why can't you just store the
+But why is interlacing even necessary? Why can not you just store the
 pixels in the proper order? Interlacing allows you to get a much
 better general view of a \gif image while downloading it, because the
 interlaced rows are more spread out from each than they are in a
@@ -526,7 +525,7 @@ different possible actions are:
 \begin{description}
 
 \item[0] No disposal is specified. This basically means that the
-  decoder doesn't need to, nor is required to, do anything at all.
+  decoder does not need to, nor is required to, do anything at all.
 
 \item[1] Do not dispose the previous image. The current image is
   rendered over the previous one. Visible parts of the current image
@@ -585,7 +584,7 @@ when encountered. This color can be seen as the transparent color of
 the color palette
 
 So as you can see from this field, the \gif format supports a very
-simple form of transparency. But it doesn't support any form of the
+simple form of transparency. But it does not support any form of the
 alpha color channel. Either a pixel is colored or it is not, there is
 no state in between.
 
@@ -603,15 +602,15 @@ user. One of the blocks contains the color data of the image.
 
 Now we have finally reached the most important kind of block that you
 can find in a \gif file: the table based image data block. Since this
-block is rather complex, we'll explain it in two steps: first we'll
-explain the fields of this block, and then we'll explain how to
+block is rather complex, we will explain it in two steps: first we will
+explain the fields of this block, and then we will explain how to
 extract the image data from the data given in the fields of this
 block.
 
 \subsubsection{LZW Minimum Code Size(Byte)}
 
 The \gif format uses a variation of the \lzw compression algorithm
-for storing it's color data. The huge difference between the
+for storing its color data. The huge difference between the
 original \lzw algorithm and the version used in \gif is that the
 code sizes of the individual codes increase as bigger codes are
 needed in the image data.  Let the value of this field be $n$, then
@@ -644,7 +643,7 @@ index in the palette has the code value $n-1$), and the end code has
 the value $n+1$.
 
 If the Clear Code is found, the compression table is reset and
-restored to it's initial state and the codes added to the table during
+restored to its initial state and the codes added to the table during
 the compression are thrown away and the code size is reset. The clear
 code can improve compression, because it is not necessary that all
 parts of a image file looks the same. The codes and strings that were
@@ -686,7 +685,7 @@ algorithm, is that the code size increases. Remember, the initial code
 size minus $1$ was given in a field of this block. Every time a new
 code is added to the table, we check if the size of the current code
 is also equal to the max value of the current code size. If so, and
-the code size is not equal to it's maximum allowable value in the \gif
+the code size is not equal to its maximum allowable value in the \gif
 format, $12$, then the value of the code size is increased by one.
 
 \begin{algorithm}[H]
@@ -764,7 +763,7 @@ format, $12$, then the value of the code size is increased by one.
 
     \Let{$\var{oldCode}$}{$\var{newCode}$}
 
-    \Let{$\var{newCode}$}{\VoidCall{ReadByte}}
+    \Let{$\var{newCode}$}{\InputCodeSize}
 
     \EndWhile
 
@@ -811,7 +810,7 @@ block. Contains the constant value \hex{FE}.
 \subsubsection{Comment Data(Data Sub-block)}
 
 Containing the comment data is just a sequence of data sub-blocks. The
-comment data stored using ASCII encoding.
+comment data stored using \ascii encoding.
 
 \subsubsection{Block Terminator(Byte)}
 
@@ -862,7 +861,7 @@ this block.
 \subsection{Infinite GIFs}
 
 Using the application extension we can make an animated \gif repeat
-it's animation infinitely long. Otherwise, the animation would just
+its animation infinitely long. Otherwise, the animation would just
 repeat one time and then stop.
 
 This is done using the Netscape Application Extension. Here the
@@ -874,7 +873,7 @@ sub-block: \cite{frazier97:_all_about_gif89}
 
 \subsubsection{Constant(Byte)}
 
-This is field doesn't really have a formal name so I named it
+This is field does not really have a formal name so I named it
 constant, because it always has the constant value $1$.
 
 \subsubsection{Iterations(Unsigned)}
@@ -887,7 +886,7 @@ browser Netscape. Other software developers then saw that the block
 was a good idea and started implementing support for the block in
 their applications, and that is how the use of this block spread. The
 name Netscape Application Extension has stuck ever since, because you
-didn't want to break old \gif images just because you wanted to make a silly
+did not want to break old \gif images just because you wanted to make a silly
 name change \cite{walte96:_web_scrip_secret_weapon}.
 
 \section{GIF syntax}
