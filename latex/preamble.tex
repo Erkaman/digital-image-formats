@@ -26,6 +26,10 @@ expansion=true]{microtype}
 % color in table.
 \usepackage[table]{xcolor}
 
+
+% fixes interaction between hyperref and algorithm
+% see: http://geomblog.blogspot.com/2008/04/latex-hyperrefalgorithm-interaction.html
+\usepackage{float}
 % colored hyperlinks
 %\usepackage[hyperindex,colorlinks]{hyperref}
 \usepackage[]{hyperref}
@@ -343,3 +347,13 @@ etx,eot,enq,ack,bel,bs,vt,ff,dle,nak,syn,etb,can,sub,esc,fs,gs,rs,us,del}
 
 % working samepage.
 \newenvironment{samepagew}{\begin{minipage}{\textwidth}}{\end{minipage}}
+
+% % Fixes list of algorithms formatting.
+% % Thanks Dan: http://newsgroups.derkeiler.com/Archive/Comp/comp.text.tex/2005-10/msg01179.html
+% \makeatletter
+% \let\l@algorithm\l@figure
+% \makeatother
+
+% \renewcommand{\listofalgorithms}{\begingroup
+% \tocfile{List of Algorithms}{loa}
+% \endgroup}

@@ -5,7 +5,7 @@
 \chapter{Run-Length Encoding}
 \label{cha:rle}
 
-In this chapter, we'll discuss the first compression algorithm of this
+In this chapter, we will discuss the first compression algorithm of this
 text. First, though, we will need to introduce the reader to some
 terminology related to data compression, which is what the discussion
 subject of the following section is going to be.
@@ -17,9 +17,9 @@ The following list of terminologies is based on the references
 
 \subsection{Encoding, Decoding, Compression and Decompression}
 
-Coding data into another form is referred to as
-\textit{encoding}. Converting that encoded data back
-to its original form is called \textit{decoding}.
+Writing data on another form is referred to as
+\textit{encoding}. Converting that encoded data back to its original
+form is called \textit{decoding}.
 
 In the circumstances of compression techniques, encoding and decoding
 are also often referred to as \textit{compression}
@@ -47,11 +47,8 @@ measure for when discussing the compression efficiency of a
 compression algorithm. It is calculated like this:
 
 \begin{equation*}
-  {\rm Compression\;Ratio} = \frac{{\rm Compressed Size}}{{\rm Original Size}}
+  {\rm Compression\;Ratio} = \frac{{\rm Compressed\; Size}}{{\rm Original\; Size}}
 \end{equation*}
-
-We will in this text specify the compression ratio in fractions or
-percentages.
 
 But it is important to realize that the compression ratio is
 \textit{not} some constant number that can simply be assigned to a
@@ -84,6 +81,8 @@ file size was saved by the compression.
 \section{RLE}
 \label{sec:rle}
 
+\subsection{Description}
+
 This following description of the \rle algorithm uses the references
 \cite{nagarajan11:_enhan_approac_run_lengt_encod_schem,murray1996encyclopedia,mark1996data_compression_book}.
 
@@ -97,39 +96,39 @@ compressed down to $(n-1,b)$. So the sequence $b,b,b,...,b$ of length
 $n$ gets compressed down to $(n-1,b)$. The pairs that represents these
 sequences of repeating values are known as \textit{packets}, and these
 sequences of repeating values will from known on be known as
-\textit{runs}. In our version of the \rle algorithm these runs are just
-sequences of repeating bytes, and the two values in the packets $n-1$
-and $b$ are for this reason stored in bytes.
+\textit{runs}. These runs are just sequences of repeating bytes, and
+the two values in the packets $n-1$ and $b$ are for this reason stored
+in bytes.
 
 But why is the length byte $n$ subtracted by $1$?  A byte can have
 $256$ different values in the range $0-255$. But since it would be a
 waste to have a packet of length $0$, the designers of the algorithm
 decided that rather than letting the value zero go to waste, they
 assigned the length value $0$ to $1$, $1$ to $2$ and so on. So while
-the values stored in the packet are in the range $0-255$, they
-actually represent range $1-256$, which has the added advantage that
-the max length of a packet is $256$ rather than $255$.
+the values stored in the length of the packet are in the range
+$0-255$, they actually represent range $1-256$, which has the added
+advantage that the max length of a packet is $256$ rather than $255$.
 
-But here's the main problem with this method: every single run of
+But here is the main problem with this method: every single run of
 values, even those for which $n=1$, are considered runs! So even a
 single run of $b$ is represented by a packet $(0,b)$ and the algorithm
 ends up doubling the size of the original data for such runs! More so,
 if the data is just a string of runs for which $n=1$, then the
 ``compressed'' size of this data ends of up being the double value of
-the original size. This means that strings like ``eric'' ends up
-getting ``compressed'' down to ``0e0r0i0c'', and the compression ratio
+the original size. This means that strings like \texttt{eric} ends up
+getting ``compressed'' down to \texttt{0e0r0i0c}, and the compression ratio
 of this compression is $\frac{2}{1} = 2$, which is an absolutely
 horrible compression ratio.
 
 And even for runs where $n=2$ this algorithm does no good. The run
 $b,b$ is represented by the pair $(1,b)$, and while this at least
-doesn't double the size of the data, no compression is performed in
+does not double the size of the data, no compression is performed in
 this case either.
 
 But for runs for which $n > 2$ we finally start seeing some
 results. Then the run $b, b, \dots, b$ ends up simply being compressed
 down to $(n-1,b)$, which results in a compression ratio of
-$\frac{2}{n}$. The maximum value of $n$ is $256$, and thus the maximum
+$\frac{2}{n}$. The maximum value of $n$ is $256$, thus the maximum
 compression ratio of a single run is $\frac{2}{256} = \frac{1}{128}$,
 which is a quite superb compression ratio!
 
@@ -137,8 +136,8 @@ So when data the contains a lot runs for which $n > 2$, then this
 algorithm can indeed do great compression. English text is however not
 one kind of data that is best compressed by \rle, since there are very
 few English words where letters are repeated more than two
-times. True, there does exist plenty of words with double consonants
-in the English language, but, remember, \rle compression does no
+times. True, there do exist plenty of words with double consonants in
+the English language, but, remember, \rle compression does no
 compression whatsoever for runs where $n=2$.
 
 But there also examples of data that could be very efficiently
@@ -149,29 +148,24 @@ is a good example of data that could get quite efficient compression
 ratios using \rle.
 
 \begin{Exercise}[label={rle-compression}]
-  Using \rle, compress the following strings and also compute the
-  compression ratio of the compression:
+  Using \rle, compress the following strings and compute the
+  compression ratio:
 
   \begin{enumerate}[(a)]
-  \item AAABBBCCC
-  \item eric
-  \item success
+  \item \texttt{AAABBBCCC}
+  \item \texttt{eric}
+  \item \texttt{success}
   \end{enumerate}
 
 \end{Exercise}
 
-So for only certain kinds of data can \rle achieve efficient
-compression, otherwise it is best avoided, since it could in worst
-cases double the size of the data. We will in section \todo{reference} discuss how we
-can improve \rle by removing this limitation from the algorithm.
+\subsection{Algorithm}
 
-\subsection{The RLE Algorithm}
-
-\subsubsection{RLE Compression Algorithm}
+\subsubsection{Compression}
 
 All of this is essentially trivial to implement in code. Let us first
 consider the compression algorithm, which is shown in algorithm
-\ref{alg:rle-enc}. What follows is the explanation of this algorithm.
+\ref{alg:rle-enc}. What follows is a explanation of this algorithm.
 
 \begin{algorithm}
   \caption{Encoding a file using \rle}
@@ -211,14 +205,14 @@ consider the compression algorithm, which is shown in algorithm
 First we read the first character in the file to the variable
 $c_1$. Then the following character is read to $c_2$, but if the file
 only consisted of the character now stored in $c_1$, then we stop and
-just write out a packet $(1,c_1)$.
+just write out a packet $(0,c_1)$.
 
 Else, the two most recently read characters are compared for equality,
 and if they are equal we have found a run where $n > 1$. However, we
 may just as this comparison is done already be in the process of
 making a packet and so we need to check for the current packet if $n <
 255$. This is necessary because $n$ is stored in a byte and values $>
-255$ can't fit in a byte.
+255$ can not fit in a byte.
 
 If $c_1$ and $c_2$ were not equal or $n = 255$, we now need to write
 out the current packet $(n,c_1)$. Now $c_1$ is set to $c_2$, so that
@@ -236,7 +230,7 @@ the file have been processed. Once we have processed all the
 characters in the file, we also need to write out the last packet at
 the end of the algorithm.
 
-\subsubsection{RLE Decompression Algorithm}
+\subsubsection{Decompression}
 
 \begin{algorithm}
   \caption{Decoding a \rle encoded file}
@@ -269,15 +263,17 @@ until we have reached to the end the input file.
 \section{PackBits RLE}
 \label{sec:packbits-rle}
 
+\subsection{Description}
+
 The information in the following section is based on the sources
 \cite{96:_techn_note_tn102,apple1994inside,91:_truev_tga_file_format_specif}
 
 The algorithm that we are about to describe is in
 \cite{96:_techn_note_tn102,apple1994inside} known as the PackBits
 method. But in \cite{91:_truev_tga_file_format_specif}, however, this
-algorithm is simply known as \rle. I will therefore try and create a
-compromise between these two names and we therefore will call the
-method PackBits \rle from now on.
+algorithm is simply known as \rle. I will try and create a compromise
+between these two names and we therefore will call the method PackBits
+\rle from now on.
 
 As familiar, the \rle algorithm can do great compression on certain
 kind of data, while it on the other can double the size of other kinds
@@ -291,7 +287,7 @@ for specifying the length of the packet, but for specifying the
 \textit{type} of the packet.
 
 Since only one bit is used for specifying the type of a packet, there
-can only be two types of packet, and these two types are: Run-length
+can only be two types of packet, and these two types are: run-length
 packets and raw packets. If the packet is a raw packet, then the
 highest bit of $n$ is cleared and if it is a run-length packet then
 the bit is toggled.
@@ -302,120 +298,77 @@ data. Run-length packets are used in exactly the same way as they are
 in plain \rle.
 
 To give an example, the data $5,5,5$, will in PackBits \rle get
-compressed down to ``130,5''. This makes sense because $130$ in binary
-is $1000\ 0010$. The highest bit is here used to specify that the
+compressed down to $130,5$. This makes sense because $130$ in binary
+is \bin{1000\ 0010}. The highest bit is here used to specify that the
 packet is a run-length packet and the 7 lowest bits are used to
-specify the actual length of the packet.
+specify the actual length of the packet minus one.
 
 Because only 7 bits are used to specify the length of a run-length
-packet, the maximum length of a run-length packet in PackBits \rle is
-$2^7 = 128$.
+packet, the maximum length of a run-length packet is $2^7 = 128$.
 
 But in exchange for a potentially lowered compression ratio, we did
 get something in return: raw packets. Raw packets essentially is the
 fix to the problem of potentially doubling the size of ``compressed''
 files that plain \rle had.
 
-What the $n$ value in raw packets specify, is the length of a
-following sequence of raw data. This packet type could in other words
-be used to store strings that \rle can't really compress, like the data
-$1,2,3,4$ for example. In PackBits \rle, the string $1,2,3,4$ would
-most efficiently get encoded as $3,1,2,3,4$. $3$ is in binary form
-$0000\ 0011$, and the since the highest bit is cleared, this means
-that this is a proper raw packet.
+The $n$ value in raw packets specify the length of a following
+sequence of raw data. This packet type could in other words be used to
+store strings that \rle is unable to compress, like the data $1,2,3,4$
+for example. In PackBits \rle, the string $1,2,3,4$ would most
+efficiently get encoded as $3,1,2,3,4$. $3$ is in binary form \bin{0000\
+0011}, and the since the highest bit is cleared, this means that this
+is a proper raw packet.
 
-Because PackBits \rle now lacks the ability to explode the size of the
-data in the way plain \rle can, the main advantage PackBits \rle has
-over plain \rle is that it is a lot more \textit{reliable}.
+Because PackBits \rle lacks the ability to explode the size of the
+data in the way plain \rle can, its advantage over plain \rle is that
+it is a lot more \textit{reliable}.
 
 \begin{Exercise}[label={packbits-rle}]
 
-  Compress the following data using the PackBits \rle method, and
-  calculate the compression ratio:
+  Compress the following data using PackBits \rle and calculate the
+  compression ratio:
 
   \begin{enumerate}[(a)]
-  \item success
-  \item AAABBBCCC
-  \item Suddenly he shouted AAAAAAAAA
+  \item \texttt{success}
+  \item \texttt{AAABBBCCC}
+  \item \texttt{Suddenly he shouted AAAAAAAAA}
   \end{enumerate}
 
 \end{Exercise}
 
 \subsection{Algorithm}
 
-\subsubsection{Writing The Packets}
+\subsubsection{Compression}
 
-Let us first consider how to write a raw packet. This is shown in
-algorithm \ref{alg:raw-packet}). This function simply writes out the
-length of the packet, which is followed by all the data of the raw
-packet,
+Let us consider how to implement the actual PackBits \rle
+algorithm. It is shown in algorithm \ref{alg:packbits-enc}. We will
+now explain why this works.
 
-\begin{algorithm}
-  \caption{Writing a raw packet}
-  \label{alg:raw-packet}
-  \begin{algorithmic}[1]
-    \Function{writeRawPacket}{$\var{length,data}$}
-    \State \Call{writeByte}{$\var{length}$}
-    \ForEach{$\var{raw}$}{$\var{data}$}
-    \State \Call{writeByte}{$\var{raw}$}
-    \EndForEach
-    \EndFunction
-  \end{algorithmic}
-\end{algorithm}
-
-In algorithm \ref{alg:rle-packet} it is shown how to write a
-run-length packet. To make sure that the highest bit is toggled, the
-length bit is assigned to an initial value of $1 \ShiftLeft 7 =
-128$. The length is then added to the length byte by bitwise oring the
-7 lower bits with the actual length of the packet subtracted by 1.
-
-\begin{algorithm}
-  \caption{Writing a run-length packet}
-  \label{alg:rle-packet}
-  \begin{algorithmic}[1]
-    \Require $\var{length} > 0$
-    \Function{writeRunLengthPacket}{$\var{length,data}$}
-    \Let{packetHead}{$128$}
-    \Let{packetHead}{$\var{packetHead} \BitOr \var{length}$}
-    \State \Call{writeByte}{$\var{packetHead}$}
-    \State \Call{writeByte}{$\var{data}$}
-    \EndFunction
-  \end{algorithmic}
-\end{algorithm}
-
-\subsubsection{Compression And Decompression}
-\label{sec:compr-decompr}
-
-Now that we know how to write the packets, let us consider how to
-implement the actual PackBits \rle algorithm. It is shown in algorithm
-\ref{alg:packbits-enc}.
-
-Since there are two kinds of packets allowed in the PackBits \rle
-method, we will need a way of telling which kind of packet we are
-creating at the time. The two constants $\var{RawPacket}$ and
-$\var{RunLengthPacket}$ are created for this purpose. The values of these
-two constants are then assigned to the variable $\var{packetType}$ for
-keeping track of the current packet type.
+Since there are two kinds of packets allowed, we will need a way of
+telling which kind of packet we are creating at the time. The two
+constants $\var{RawPacket}$ and $\var{RunLengthPacket}$ are created
+for this purpose. The values of these two constants are then assigned
+to the variable $\var{packetType}$ for keeping track of the current
+packet type.
 
 We start the algorithm by setting up a starting packet of length 1 of
 type raw packet. The first character of the file is then read to $c_1$
 and following this the second character in the file is read to
-$c_2$. However, if there's only one character in the file, then the
+$c_2$. However, if there is only one character in the file, then the
 main loop is stopped and the last packet is written. Since we were
 dealing with a raw packet the only character $c_1$ is put in the array
-$\var{data}$. The array $\var{data}$ stores the data of the current
-raw packet.
+$\var{data}$, which contains the data of the raw packet to be written.
 
 If there however was more than one character, then it is first checked
 if the current packet is at its maximum capacity. If so, then the
 current packet is written out. If the current packet is a run-length
-packet then the run-length packet is simply written out and
-preparations are made for writing a new raw packet. If the packet is a
-raw packet then the character $c_1$ is put at the end of the $\var{data}$
-array, and then the raw packet is written out. The next character is
-read to $c_2$, which is why we beforehand assigns $c_1$ to $c_2$ after
-we have written the raw packet, to ensure that the value of $c_2$ is
-not destroyed.
+packet then it is simply outputted and preparations are made for
+writing a new raw packet. If the packet is a raw packet then the
+character $c_1$ is put at the end of the $\var{data}$ array, and then
+the raw packet is written out. The next character is read to $c_2$,
+which is why we beforehand assigned $c_1$ to $c_2$ after we have
+written the raw packet, to ensure that the value of $c_2$ is not
+destroyed.
 
 If on the other hand the current packet is not full then we are going
 to write a run-length packet. First however, we need to check if we
@@ -506,8 +459,11 @@ outputted.
   \end{algorithmic}
 \end{algorithm}
 
-The decoding algorithm is thankfully not as complex. It is shown in
-algorithm \ref{alg:packbits-dec}.
+
+\subsubsection{Decompression}
+
+  The decoding algorithm is thankfully not as complex. It is shown in
+  algorithm \ref{alg:packbits-dec}.
 
 \begin{algorithm}
   \caption{Decoding a \rle packbits encoded file}\algohack{}
@@ -554,8 +510,12 @@ algorithm \ref{alg:packbits-dec}.
     The data is just a sequential list of numbers and the difference
     between all the numbers is $1$. This sequence can be compressed
     down to a pair $(n,s)$, where $s$ is the starting value and $n$ is
-    the length of the sequence. This pair can then be decompressed
-    like this: $s,s+1,s+2,\cdots,s+n$.
+    the length of the sequence minus 1. This pair can then be decompressed
+    as such:
+
+    \begin{equation*}
+     s,s+1,s+2,\dots,s+n
+    \end{equation*}
 
   \item $\frac{1}{2}$
 
@@ -583,9 +543,9 @@ algorithm \ref{alg:packbits-dec}.
 \begin{Answer}[ref={rle-compression}]
 
   \begin{enumerate}[(a)]
-  \item 2A2B2C, $\frac{2}{3}$
-  \item 0e0r0i0c, $2$
-  \item 0s0u1c0e1s, $\frac{10}{7}$
+  \item \texttt{2A2B2C}, $\frac{2}{3}$
+  \item \texttt{0e0r0i0c}, $2$
+  \item \texttt{0s0u1c0e1s}, $\frac{10}{7}$
   \end{enumerate}
 
 \end{Answer}
@@ -593,9 +553,9 @@ algorithm \ref{alg:packbits-dec}.
 \begin{Answer}[ref={packbits-rle}]
 
   \begin{enumerate}[(a)]
-  \item 6success, $\frac{8}{7}$
-  \item 130A130B130C, $\frac{2}{3}$
-  \item 18Suddenly he shouted136A, $\frac{22}{29}$
+  \item \texttt{6success}, $\frac{8}{7}$
+  \item \texttt{130A130B130C}, $\frac{2}{3}$
+  \item \texttt{18Suddenly he shouted136A}, $\frac{22}{29}$
   \end{enumerate}
 
 \end{Answer}
