@@ -74,17 +74,13 @@ throughout his text and explain some basic terms.
   last bit of a binary number. In the number \bin{100} the highest bit
   toggled and the 2 lowest bits are cleared.
 
-\item[most significant bit] Alternative name for the highest bit.
-
-\item[least significant bit] Alternative name for the lowest bit.
-
   \begin{Exercise}[label={bits-value-order}]
-    What are the values of bits 1, 3 and the most significant bit in the
-    number \bin{01001}?
+    What are the values of bits 0, 3 and the highest bit in the number
+    \bin{01001}?
 
   \end{Exercise}
 
-\item[Byte] A byte is simply a binary number with 8 digits/bits. The
+\item[byte] A byte is simply a binary number with 8 digits/bits. The
   max value of a byte is $2^8 - 1 = 255$ and there are $2^8 = 256$
   different values that a byte can have. We will often be referring to
   bytes throughout the entire text, since, as we soon shall see, an
@@ -100,8 +96,8 @@ throughout his text and explain some basic terms.
   processed. \htab(9) is for an ordinary tab while {\acronymstyle
     sp}(32) represents space. However, many of these control
   characters are obsolete and are practically never used. The control
-  codes that are actually used in modern files are \nul, \htab, \lf
-  and \cret \cite{maini2007digital}.
+  codes that are actually used in modern files are \nul, \htab,
+  \lf,\cret and {\acronymstyle sp} \cite{maini2007digital}.
 
   The usage of the two special codes \cret and \lf is something that
   we need to further discuss. They are used to start a new line in
@@ -121,7 +117,7 @@ throughout his text and explain some basic terms.
   software to flawlessly run on different operating systems.
 
     \begin{longtable}{lll}
-      \caption{The ASCII table} \\
+      \caption{The \ascii table} \\
       \toprule
       Value & Code(Character) & Code Description \\
       \midrule
@@ -272,8 +268,6 @@ throughout his text and explain some basic terms.
 
     \end{longtable}
 
-
-
   \begin{Exercise}[label={ascii-to-num}]
     Convert the following \ascii characters to their corresponding \ascii
     values:
@@ -312,10 +306,10 @@ throughout his text and explain some basic terms.
 
   \end{Exercise}
 
-\item[Hexadecimal] We will also be using the hexadecimal numeral system
-  in this text a lot. In the hexadecimal system the numbers 0--9 are
-  given their usual values, while the letters A--F are assigned to the
-  values 10-15, so that the hexadecimal number \hex{D3} has the value
+\item[Hexadecimal] We will also be using the hexadecimal numeral
+  system in this text. In hexadecimal the numbers 0--9 are given their
+  usual values, while the letters A--F are assigned to the values
+  10-15, so that the hexadecimal number \hex{D3} has the value
 
   \begin{equation*}
    13 \cdot 16^1 + 3 \cdot 16^0 = 13 \cdot 16 + 3 = 208 + 3 = 211
@@ -345,7 +339,7 @@ throughout his text and explain some basic terms.
   \end{Exercise}
 
 
-\item[String] A string is simply a sequence of letters in some
+\item[string] A string is simply a sequence of letters in some
   encoding. The most commonly used encoding in this text will be \ascii
   \cite{rfc20}.
 
@@ -355,13 +349,13 @@ throughout his text and explain some basic terms.
   of \nul) character has, as familiar, a value of $0$. This means that
   the string ``eric'' will be represented by the sequence of bytes
   $101,114,105,99, 0$ in the C programming language. This is important
-  to know, because in a lot of image formats strings are stored as C
+  to know, because in some image formats strings are stored as C
   strings.
 
   Why the \nullm character at the end of the string even is necessary
   is for rather complex reasons that we will not treat in this text.
 
-\item[File] We are going to be talking a lot about files in this text,
+\item[file] We are going to be talking a lot about files in this text,
   so it is important that we as early as possible establish a strict
   definition for what a file is. A file is just a sequence of bytes. A
   perfectly valid file could for example consist of the numbers
@@ -382,18 +376,18 @@ throughout his text and explain some basic terms.
   with a maximum value of $2^{16} - 1$. In the same fashion even
   larger numbers can be stored.
 
-\item[Offset] When we are talking about an offset we are referring to
+\item[offset] When we are talking about an offset we are referring to
   a position in a file. The offset is zero based. When we are talking
   about the number at offset 0 in the file $13,2,1$ we are talking
   about the number $13$. In the same file at the offset $2$, the
   number $1$ can be found.
 
 
-\item[Render] When a program displays an image on the screen this
+\item[render] When a program displays an image on the screen this
   process is known as \textit{rendering}. To render an image is to
   display an image on the screen.
 
-\item[Display] Synonym for render.
+\item[display] Synonym for render.
 
 \end{description}
 
@@ -419,56 +413,59 @@ we are going to do for the rest of the chapter.
 \subsection{Boolean Operators}
 \label{sec:boolean-operators}
 
-To signify the boolean operators, or logical operators as we will often
+To signify the Boolean operators, or logical operators as we will often
 also refer them to, we will be using the following symbols:
-
-\begin{description}
-\item[$\NOT$] logical \textit{not}
-\item[$\AND$] logical \textit{and}
-\item[$\OR$] logical \textit{or}
-\end{description}
+\begin{samepage}
+  \begin{description}
+  \item[$\NOT$] logical \textit{not}(table~\ref{tab:log-not-table})
+  \item[$\AND$] logical \textit{and}(table~\ref{tab:log-and-table})
+  \item[$\OR$] logical \textit{or}(table~\ref{tab:log-or-table})
+  \end{description}
+\end{samepage}
 
 Logical truth is represented by \True, and falseness is represented by
 \False.
 
-The truth tables for these operators are presented in the
-tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
-\ref{tab:log-not-table}.
-
 \begin{table}
-  \centering
-  \begin{tabular}{|c|c|c|}
+  \subfloat[l][Logical and]{
+      \begin{tabular}{|c|c|c|}
     \hline
     $\mathbf{\AND}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
     $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\False}$ \\ \hline
     $\mathbf{\True}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
   \end{tabular}
-  \caption{Logical and truth table}
   \label{tab:log-and-table}
-\end{table}
-
-\begin{table}
-  \centering
-  \begin{tabular}{|c|c|c|}
+    }
+  \subfloat[l][Logical or]{
+      \begin{tabular}{|c|c|c|}
     \hline
     $\mathbf{\OR}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
     $\mathbf{\False}$ & $\False$ & $\True$ \\ \hline
     $\mathbf{\True}$ & $\True$ & $\True$ \\ \hline
   \end{tabular}
-  \caption{Logical or truth table}
   \label{tab:log-or-table}
-\end{table}
 
-\begin{table}
-  \centering
+}
+\subfloat[l][Logical exclusive or]{
+        \begin{tabular}{|c|c|c|}
+    \hline
+    $\mathbf{\BitXor}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+    $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+    $\mathbf{\True}$ & $\mathbf{\True}$ & $\mathbf{\False}$ \\ \hline
+  \end{tabular}
+  \label{tab:log-exlusive-or-table}
+}
+
+  \subfloat[c][Logical not]{
   \begin{tabular}{|c|c|}
     \hline
     $\mathbf{p}$ & $\mathbf{\NOT p}$ \\ \hline
     $\True$ & $\False$ \\ \hline
     $\False$ & $\True$ \\ \hline
   \end{tabular}
-  \caption{Logical not truth table}
-  \label{tab:log-not-table}
+    \label{tab:log-not-table}
+    }
+    \caption{Logical truth tables}
 \end{table}
 
 \begin{Exercise}[label={boolean}]
@@ -488,19 +485,21 @@ tables,~\ref{tab:log-and-table},~\ref{tab:log-or-table} and
 
 \subsubsection{Notation}
 
-The bitwise operators will also be used in this text. We will use
+The bitwise operators will also be used in this text. We will use the
 notation introduced in the C programming language\cite{kernighan1988c}
 to represent them in pseudocode:
 
-\begin{description}
-\item[$\BitAnd$] Bitwise and
-\item[$\BitOr$] Bitwise or
-\item[$\BitXor$] Bitwise xor
-\item[$\BitNeg$] Bitwise not
-\item[$\ShiftLeft$] Left bit shift
-\item[$\ShiftRight$] Right bit shift
-\end{description}
 
+\begin{samepage}
+  \begin{description}
+  \item[$\BitAnd$] Bitwise and
+  \item[$\BitOr$] Bitwise or
+  \item[$\BitXor$] Bitwise xor
+  \item[$\BitNeg$] Bitwise not
+  \item[$\ShiftLeft$] Left bit shift
+  \item[$\ShiftRight$] Right bit shift
+  \end{description}
+\end{samepage}
 Notice that we are using $\BitXor$ for representing bitwise
 xor rather than the traditional C notation $\AND$. This is due to
 the fact that we would otherwise confuse it with logical and, $\AND$.
@@ -511,11 +510,11 @@ operators.
 \subsubsection{Bitwise and, or, and xor}
 
 Bitwise and is just like logical and, except for the fact that it
-operates on the on the bit level. Let us for demonstrative consider
-the result of the expression $22 \BitAnd 12$. Since bitwise and
-operates on the bit level we first must convert the two numbers to
-binary:\mbox{ $\bin{10110} \BitAnd \bin{01100}$}. Then the calculation is simply done
-like this:
+operates on the bit level. Let us for demonstrative consider the
+result $22 \BitAnd 12$. Since bitwise and operates on the bit level we
+first must convert the two numbers to binary:\mbox{ $\bin{10110}
+  \BitAnd \bin{01100}$}. Then the calculation is simply done like
+this:
 
 \begin{center}
   \begin{tabular}{lr}
@@ -526,9 +525,8 @@ like this:
   \end{tabular}
 \end{center}
 
-So $22 \BitAnd 12 = \bin{00100} = 4$. So as you can see, the bitwise
-operators do boolean logic on the bit level by considering a toggled
-bit truth, and a cleared bit falsity
+So as you can see, the bitwise operators do Boolean logic on the bit
+level.
 
 \begin{Exercise}[label={bitand}]
 
@@ -559,23 +557,10 @@ perform the former calculation using bitwise or:
   \end{enumerate}
 \end{Exercise}
 
-\begin{table}
-  \centering
-  \begin{tabular}{|c|c|c|}
-    \hline
-    $\mathbf{\BitXor}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-    $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-    $\mathbf{\True}$ & $\mathbf{\True}$ & $\mathbf{\False}$ \\ \hline
-  \end{tabular}
-  \caption{Logical exclusive or truth table}
-  \label{tab:log-exlusive-or-table}
-\end{table}
-
 Bitwise xor on the other hand, operates on bits by using logical
 exclusive or. The truth table of logical exclusive or is given in
 table \ref{tab:log-exlusive-or-table}. Using this table, we can easily
-understand how bitwise xor works and calculate the value of the
-expression $\bin{10110} \BitXor \bin{01100}$:
+understand how bitwise xor works:
 
 \begin{center}
   \begin{tabular}{lr}
@@ -605,9 +590,9 @@ cleared, and all cleared bits get toggled, so $\BitNeg b = \bin{1111\
 0101}$.
 
 Now you should see why it was important that we considered the size of
-the number. Had the variable $b$ been of size 4 bits, then $b = 1010$
+the number. Had the variable $b$ been of size 4 bits, then $b = \bin{1010}$
 and then the end result of the operation $\BitNeg b$ would have been
-$0101$ instead of $1111\ 0101$.
+$\bin{0101}$ instead of $\bin{1111\ 0101}$.
 
 \begin{Exercise}[label={bitnot}]
   What are the values of the following expressions, if all the numbers
@@ -629,33 +614,16 @@ It is also in bitwise shifting important that we consider the size of
 the numbers. Bitwise shifting is actually very simple: all the
 operation $b \ShiftLeft n$ really does, is that it shifts the bit
 pattern in the number $b$ $n$ steps to the left. For the 4-bit number
-$0011$, this means that $0011 \ShiftLeft 2 = 1100$. But what would
+$\bin{0011}$, this means that $\bin{0011} \ShiftLeft 2 = \bin{1100}$. But what would
 have happened if the bit pattern was shifted 3 steps? Then one bit is
-going fall of the bit boundary and disappear, so $0011 \ShiftLeft 3 =
-1000$.
+going fall of the bit boundary and disappear, so ${0011} \ShiftLeft 3 =
+\bin{1000}$.
 
 And bitwise right shifting works in pretty much the same way, expect
-for the fact that the bit shifting are done to the right instead of
-the left, so that for the 4-bit number $0110$: $0110 \ShiftRight 2 =
-0001$.
-
-\begin{Exercise}[label={bit-shiting}]
-  Assuming that we are dealing with bytes, what is the value of the
-  following expression:
-
-  \begin{equation*}
-    120 \BitAnd (3 \ShiftLeft 4)
-  \end{equation*}
-
-  (important!) What does this expression really do?
-
-  Hint: what kind of value does it extract from the byte $120$?
-
-\end{Exercise}
+for the fact that the bit shifting is done to the right instead of the
+left, so $\bin{0110} \ShiftRight 2 = \bin{0001}$.
 
 \begin{Exercise}[label={bit-equiv}]
-
-  What is
 
   \begin{enumerate}[(a)]
   \item $1 \ShiftLeft 0$
@@ -668,7 +636,9 @@ the left, so that for the 4-bit number $0110$: $0110 \ShiftRight 2 =
 
   Can you express the operation $N \ShiftLeft S$, if the condition $S
   \geq 0$ holds, in terms of the arithmetic operators? Exponentiation
-  counts as an arithmetic operator in this exercise.
+  counts as an arithmetic operator in this exercise. Also, you can
+  ignore the possibility of bits falling of the bit boundary in this
+  exercise.
 
 \end{Exercise}
 
@@ -679,26 +649,22 @@ In this section we will discuss the basic syntax of the pseudocode.
 
 The start of a comment is indicated by the symbol \commentsymbol.
 
-To assign the value $n$ to the variable $var$, the notation shown in
-algorithm \ref{alg:assign} is used.
 
-\begin{algorithm}[H]
-  \caption{Syntax for assigning the value $n$ to the variable $var$}
-  \label{alg:assign}
-  \begin{algorithmic}[1]
-    \Let{$\var{var}$}{$\var{n}$}
-  \end{algorithmic}
-\end{algorithm}
+\begin{samepagew}
+  To assign the value $n$ to the variable $var$, the we use the
+  following notation:
+
+\begin{equation*}
+  var \gets n
+\end{equation*}
+\end{samepagew}
+
 
 To store a sequence of values we will use arrays. If for example the
 array $a$ contains the values the $3,1,2$ then to access the first
 value of this array, $3$, the syntax $a[0]$ is used. In general, to
 access the n:th value of an array you do $a[n-1]$, since the indexes
 of arrays are zero-based.
-
-Strings are also considered arrays. If the string ``eric'' was
-stored in the variable \texttt{str}, then the letter ``e'' can be
-accessed with the syntax $str[0]$
 
 To to go through each value in the array $a$, the syntax demonstrated
 in algorithm \ref{alg:for-each} is used.
@@ -731,13 +697,13 @@ demonstrated.
 
 For functions, we will be using the traditional syntax;
 \Call{Func}{$a,b,c$} means that we are calling the function
-\textproc{Func} with the argument $a$,$b$ and $c$ and that the value
+\textproc{Func} with the arguments $a$, $b$ and $c$ and that the value
 of this expression is the return value of the function. To return a
 value from a function the \textbf{return} statement is used.
 
 The function syntax is demonstrated in algorithm \ref{alg:euclid}. In
 this function, Euclid's algorithm is used to calculate the greatest
-common divisor of the two given numbers.
+common divisor of two given numbers.
 \cite{cormen2009introduction_to_algo,weisstein:_euclid_algor}.
 
 \begin{algorithm}
@@ -756,15 +722,16 @@ common divisor of the two given numbers.
   \end{algorithmic}
 \end{algorithm}
 
-The for loop allows for iteration with an explicit counter variable
-that is given in the for loop statement. In algorithm \ref{alg:forto}
-the for to loop is used to count from $1$ to $9$. Note that it in
-reality counts up to $10$, then stops.
+The for loop allows for iteration with an explicit counter
+variable. In algorithm \ref{alg:forto} the for to loop is used to
+count from $1$ to $9$. Note that it in reality counts up to $10$, then
+stops.
 
 \begin{algorithm}
   \caption{For to loop}\algohack{}
   \label{alg:forto}
   \begin{algorithmic}[1]
+    \linecomment{Prints the numbers 1--9}
     \ForTo{$i$}{$1$}{$10$}
     \linecomment{Print the number 1.}
     \EndFor
@@ -778,7 +745,7 @@ We will be dealing with files in many of these algorithms, so we will need
 to introduce several functions for handling file operations.
 
 \begin{description}[font=\normalfont]
-\item[\textproc{ReadByte}] It is assumed from the beginning of the
+\item[\VoidCall{ReadByte}] It is assumed from the beginning of the
   algorithm that a file has already been opened for reading. This
   function reads a byte from that file.
 
@@ -786,52 +753,27 @@ to introduce several functions for handling file operations.
   we also assume that there is a file opened for output. This function
   writes a byte to that file.
 
-\item[\textproc{EndOfFileReached}] \True{} if the end the file we are
+\item[\VoidCall{EndOfFileReached}] True if the end the file we are
   reading from have been reached.
-
-\item[\Call{Read}{$\var{size}$}] Just being able to read a byte may not
-  always be enough. We may want to read a number of a specific size
-  from a file. We will do that with this function. This functions
-  reads a number of the size $size$ \textit{bytes}(not bits) from a
-  file.
-
-\item[\Call{Inc}{\ensuremath{\var{var},n}}] Increases the value of the
-  variable $var$ by $n$.
-
-\item[\Call{Dec}{\ensuremath{\var{var},n}}] Decrease the value of the
-  variable $var$ by $n$.
-
-\item[\Call{getbits}{$b, \var{start}, \var{end}$}] is used to extract a bit
-  pattern in the given bit range from $b$. This function will be
-  derived in exercise \ref{bitcount}
 
 \end{description}
 
-\begin{Exercise}[label={bitcount}]
-  Using the bitwise operators, try to devise a function
-  \textproc{bitcount} for counting the numbers of toggled bits in a
-  byte. For \Call{bitcount}{$7$} it should return $3$ and for
-  \Call{bitcount}{$1$} it should return $1$.
-
-\end{Exercise}
-
 \begin{Exercise}[label={getbits}]
 
-  Make a function  \Call{getbits}{$b, \var{start}, \var{end}$} that extracts
-  the bit pattern of a number $b$ from a given starting position to a
-  given ending position. These positions are be zero-based. Example:
-  \Call{getbits}{$80, 4, 6$}$=5$, because $80$ is represented by the
-  binary number $0101\ 0000$ and from the positions 4 to 6 there is a
-  bit pattern that has a value of $5$($101$), which is what this function is
-  supposed to extract.
+  Make a function \Call{getbits}{$b, \var{start}, \var{end}$} that
+  extracts the bit pattern of a number $b$ from a starting position to
+  a ending position. These positions are be zero-based. Example:
 
-  It is especially important that you do this exercise, because the
-  function \textproc{getbits} is going to be used \textit{a lot}
-  throughout this text.
+  \begin{equation*}
+    \Call{getbits}{80, 4, 6}=5,
+  \end{equation*}
 
-  Hint: The bitwise operators $\ShiftLeft, \ShiftRight, \BitAnd,
-  \BitNeg$ and the arithmetic operators $+,-$ is all you really need to
-  use to solve this problem.
+  because $80$ is represented
+  by the binary number \bin{0101\ 0000} and from the positions 4 to 6
+  there is a bit pattern that has a value of $5$(\bin{101}), which is
+  what this function was supposed to extract.
+
+  Hint: Use the bitwise operators.
 
 \end{Exercise}
 
@@ -839,9 +781,9 @@ to introduce several functions for handling file operations.
 
 \begin{Answer}[ref={n-to-bin}]
   \begin{enumerate}[(a)]
-  \item $100$
-  \item $11\ 0010$
-  \item $1\ 1111\ 0100$
+  \item \bin{100}
+  \item \bin{11\ 0010}
+  \item \bin{1\ 1111\ 0100}
   \end{enumerate}
 \end{Answer}
 
@@ -893,8 +835,8 @@ to introduce several functions for handling file operations.
 
 \begin{Answer}[ref={uppercase-conv}]
 
-  You convert an uppercase ASCII value to lowercase by adding $32$ to
-  it, since $a - A = 97 - 65 = 32$. To do the reverse transformation,
+  You convert an uppercase \ascii value to lowercase by adding $32$ to
+  it, since a $-$ A $= 97 - 65 = 32$. To do the reverse transformation,
   you subtract $32$ from the value.
 
 \end{Answer}
@@ -939,7 +881,7 @@ to introduce several functions for handling file operations.
 
 \begin{Answer}[ref={bitor}]
   \begin{enumerate}[(a)]
-  \item $52$
+  \item $188$
   \item $3$
   \item $255$
   \end{enumerate}
@@ -963,14 +905,6 @@ to introduce several functions for handling file operations.
   \end{enumerate}
 \end{Answer}
 
-\begin{Answer}[ref={bit-shiting}]
-
-  The value of the expression is $3$. What this expression does, is
-  that it extracts the values of the 5:th and 6:th bits from the
-  number $120$.
-
-\end{Answer}
-
 \begin{Answer}[ref={bit-equiv}]
 
   \begin{enumerate}[(a)]
@@ -986,27 +920,10 @@ to introduce several functions for handling file operations.
 
 \end{Answer}
 
-\begin{Answer}[ref={bitcount}]
-
-  \begin{algorithmic}[1]
-    \Procedure{bitcount}{$n$}
-    \Let{$\var{count}$}{$0$}
-    \linecomment{Once the value $8$ is reached the for loop terminates.}
-    \ForTo{$\var{shift}$}{$0$}{$8$}
-    \If{$n \BitAnd (1 \ShiftLeft \var{shift})$}
-    \State \Call{Inc}{$\var{count}$}
-    \EndIf
-    \EndFor
-    \State \Return{$\var{count}$}
-    \EndProcedure
-  \end{algorithmic}
-
-\end{Answer}
-
 \begin{Answer}[ref={getbits}]
 
   \begin{algorithmic}[1]
-    \Procedure{getbits}{$n$}
+    \Procedure{getbits}{$b, \var{start}, \var{end}$}
     \linecomment{Calculate the length of the bit pattern}
     \Let{$\var{len}$}{$\var{end} - \var{start} + 1$}
     \State \textbf{return} $(b \ShiftRight \var{start}) \BitAnd (\BitNeg
@@ -1019,27 +936,38 @@ to introduce several functions for handling file operations.
   If given the input \Call{getbits}{$80, 4, 6$} how may we calculate
   the value $5$ from this?
 
-  $80$ is represented by the bit pattern $0101\ 0000$. First, we will
-  right shift down the pattern $start=4$ steps, $0101\ 0000 \ShiftRight
-  start$, resulting in the bit pattern $0000\ 0101$. Now all that
-  remains to be done is that we need to figure out how construct the
-  bit pattern $0000\ 0111$ from the input values. Once we have figured
-  out how to make this pattern, we can calculate the proper result
-  like this: $0000\ 0101 \BitAnd 0000\ 0111 = 101 = 5$
+  $80$ is represented by the bit pattern \bin{0101\ 0000}. First, we
+  will right shift down the pattern $start=4$ steps, $\bin{0101\ 0000}
+  \ShiftRight start$, resulting in the bit pattern $\bin{0000\
+    0101}$. Now all that remains to be done is that we need to figure
+  out how construct the bit pattern \bin{0000\ 0111} from the input
+  values. Once we have figured out how to make this pattern, we can
+  calculate the proper result:
 
-  The bit pattern we want to construct is $0000\ 0111$. We want a
-  sequence of $3$ toggled bits from the lowest bit. We can trivially
-  calculate this length like this: $end - start + 1 = 6 - 4 + 1 = 3$.
-  $ + 1$ is necessary because the bit position are zero based.
+  \begin{equation*}
+   \bin{0000\ 0101} \BitAnd \bin{0000\ 0111} = \bin{101} = 5
+  \end{equation*}
+
+  Using bitwise and in this way to extract bit patterns is a common
+  idiom in the C programming language.
+
+  The bit pattern we want to construct is $\bin{0000\ 0111}$. We want
+  a sequence of $3$ toggled bits from the lowest bit. We can trivially
+  calculate the length of this pattern as
+
+  \begin{equation*}
+    end - start + 1 = 6 - 4 + 1 = 3
+  \end{equation*}
+
+  $ + 1$ is necessary because the bit positions are zero based.
 
   We now have the length of the pattern. Now we need to figure out how
   to construct it. The operation $\BitNeg 0$, assuming we are dealing
-  with bytes, gets you the pattern $1111\ 1111$. Then, by shifting
-  this pattern $len$ steps to the left, $3 \ShiftLeft 1111\ 1111$ we
-  end up with the value $1111\ 1000$. Now, by simply using the bitwise
-  not operation again, $\BitNeg (1111\ 1000)$, we end up with the
-  desired pattern $0000\ 0111$. And now we can simply extract the bit
-  pattern like this: $0000\ 0101 \BitAnd 0000\ 0111 = 101 = 5$.
+  with bytes, gets you the pattern $\bin{1111\ 1111}$. Then by
+  shifting this pattern $len$ steps to the left, $3 \ShiftLeft
+  \bin{1111\ 1111}$, we end up with the value $1111\ 1000$. Now, by
+  simply using the bitwise not operation again, $\BitNeg \bin{1111\
+    1000}$, we end up with the desired pattern $\bin{0000\ 0111}$.
 
 \end{Answer}
 

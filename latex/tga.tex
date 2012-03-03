@@ -178,23 +178,7 @@ then the total byte length of the color map is $\frac{S}{8} \cdot
 L$. If furthermore the first entry index is $I$ and $I \neq 0$, then
 the number is colors you actually end up loading from the color map
 will actually be $\frac{S}{8} \cdot L - I$, since you in this case
-skipped $I$ colors at the beginning of the color map. In algorithm
-\ref{alg:tga-read-colormap} it is shown to load the color map to an
-array.
-
-\begin{algorithm}[H]
-  \caption{Reading the color map of a \tga file}
-  \label{alg:tga-read-colormap}
-  \begin{algorithmic}[1]
-
-    \State Move $\var{colorMapStart}$ bytes forward in the file.
-
-    \ForTo{$i$}{$\var{colorMapStart}$}{$\var{colorMapLength}$}
-      \Let{$\var{data}$}{\Call{Read}{$\var{colorMapEntrySize} / 8$}}
-      \Let{$\var{colorMap[i]}$}{$\var{data}$}
-    \EndFor
-    \end{algorithmic}
-  \end{algorithm}
+skipped $I$ colors at the beginning of the color map.
 
 \imgfield{Image Specification}{10}
 
@@ -296,11 +280,9 @@ doesn't exist at all and should be ignored.
 \imgfield{Color Map Data}{0}
 
 The color map can trivially be loaded into an array by loading the
-same number colors that was specified in the color map length field. These
-colors will have to be loaded $\frac{D}{8}$ bytes at a time, where $D$
-is the color map entry size. Back in algorithm
-\ref{alg:tga-read-colormap} it was shown to load the color map into an
-array.
+same number colors that was specified in the color map length
+field. These colors will have to be loaded $\frac{D}{8}$ bytes at a
+time, where $D$ is the color map entry size.
 
 \imgfield{Color Data}{0}
 
@@ -345,7 +327,7 @@ you have fully understood it.
 
         \Repeatn{$\var{length} + 1$}
           \process
-          \Inc{$i$}{1}
+          \Let{$i$}{$i + 1$}
         \EndRepeatn
 
     \Else
@@ -360,7 +342,7 @@ you have fully understood it.
 
         \process
 
-        \Inc{$i$}{1}
+        \Let{$i$}{$i + 1$}
 
         \EndRepeatn
 
@@ -375,7 +357,7 @@ you have fully understood it.
 
       \process
 
-      \Inc{$i$}{1}
+      \Let{$i$}{$i + 1$}
 
     \EndIf
     \EndWhile

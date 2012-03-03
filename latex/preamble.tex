@@ -161,9 +161,6 @@ expansion=true]{microtype}
 \newcommand{\Ret}[1]{\State \textbf{return} #1}
 
 
-\newcommand{\Dec}[2]{\State \Call{Dec}{\ensuremath{#1,#2}}}
-\newcommand{\Inc}[2]{\State \Call{Inc}{\ensuremath{#1,#2}}}
-
 \newcommand{\eof}{\VoidCall{EndOfFileReached}}
 \newcommand{\neof}{$\NOT\VoidCall{\textsc{EndOfFileReached}}$}
 
@@ -343,3 +340,6 @@ etx,eot,enq,ack,bel,bs,vt,ff,dle,nak,syn,etb,can,sub,esc,fs,gs,rs,us,del}
 \newcommand*{\crcst}{{\acronymstyle crc-16}\xspace}
 
 \newcommand{\deflate}{Deflate\xspace}
+
+% working samepage.
+\newenvironment{samepagew}{\begin{minipage}{\textwidth}}{\end{minipage}}

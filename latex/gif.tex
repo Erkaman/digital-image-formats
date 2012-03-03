@@ -753,10 +753,13 @@ format, $12$, then the value of the code size is increased by one.
     \State \Call{AddToStringTable}{$\var{nextCode}, \var{oldCode}, \var{character}$}
 
     \linecomment{The maximum code size in \gif \lzw is $12$}
-    \If{$\var{nextCode} == 2^{\var{codeSize}} - 1 \AND \var{codeSize} \neq 12$}
-    \Inc{\var{codeSize}}{1}
+    \If{$\var{nextCode} == 2^{\var{codeSize}} - 1 \AND \var{codeSize}
+      \neq 12$}
+
+
+    \Let{$\var{codeSize}$}{$\var{codeSize} + 1$}
     \EndIf
-    \Inc{\var{nextCode}}{1}
+    \Let{$\var{nextCode}$}{$\var{nextCode} + 1$}
     \EndIf
 
     \Let{$\var{oldCode}$}{$\var{newCode}$}
