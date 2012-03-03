@@ -379,9 +379,7 @@ void writeTGA_Header(TGA_Header header, FILE * out)
         fprintf(out,"right\n");
     else
         fprintf(out,"left\n");
-
 }
-
 
 void writeColorMap(TGA_Header header, unsigned long * colorMap, FILE * out)
 {

@@ -5,12 +5,8 @@
 \chapter{Truevision Graphics Adapter}
 \label{cha:tga}
 
-\section{Introduction}
-\label{sec:tga-introduction}
-
-In this chapter, we are to explore the first image format in this
-text: \tga. But why are we beginning with \tga of all image
-formats?
+In this chapter, we are to explore the first image format of this
+text: \tga. But why are we beginning with \tga of all image formats?
 
 For the same reason that the image format first became popular: its
 specification is very well written; it is freely available without any
@@ -19,8 +15,8 @@ because the color data is stored in an obvious and intuitive way(in
 chapter \ref{cha:gif} and \ref{cha:png} we will see \textit{many}
 examples of how unintuitively the color data can be stored) and the
 data itself is compressed with a very simple compression algorithm:
-PackBits RLE, which we discussed very much in depth in section
-\ref{sec:packbits-rle}. \cite{murray1996encyclopedia}
+PackBits \rle, which we discussed very much in depth in section
+\ref{sec:packbits-rle} \cite{murray1996encyclopedia}.
 
 However, there are also some more complex features of the \tga format,
 but we will not cover all of them because very few of them are rarely ever
@@ -31,30 +27,29 @@ The \tga specification is the document
 \cite{91:_truev_tga_file_format_specif} and it is going to be the main
 reference for this chapter.
 
-\section{Conventions Used In This Chapter}
+\section{Building Blocks}
 
-The \tga format is built up of things called fields. A
-field gives information about the image you're trying to open. It
-could give information like the name of the image, color depth, the
-color data of the image and so on. It could really contain any sort of
-data.
+The \tga format is built up of things called fields. A field gives
+information about the image. Information like the name of the image,
+color depth, the color data of the image and so on. It could really
+contain any sort of data.
 
 A field also has a specific size. Knowing the size of a field is
 essential to loading its data, since you cannot just let the computer
-guess the size of a field. It's all just a sequence of numbers to the
-computer, so you as the programmer will have to tell the computer how
-big the respective fields are in order to load them.
+guess the size of a field. To the computer it is all just a sequence
+of numbers, so you as the programmer will have to tell the computer
+how big the respective fields are in order to load them.
 
 \newcommand{\plural}[3]{\ifstrequal{#1}{1}{#2}{#3}}
-\newcommand{\fieldlength}[1]{\ifstrequal{#1}{0}{variable}{#1 \plural{#1}{byte}{bytes}}}
+\newcommand{\fieldlength}[1]{\ifstrequal{#1}{0}{bytes}{#1 \plural{#1}{byte}{bytes}}}
 \newcommand{\imgfield}[2]{\subsection*{#1(\fieldlength{#2})}}
 \newcommand{\imgsubfield}[2]{\subsubsection*{#1(\fieldlength{#2})}}
 
 Fields are organized into larger units we will call
-\textit{sections}. We will in this chapter cover these
-sections one after one and we will describe the fields in the order
-that they occur in their respective sections. The separate are
-organized in subheadings like this:
+\textit{sections}. We will in this chapter cover these sections one
+after one and we will describe the fields in the order that they occur
+in their respective sections. The separate field are organized in
+subheadings like this:
 
 \imgfield{Data}{3}
 
@@ -66,14 +61,10 @@ On the other hand, the subheading:
 \imgfield{Data}{0}
 
 Shows that we will be covering a field named Data with a variable
-size. The size of such a field varies completely on the image we're
-dealing with. The color data field is a perfect example of that kind
-of field; since it contains the color data of the image, it will
-always vary for images of different widths and height, and therefore
-the size of this field is variable.
-
-The sizes of these fields are most often specified by \textit{earlier}
-fields, as we soon will see several examples of.
+size. The color data field is a perfect example of that kind of field;
+since it contains the color data of the image, it will always vary for
+images of different widths and height, and therefore the size of this
+field is variable for different images.
 
 \section{File Header}
 
@@ -82,19 +73,19 @@ Header.
 
 \imgfield{ID Length}{1}
 
-Surprisingly enough, this is one the few image formats that doesn't
-have a set of magic numbers identifying the type of the file at the
-beginning. Instead, something known as the ID Length is found. In a
-later field of the format, there is a field called the image ID and
-this field specifies the length of that field in bytes.
+Surprisingly enough, this is one the few image formats without a set
+of magic numbers. Instead, something known as the ID Length is
+found. In a later field of the format, there is a field called the
+image ID and this field specifies the length of that field in bytes.
 
 \imgfield{Color Map Type}{1}
 
 The \tga format supports color palettes. An alternative term for
-palette used in the \tga specification is Color map. This field could simply be seen as a boolean flag indicating
-whether or not the image has a color map; if the value of this field
-is $1$, then the image has a color map and if it is $0$, then there is
-no color map in the image.
+palette used in the \tga specification is a color map. This field
+could simply be seen as a boolean flag indicating whether or not the
+image has a color map; if the value of this field is $1$, then the
+image has a color map and if it is $0$, then there is no color map in
+the image.
 
 \imgfield{Image Type}{1}
 
@@ -107,16 +98,10 @@ obviously means that the color data are indexes to a
 color-map. True-color simply means that the color uses the \rgb or the
 \rgba color models.
 
-%The color depths supported by the \tga format are 16,24 and 32.
-
-Since the color data can also be PackBits RLE compressed, this all amounts to $6$
-different kinds of image types. The image type is specified by the
-number value of this field. Table \ref{tab:imgtype} shows the number
-assigned to each image type\footnote{I will admit that to the number
-  $0$ the image type ``No Image Data Included'' is assigned. However,
-  since the main topic of this text is the storage of digital color, I
-have deemed this image type useless for our purposes and therefore
-omitted any discussion of it.}.
+Since the color data can also be PackBits \rle compressed, this all
+amounts to $6$ different kinds of image types. The image type is
+specified by the value of this field. Table \ref{tab:imgtype} shows
+the number assigned to each image type.
 
 \begin{table}
   \centering
@@ -136,31 +121,18 @@ omitted any discussion of it.}.
   \label{tab:imgtype}
 \end{table}
 
-From table \ref{tab:imgtype}, we can derive that, if we let $T$
-represent the value of this field, then a \tga image is compressed if
-and only if the following holds true:
-
-\begin{equation*}
-  \var{imageType} = 9 \OR \var{imageType} = 10 \OR \var{imageType} = 11
-\end{equation*}
-
 \imgfield{Color Map Specification}{5}
 
 The color map specification fields consists of a set of subfields
-describing the color map included in the image. If the image doesn't
-even have a color map to begin with, these fields can simply be
-ignored. Remember that a \tga image only has a color map if and only if
-the color map type $1$.
+describing the color map included in the image. For images without
+color maps you can simply ignore these fields.
 
 \imgsubfield{First Entry Index}{2}
 
-This entry consists of 2 bytes, so it's a 16-bit number and the
-maximum length of a 16-bit number is $2^{16} - 1$
-
-A color map essentially consists of a sequence of colors. The value
-of this field is how many of those colors that should be skipped in
-the beginning of that sequence. Don't know why you'd \textit{ever}
-want to do this, though. This value is most usually $0$.
+A color map essentially consists of a sequence of colors. The value of
+this field is how many of those colors that should be skipped in the
+beginning of that sequence. This value is most usually $0$. And
+remember, a sequence of two bytes forms a 16-bit number.
 
 \imgsubfield{Color map length}{2}
 
@@ -175,10 +147,10 @@ specified by this field. This number is specified in bits.
 
 If the color map entry size is $S$ and the color map length is $L$,
 then the total byte length of the color map is $\frac{S}{8} \cdot
-L$. If furthermore the first entry index is $I$ and $I \neq 0$, then
-the number is colors you actually end up loading from the color map
-will actually be $\frac{S}{8} \cdot L - I$, since you in this case
-skipped $I$ colors at the beginning of the color map.
+L$. If furthermore the first entry index is $I$, then the number is
+colors you actually end up loading from the color map will actually be
+$\frac{S}{8} \cdot L - I$, since you in this case skipped $I$ colors
+at the beginning of the color map.
 
 \imgfield{Image Specification}{10}
 
@@ -191,24 +163,17 @@ properly.
 \imgsubfield{Y-origin of Image}{2}
 
 These two subfields specify the coordinates of the image on the
-screen. The values of both of these fields are usually $0$, and I have
-never used an image viewer that actually supports the usage of these
-fields. My advice is that you can simply ignore these two values.
+screen. The values of both of these fields are usually $0$.
 
 \imgsubfield{Image Width}{2}
 
 \imgsubfield{Image Height}{2}
 
-These two fields specify the size of the image in pixels. Let $W$ be
-the first of these two fields, and $H$ the second, then the total
-number of pixels(colors) in this image is $W \cdot H$. And if the
-color depth is $D$, and $D$ is measured in bits, then the total byte
-size of the image data is $\frac{W \cdot H \cdot D}{8}$. Note that
-this only holds true when the color data have been uncompressed.
+These two fields specify the size of the image in pixels.
 
 \imgsubfield{Pixel Depth}{1}
 
-If the image doesn't use a colormap then this is color depth of the
+If the image does not use a colormap then this is color depth of the
 colors in the image data. If the image uses a color palette then this
 is the bit size of the indexes that the color data consists of when a
 colormap is used.
@@ -230,8 +195,6 @@ left corner, then the image is flipped upside down. If it is the
 bottom right corner, then the image is mirrored \textit{and} displayed
 upside down.
 
-% discuss how you can achieve horizontal reversal using this field.
-
 \begin{table}
   \centering
   \begin{tabular}{lrr}
@@ -252,20 +215,14 @@ The last four bits are the alpha channel bits. These specify how many
 bits in a separate color is used for the alpha channel. For images
 without an alpha channel this value will always be zero. For 16-bit
 images it will be 1, and for 32-bit images it will be 8. 32-bit color
-uses the \argb color channel ordering, meaning that the 8 highest bits,
-bits 24-31, are used to store the alpha. How the alpha channel is
-stored in 16-bit color was discussed in section
-\ref{sec:other-channel-sizes}.
-
-And the data of this image descriptor can trivially be parsed using
-the \textproc{getbits} function.
+uses the \argb color channel ordering. In section
+\ref{sec:other-channel-sizes} we discussed how to parse 16-bit color.
 
 \section{Color Data}
 \label{sec:color-data}
 
-I described the fields of the image header in the order that they must
-be loaded. Following the image header is the color data section. Here
-the palette, if there is one, and the color data of the image can be
+Following the image header is the color data section. Here the
+palette, if there is one, and the color data of the image can be
 found.
 
 \imgfield{Image ID}{0}
@@ -274,33 +231,22 @@ This field contains identifying information about the image in form of
 an \ascii string. It could be described as the name of the image. The
 ID Length field found in the header describes the size of this
 field. Since the ID Length field was stored in a byte, the maximum
-length of this string is $255$. But if the ID Length field is 0, this field
-doesn't exist at all and should be ignored.
+length of this string is $255$. But if the ID Length field is 0, this
+field does not exist at all and should be ignored.
 
 \imgfield{Color Map Data}{0}
 
 The color map can trivially be loaded into an array by loading the
-same number colors that was specified in the color map length
-field. These colors will have to be loaded $\frac{D}{8}$ bytes at a
-time, where $D$ is the color map entry size.
+same number of colors that was specified in the color map length
+field, where every color has the bit size specified by the Color map
+entry size field.
 
 \imgfield{Color Data}{0}
 
 In this field, the color data of the image is stored. The way this
 data is stored depends on the values stored in the image header. In
 algorithm \ref{alg:TGA-read-colordata} it is shown how to load the
-color data. Note that this algorithm only loads the numbers which
-represents the colors. If you don't know parse the color channels in
-these loaded numbers, then I refer you back to chapter
-\ref{cha:color}.
-
-And if you don't understand the decompression step of the PackBits RLE
-encoded data in the algorithm, then refer you back to algorithm
-\ref{alg:packbits-dec}.
-
-This algorithm is a combination of everything you have learned up to
-this point and you should study it carefully and not go on reading until
-you have fully understood it.
+color data.
 
 \begin{algorithm}[H]
   \caption{Reading and decompressing the color data of a \tga file}\algohack{}
@@ -319,6 +265,7 @@ you have fully understood it.
 
       \If{$\var{packet} \BitAnd 128$}
 
+        \linecomment{Read a number of the byte length $\var{pixelDepth} / 8$}
         \Let{$\var{data}$}{\Call{Read}{$\var{pixelDepth} / 8$}}
 
         \If{$\var{colorMapType} = 1$}
@@ -375,25 +322,23 @@ If there is a file footer, then the last 26 bytes of the file
 constitutes of it. And if the 26 last bytes really is a file footer,
 then bytes 8-23 for this footer is the \ascii string
 ``TRUEVISION-XFILE''. If this is true then these 26 bytes is the file
-footer of the image; otherwise, the image doesn't have a file footer.
+footer of the image; otherwise, the image has no footer in the first
+place.
 
-Byte 24 of this footer is the \ascii character ``.''(a dot) and byte 25
-is the \null terminator(the \ascii character whose \ascii value is
-0). Only bytes 0-7 in the file footer contain information that is of
-any significance and the fields that these bytes form are what I am
-going to cover now:
+Byte 24 of this footer is the \ascii character ``.''(a dot) and byte
+25 is the has the constant value $0$. Only bytes 0-7 in the file
+footer contain information that is of any significance. They form two
+fields:
 
 \imgfield{Extension Area Offset}{4}
 
 This 32-bit number gives the offset to the extension area. That is, it
 gives the position of the extension area, assuming that the very first
-byte in the file has position 0. I will discuss the contents of the
-extension area in section \ref{sec:tga-extension-area}.
-
-If this value is zero, then there is no extension area in the
-file. This will also hold true for any of the following offsets I am
-about to discuss. In general, if the offset to a section in a file has
-the value $0$, then that section does not exist for that file.
+byte in the file has position 0. We will discuss the contents of the
+extension area in section \ref{sec:tga-extension-area}. If this value
+is zero, then there is no extension area in the file. And in general,
+if the offset to a section in a file has the value $0$, then that
+section does not exist for that file.
 
 \imgfield{Developer Directory Offset}{4}
 
@@ -405,25 +350,20 @@ will briefly discuss this area section \ref{sec:developer-area}.
 
 The developer area allows programmers to add information to the \tga
 format that is specific to their applications. But this information is
-basically useless if you're only trying to load the color data from
-the \tga image, hence why we will not cover this section at all.
+basically useless for loading the color data of the \tga image, hence
+why we will not cover this section at all.
 
 Even if you were to find a \tga image out in the wild that uses this
 feature, you can only really guess on how you are supposed to use this
 data, as this is entirely dependent on the program that created the
 image.
 
-But if you actually need to figure out how to use this area, then I
-refer you to
-\cite{murray1996encyclopedia,91:_truev_tga_file_format_specif} for
-further reading.
-
 \section{Extension Area}
 \label{sec:tga-extension-area}
 
 The extension area is an absolutely \textit{huge} section containing
-many fields giving numerous kinds of meta data about the image. After
-examining this section, you should hopefully finally understand what
+many fields giving numerous kinds of metadata about the image. After
+reading this section, you should hopefully finally understand what
 metadata is.
 
 \imgfield{Extension Size}{2}
@@ -433,18 +373,16 @@ always $495$ bytes.
 
 \imgfield{Author Name}{41}
 
-This field gives the name of the author of the image. The last byte of
-this string is always NULL, so you can load this field as a C
-string. And if the length of the name is less than $40$, the rest of
-the string will be filled with NULL characters to indicate the end of
-the author name. We will from now on refer to such a string as a
-NULL-padded C string.
+This field gives the name of the creator of the image. The last byte
+of this string is always \nullm, so it is a C string. And if the
+length of the name is less than $40$, the rest of the string will be
+padded with \nullm characters. We from now on refer to such a string
+as a \nullm padded C string.
 
 \imgfield{Author Comment}{324}
 
-In this field the author can leave a comment on the image. This could
-for example be a shorter description of the where the image was
-taken. It is stored in a NULL-padded C string.
+In this field the author can leave a comment on the image and it is
+stored as a \nullm padded C string.
 
 \imgfield{Date/Time Stamp}{12}
 
@@ -463,24 +401,22 @@ numbers are stored in this order:
 
 \imgfield{Job Name/ID}{41}
 
-This is used to tie an image with a specific job. That is the best
-explanation I can give you, because I could not understand the \tga
-specification's description of this field.
+This is used to tie an image with a specific job.
 
 \imgfield{Job Time}{6}
 
 This is the time invested in creating the image, as described by the 3
 16-bit values:
 
-\begin{itemize}
-\item Hours (0 -- 65535)
+\begin{enumerate}
+\item Hours (0--65535)
 \item Minutes (0--59)
 \item Seconds (0--59)
-\end{itemize}
+\end{enumerate}
 
 \imgfield{Software ID}{41}
 
-A NULL-padded C string storing the name of program that was used to
+A \nullm padded C string storing the name of program that was used to
 create the image. This string could for example be \gimp or
 Photoshop(Two image editing programs).
 
@@ -500,8 +436,8 @@ number $123$ would get stored in this field.
 
 In this field, an \ascii letter that is used to indicated the version
 letter of the software is stored. If the software that created this
-image was in alpha version when the image was created, then the \ascii
-letter ``a'' would get stored in this field.
+image was in alpha version when the image was created, then the letter
+``a'' would get stored in this field.
 
 \imgfield{Key Color}{4}
 
@@ -525,8 +461,8 @@ appearance of the pixels as they were in the original image.
 
 \imgfield{Gamma Value}{4}
 
-This is an interesting value but I will not discuss it in this text
-because the math behind it was simply beyond me, and because in most
+This is an interesting value but we will not discuss it in this text
+because the math behind was simply to difficult, and because in most
 cases you can simply ignore this value.
 
 \imgfield{Color Correction Offset}{4}
@@ -543,8 +479,8 @@ file. The first value in the postage stamp is the width of the postage
 stamp image and the second value is its height. Following these two
 values is the postage stamp image. The color data in the postage stamp
 image is stored in exactly the same way as the full-size image and
-should therefore be loaded in the same way, as it is specified in
-algorithm \ref{alg:TGA-read-colordata}.
+should therefore be loaded in the same way, as specified in algorithm
+\ref{alg:TGA-read-colordata}.
 
 The postage stamp image is mainly useful when you want to preview a
 \tga image, without loading the entire full-size image. This may come
@@ -555,11 +491,11 @@ preview of it.
 
 This field provides the offset to the beginning of the Scan Line Table
 of the image. But the Scan Line Table is practically never used in
-practice, so I'll only discuss the Scan Line Table very briefly.
+practice, we will only discuss the Scan Line Table very briefly.
 
 The Scan Line Offset table basically contains a list of offsets. These
 offsets are offsets to the beginning of every single line, also called
-scan line, in the image data.
+scan lines, in the image data.
 
 \imgfield{Attributes Type}{1}
 
@@ -570,7 +506,8 @@ file. The following are valid values for this field:
   \item[0] No alpha data is included at all.
   \item[1] The alpha data is undefined, meaning that it can be ignored.
   \item[2] Basically same as for $1$.
-  \item[3] The alpha data should be used for transparency.
+  \item[3] The alpha data should be used for transparency, meaning
+    that it is normal alpha.
   \item[4] The color uses pre-multiplied alpha.
 
     But what does that mean? Let the quadruplet $(A,R,G,B)$ represent
@@ -590,10 +527,15 @@ file. The following are valid values for this field:
     \end{equation*}
 
     So using pre-multiplied alpha, the quadruplet $(A,R,G,B)$ is
-    instead represented by the quadruplet $\left(A, AR \bmod M, AG
-      \bmod M, AB \bmod M \right)$, where $M=2^n$ and $n$ is the
-    number bits assigned to one channel. The advantages of
-    pre-multiplied alpha will not be treated in this text, but a brief
-    discussion of this can be found in \cite{porter84_compos_dig_img}.
+    instead represented by the quadruplet
+
+    \begin{equation*}
+     \left(A, AR \bmod M, AG \bmod M, AB \bmod M \right),
+    \end{equation*}
+
+    where $M=2^n - 1$ and $n$ is the number of bits assigned to one
+    channel. The advantages of pre-multiplied alpha will not be
+    treated in this text, but a brief discussion of this can be found
+    in \cite{porter84_compos_dig_img}.
 
 \end{description}
