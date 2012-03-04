@@ -7,8 +7,8 @@
 %\usepackage[notextcomp]{kpfonts}
 
 % tgpagella doesn't have a math font.
-\RequirePackage[sc]{mathpazo}
-\RequirePackage{tgpagella}
+\usepackage[sc]{mathpazo}
+\usepackage{tgpagella}
 
 %\usepackage{fouriernc}
 
@@ -67,9 +67,6 @@ expansion=true]{microtype}
 
 % string macros.
 \usepackage{xstring}
-
-% used only for abbreviations.
-\usepackage{soul}
 
 % used for the very long ASCII table.
 \usepackage{longtable}
@@ -322,7 +319,8 @@ expansion=true]{microtype}
 \newacronyms{pgf,im,ascii,exif,tga,gif,png,crc,gcc,emacs,git,rle,lzw,lzss,
 nul, soh,stx,lf,rgb,rgba, argb,gimp,lzma,
 etx,eot,enq,ack,bel,bs,vt,ff,dle,nak,syn,etb,can,sub,esc,fs,gs,rs,us,del,
-zlib}
+zlib,mime,stmp,ihdr,plte,idat,iend,
+cmf,cm,cinfo,flg}
 
 % LZ77 and LZ78 are sometimes also referred to as LZ1 and LZ2.
 \newcommand*{\lzone}{{\acronymstyle lz\oldstylenums{77}}\xspace}
@@ -341,8 +339,6 @@ zlib}
 
 
 \newcommand*{\dc}[1]{{\acronymstyle dc#1}\xspace}
-
-%idat?
 
 % sixteen
 \newcommand*{\crcst}{{\acronymstyle crc-16}\xspace}

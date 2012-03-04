@@ -7,18 +7,13 @@
 
 \newcommand{\chnk}[1]{``#1''}
 
-\newcommand{\IDAT}{\chnk{IDAT}\xspace}
-
 \section{History}
 
-As stated in section \ref{sec:gif-history}, the creation of the \png
+As stated in section~\ref{sec:gif-history}, the creation of the \png
 format was primarily motivated by the patents encumbering the already
 popular \gif format. To solve this problem, a bunch of developers in
 the graphics developer community decided to cooperate on creating a
-new format that came to be known as \png. July 1 1996, version 1.0 of
-the \png specification was released. Then version 1.1 was released on
-new years eve of 1998. And the latest version of the \png specification
-is version 1.2, which was released in August 1999.
+new format that came to be known as \png.
 \cite{roelofs09:_histor_portab_networ_graph_png_format,roelofs99:_png,roelofs:_portab_networ_graph_main}.
 
 What follows is a technical description of the \png format. It is based
@@ -30,8 +25,8 @@ on the references
 \subsection{Chunks}
 
 \png images are fundamentally built up of chunks. The structure of the
-chunk is shown in figure \ref{fig:png-chunk}. It consists of four so
-called fields. Let us desribe them, one after one:
+chunk is shown in figure~\ref{fig:png-chunk}. It consists of four
+fields. Let us desribe them, one after one:
 
 \begin{figure}
   \centering
@@ -47,7 +42,7 @@ field.
 
 \subsubsection*{Chunk Type (4 Bytes)}
 
-This field stores 4 bytes that are used to store the type of the
+This field stores 4 bytes that are used to define the type of the
 chunk. Only the \ascii letters in the ranges A--Z and a--z are
 acceptable values of these bytes. So \chnk{abcd} is an acceptable
 chunk type while \chnk{a:e;} is not.
@@ -62,31 +57,31 @@ their inner workings will for this reason be the main topic of this
 chapter.
 
 If on the other hand the first letter of the chunk type name is
-lowercase, then that means that the chunk is \textit{ancillary}. These
+lowercase, then that means the chunk is \textit{ancillary}. These
 chunks do not need to be loaded in order to successfully render the
 image. These can contain all kinds of data, like the creation date of
 the image or a textual comment. Since much of the kind of data stored
-in ancillary chunks are things that we discussed in chapter
-\ref{cha:gif} and \ref{cha:tga}, we will not discuss these chunks at
-all.
+in ancillary chunks are things that we discussed in
+chapter~\ref{cha:gif}~and~\ref{cha:tga}, we will not discuss these
+chunks at all.
 
 \subsubsection*{Data (Variable)}
 
 In this field the actual data of the chunk is stored. The length of
 this field was specified by the earlier length field.
 
-\subsubsection*{CRC (4 Byte)}
+\subsubsection*{CRC (4 Bytes)}
 
-This is a CRC that is used to validate the correctness of the data in
-the chunk field. The CRC used in this field is the one we discussed
-back in section \ref{sec:pngcrc} on page \pageref{sec:pngcrc}
+This is a \crc that is used to validate the correctness of the data in
+the chunk field. The \crc used in this field is the one we discussed
+back in section~\ref{sec:pngcrc} on page~\pageref{sec:pngcrc}.
 
 \subsection{PNG Signature}
 
 Only chunks can be found in a \png image with one exception: the \png
 signature. The \png signature is a sequence of 8 bytes that is
-\textit{always} found in the beginning of a legit \png image. The byte
-sequence is the numbers
+\textit{always} found in the beginning of a legit \png image. The
+signature itself consists of the bytes
 
 \begin{equation*}
   \text{137 80 78 71 13 10 26 10}
@@ -96,14 +91,14 @@ They were all chosen to detect certain kinds of errors that can occur
 when transmitting a \png file over a network because such errors were
 very normal back in the days when \png was invented.
 
-The first bit is $137$. In binary this number is $1000\ 1001$. The key
+The first byte is $137$. In binary this number is \bin{1000\ 1001}. The key
 part to notice is that this is a non-\ascii character, because since
 the 7:th bit toggled it will always have a value $\ge 128$. When data
 is tranmitted as \ascii-text over a network the 7:th bit tends to be
-thrown away, as it is for example done in STMP \cite{rfc5321}, the
+thrown away, as it is for example done in \stmp \cite{rfc5321}, the
 Internet protocol that is used to transfer emails. To transmit
 non-\ascii binary data, like image data is, one should instead use the
-MIME protocol, which is an extension to the STMP protocol.
+\mime protocol, which is an extension to the \stmp protocol.
 
 So the main purpose of the first byte is to detect whether an image
 has accidentally been transmitted as \ascii text. If this byte does not
@@ -112,40 +107,28 @@ the bytes whose values are $\ge 128$ in the image file will also be
 corrupted, so there is little to no point in the decoder trying to open
 the corrupted image.
 
-The bytes
+The bytes $80, 78, 71$ are the \ascii values for the string \png, so
+they could simply be seen as the magic numbers of the \png format.
 
-\begin{equation*}
-  \text{80 78 71}
-\end{equation*}
+The following two bytes are $13, 10$. This is a windows style new
+line, \crlf, as was discussed section in~\ref{sec:glossary} on page~\pageref{sec:glossary}. If a \png file is accidentally transferred as
+text, there is another thing that may corrupt the file: line ending
+conversions. When, for example, you are transmitting a file from a
+window based operating system to a Unix-based operating system, there
+is a chance that the proram doing the transmission may convert the
+windows-style line-endings to their Unix equivalents, \lf. But for a
+binary image file this behavior is clearly undesirable, and is very
+likely to end up corrupting the image data. To detect such errors,
+these two bytes are used.
 
-are the \ascii values for the string \png, so they could simply be seen
-as the magic numbers of the \png format.
-
-The following two bytes are
-
-\begin{equation*}
-  \text{13 10}
-\end{equation*}
-
-This is a windows style new line, CRLF, as was discussed section in
-\ref{sec:glossary} on page \pageref{sec:glossary}. If a \png file is
-accidentally transferred as text, there is another thing that may
-corrupt the file: line ending conversions. When, for example, you are
-transmitting a file from a window based operating system to a
-UNIX-based operating system, there is a chance that the proram doing
-the transmission may convert the windows-style line-endings to their
-Unix equivalents, LF. But for a binary image file this behavior is
-clearly undesirable, and is very likely to end up corrupting the image
-data. To detect such errors, these two bytes are used.
-
-The byte $26$ is a bit obscure and it basically does nothing to verify
+The byte $26$ is very obscure and it basically does nothing to verify
 the correctness of the file. We will for these reasons a omit
 description of it here.
 
-The last byte $10$ is the newline character in UNIX-based operating
-systems, LF. So this is yet another byte that is used to verify that
+The last byte $10$ is the newline character in Unix-based operating
+systems, \lf. So this is yet another byte that is used to verify that
 the image was not transferred as text. This byte is used to verify
-that an image transferred from a UNIX-based operating system to a
+that an image transferred from a Unix-based operating system to a
 windows based operating system is not transferred as \ascii text.
 
 \section{Critical Chunks}
@@ -154,9 +137,9 @@ Following the \png signature is a sequence of chunks. Most kinds of
 chunks can simply be ignored, but the critical ones can not be
 ignored. Let us discuss the critical chunks, one after one.
 
-\subsection{IHDR -- Image Header}
+\subsection{Image Header}
 
-The image header of the \png format, the \chnk{IHDR} chunk, is by the
+The image header of the \png format, the \ihdr chunk, is by the
 \png specification guaranteed to always occur first in a \png file,
 after the \png signature. It contains data that is absolutely necessary
 for loading the image data.
@@ -164,16 +147,14 @@ for loading the image data.
 \subsubsection*{Width (4 Bytes)}
 \subsubsection*{Height (4 Bytes)}
 
-These two consecutive fields contains the size of the image. Since
-they are stored in two 32-bit numbers each, this means that the \png
-format allows for quite huge images.
+These two consecutive fields contains the size of the image.
 
 \subsubsection*{Bit Depth (1 Byte)}
 
 In the bit depth field the \textit{size of each color channel} is
 stored. So this value is \textit{not} the color depth of the
-image. However, note the only the values 1, 2, 4, 8 and 16 are allowed
-values for this field. This is mainly to simplify the job for
+image. However, note that only the values 1, 2, 4, 8 and 16 are
+allowed values for this field. This is mainly to simplify the job for
 programmers using the \png format.
 
 \begin{table}
@@ -196,39 +177,37 @@ programmers using the \png format.
 \subsubsection*{Color Type (1 Byte)}
 
 The \png format allows five different ways of storing color. The color
-type used varies depending on this value, as is shown in table
-\ref{tab:png-color-type}.
+type used varies depending on this value, as is shown in
+table~\ref{tab:png-color-type}.
 
 As you can from this field and the former, the \png is very flexible
 and allows for a multitude of different ways of storing
 color. However, to simplify things for programmers, not all possible
 bit depths can be used with all color types. The allowed color depths
-are shown in table \ref{tab:png-color-type}.
+are shown in table~\ref{tab:png-color-depths}.
 
 \begin{table}
   \centering
 
-  \newcommand{\invalid}{\cellcolor{gray}}
-
-  \begin{tabular}{|l|l|l|l|l|l|l|}
-    \hline
-    \multicolumn{7}{|c|}{Color Depth} \\
+  \begin{tabular}{lllllll}
+    \toprule
+    \multicolumn{7}{c}{Color Depth} \\
     \cline{1-7}
     \multirow{2}{*}{Color Type} & \multirow{2}{*}{Channels} &
-    \multicolumn{5}{c|}{Bits per channel} \\
+    \multicolumn{5}{c}{Bits per channel} \\
 
     \cline{3-7}
 
     & & 1 & 2 & 4 & 8 & 16 \\
 
     \hline
-    Indexed & 1 & 1 & 2 & 4 & 8 & \invalid \\ \hline
-    Grayscale & 1 & 1 & 2 & 4 & 8 & 16  \\ \hline
-    Grayscale and alpha & 2 & \invalid& \invalid & \invalid & 16 & 32  \\ \hline
-    Truecolor & 3 & \invalid & \invalid & \invalid & 24 & 48  \\ \hline
-    Truecolor and alpha & 4 & \invalid & \invalid & \invalid & 32 & 64  \\ \hline
+    Indexed & 1 & 1 & 2 & 4 & 8 & \\
+    Grayscale & 1 & 1 & 2 & 4 & 8 & 16  \\
+    Grayscale and alpha & 2 &&&& 16 & 32  \\
+    Truecolor & 3 &&&& 24 & 48  \\
+    Truecolor and alpha & 4 &&&& 32 & 64  \\
 
-    \hline
+    \bottomrule
 
   \end{tabular}
   \caption{The allowed color depths of the \png format}
@@ -239,7 +218,7 @@ are shown in table \ref{tab:png-color-type}.
 
 This field is used to indicate the compression method used in the
 image data. But the only value defined for this field by the \png
-specification is $0$, which means that DEFLATE compression is used.
+specification is $0$, which means that \deflate compression is used.
 
 \subsubsection*{Filter Method (1 Byte)}
 
@@ -247,7 +226,7 @@ specification is $0$, which means that DEFLATE compression is used.
 data. These filters basically make the image data compress
 better. Only the value $0$ is defined for this field, and this means
 that the four default filters are used to perform the filtering. We will
-discuss the filters in section \ref{sec:png-filters}.
+discuss the filters in section~\ref{sec:png-filters}.
 
 \subsubsection*{Interlace Method (1 Byte)}
 
@@ -257,65 +236,62 @@ is $1$, then the image data is interlaced.
 The \png format supports an interlacing method known Adam7, named so
 because it was invented by Adam Costello. This method of interlacing
 is significantly more complex than that of \gif, and is something
-that we will discuss in depth in section \ref{png-interlacing}.
+that we will discuss in depth in section~\ref{png-interlacing}.
 
-\subsection{PLTE -- Image Palette}
+\subsection{Image Palette}
 
-If the image uses indexed color, then that means that it uses a
-palette and that is what is stored in this chunk. The palette chunk
-simply consists of a sequence of \rgb colors. These colors will always be
-24 bits of size, so 8 bits are assigned to each color channel.
+For storing the palette the \plte chunk is used. The palette chunk
+simply consists of a sequence of \rgb colors with a color depth of 24.
 
-\subsection{IDAT -- Image Data}
+\subsection{Image Data}
 
-In this chunk the color data of the image is stored. The image data
+Storage of the the compressed image data is handled by the \idat chunk. In
+this chunk the color data of the image is stored. The image data
 storage system of the \png format is very complex and it is discussed
-in depth in section \ref{sec:png-image-data-storage}.
+in depth in section~\ref{sec:png-image-data-storage}.
 
-\subsection{IEND -- Image Trailer}
+\subsection{Image Trailer}
 
-The reading of chunks from the \png file will go and on until the image
-trailer chunk, \chnk{IEND}, is found. Once this chunk is encountered
-in the file, the entire image has been processed, and the decoder is
-done. The chunk data of this chunk type will \textit{always} be empty.
+The reading of chunks from the \png file will go and on until the
+image trailer chunk, the \iend chunk, is found. Once this chunk is
+encountered in the file, the entire image has been processed, and the
+decoder is done. The chunk data of this chunk type will
+\textit{always} be empty.
 
 \section{Image Data Storage Model}
 \label{sec:png-image-data-storage}
 
-We will now describe how the color data is stored in the IDAT chunk.
+We will now describe how the color data is stored in the \idat chunk.
 
 \subsection{The encoding process}
 
-To understand how the color data is stored in the \IDAT chunk, we must
-first understand how the data is encoded in the first place. So before
-discussing the decoding process, we will now briefly discuss how the
-image data is encoded.
+To understand how the color data is stored in the \idat chunk, we must
+first understand how the data is encoded in the first place, so we
+will now briefly discuss the encoding process.
 
 The unencoded data is just a sequence of pixel color values. If the
 image is \textit{interlaced}, then the image data is rearranged in a
 certain order and divided into passes. This process is in the \png
 specification referred to as \textit{pass extraction}. We will discuss
-interlacing in section \ref{png-interlacing}.
+interlacing in section~\ref{png-interlacing}.
 
 Not all images are interlaced, and if not, then the image data is just
 carried onto the next step. The next step is known as \textit{scanline
   serialization}. Here, the separate colors are partitioned up into
 byte values, and the byte values are divided up into separate rows.
 
-
-
-After the scanline serialization process, filters are applied to the
-image data that is now represented as a sequence of bytes. The filters
-are operations on the byte sequence that makes the data easier to
-compress. We will discuss these filters in section
-\ref{sec:png-filters}.
+After this, filters are applied to the image data that is now
+represented as a sequence of bytes. The filters are operations on the
+byte sequence that makes the data easier to compress. We will discuss
+these filters in section~\ref{sec:png-filters}.
 
 After that the data has optimized for compression by the filter, it is
-compressed using the DEFLATE algorithm, and stored using the \zlib
-format. We will discuss this in more depth in section \ref{sec:png-dec}.
+compressed using the \deflate algorithm, and stored using the \zlib
+format. We will discuss this in more depth in section~\ref{sec:png-dec}.
+
 
 And after all these steps, the image data is finally divided into
-\IDAT chunks, and these chunks are written to the file.
+\idat chunks, and these chunks are written to the file.
 
 And that is the entire encoding process. It is, indeed, compared to
 that of the other formats we have described, one complicated process.
@@ -329,53 +305,52 @@ describing how to undo the last of these subprocesses.
 First of all, even though the chunk length is stored in a 32-bit
 number, one chunk may not be enough to store all the compressed image
 data. If so, then the compressed image data is split up over several
-\IDAT chunks. So if an \IDAT chunk is encountered, one should keep
-reading and concatenate the data found in the \IDAT chunks until a non
-\IDAT chunk is found. Then, before reading the next chunk, one should
-decode and deal with the image data.
+\idat chunks. So if an \idat chunk is encountered, one should keep
+reading and concatenate the data found in the \idat chunks until a non
+\idat chunk is found.
 
 \subsection{Decompression}
 \label{sec:png-dec}
 
 The compressed image data, which may or may not be split up over
-several \IDAT chunks, is stored using the \zlib format. Let us briefly
+several \idat chunks, is stored using the \zlib format. Let us briefly
 outline the structure of this format, as it is specified by
 \cite{gailly96:_zlib_compr_data_format_specif}:
 
 \subsubsection{CMF}
 
-The first value found in the \zlib format will always be the CMF
+The first value found in the \zlib format will always be the \cmf
 byte. It is divided into two subfields:
 
 \paragraph{Bits 0-3 -- CM}
 
-The 4 lowest bits is the CM value. It is used to indicate the
+The 4 lowest bits is the \cm value. It is used to indicate the
 compression method. The only valid value of this field is $8$, which
-means that the compression method DEFLATE is used. We discussed
-DEFLATE in chapter \ref{cha:deflate}.
+means that the compression method \deflate is used. We discussed
+\deflate in chapter~\ref{cha:deflate}.
 
 \paragraph{Bits 4-7 -- CINFO}
 
 The compression info. It is the base 2 logarithm, $\log_2$, of the
-\lzone window size used during the DEFLATE compression, minus $8$ . Its
-maximum value is $7$, meaning that the maximum possible size of the \lzone window
-will be $2^{7 + 8} = 2^{15} = 32768$.
+size of the \lzone window used during the \deflate compression, minus
+$8$ . Its maximum value is $7$, meaning that the maximum possible size
+of the \lzone window will be $2^{7 + 8} = 2^{15} = 32768$.
 
 \subsubsection{FLG}
 
-The second value is the FLG byte. It divided into subfields as
+The second value is the \flg byte. It divided into subfields as
 follows:
 
 \paragraph{Bits 0-4 -- FCHECK}
 
-This value serves as a sort of checksum on the CMF and FLG bytes. This
+This value serves as a sort of checksum on the \cmf and \flg bytes. This
 value must be the value such that
 
 \begin{equation*}
-  \var{CMF} \cdot 256 + \var{FLG} (mod 31) = 0
+  \text{\cmf} \cdot 256 + \text{\flg} (\bmod 31) = 0
 \end{equation*}
 
-So CMF and FLG, when viewed as a 16-bit number, must be made dividable
+so \cmf and \flg, when viewed as a 16-bit number, must be made dividable
 by $31$ by this value. This value can \textit{always} do this because
 the maximum value of a 5-bit number is $2^5 - 1 = 31$.
 
@@ -385,8 +360,9 @@ This value must always be $0$ for valid \png files.
 
 \paragraph{Bits 6-7 -- FLEVEL}
 
-Compression level. This value used indicate the compression method used
-during the DEFLATE compression. It has $4$ possible values:
+Compression level. This value is used to indicate the compression
+method used during the \deflate compression. It has $4$ possible
+values:
 
 \begin{description}
 \item[0] Fastest compression algorithm used.
@@ -396,29 +372,29 @@ during the DEFLATE compression. It has $4$ possible values:
 \end{description}
 
 What compression method was used depends on how aggressive the \lzone
-window matching was during the DEFLATE compression. Because searching
-the \lzone window for matches is such a slow operation, faster versions
-of DEFLATE may give up on the string matching after a couple of tries
+window matching was during the \deflate compression. Because searching
+the \lzone window for matches is such a slow
+operation(\textit{especially} for very large windows), faster versions
+of \deflate may give up on the string matching after a couple of tries
 in order to speed up the compression in favor of lost compression
 performance. However, the maximum compression algorithm will never
-give until it has searched the entire window for matches, and it will
-therefore result in the best possible DEFLATE compression in return
-for a small speed loss. But with the fast computers of today the
+give up until it has searched the entire window for matches, and it
+will therefore result in the best possible \deflate compression in
+return for a speed loss. But with the fast computers of today the
 maximum compression algorithm is almost always used, but back in the
 old days you always had to make this choice between speed and
 compression performance.
 
 \subsubsection{Compressed Data}
 
-Following FLG byte the DEFLATE compressed data can be found, which we
-discussed in chapter \ref{cha:deflate}.
+Following the \flg byte the \deflate compressed data can be found,
+which we discussed in chapter~\ref{cha:deflate}.
 
 \subsubsection{Adler-32 checksum}
 
-This is the Adler-32 checksum of the \textit{uncompressed data} so
-this value is used validate the integrity of the uncompressed data. We
-discussed the Adler-32 checksum in section \ref{sec:adler32} on page
-\pageref{sec:adler32}.
+This is the Adler-32 checksum of the \textit{uncompressed data}. This
+value is used validate the integrity of the uncompressed data. We
+discussed the Adler-32 checksum in section~\ref{sec:adler32} on page~\pageref{sec:adler32}.
 
 \subsection{Filtering}
 \label{sec:png-filters}
@@ -440,7 +416,7 @@ Henceforth, we will let $B_{i,j}$ represent the \textit{byte} that
 being filtered by a filter. This byte is the $j$:th byte in row $i$ of
 the color data. As familiar, the scanline serialization process that
 occured before the filtering divided the pixel values into
-bytes. Notice that we do not reference the separate pixels using
+bytes. Notice that we do not reference the separate pixels using this
 notation. Filters operate on bytes instead of pixels for reasons that
 we will explain later.
 
@@ -462,13 +438,13 @@ something. Consider the data sequence
 
 Assuming that we are using 8-bit grayscale color, this data sequence
 describes a slow but steady progression from black to white(reread
-section \ref{sec:grayscale-color} on page
-\pageref{sec:grayscale-color} if you do not understand this). This
-linear kind of color progression is in computer graphics known as a
-\textit{gradient}\cite{sayood2003lossless}. How this progression would
-look like in an actual image is demonstrated in figure
-\ref{fig:gradient-black-white}. The key part here is to notice that
-since the difference between each number is always $1$,
+section~\ref{sec:grayscale-color} on
+page~\pageref{sec:grayscale-color} if you do not understand
+this). This linear kind of color progression is in computer graphics
+known as a \textit{gradient}\cite{sayood2003lossless}. How this
+progression would look like in an actual image is demonstrated in
+figure~\ref{fig:gradient-black-white}. The key part here is to notice
+that since the difference between each number is always $1$,
 
 \begin{equation*}
   2-1=3-2=4-3=\dots=255-254=1,
@@ -483,43 +459,49 @@ like this
 \end{equation}
 
 So every byte $B_{i,j}$ in the image will be represented by the
-difference $B_{i,j} - B_{i,j-1}$. If $j \le 0$, then always $B_{i,j-1}
-= 0$, so all bytes outside the boundary of the image will always be
-equal to $0$. Since this is done on bytes, all subtraction and
-addition is done modulo $256$. And since bytes cannot store negative
-numbers, numbers like $-2$ will be stored as $254$.
+difference
+
+\begin{equation*}
+ B_{i,j} - B_{i,j-1}
+\end{equation*}
+
+If $j \le 0$, then always $B_{i,j-1} = 0$, so all bytes outside the
+boundary of the image will always be equal to $0$. Since this is done
+on bytes, all subtraction and addition is done modulo $256$. And since
+bytes cannot store negative numbers, numbers like $-2$ will be stored
+as $254$.
 
 The original sequence can then be restored by iterating over the
-sequence (\ref{eq:filter1-seq}) and keeping a running sum, like this:
+sequence~\ref{eq:filter1-seq} and keeping a running sum:
 
 \begin{equation*}
   0+1,1+1,1+1+1,\dots
 \end{equation*}
 
-So each unfiltered byte is calculated from the filtered data $B$ in
-this way as follows:
+So each unfiltered byte is calculated from the filtered data $B$ as
+follows:
 
 \begin{equation*}
   B_{i,j} + B_{i,j-1}
 \end{equation*}
 
-And remember that all addition is done modulo $256$
+And remember that all addition is done modulo $256$.
 
 This filter can increase greatly the compression rate, because the
-sequence given in \ref{eq:filter1-seq} is more susceptible to
-compression than the original sequence \ref{eq:1-seq}. This is because
+sequence given in~\ref{eq:filter1-seq} is more susceptible to
+compression than the original sequence~\ref{eq:1-seq}. This is because
 in the filtered sequence redundancies are abundant, while in the
 unfiltered sequence not a single redundancy can be found! In fact,
 even an extremely simple compression algorithm like \rle can do wonders
 compressing the filtered data.
 
-Now consider figure \ref{fig:gradient-blue-red}. Assuming 24-bit
+Now consider figure~\ref{fig:gradient-blue-red}. Assuming 24-bit
 color, it is a gradient from the bluest of blue, $(0,0,255)$, to the
 reddest of red, $(255,0,0)$. This gradient is expressed by the
 following sequence of \rgb triplets:
 
 \begin{equation*}
-  (0,0,255), (1,0,254), (2,0,253), \dots, (254,0,1), (255,0,0)
+  (0,0,255); (1,0,254); (2,0,253); \dots; (254,0,1); (255,0,0)
 \end{equation*}
 
 In memory, this data laid out as sequence of 8-bit bytes. However, can
@@ -527,16 +509,16 @@ we filter this row for better compression using the same method we
 described before for 8-bit grayscale data? No, because the
 redundancies lies in the difference between the \textit{color
   channels} of following colors, not between the separate color
-channels that belongs so the same color.
+channels that belong to the same color.
 
 So the method of calculating each filtered byte to $B_{i,j} -
-B_{i,j-1}$ will not work very well. Rather, it should be calculated
-like $B_{i,j} - B_{i,j-3}$, since $24 / 8 = 3$.
+B_{i,j-1}$ will not work very well. Rather, it should be calculated as
+$B_{i,j} - B_{i,j-3}$, since $24 / 8 = 3$.
 
-Generally, for every color type and color depth, there is some value $t$ that is to
-calculate the filtered byte $B_{i,j} - B_{i,j-t}$. For a color type
-where the number of bits per pixel, in other words the color depth, is
-$c$, then this value is calculated as follows:
+Generally, for every color type and color depth, there is some value
+$t$ that is used to calculate the filtered byte $B_{i,j} -
+B_{i,j-t}$. For a color type where the number of bits per pixel, the
+color depth, is $c$, this value is calculated as follows:
 
 \begin{equation*}
   t = \left\lceil \frac{c}{8} \right\rceil
@@ -544,7 +526,7 @@ $c$, then this value is calculated as follows:
 
 Notice that by this definition, since $t$ is rounded up to whole
 bytes, this filter will not operate pixels but on bytes. For 1-bit
-grayscale color, here $c=1$, will be $t=1$, despite the fact that a
+grayscale color, here $c=1$ and so $t=1$, despite the fact that a
 whole $8$ pixels can fit in a byte. The developers of the \png
 specification made this decision to simplify the work of implementing
 support for these filters. All the other filters will also operate on
@@ -553,10 +535,10 @@ bytes for the same reason.
 Even for color types where the color channels are stored in channels
 of sizes over $8$ bits the filters will always operate on bytes. For
 48-bit \rgb color, where 16 bits are assigned to every channel,
-$t=6$. So for the red channel of a color, the value of the 8 highest
-bits is seen as a single byte and will be subtracted the value of the
-of the 8 highest bits of the same channel of the former pixel of that
-same. The same thing is done for the 8 lower bits.
+$t=6$. So for the red channel of such a color type, the value of the 8
+highest bits is seen as a single byte and will be subtracted from the
+value of the of the 8 highest bits of the red channel of the previous
+pixel. The same thing is done for the 8 lower bits.
 
 \begin{figure}[h!]
   \centering
@@ -582,7 +564,7 @@ filter as follows:
   B_{i,j} - B_{i,j-t}
 \end{equation*}
 
-And the bytes are unfiltered like this:
+And the bytes are unfiltered as
 
 \begin{equation*}
   B_{i,j} + B_{i,j-t}
@@ -592,8 +574,8 @@ Where any values outside of the image boundaries are set to $0$.
 
 \begin{Exercise}[label={filter-1}]
 
-  Filter the rows of the following image using filter type 1(remember
-  that every filtered row must begin with the filter type):
+  Filter the rows of the following image data using filter type
+  1(remember that every filtered row must begin with the filter type):
 
   \[
   \begin{matrix}
@@ -611,10 +593,10 @@ Where any values outside of the image boundaries are set to $0$.
 
 The Up filter works just like the Sub filter, expect that its purpose
 is to make vertical gradients easier to compress rather than
-horizontal gradients. So every byte will be filtered as $B_{i,j} -
-B_{i-1,j}$; that is, every byte is subtracted from the value of the
-corresponding byte in the former, unfiltered row. This filter, just as
-the former, operates only on bytes and not on pixels.
+horizontal. So every byte will be filtered as $B_{i,j} - B_{i-1,j}$;
+that is, every byte is subtracted from the value of the corresponding
+byte in the former row. This filter, just as the former, operates only
+on bytes and not on pixels.
 
 So given the three rows
 
@@ -628,7 +610,6 @@ So given the three rows
 
 If we let the first row get filtered by filter $0$, and the last two
 rows get filtered by filter $2$, then these rows will be filtered as
-follows
 
 \[
 \begin{matrix}
@@ -638,7 +619,7 @@ follows
 \end{matrix}
 \]
 
-Unfiltering is trivially done by reversing the filter:
+Unfiltering is trivially done:
 
 \begin{equation*}
   B_{i,j} + B_{i-1,j}
@@ -649,7 +630,6 @@ Unfiltering is trivially done by reversing the filter:
 This filter is essentially a combination of the two former
 filters. Here the filtered value of the byte will be equal to the
 average of $B_{i-1,j}$ and $B_{i,j-t}$, so it is calculated as
-follows:
 
 \begin{equation*}
   B_{i,j} - \left \lfloor \frac{B_{i-1,j} +
@@ -669,8 +649,7 @@ The transformation can then be trivially reversed:
 \subsubsection{Filter 4 -- Paeth}
 
 In this filter a third byte is added to the computation: the preceding
-byte of the upper byte, $B_{i-1,j-t}$. The filtered byte is in this
-filter computed as follows:
+byte of the upper byte, $B_{i-1,j-t}$. The filtering computation is
 
 \begin{equation*}
   B_{i,j} - \textsc{Paeth}(B_{i,j-t},B_{i-1,j},B_{i-1,j-t})
@@ -678,12 +657,12 @@ filter computed as follows:
 
 Where \textsc{Paeth} is the so-called Paeth-predictor function, named
 after Alan W.~Paeth because it was first described by him in
-\cite{arvo1994graphics_gems}. It is defined as is shown in algorithm,
-where $a=B_{i,j-t}$, $b=B_{i-1,j}$ and $c=B_{i-1,j-t}$.
+\cite{arvo1994graphics_gems}. It is defined as is shown in
+algorithm~\ref{alg:paeth}.
 
 
 \begin{algorithm}[H]
-  \caption{The Paeth filter.}
+  \caption{The Paeth-predictor.}
   \label{alg:paeth}
   \begin{algorithmic}[1]
     \Procedure{Paeth}{$a,b,c$}
@@ -795,8 +774,8 @@ single row $33,37$ and so on.
 
 To undo the interlacing first all the separate images that the passes
 consists of will have to be read. Then the separate pixels must be
-rearranged in proper order. It is shown in algorithm
-\ref{alg:png-interlace} how this is done.
+rearranged in proper order. It is shown in
+algorithm~\ref{alg:png-interlace} how this is done.
 
 \begin{algorithm}[H]
   \caption{Undoing the interlacing of the uncompressed \png color data}

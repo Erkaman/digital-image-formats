@@ -10,7 +10,7 @@ Interchange Format. We will first discuss the rather complicated legal
 history that the format has and then we will discuss the inner
 workings of the format. Since many of the features of the \tga format
 can also be found in the \gif format, we will not be as detailed as we
-were in chapter \ref{cha:tga} when we are describing all the features
+were in chapter~\ref{cha:tga} when we are describing all the features
 of the \gif format.
 
 \section{History}
@@ -51,7 +51,7 @@ uproar in the graphics developer community. Some of these upset
 developers formed a group that would develop a new, \textit{free}
 graphics format that would serve as an improved replacement to
 \gif. This new graphics format was \png, which we shall discuss in
-chapter \ref{cha:png}.
+chapter~\ref{cha:png}.
 
 \subsection{Freedom}
 
@@ -276,8 +276,8 @@ the \gif format can store several images in a single file.).
 
 \subsubsection{Pixel Aspect Ratio(Byte)}
 
-We already discussed this value in chapter \ref{cha:tga}. To be more
-specific, we discussed it in section \ref{sec:tga-extension-area}.
+We already discussed this value in chapter~\ref{cha:tga}. To be more
+specific, we discussed it in section~\ref{sec:tga-extension-area}.
 
 \section{Color Tables}
 
@@ -290,7 +290,7 @@ global color table will not occur at all within the image!
 The global color table is, just as in any other image format, a long
 array of colors. Every color is given 24 bits of storage and every
 color channel color is assigned an 8-bit number. The number of colors
-in the color table is calculated according to equation \ref{eq:calc-global-color-table-size}.
+in the color table is calculated according to equation~\ref{eq:calc-global-color-table-size}.
 
 \subsection{Local Color Table(Optional)}
 
@@ -372,7 +372,7 @@ of rows in pass $x$:
 \end{description}
 
 For an image of height $20$ rows, the rows would assigned to the
-passes shown in table \ref{tab:gif-interlacing}. Here $n_1 =
+passes shown in table~\ref{tab:gif-interlacing}. Here $n_1 =
 3$, so the rows of pass $1$ are $0$,$8$ and $16$. $n_2 = 2$, so the
 rows of pass $2$ are $4$ and $12$. $n_3 = 5$, so the rows of pass $3$
 are $2$, $6$, $10$, $14$ and $18$. $n_4 = 10$, so the rows of the
@@ -387,10 +387,10 @@ row? Yes it is; this follows from the fact that
   = 1
 \end{equation*}
 
-In algorithm \ref{alg:gif-decompression} it is shown how to
+In algorithm~\ref{alg:gif-decompression} it is shown how to
 uninterlace the interlaced decompressed image data.  Since this
 algorithm is pretty much self-explanatory, I will not include an in
-depth discussion of it. Reread section \ref{sec:color-layout} if you
+depth discussion of it. Reread section~\ref{sec:color-layout} if you
 do not fully understand this algorithm.
 
 \begin{algorithm}[H]
@@ -630,7 +630,7 @@ is as usual terminated by the empty block.
 
 Now we are to discuss how to decompress the color data using the
 information given in the two previous fields. The full decompression
-algorithm is given in algorithm \ref{alg:gif-decompression}. As you
+algorithm is given in algorithm~\ref{alg:gif-decompression}. As you
 can see, it is very similar to the original \lzw algorithm. Let us
 now go through the most important differences.
 
@@ -662,7 +662,7 @@ data has been reached, and that the decompression is done.
 If, for example, our color table simply consisted of the colors black
 and white(in that order), the initial table that would be used in the
 beginning of then decompression algorithm would have been the table
-given in table \ref{tab:example-gif-color-table}.
+given in table~\ref{tab:example-gif-color-table}.
 
 \begin{table}
   \centering
@@ -892,11 +892,11 @@ name change \cite{walte96:_web_scrip_secret_weapon}.
 \section{GIF syntax}
 \label{sec:gif-syntax}
 
-So there are quite a few kinds of block in the \gif format. But in what
-order must they come for a \gif file to be considered syntactically
-valid, by the sytnax of \gif files? The syntax of valid \gif files, as
-given in \cite{gif89a}, is illustrated by figure
-\ref{fig:gif-grammar}.
+So there are quite a few kinds of block in the \gif format. But in
+what order must they come for a \gif file to be considered
+syntactically valid, by the sytnax of \gif files? The syntax of valid
+\gif files, as given in \cite{gif89a}, is illustrated by
+figure~\ref{fig:gif-grammar}.
 
 \begin{figure}
   \centering

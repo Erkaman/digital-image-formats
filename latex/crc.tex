@@ -387,7 +387,7 @@ not cover in this text.
 Now we will finally discuss how to implement the \crc computation in
 code.
 
-Please inspect algorithm \ref{alg:crc8-comp}. It implements
+Please inspect algorithm~\ref{alg:crc8-comp}. It implements
 polynomial division for generator polynomials of width 8.
 
 \begin{algorithm}[H]
@@ -585,7 +585,7 @@ The result of this subtraction is divided by the generator polynomial:
 
 If we consider this example, then it is easy to see that dividing the
 bytes by the generator polynomial separately will not affect the end
-result. And therefore, algorithm \ref{alg:crc8-comp} works. The
+result. And therefore, algorithm~\ref{alg:crc8-comp} works. The
 advantage that our algorithm has, is that does not require
 concatenating the numbers into one large binary number, but rather
 only requires being able to perform the operations on comparatively
@@ -617,7 +617,7 @@ things simple we will not discuss it here.
 
 Reasoning in very much the same, way can also implement the \crc
 computation for generator polynomials of width $32$, as is shown in
-algorithm \ref{alg:crc32-comp}. As you can see, it is largely the same
+algorithm~\ref{alg:crc32-comp}. As you can see, it is largely the same
 algorithm.
 
 \begin{algorithm}[H]
@@ -652,12 +652,13 @@ algorithm.
 We will end our discussion on \crc by briefly discussing the \crc that
 is used in the \png format as it is defined in
 \cite{boutel:_png_portab_networ_graph_specif_version12}. The \crc
-computation algorithm is given in algorithm
-\ref{alg:crc-png-comp}. The generator polynomial has a width of $32$,
-so the \crc calculated by this algorithm is a 32-bit number. As can be
-seen, the generator polynomial used is \hex{EDB88320}. But this number
-represent the polynomial written out in reversed order with the highest bit
-left out, so the polynomial represented by this number is in fact
+computation algorithm is given in
+algorithm~\ref{alg:crc-png-comp}. The generator polynomial has a width
+of $32$, so the \crc calculated by this algorithm is a 32-bit
+number. As can be seen, the generator polynomial used is
+\hex{EDB88320}. But this number represent the polynomial written out
+in reversed order with the highest bit left out, so the polynomial
+represented by this number is in fact
 
 \begin{equation*}
   x^{32} + x^{26} + x^{23} + x^{22} + x^{16} + x^{12} + x^{11} + x^{10} + x^8 + x^7 + x^5 + x^4 + x^2 + x + 1
@@ -735,7 +736,7 @@ of $n$ bytes the checksum is calculated as follows:
 \end{align*}
 
 The last line may however need some explanation. It was back in
-exercise \ref{bit-equiv} on page \pageref{bit-equiv} shown that $b
+exercise~\ref{bit-equiv} on page~\pageref{bit-equiv} shown that $b
 \ShiftLeft 16$ is equivalent to $b \cdot 2^{16}$. Bitwise or is
 equivalent to plain addition in this case only because $b$ and $a$
 were constantly taken modulo $65521$, meaning that they can never be
@@ -744,7 +745,7 @@ in the numbers $a$ and $b$ to interfere with each other in the bitwise
 or operation, and therefore bitwise or is equivalent to plain addition
 in this case.
 
-It is also shown in algorithm \ref{alg:adler32} how to calculate the
+It is also shown in algorithm~\ref{alg:adler32} how to calculate the
 \adlerchk checksum.
 
 \begin{algorithm}[H]

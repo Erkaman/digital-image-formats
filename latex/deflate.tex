@@ -38,20 +38,20 @@ strings. All these values forms an alphabet of values 0--285. This
 entire alphabet will also get Huffman coded in the later parts of the
 algorithm.
 
-The length codes are a bit tricky to use, though. Please observe table
-\ref{tab:deflate-length-codes}. This table means that if a code of
-$257$ is found then that means that this code in reality represents a
-length of $3$, and in the same way a code of $262$ represents a length
-of $8$. But how should a code like $265$ be parsed? First, we will
-remark that the minimum length this code can represent is $11$. This
-code is then followed by a single extra bit, as indicated by the
-table. The value of the extra bit is added to minimum code length to
-get the true code length represented by the previous code. In other
-words, a code of $265$ followed by the extra bit $1$ will represent
-the code length $12$, but had it on the other hand been followed by
-the single bit $0$, then it would have represented the code length
-$11$. In the same way, a length of $95$ is indicated by the length
-code $278$ followed by the 4-bit number $\bin{1100}=12$.
+The length codes are a bit tricky to use, though. Please observe
+table~\ref{tab:deflate-length-codes}. This table means that if a code
+of $257$ is found then that means that this code in reality represents
+a length of $3$, and in the same way a code of $262$ represents a
+length of $8$. But how should a code like $265$ be parsed? First, we
+will remark that the minimum length this code can represent is
+$11$. This code is then followed by a single extra bit, as indicated
+by the table. The value of the extra bit is added to minimum code
+length to get the true code length represented by the previous
+code. In other words, a code of $265$ followed by the extra bit $1$
+will represent the code length $12$, but had it on the other hand been
+followed by the single bit $0$, then it would have represented the
+code length $11$. In the same way, a length of $95$ is indicated by
+the length code $278$ followed by the 4-bit number $\bin{1100}=12$.
 
 \begin{table}
 
@@ -123,7 +123,7 @@ Following a length code and its accompanying extra bits is always a
 distance code. By the way, offsets are termed distances in the \deflate
 literature. The distance codes are drawn from the alphabet 0--29 and
 they are stored in very much the same way as length codes, as is shown
-in table \ref{tab:deflate-distance-codes}. So a distance of $30000$
+in table~\ref{tab:deflate-distance-codes}. So a distance of $30000$
 will be represented by a distance code 29 followed by the 13-bit value
 5423, since
 
@@ -214,20 +214,21 @@ fixed Huffman codes.
 Using fixed Huffman codes the Huffman codes of the both alphabets are
 precomputed(it is shown in section ? \todo{reference section} how
 these Huffman codes are computed). The precomputed Huffman codes for
-the first alphabet are shown in table
-\ref{tab:fixed-length-litteral-huffman}. Using this table, the end
-code, 256, will be represented by the 7-bit Huffman Code
+the first alphabet are shown in
+table~\ref{tab:fixed-length-litteral-huffman}. Using this table, the
+end code, 256, will be represented by the 7-bit Huffman Code
 \bin{0000000}, the literal code 142 will on the other hand be
 represented by the 8-bit Huffman code \bin{10111110} and the length
 code 258 will be represented by the 7-bit Huffman code
 \bin{0000010}. The reader may however be confused by the inclusion of
 the two length codes 286 and 287. Did not the literal/length alphabet
 only span the range 0--285? The two codes 286 and 287 will according
-to the \deflate specification never be found in the compressed data. So
-it is to us incomprehensible why these two codes are given assigned
-Huffman codes. But since they will never occur in the data we can
-safely ignore them. The Huffman encoded length codes will obviously,
-if there are any, also be followed by their accompanying extra bits.
+to the \deflate specification never be found in the compressed
+data. So it is to us incomprehensible why these two codes are given
+assigned Huffman codes. But since they will never occur in the data we
+can safely ignore them. The Huffman encoded length codes will
+obviously, if there are any, also be followed by their accompanying
+extra bits.
 
 The fixed Huffman Distance codes are on the other hand represented in
 a more simple way: Distance codes 0-29 are assigned 5-bit Huffman
@@ -267,9 +268,9 @@ general pay off.
 
 These Huffman code are actually computed in a very peculiar way, and
 this is what we will be discussing for the rest of this section. As should
-familiar from chapter \ref{cha:huffman}, the computed Huffman is
+familiar from chapter~\ref{cha:huffman}, the computed Huffman is
 rarely unique, but many different Huffman tree can be computed. In
-chapter \ref{cha:huffman} we constructed a Huffman tree for the string
+chapter~\ref{cha:huffman} we constructed a Huffman tree for the string
 $\var{ababaacdd}$ and ended up with the Huffman tree:
 
 \begin{huffmanc}
@@ -287,7 +288,7 @@ $\var{ababaacdd}$ and ended up with the Huffman tree:
   \nodechar{anode}{a}
 \end{huffmanc}
 
-But as was shown in exercise \ref{nuther}, this Huffman tree was not
+But as was shown in exercise~\ref{nuther}, this Huffman tree was not
 by any means unique. However, if add the following requirements to the
 construction of the Huffman tree it is guaranteed to be unique:
 
@@ -335,8 +336,8 @@ Huffman tree for the string $\var{ababaacdd}$ will be
   \label{tab:huffman-codes-sorted}
 \end{table}
 
-The letters we then be assigned the codes shown in table
-\ref{tab:huffman-codes-sorted}. This tree will always be unique,
+The letters we then be assigned the codes shown in
+table~\ref{tab:huffman-codes-sorted}. This tree will always be unique,
 because it is sorted by the only two properties that a code can have:
 its length and the symbol it represents.
 
@@ -372,10 +373,10 @@ tokens? It turns out that it is actually fully possible to represent
 the sorted Huffman by the code lengths of the codes represented by the
 tree, assuming that these codes are sorted in the lexicographic order
 by the symbols which they are supposed to represent. From the input
-string $\var{ababaacdd}$ the sorted Huffman codes shown in table
-\ref{tab:huffman-codes-sorted} are shown. We will now show that is
-fully possible to represent these codes by the respective code lengths
-in lexicographical order:
+string $\var{ababaacdd}$ the sorted Huffman codes shown in
+table~\ref{tab:huffman-codes-sorted} are shown. We will now show that
+is fully possible to represent these codes by the respective code
+lengths in lexicographical order:
 
 \begin{equation*}
   1,3,3,2
@@ -618,7 +619,7 @@ length of this sequence is the value of the LEN field.
 
 While the non-compressed block-type may seem useless, it does have
 several usages. It can for example store sections of data in a file
-which is inflated by compression. As we saw in chapter \ref{cha:rle},
+which is inflated by compression. As we saw in chapter~\ref{cha:rle},
 it is fully possible for a compression algorithm to explode the size
 of the compressed data. But for \deflate, this is something that most
 typically happens for very random data. Data in which there are close
@@ -628,9 +629,9 @@ storing parts of a file that contains \textit{very} random data.
 \subsection{Compression with fixed Huffman codes (BTYPE=01))}
 
 The data in the block is compressed using the fixed, precomputed,
-Huffman codes we discussed in section
-\ref{sec:fixed-huffman-codes}. So the compressed data will in other
-words just contain a sequence of Huffman codes for the two
+Huffman codes we discussed in
+section~\ref{sec:fixed-huffman-codes}. So the compressed data will in
+other words just contain a sequence of Huffman codes for the two
 alphabets. The 5 remaining bits of the header byte of the block will
 be used for storing Huffman codes, so they are not skipped in this
 case.
@@ -638,9 +639,9 @@ case.
 \subsection{Compression with dynamic Huffman codes (BTYPE=11))}
 
 In the last block type dynamic Huffman codes are instead computed. We
-already discussed in depth how this is done in section
-\ref{sec:dynamic-huffman-codes}, so we will not delve to deep into
-details here.
+already discussed in depth how this is done in
+section~\ref{sec:dynamic-huffman-codes}, so we will not delve to deep
+into details here.
 
 \subsection{HLIT (5 bits)}
 
@@ -671,11 +672,11 @@ by the sum $\var{HCLEN} + 4$, in the range 4--19.
 \subsection{Code Length Alphabet Code Lengths}
 
 And finally, here comes the code lengths for the alphabet of code
-lengths, permuted in the order we discussed in section
-\ref{sec:storing-huffman-codes}. The code lengths of this alphabet
-were limited to 7 bits of length, meaning that these code lengths are
-stored using 3-bit numbers; more specifically, the length of this
-sequence will be $(\var{HCLEN} + 4) \cdot 3$ bits.
+lengths, permuted in the order we discussed in
+section~\ref{sec:storing-huffman-codes}. The code lengths of this
+alphabet were limited to 7 bits of length, meaning that these code
+lengths are stored using 3-bit numbers; more specifically, the length
+of this sequence will be $(\var{HCLEN} + 4) \cdot 3$ bits.
 
 \subsection{Literal/Length Alphabet Code Lengths}
 

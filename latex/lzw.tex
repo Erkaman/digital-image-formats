@@ -50,7 +50,7 @@ filling this string table with all the strings that are possible to
 fit in a byte. So all the codes 0--255 are assigned their respective
 strings. We will for sake of simplicity use \ascii encoding throughout
 this example, so the codes 0--255 are assigned their respective \ascii
-characters, as is shown in table \ref{tab:str-tab-ascii}.
+characters, as is shown in table~\ref{tab:str-tab-ascii}.
 
 \begin{table}
   \centering
@@ -102,8 +102,7 @@ in the table, so it is added to the string table and given the code
 $258$.
 
 
-And the algorithm just keeps going on like this. Table
-\ref{tab:lzw-walkthru} gives a detailed walkthrough of the entire
+And the algorithm just keeps going on like this. Table~\ref{tab:lzw-walkthru} gives a detailed walkthrough of the entire
 compression process. So the string \texttt{ababcbababaaaaaaa} was in
 the end compressed down to
 
@@ -158,7 +157,7 @@ outputted, and the appended string $Sc$ is added to the dictionary.
 \section{Implementation of The Compression Algorithm}
 \label{sec:lzw-enc-algorithm}
 
-In algorithm \ref{alg:lzw-compression} the complete \lzw compression
+In algorithm~\ref{alg:lzw-compression} the complete \lzw compression
 algorithm is presented. Let us now discuss the details of it.
 
 \begin{algorithm}[H]
@@ -221,7 +220,7 @@ This is of course not the only possible storage model for the
 codes. In the \gif format's variation of the \lzw algorithm,
 increasing codes sizes are used to even further improve the
 compression efficiency of this algorithm. We will discuss this
-variation in chapter \ref{cha:gif}.
+variation in chapter~\ref{cha:gif}.
 
 \subsection{Knowing when to stop}
 
@@ -258,9 +257,9 @@ data the decompressor is able to rebuild an exact copy of the string
 table built during the compression.
 
 The decompressor first assign the code values 0--255 to their
-corresponding single length strings, and constructs the same table
-\ref{tab:str-tab-ascii} that was also built in the beginning of the
-compression.
+corresponding single length strings, and constructs the same
+table~\ref{tab:str-tab-ascii} that was also built in the beginning of
+the compression.
 
 The codes for the characters \texttt{a} and \texttt{b} are read and
 \texttt{a} is outputted. Now \texttt{a} and \texttt{b} are appended
@@ -326,7 +325,7 @@ $\omega$, so that we may construct the string $\kok$. Since
 =\ $\texttt{b} and $\omega =\ $\texttt{a}, so the string represented
 by $260$ is $\kok =\ $\texttt{bab}.
 
-In algorithm \ref{alg:lzw-working-decompression} pseudocode of the
+In algorithm~\ref{alg:lzw-working-decompression} pseudocode of the
 algorithm we just described is given.
 
 \begin{Exercise}[label={lzw-decompress}]
@@ -404,7 +403,7 @@ for testing new compression algorithms called the Canterbury Corpus is
 that we will be using. These files were selected by
 \cite{arnold:corpus} out of thousands of other files because they were
 shown to test the efficiency of lossless compression algorithms the
-best. Table \ref{tab:corp-files} lists all the files in the Canterbury
+best. Table~\ref{tab:corp-files} lists all the files in the Canterbury
 Corpus. They can all be downloaded at \cite{powell:desc-corp}.
 
 \begin{table}
@@ -433,7 +432,7 @@ Corpus. They can all be downloaded at \cite{powell:desc-corp}.
 \subsection{The Test}
 
 The purpose of the test was to test for the compression ratio for all
-the files in table \ref{tab:corp-files} for different code fixed sizes
+the files in table~\ref{tab:corp-files} for different code fixed sizes
 $n$ in the range $9 \leq n \leq 15$.
 
 The program that was used to do the compression was \verb|LZW|, which
@@ -448,7 +447,7 @@ script can be found at the location \verb|code/lzw/test.py|.
 
 \subsection{The Test Results}
 
-In table \ref{tab:lzw-test-results} we show the results of the test.
+In table~\ref{tab:lzw-test-results} we show the results of the test.
 
 \begin{sidewaystable}
 %  \begin{table}
@@ -461,8 +460,8 @@ In table \ref{tab:lzw-test-results} we show the results of the test.
 \end{sidewaystable}
 \subsection{Discussion}
 
-Now we will discuss the results gathered in table
-\ref{tab:lzw-test-results} and see if we can draw any sort of
+Now we will discuss the results gathered in
+table~\ref{tab:lzw-test-results} and see if we can draw any sort of
 conclusion from them.
 
 \subsubsection{Human Readable Text}

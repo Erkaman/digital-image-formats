@@ -7,7 +7,7 @@
 
 \section{History}
 
-As familiar from section \ref{sec:hist-lzw}, \lzone was the first of
+As familiar from section~\ref{sec:hist-lzw}, \lzone was the first of
 the two algorithms described by Lempel and Ziv that sparked the family
 of dictionary methods. We have partially discussed already \lztwo,
 since \lzw was based on it, and we will in this chapter discuss
@@ -156,9 +156,9 @@ the decompressed data will have increased by one. Now you can by again
 going back offset steps in the decompressed data reach the second
 character of the matched string. This process is then repeated until a
 string with the length indicated by the second field of the token has
-been decoded. This whole process is outlined in algorithm
-\ref{alg:dec-lzone-token}. Once this has been done, the third field of
-the match token is also added to the decompressed data.
+been decoded. This whole process is outlined in
+algorithm~\ref{alg:dec-lzone-token}. Once this has been done, the
+third field of the match token is also added to the decompressed data.
 
 \begin{algorithm}[H]
   \caption{Decoding a \lzone token}\algohack{}

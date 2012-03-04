@@ -88,7 +88,7 @@ This following description of the \rle algorithm uses the references
 
 One the most simple compression algorithms is known as
 \textit{Run-Length Encoding}, abbreviated \rle. The compression
-performed in the third question of exercise \ref{compression-ratio} is
+performed in the third question of exercise~\ref{compression-ratio} is
 actually \rle compression.
 
 In this algorithm, sequences of length $n$ of the same value $b$ are
@@ -164,8 +164,9 @@ ratios using \rle.
 \subsubsection{Compression}
 
 All of this is essentially trivial to implement in code. Let us first
-consider the compression algorithm, which is shown in algorithm
-\ref{alg:rle-enc}. What follows is a explanation of this algorithm.
+consider the compression algorithm, which is shown in
+algorithm~\ref{alg:rle-enc}. What follows is a explanation of this
+algorithm.
 
 \begin{algorithm}
   \caption{Encoding a file using \rle}
@@ -252,8 +253,8 @@ the end of the algorithm.
   \end{algorithmic}
 \end{algorithm}
 
-The ridiculously simple \rle decoding algorithm is shown in algorithm
-\ref{alg:rle-dec}.
+The ridiculously simple \rle decoding algorithm is shown in
+algorithm~\ref{alg:rle-dec}.
 
 It is very simple: pairs of $(n-1,b)$ are read in pair by pair. These
 pairs are then expanded to sequences $b,b,\dots,b$ of length $n$ and
@@ -341,7 +342,7 @@ it is a lot more \textit{reliable}.
 \subsubsection{Compression}
 
 Let us consider how to implement the actual PackBits \rle
-algorithm. It is shown in algorithm \ref{alg:packbits-enc}. We will
+algorithm. It is shown in algorithm~\ref{alg:packbits-enc}. We will
 now explain why this works.
 
 Since there are two kinds of packets allowed, we will need a way of
@@ -463,7 +464,7 @@ outputted.
 \subsubsection{Decompression}
 
   The decoding algorithm is thankfully not as complex. It is shown in
-  algorithm \ref{alg:packbits-dec}.
+  algorithm~\ref{alg:packbits-dec}.
 
 \begin{algorithm}
   \caption{Decoding a \rle packbits encoded file}\algohack{}
@@ -535,7 +536,7 @@ outputted.
     whatsoever ended up being performed in the long run.
 
     This data was compressed using the \rle algorithm, and we will
-    discuss this algorithm in section \ref{sec:rle}.
+    discuss this algorithm in section~\ref{sec:rle}.
 
   \end{enumerate}
 \end{Answer}

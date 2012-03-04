@@ -1,17 +1,22 @@
 \documentclass[a4paper]{article}
 \usepackage[T1]{fontenc}
 \usepackage[swedish]{babel}
+\usepackage[sc]{mathpazo}
+\usepackage{tgpagella}
 \usepackage[kerning,spacing]{microtype}
-\usepackage[charter]{mathdesign}
 \usepackage{datetime}
 \usepackage{hyperref}
 \usepackage{verbatim}
 \usepackage{algorithm}
 \usepackage{algpseudocode}
-\usepackage{inconsolata}
+\usepackage[scaled=0.80]{luximono}
 
-% reduce section header spacing to save some poor trees.
-\usepackage[compact]{titlesec}
+\makeatletter
+\renewcommand{\section}{\@startsection{section}{1}{\z@}%
+{-3.25ex\@plus -1ex \@minus -.2ex}%
+{1.5ex \@plus .2ex}%
+{\normalfont\normalsize\bfseries}}
+\makeatother
 
 \hyphenation{kom-pressions-algo-rit-mer}
 
@@ -294,7 +299,7 @@ http://marknelson.us/1989/10/01/lzw-data-compression/
 
 Data Compression - The Complete Reference
 
-A Technique for High-Performance Data Compressio
+A Technique for High-Performance Data Compression
 \end{verbatim}
 
 \dayheading{25}{9}{2011}
@@ -837,5 +842,11 @@ själv vet hur de fungerar.
 \dayheading{29}{2}{2012}
 
 Idag renskrev jag allt som jag hade skrivit om DEFLATE.
+
+\dayheading{4}{3}{2012}
+
+Har under de senaste två dagarna läst igenom hela arbetet(den
+skriftliga delen) och rättat ett flertal fel som jag inte upptäckt
+under de tidigare renskrivningarna.
 
 \end{document}

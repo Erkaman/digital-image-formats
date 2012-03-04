@@ -46,8 +46,7 @@ very widely used color model for representing color in computers is
 
 The \rgb color model is based on how our eyes perceive color, which we
 discussed in the previous section, so in \rgb color made by mixing
-different amounts of red, green and blue. It can be seen in figure
-\ref{fig:rgb} how the colors cyan, magenta and yellow are achieved in
+different amounts of red, green and blue. It can be seen in figure~\ref{fig:rgb} how the colors cyan, magenta and yellow are achieved in
 \rgb. Also note that white is achieved by mixing all of three colors
 and that black is represented by no color at all. The rest of the
 colors can be achieved by mixing different amounts of red, green and
@@ -56,7 +55,7 @@ blue.
 Color channels describe the different amounts of the basic colors red,
 green and blue in a color. The amount of red in a color is described
 by the red color channel. These are represented by numbers, and how
-exactly this is done is discussed in section \ref{sec:color-depth}.
+exactly this is done is discussed in section~\ref{sec:color-depth}.
 
 \subsection{RGBA}
 
@@ -66,7 +65,7 @@ added: the alpha channel. This new channel represents the opacity of a
 color. Opacity is simply the opposite of transparency
 \cite{porter84_compos_dig_img,murray1996encyclopedia,niederst1999webdesign}.
 
-Take a good look at figure \ref{fig:alpha}. This demonstrates how a
+Take a good look at figure~\ref{fig:alpha}. This demonstrates how a
 color with the same values for its red, blue and green channels gets a
 lower and lower value for its alpha channel. In the leftmost part of
 the image the value of the alpha channel is at its maximum, so the
@@ -222,7 +221,7 @@ Most programming languages do not support reading numbers from a file
 whose bit lengths are not multiples of 8. It is therefore not possible
 to directly read the 1-bit and 5-bit numbers that 16-bit color
 consists of. These numbers have to be extracted using the bitwise
-operators. In algorithm \ref{alg:read-16-bit-rgb} it is shown how to
+operators. In algorithm~\ref{alg:read-16-bit-rgb} it is shown how to
 parse 16-bit color.
 
 \begin{algorithm}[H]

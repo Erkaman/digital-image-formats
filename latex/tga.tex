@@ -12,11 +12,11 @@ For the same reason that the image format first became popular: its
 specification is very well written; it is freely available without any
 encumbering patents; and it is one extremely simple image format
 because the color data is stored in an obvious and intuitive way(in
-chapter \ref{cha:gif} and \ref{cha:png} we will see \textit{many}
+chapter~\ref{cha:gif}~and~\ref{cha:png} we will see \textit{many}
 examples of how unintuitively the color data can be stored) and the
 data itself is compressed with a very simple compression algorithm:
-PackBits \rle, which we discussed very much in depth in section
-\ref{sec:packbits-rle} \cite{murray1996encyclopedia}.
+PackBits \rle, which we discussed very much in depth in
+section~\ref{sec:packbits-rle} \cite{murray1996encyclopedia}.
 
 However, there are also some more complex features of the \tga format,
 but we will not cover all of them because very few of them are rarely ever
@@ -100,7 +100,7 @@ color-map. True-color simply means that the color uses the \rgb or the
 
 Since the color data can also be PackBits \rle compressed, this all
 amounts to $6$ different kinds of image types. The image type is
-specified by the value of this field. Table \ref{tab:imgtype} shows
+specified by the value of this field. Table~\ref{tab:imgtype} shows
 the number assigned to each image type.
 
 \begin{table}
@@ -188,7 +188,7 @@ always be set to zero.
 
 Bits 5 and 4 specify the screen destination of the first pixel. The
 screen destination varies depending on the values of these two bits
-according to table \ref{tab:image-origin}. If the image destination is
+according to table~\ref{tab:image-origin}. If the image destination is
 the top left corner, then the image is normally displayed. If it is
 the top right corner, then the image is mirrored. If it is the bottom
 left corner, then the image is flipped upside down. If it is the
@@ -215,8 +215,7 @@ The last four bits are the alpha channel bits. These specify how many
 bits in a separate color is used for the alpha channel. For images
 without an alpha channel this value will always be zero. For 16-bit
 images it will be 1, and for 32-bit images it will be 8. 32-bit color
-uses the \argb color channel ordering. In section
-\ref{sec:other-channel-sizes} we discussed how to parse 16-bit color.
+uses the \argb color channel ordering. In section~\ref{sec:other-channel-sizes} we discussed how to parse 16-bit color.
 
 \section{Color Data}
 \label{sec:color-data}
@@ -245,7 +244,7 @@ entry size field.
 
 In this field, the color data of the image is stored. The way this
 data is stored depends on the values stored in the image header. In
-algorithm \ref{alg:TGA-read-colordata} it is shown how to load the
+algorithm~\ref{alg:TGA-read-colordata} it is shown how to load the
 color data.
 
 \begin{algorithm}[H]
@@ -335,7 +334,7 @@ fields:
 This 32-bit number gives the offset to the extension area. That is, it
 gives the position of the extension area, assuming that the very first
 byte in the file has position 0. We will discuss the contents of the
-extension area in section \ref{sec:tga-extension-area}. If this value
+extension area in section~\ref{sec:tga-extension-area}. If this value
 is zero, then there is no extension area in the file. And in general,
 if the offset to a section in a file has the value $0$, then that
 section does not exist for that file.
@@ -343,7 +342,7 @@ section does not exist for that file.
 \imgfield{Developer Directory Offset}{4}
 
 This field gives the offset of the less interesting developer area. I
-will briefly discuss this area section \ref{sec:developer-area}.
+will briefly discuss this area section~\ref{sec:developer-area}.
 
 \section{Developer Area}
 \label{sec:developer-area}
@@ -479,8 +478,8 @@ file. The first value in the postage stamp is the width of the postage
 stamp image and the second value is its height. Following these two
 values is the postage stamp image. The color data in the postage stamp
 image is stored in exactly the same way as the full-size image and
-should therefore be loaded in the same way, as specified in algorithm
-\ref{alg:TGA-read-colordata}.
+should therefore be loaded in the same way, as specified in
+algorithm~\ref{alg:TGA-read-colordata}.
 
 The postage stamp image is mainly useful when you want to preview a
 \tga image, without loading the entire full-size image. This may come
