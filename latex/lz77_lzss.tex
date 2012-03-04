@@ -7,12 +7,12 @@
 
 \section{History}
 
-As familiar from section \ref{sec:hist-lzw}, \lzone was the first of the
-two algorithms described by Lempel and Ziv that sparked the family of
-dictionary methods. We have partially discussed already \lztwo, since
-\lzw was based on it, and we will in this chapter discuss the \lzone
-method. But we will also discuss \lzss, which is an improvement of \lzone
-that was developed by Storer and Szymanski in 1982.
+As familiar from section \ref{sec:hist-lzw}, \lzone was the first of
+the two algorithms described by Lempel and Ziv that sparked the family
+of dictionary methods. We have partially discussed already \lztwo,
+since \lzw was based on it, and we will in this chapter discuss
+\lzone. But we will also discuss \lzss, which is an improvement of
+\lzone that was developed by Storer and Szymanski in 1982.
 
 \section{LZ77}
 
@@ -89,7 +89,7 @@ following the matching string. Thus, the resulting token will be:
   \lzonestate{she{\spc}sells}{{\spc}sea{\spc}shell}{6}{3}{a}
 }
 
-And after this yet another string can get matched for:
+And after this yet another string can be matched for:
 
 \lzonedem{%
   \lzonestate{she{\spc}sells{\spc}sea}{{\spc}shells on}{4}{2}{h}
@@ -102,37 +102,37 @@ the lookahead buffer will start shrinking as the remaining characters
 are compressed, while the size of the window buffer is managed so that
 it never rises above its fixed size value.
 
-It is easy to see why \lzone works. Consider for example the following
-extract from ``Alice in Wonderland'':
+  It is easy to see why \lzone works. Consider for example the
+  following extract from ``Alice in Wonderland'':
 
 \begin{quote}
   `Then you should say what you mean,' the March Hare went on.
 
-  `I do,' Alice hastily replied; `at least--\underline{at least} I
-  \underline{mean} what I say--that's the same thing, you know.'
+  `I do,' Alice hastily replied; `at least--\textit{at least} I
+  \textit{mean} what I say--that's the same thing, you know.'
 
-  `Not the \underline{same thing} a bit!' said \underline{the} Hatter.
+  `Not the \textit{same thing} a bit!' said \textit{the} Hatter.
   `You might just as well say that ``I see what I eat'' is the
-  \underline{same thing} as ``\underline{I eat} \underline{what}
-  \underline{I see}''!'
+  \textit{same thing} as ``\textit{I eat} \textit{what}
+  \textit{I see}''!'
 
-  `\underline{You might just as well say},' \underline{added the}
-  \underline{March Hare}, `that ``I like what I get'' is the same
-  thing as ``\underline{I get} what \underline{I like}''!'
+  `\textit{You might just as well say},' \textit{added the}
+  \textit{March Hare}, `that ``I like what I get'' is the same
+  thing as ``\textit{I get} what \textit{I like}''!'
 
-  `\underline{You might just as well say},' \underline{added the}
+  `\textit{You might just as well say},' \textit{added the}
   Dormouse, who seemed to be talking in his sleep, `that ``I breathe
-  when I \underline{sleep}'' is the same thing as ``\underline{I
-    sleep} \underline{when} \underline{I breathe''}!'
+  when I \textit{sleep}'' is the same thing as ``\textit{I
+    sleep} \textit{when} \textit{I breathe''}!'
 
 \end{quote}
 
-Underlined in this extract are the longest parts of this text that
+Italicized in this extract are the longest parts of this text that
 will get caught by the \lzone compressor and get represented more
 efficiently as tokens. (Not all strings that will get caught by \lzone
-are underlined, only the longest ones are.) Human language texts tend
+are italicized, only the longest ones are.) Human language texts tend
 to be chock-full with repeated words, no matter how well written they
-are ,so they compress especially well under \lzone. And the same thing
+are, so they compress especially well under \lzone. And the same thing
 could be said for simple images.
 
 \subsection{Decompression}
@@ -194,7 +194,7 @@ size:
 Where the $\log_2$ is defined as
 
 \begin{equation*}
-  \log_2(x) = \frac{\log_b (x)}{\log_b (2)}
+  \log_2x = \frac{\log_b x}{\log_b 2}
 \end{equation*}
 
 for \textit{any} base $b$.
@@ -202,7 +202,7 @@ for \textit{any} base $b$.
 For window sizes that can not be written on the form $2^n$ then the
 above reasoning does not hold, but it needs an extension. For a window
 size of $20$ 5-bit numbers are required for specifying offsets, since
-$2^4 = 16$ and $2^5 = 32$. But $\log_2 20 \approx 4.32$, so if we let
+$2^4 = 16$ and $2^5 = 32$. But $\log_2 20 \approx 4.32$, so, if we let
 $\lceil x \rceil$ denote the floor operation, then correct bit size is
 calculated as
 
@@ -216,23 +216,24 @@ So for a window size of $w$, binary numbers of the bit length
   \lceil\log_2 w\rceil
 \end{equation*}
 
-are used for specifying offsets. And the size of the length field is
-the same way similarly.
+are used for specifying offsets. And the bit size of the length field
+is defined in very much the same way.
 
 \section{LZSS}
 
 The following brief description of the \lzss algorihtm is based on
 \cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr_lzss,okumura:_data_compr_algor_larc_lharc}.
 
-\lzone can perform excellent compression but it is also very wasteful in
-how it outputs unmatched characters. For a window size of $2^8$ and a
-lookahead size of $2^4$, $4 + 8 + 8 = 20$ whole bits are required for
-specifying a number that would otherwise have been stored as 8 bits!
+\lzone can perform excellent compression but it is also very wasteful
+in how it outputs unmatched characters. For a window size of $2^8$ and
+a lookahead size of $2^4$, $4 + 8 + 8 = 20$ whole bits are required
+for specifying a number(a number that could not be matched in the
+window) that would otherwise have been stored as 8 bits!
 
-\lzss fixes that problem as follows: unmatched character are
+\lzss fixes that problem as follows: unmatched characters are
 represented by a single toggled bit, 1, followed by the 8-bit value of
 the unmatched character. So the unmatched character \texttt{A}, which
 has an \ascii code of $65$, would be represented by the bit pattern
-\bin{1\ 0100\ 0001}. Match tokens are represented by a cleared bit, 0,
-followed by the offset and length values.
+\bin{1\ 0100\ 0001}. Matched tokens are represented by a cleared bit,
+0, followed by their offset and length values.
 
