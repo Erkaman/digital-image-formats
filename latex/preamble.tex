@@ -1,7 +1,7 @@
 % fonts
 \usepackage[T1]{fontenc}
 %usepackage{inconsolata}
-\usepackage[scaled=0.75]{luximono}
+\usepackage[scaled=0.80]{luximono}
 
 %\usepackage[charter]{mathdesign}
 %\usepackage[notextcomp]{kpfonts}
@@ -295,14 +295,14 @@ expansion=true]{microtype}
 
 \newcommand{\charnodeoffset}{1.0cm}
 
-\newcommand{\nodechar}[2]{\node[below=of #1, yshift=\charnodeoffset] {#2};}
+\newcommand{\nodechar}[2]{\node[below=of #1, yshift=\charnodeoffset] {\texttt{#2}};}
 
 \newcommand{\firstcharnode}[3]{  \node (#1) [hnode] {#2};
-  \nodechar{#1}{#3}}
+  \nodechar{#1}{\texttt{#3}}}
 
 \newcommand{\restcharnode}[4]{
   \node (#1) [hnode,right=of #2] {#3};
-  \nodechar{#1}{#4}
+  \nodechar{#1}{\texttt{#4}}
 }
 
 % see http://www.latex-community.org/forum/viewtopic.php?f=5&t=6218&p=63092
