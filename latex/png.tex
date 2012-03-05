@@ -697,16 +697,16 @@ Now let us describe the scanline serialization process. Say I have an
 image with the size 2x2, meaning that it is two pixels wide and two
 pixels high. This image uses indexed color with a color depth of 1 to
 store the color. Let the index $0$ represent a fully black color and
-the index $1$ represent gray color. Now let us that the first row of
-this image consists of the color indexes $1$ and $0$ and that the
-second consists of the indexes $0$ and $1$. Then this data would
-represent the image \checkerimg. Then, after scanline serialization
-process, the first row of this image will get encoded as a byte by
-writing from the highest bits to the lowest, meaning that the
-resulting byte will be $128$. The bit pattern for this number
-\bin{\textbf{10}00\ 0000}. Separate rows in the image data are kept
-separate from each other, so the second row will get encoded in a
-separate byte value $64$(\bin{\textbf{01}00\ 0000}).
+the index $1$ represent gray color. The first row of this image
+consists of the color indexes $1$ and $0$ and that the second consists
+of the indexes $0$ and $1$. Then this data would represent the image
+\checkerimg. During scanline serialization process, the first row of
+this image will get encoded as a byte by writing from the highest bit
+to the lowest, meaning that the resulting byte will be $128$, since
+the bit pattern for this number \bin{\textbf{10}00\ 0000}. Separate
+rows in the image data are kept separate from each other, so the
+second row will get encoded in a separate byte value
+$64$(\bin{\textbf{01}00\ 0000}).
 
 If on the other hand the color depth was 2, and the color values of
 the indexes of the data were kept the same, $01$; $00$; $00$; $01$,
@@ -722,9 +722,9 @@ the channels will get spread out over several bytes.
 \subsection{Interlacing}
 \label{png-interlacing}
 
-The main idea behind \png interlacing is that the image to be
-interlaced is divided into 8x8 tiles, and then the data of these tiles
-are partitioned into $7$ distinct passes:
+The main idea behind \png interlacing is that the interlaced image is
+divided into 8x8 tiles, and then the data of these tiles is
+partitioned into $7$ distinct passes:
 
 \[
 \begin{matrix}
@@ -738,6 +738,11 @@ are partitioned into $7$ distinct passes:
   7 & 7 & 7 & 7 & 7 & 7 & 7 & 7\\
 \end{matrix}
 \]
+
+Pixels belonging to the same pass, even those belonging to different
+tiles, will form subimages. These images are separately filtered and
+scanline serialized. The sequence of subimages is \deflate compressed
+as one consecutive stream of data.
 
 This is best understood by using an example. Consider, for example, an
 8-bit grayscale image that consisted of the grayscale data:
@@ -756,15 +761,10 @@ This is best understood by using an example. Consider, for example, an
 \end{matrix}
 \]
 
-The first pass of this interlaced image would consist of the 1x1 image
-with a single color 1. Passes are treated like single images and these
-single images will get scanline serialized separately. The images that
-of the separate passes will then be found after each in the color
-data. Pass would get scanline serialized to the byte $1$. It would
-then followed by the 1x1 image that pass 2 also consists of. This
-image consists of the color $5$ and so it will get serialized to
-$5$. Pass 3 will on the other hand consist of the 2x1 image with the
-single row $33,37$ and so on.
+The first pass of this interlaced image will consist of the 1x1 image
+with the single grayscale color 1. Pass 2 will also be an 1x1 image
+and this image consists of the color $5$. Pass 3 will on the other
+hand consist of the 2x1 image with the single row $33,37$ and so on.
 
 \begin{Exercise}[label={ex-interlace}]
 
@@ -773,12 +773,14 @@ single row $33,37$ and so on.
 \end{Exercise}
 
 To undo the interlacing first all the separate images that the passes
-consists of will have to be read. Then the separate pixels must be
-rearranged in proper order. It is shown in
-algorithm~\ref{alg:png-interlace} how this is done.
+consists of will have to be unfiltered and have the scanline
+serialization process undone on them. The images will then form a long
+stream of pixels. The separate pixels must then be rearranged in
+proper order. It is shown in algorithm~\ref{alg:png-interlace} how
+this is done.
 
 \begin{algorithm}[H]
-  \caption{Undoing the interlacing of the uncompressed \png color data}
+  \caption{Undoing \png interlacing}
   \label{alg:png-interlace}
   \begin{algorithmic}[1]
     \Let{$\var{startingRow}$}{$\{0, 0, 4, 0, 2, 0, 1\}$}
@@ -800,7 +802,7 @@ algorithm~\ref{alg:png-interlace} how this is done.
 
     \Let{$j$}{$\var{row} \cdot \var{width} + \var{column}$}
     \Let{$\var{uninterlacedColorData[j]}$}{$\var{uncompressedColorData[i]}$}
-    \Let{$i$}{$i + $}
+    \Let{$i$}{$i + 1$}
 
     \Let{$\var{column}$}{$\var{column} + \var{colIncrement[pass]}$}
 
@@ -814,8 +816,6 @@ algorithm~\ref{alg:png-interlace} how this is done.
 
   \end{algorithmic}
 \end{algorithm}
-
-
 
 \section{Answers to the exercises}
 
@@ -842,6 +842,7 @@ algorithm~\ref{alg:png-interlace} how this is done.
 
 
 \end{Answer}
+
 
 
 
