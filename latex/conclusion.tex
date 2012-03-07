@@ -8,9 +8,9 @@
 \section{Answer to the question}
 
 So how are images represented numerically? The answer to that question
-is simple: by using a color model separate pixel colors are
-represented numerically and by storing a long sequence of such pixels
-images are formed.
+is simple: by using a color model separate pixels are represented
+numerically and by storing a long sequence of such pixels images are
+formed.
 
 However, since raw color takes up so much space, it is often
 absolutely necessary to compress it. And here is where things truly
@@ -19,50 +19,48 @@ into compression algorithms like Huffman coding and \lzw, you will
 notice that they have a beauty in their simplicity that is almost
 frightening. For example, the main idea behind Huffman coding is
 simply that more frequent symbols are assigned binary numbers with
-less bits. And it makes perfect that doing will compress the input data!
+less bits.
 
 The \lzfam of methods could also be said to reason in the same way;
 but here the main goal is to rather assign frequently occurring
 formations of symbols, words, more space efficient
 representations. And as was shown by the \deflate algorithm, these
-word representation can also be Huffman coded to even further increase
-compression.
+word representations can also be Huffman coded to even further
+increase compression.
 
-But I will admit that reading the texts on data compression I had
-found was very difficult. Often the descriptions of the compression
+But I will admit that the sources in data compression I had found were
+very difficult reads. Often the descriptions of the compression
 algorithms were very terse, and as a result very difficult to
 understand. It for example took me several weeks until I had fully
 understood how the \lzw algorithm worked! Rereading my own description
 of the algorithm, I find it almost impossible to believe that it took
-me that long of a time to understood that simple of an algorithm!
+me that long of a time to understand that simple of an algorithm!
 
 But at the beginning of 2012 it felt like I had finally gotten over
 the intial hurdle because now I could without any sorts of problems
 read and understand the literature on data compression that I had
 initially found impenetrable!
 
-But understanding data compression was not the only great difficulty I had
-during the project. Understanding the computation of a \crc was
+But understanding data compression was not the only great difficulty I
+had during the project. Understanding the computation of a \crc was
 something that I found much harder than I expected, and it took
-several weeks until I had fully understood and documented this almost
-arcane subject. Because the mathematics that \crc is based is so
-advanced, you have little to no choice than just having to accept that
-the algorithm works. Having to accept that is something that I have
-always found very frustrating; I wanted to understand how things, not
-only know merely how they are done! But in the end, I had no choice
-but having to abbondon fully understand \crc, since there were several
-other things that I had also to get done in the project.
+several weeks until I had fully understood and documented this arcane
+subject. Because the mathematics that \crc is based is so advanced,
+you have little to no choice than just having to accept that the
+algorithm works. Having to accept that is something that I have always
+found very frustrating; I wanted to understand how things, not only
+know merely how they are done! But in the end, I had no choice but
+having to abbondon the idea of fully understanding \crc, since there
+were several other things that I had also to get done in the project.
 
 Another parts that proved to be a great obstacle to me was
 understanding color theory. Color Theory proved very difficult for me,
-because, again, the mathematics and physics was simply beyond me. I
-had plans for covering several more advanced color spaces that are
-also used in the project, but I simply had to give up because I simply
-could not understand the math behind them. This is also the reason why
-the chapter on digital color is so short compared to the rest of the
+because, again, the mathematics was simply beyond me. I had plans for
+covering several more advanced color spaces that are also used in the
+project, but I simply had to give up because I simply could not
+understand the math behind them. This is also the reason why the
+chapter on digital color is so short compared to the rest of the
 chapters in the text.
-
-% increase font size and decrese margins. 
 
 But overall I had very fun doing this project because these is nothing
 I enjoy more than programming and learning new things. And as the

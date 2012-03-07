@@ -25,7 +25,7 @@ operates to begin with.
 \deflate compressed data on the basic level consists of two kinds of
 data: literal bytes and length-distance pairs. This means that it uses
 a \lzone variation to do compression. It uses a system very similar to
-that of lzss, as we will soon see.
+that of \lzss, as we will soon see.
 
 An alphabet of 0--255 is used to encode literal bytes, which are just
 like unmatched tokens; that is, tokens for which for no match was
@@ -33,8 +33,8 @@ found for in the \lzone window. The special value $256$ is used to
 indicate the end of the compressed data. Note that this value is part
 of the \textit{same} alphabet as the literal bytes. Also part of the
 same alphabet are the length codes. They can be found in the range
-257--285, and they are used to indicate the length of the \lzone matched
-strings. All these values forms an alphabet of values 0--285. This
+257--285, and they are used to indicate the length of the \lzone
+matched strings. All these codes forms an alphabet of 0--285. This
 entire alphabet will also get Huffman coded in the later parts of the
 algorithm.
 
@@ -51,7 +51,12 @@ code. In other words, a code of $265$ followed by the extra bit $1$
 will represent the code length $12$, but had it on the other hand been
 followed by the single bit $0$, then it would have represented the
 code length $11$. In the same way, a length of $95$ is indicated by
-the length code $278$ followed by the 4-bit number $\bin{1100}=12$.
+the length code $278$ followed by the 4-bit number $\bin{1100}=12$,
+since
+
+\begin{equation*}
+  83 + 12 = 95
+\end{equation*}
 
 \begin{table}
 
@@ -133,8 +138,8 @@ will be represented by a distance code 29 followed by the 13-bit value
 
 Length distance codes form pair to represent strings that have been
 matched for in the window. First comes the length code and its extra
-bits, and after the distance code and its extra bits. If no matches
-could be made, then literal bytes are simply used.
+bits, and after that the distance code and its extra bits. If no
+matches could be made, then literal bytes are simply used.
 
 \begin{table}
 
@@ -211,24 +216,23 @@ properly. There are two sorts of ways of doing this: fixed and dynamic
 Huffman codes. Let us first discuss the most of simple of these two:
 fixed Huffman codes.
 
-Using fixed Huffman codes the Huffman codes of the both alphabets are
+Using fixed Huffman codes, the Huffman codes of the both alphabets are
 precomputed(it is shown in section ? \todo{reference section} how
 these Huffman codes are computed). The precomputed Huffman codes for
 the first alphabet are shown in
-table~\ref{tab:fixed-length-litteral-huffman}. Using this table, the
-end code, 256, will be represented by the 7-bit Huffman Code
-\bin{0000000}, the literal code 142 will on the other hand be
-represented by the 8-bit Huffman code \bin{10111110} and the length
-code 258 will be represented by the 7-bit Huffman code
-\bin{0000010}. The reader may however be confused by the inclusion of
-the two length codes 286 and 287. Did not the literal/length alphabet
-only span the range 0--285? The two codes 286 and 287 will according
-to the \deflate specification never be found in the compressed
-data. So it is to us incomprehensible why these two codes are given
-assigned Huffman codes. But since they will never occur in the data we
-can safely ignore them. The Huffman encoded length codes will
-obviously, if there are any, also be followed by their accompanying
-extra bits.
+table~\ref{tab:fixed-length-litteral-huffman}. So the end code, 256,
+will be represented by the 7-bit Huffman Code \bin{0000000}, the
+literal code 142 will on the other hand be represented by the 8-bit
+Huffman code \bin{10111110} and the length code 258 will be
+represented by the 7-bit Huffman code \bin{0000010}. The reader may
+however be confused by the inclusion of the two length codes 286 and
+287. Did not the literal/length alphabet only span the range 0--285?
+The two codes 286 and 287 will according to the \deflate specification
+never be found in the compressed data. So it is to us incomprehensible
+why these two codes are even given Huffman codes. But since they will
+never occur in the data we can safely ignore them. The Huffman encoded
+length codes will obviously, if there are any, also be followed by
+their accompanying extra bits.
 
 The fixed Huffman Distance codes are on the other hand represented in
 a more simple way: Distance codes 0-29 are assigned 5-bit Huffman
@@ -258,13 +262,14 @@ will be followed by their accompanying extra bits.
 
 \subsection{Computing the Huffman Tree}
 
-The Huffman codes can also be computed in the \deflate algorithm. Using
-dynamic Huffman codes the token will be assigned Huffman codes that
-are, in most cases, more space efficent than those of the fixed
-Huffman codes. For very short this may however make little different
-in space savings, and dynamic Huffman codes tend not be used for small
-files for these reasons. But for larger files dynamic Huffman will in
-general pay off.
+The Huffman codes can also be computed from the input data. Using
+dynamic Huffman codes, the codes will be assigned Huffman codes that
+are, in a majority of cases, more space efficient than those of the
+fixed Huffman codes. For very small input data files this may however
+make very little difference in space savings, and since the dynamic
+Huffman codes have to be passed along with the compressed data,
+dynamic Huffman codes tend to not be used for small files. But for
+larger files dynamic Huffman codes will in general pay off.
 
 These Huffman code are actually computed in a very peculiar way, and
 this is what we will be discussing for the rest of this section. As should
@@ -274,7 +279,7 @@ chapter~\ref{cha:huffman} we constructed a Huffman tree for the string
 $\var{ababaacdd}$ and ended up with the Huffman tree:
 
 \begin{huffmanc}
-  \node[hnode] {9}
+n  \node[hnode] {9}
   child {node[hnode]{5}
     child{node[hnode]{3}
       child{node(cnode)[hnode] {1}}
@@ -326,10 +331,10 @@ Huffman tree for the string $\var{ababaacdd}$ will be
     \toprule
     Letter & Code \\
     \midrule
-    $a$ & $0$ \\
-    $b$ & $110$ \\
-    $c$ & $111$ \\
-    $d$ & $10$ \\
+    \texttt{a} & $0$ \\
+    \texttt{b} & $110$ \\
+    \texttt{c} & $111$ \\
+    \texttt{d} & $10$ \\
     \bottomrule
   \end{tabular}
   \caption{Sorted Huffman Codes}
@@ -374,7 +379,7 @@ the sorted Huffman by the code lengths of the codes represented by the
 tree, assuming that these codes are sorted in the lexicographic order
 by the symbols which they are supposed to represent. From the input
 string $\var{ababaacdd}$ the sorted Huffman codes shown in
-table~\ref{tab:huffman-codes-sorted} are shown. We will now show that
+table~\ref{tab:huffman-codes-sorted} are used. We will now show that
 is fully possible to represent these codes by the respective code
 lengths in lexicographical order:
 
@@ -391,25 +396,25 @@ Huffman codes:
   example, $\var{blCount[1]} = 1$, $\var{blCount[2]} = 1$ and
   $\var{blCount[3]} = 2$.
 
-\item The numerical value of the smallest code for each code length is then
-  found. Once these values have been computed most of the job in
-  computing the codes is done. Because since the codes of the same
-  code lengths we be sorted in lexographic order, the difference
-  between single codes in the same code lengths groups will always be
-  one. The most leftmost code in a code length will have the minimum
-  code length computed in this step, and the code to the left of this
-  group, assuming that it has the same length, will have a code with a
-  value $+1$ the previous code length.
+\item The numerical value of the smallest code for each code length is
+  then found. Once these values have been computed most of the job in
+  computing the codes is done. Since the codes of the same code
+  lengths we be sorted in lexographic order, the difference between
+  single codes in the same code lengths groups will always be one. The
+  most leftmost code in a code length will have the minimum code
+  length computed in this step, and the code to the left with the same
+  code length will have a code with a value $+1$ the previous code
+  length.
 
-  However, computing these smallest codes values for each code lengths
-  turns out to be more easily said than done. But we take several
-  things into consideration, we will see that this is not very
+  However, computing these smallest codes values for each of the code
+  lengths turns out to be more easily said than done. But we take
+  several things into consideration, we will see that this is not very
   difficult. First of all, the smallest value of each the first group
   of code lengths will always be $0$. This follows from the fact that
   codes of smaller code lengths will always be placed leftmost in the
   tree. Since left branches represents cleared bits($0$), the minimum
   value of that smallest code lengths will be $0$. This fact can also
-  be easily interpreted from our example tree:
+  be easily interfered from our example tree:
 
 \begin{huffmanc}
   \node[hnode] {9}
@@ -427,7 +432,33 @@ Huffman codes:
   \nodechar{anode}{a}
 \end{huffmanc}
 
-\todo{now explain why the addition and shifting step makes sense.}
+Now, how will the minimum values of the following code lengths be
+computed? The will be computed as the sum of the former code length
+frequency and the former minimum code left shifted by one step. This
+is shown in algorithm
+\ref{alg:smallest-code-length}. $\var{minCodes[1]} = 0$, because the
+first minimum value will always be 0. $\var{minCodes[2]}$ will on the
+  other hand be computed as
+
+  \begin{equation*}
+    (0 + 1) \ShiftLeft 1 = \bin{10}
+  \end{equation*}
+
+  because this is the sum of the former minimum code and the frequency
+  of the former code lengths left shifted by one. And if you inspect
+  the tree this makes perfect since; the minimum values for codes of
+  the code length $2$, the only code \texttt{d}, is, indeed
+  \bin{10}. And similarly,
+
+  \begin{equation*}
+    \var{minCodes[3]} (\bin{10} + \var{blCount[2]}) \ShiftLeft 1 =
+      (\bin{10} + \bin{01}) \ShiftLeft 1 = \bin{110}
+  \end{equation*}
+
+  Regrettably, we cannot give a reasonable explanation why this step
+  works, since we cannot understand it. However, since this method was
+  reccomended directly by the Deflate specification, we can be pretty
+  sure that it will always work.
 
   \begin{algorithm}[H]
     \caption{Finding the smallest code of each code length}\algohack{}    \label{alg:smallest-code-length}
