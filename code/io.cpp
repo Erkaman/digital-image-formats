@@ -63,5 +63,4 @@ size_t getFileSize(FILE * fp)
     size = ftell(fp);
     fsetpos(fp, &orig);
     return size;
-
 }
