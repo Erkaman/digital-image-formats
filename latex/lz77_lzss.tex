@@ -68,8 +68,8 @@ compressor then keeps outputting these single character tokens:
   \lzonestates{she{\spc}sell}{s{\spc}sea{\spc}shel}{s}
 }
 
-(The \lzone compressor does not bother in matching single character
-strings)While characters keeps getting read to the lookahead buffer,
+The \lzone compressor does not bother in matching single character
+strings. While characters keeps getting read to the lookahead buffer,
 processed characters get added to the window buffer. After the token
 for the last character \texttt{s} has been outputted, interesting
 things finally start happening; the next three characters to be found
@@ -77,13 +77,14 @@ in the lookahead buffer are \texttt{{\spc{}se}}, and this sequence can
 also be found in the window buffer. How far back in the window buffer
 does this match begin? If we start counting from the end of the window
 buffer, then we have to go $6$(this count is one-based) characters
-\textit{back} in the buffer to reach the match. This number is formally known
-as the \textit{offset} of the token, which is the first number of a
-token. The second number in a token represent the \textit{length} of
-the matching string. Since the matching string, \texttt{{\spc{}se}},
-has length of $3$, this will also be the second number of the
-token. The third part of the token will get set to the character
-following the matching string. Thus, the resulting token will be:
+\textit{back} in the buffer to reach the match. This number is
+formally known as the \textit{offset} of the token, which is the first
+number of a token. The second number in a token represent the
+\textit{length} of the matching string. Since the matching string,
+\texttt{{\spc{}se}}, has length of $3$, this will also be the second
+number of the token. The third part of the token will get set to the
+character following the matching string. Thus, the resulting token
+will be:
 
 \lzonedem{%
   \lzonestate{she{\spc}sells}{{\spc}sea{\spc}shell}{6}{3}{a}

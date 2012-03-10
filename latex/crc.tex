@@ -726,12 +726,13 @@ indicated by its name. In other words, for some data that has a length
 of $n$ bytes the checksum is calculated as follows:
 
 \begin{align*}
-    & a = 1 + D_1 + D_2 + \ldots + D_n (\bmod{65521}) = 1 +
-    \displaystyle\sum_{i = 1}^{n}D_i (\bmod{65521}) \\
+    & P = 65521 \\
+    & a = 1 + D_1 + D_2 + \ldots + D_n (\bmod{P}) = 1 +
+    \displaystyle\sum_{i = 1}^{n}D_i (\bmod{P}) \\
     & b = (1 + D_1) + (1 + D_1 + D_2) + \ldots + (1 + D_1 + D_2 + \ldots +
-    D_n) (\bmod{65521}) = \\
+    D_n) (\bmod{P}) = \\
     & = n + \displaystyle\sum_{i = 1}^{n}(D_i \cdot (n + 1 - i))
-    (\bmod{65521}) \\
+    (\bmod{P}) \\
     & \text{adler32} = (b \ShiftLeft 16) \BitOr a = (b \cdot 2^{16}) + a
 \end{align*}
 

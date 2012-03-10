@@ -467,22 +467,21 @@ conclusion from them.
 \subsubsection{Human Readable Text}
 
 We will first discuss the four files \verb|asyoulik.txt|,
-\verb|alice29.txt|, \verb|plrabn12.txt|, \verb|lcet10.txt|. What these
-files have in common is that they all contain only human-readable
-English text. Interestingly enough, if we exclude the file
-\verb|asyoulik.txt|, they all seem to share a common pattern: larger
-codes sizes means better compression(the lower compression ratio, the
-better compression). This makes sense because the English language,
-and human languages in general, is full of redundancies. So for larger
-code sizes, larger string tables can be built and therefore a greater
-number of redundancies can be eliminated from the text.
+\verb|alice29.txt|, \verb|plrabn12.txt| and \verb|lcet10.txt|. What
+these files have in common is that they all contain only
+human-readable English text. Interestingly enough, if we exclude the
+file \verb|asyoulik.txt|, they all seem to share a common pattern:
+larger codes sizes means better compression(the lower compression
+ratio, the better compression). This makes sense because the English
+language, and human languages in general, is full of redundancies. So
+for larger code sizes, larger string tables can be built and therefore
+a greater number of redundancies can be eliminated from the text.
 
-You may also notice that the largest files, \verb|plrabn12.txt| and
-\verb|lcet10.txt|, achieved the best compression. This is because for
-longer files much more of the string table will get built up. The
-longer a compression goes on, the larger the string table gets. And
-the larger the string table gets, the better the data can be
-compressed.
+The largest files, \verb|plrabn12.txt| and \verb|lcet10.txt|, achieved
+the best compression. This is because for longer files much more of
+the string table will get built up. The longer a compression goes on,
+the larger the string table gets. And the larger the string table
+gets, the better the data can be compressed.
 
 For the smallest file, \verb|asyoulik.txt|, the best compression ratio
 was not achieved for the largest code size. This is because for

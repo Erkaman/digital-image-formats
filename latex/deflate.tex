@@ -57,7 +57,7 @@ number $\bin{1100}=12$, since
 \end{equation*}
 
 \begin{table}
-
+  \footnotesize
   \newcommand*\hdr{Code &  \parbox[t]{5mm}{Extra\\bits} & Lengths}
   \begin{minipage}[t]{0.32\textwidth}
     \centering
@@ -140,7 +140,7 @@ extra bits, and after that the distance code and its extra bits. If no
 matches could be made, then literal bytes are simply used.
 
 \begin{table}
-
+  \footnotesize
   \newcommand*\hdr{Code &  \parbox[t]{5mm}{Extra\\bits} & Distances}
   \begin{minipage}[t]{0.32\textwidth}
     \centering
@@ -634,7 +634,7 @@ the size of the compressed data. But for \deflate, this is something
 that most typically happens for very random data; data in which there
 are close to redundancies at all.
 
-\subsection{Compression with fixed Huffman codes (BTYPE=01))}
+\subsection{Fixed Huffman Codes (BTYPE=01))}
 
 The data in the block is compressed using the fixed, precomputed,
 Huffman codes we discussed in
@@ -644,7 +644,7 @@ alphabets. The 5 remaining bits of the header byte of the block will
 be used for storing the Huffman codes of the compressed data, so they
 are not skipped in this case.
 
-\subsection{Compression with dynamic Huffman codes (BTYPE=11))}
+\subsection{Dynamic Huffman Codes (BTYPE=11))}
 
 In the last block type dynamic Huffman codes are instead computed. We
 already discussed in depth how this is done in
