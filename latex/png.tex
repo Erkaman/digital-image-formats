@@ -791,7 +791,9 @@ this is done.
     \Let{$i$}{$0$}
 
     \linecomment{In this algorithm, the pass numbers are zero based}
-    \ForTo{$\var{pass}$}{$0$}{$7$}
+
+    \Let{$\var{pass}$}{$0$}
+    \While{$\var{pass} < 7$}
     \Let{$\var{row}$}{$\var{startingRow[pass]}$}
 
     \While{$\var{row} < \var{imageHeight}$}
@@ -812,7 +814,8 @@ this is done.
 
     \EndWhile
 
-    \EndForTo
+    \Let{$\var{pass}$}{$\var{pass} + 1$}
+    \EndWhile
 
   \end{algorithmic}
 \end{algorithm}

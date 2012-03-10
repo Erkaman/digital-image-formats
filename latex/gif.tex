@@ -404,24 +404,28 @@ do not fully understand this algorithm.
     \Let{$i$}{$0$}
 
     \linecomment{In this algorithm, the pass numbers are zero based}
-    \ForTo{$\var{pass}$}{$0$}{$4$}
+    \Let{$\var{pass}$}{$0$}
+    \While{$\var{pass} < 4$}
     \Let{$\var{row}$}{$\var{startingRow[pass]}$}
 
     \While{$\var{row} < \var{imageHeight}$}
 
-    \ForTo{$\var{column}$}{$0$}{$\var{imageWidth}$}
+    \Let{$\var{column}$}{$0$}
+    \While{$\var{column} < imageWidth$}
 
     \Let{$j$}{$\var{row} \cdot \var{width} + \var{column}$}
     \Let{$\var{uninterlacedColorData[j]}$}{$\var{uncompressedColorData[i]}$}
     \Let{$i$}{$i + 1$}
 
-    \EndForTo
+    \Let{$\var{column}$}{$\var{column} + 1$}
+    \EndWhile
 
     \Let{$\var{row}$}{$\var{row} + \var{rowIncrement[pass]}$}
 
     \EndWhile
 
-    \EndForTo
+    \Let{$\var{pass}$}{$\var{pass}  + 1$}
+    \EndWhile
 
   \end{algorithmic}
 \end{algorithm}

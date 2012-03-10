@@ -29,14 +29,12 @@ expansion=true]{microtype}
 % http://tex.stackexchange.com/questions/16061/includegraphics-pdf-color-problem
 \pdfpageattr {/Group << /S /Transparency /I true /CS /DeviceRGB>>}
 
-
 % fixes interaction between hyperref and algorithm
 % see: http://geomblog.blogspot.com/2008/04/latex-hyperrefalgorithm-interaction.html
 \usepackage{float}
 % colored hyperlinks
 %\usepackage[hyperindex,colorlinks]{hyperref}
-\usepackage[]{hyperref}
-%\hypersetup{colorlinks=false}
+\usepackage[hyperindex,colorlinks,linkcolor=black,citecolor=black,urlcolor=black]{hyperref}
 \usepackage{verbatim}
 
 % SI units

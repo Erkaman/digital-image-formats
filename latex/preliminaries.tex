@@ -683,7 +683,9 @@ in algorithm~\ref{alg:for-each} is used.
 \end{algorithm}
 
 In algorithm~\ref{alg:repeat} the control structure repeat is
-demonstrated.
+demonstrated, which is used unconditionally looping a number of
+times. Prematurely terminating a loop is done with the \textbf{break}
+statement.
 
 \begin{algorithm}[H]
   \caption{The repeat control structure}
@@ -722,22 +724,6 @@ common divisor of two given numbers.
   \end{algorithmic}
 \end{algorithm}
 
-The for loop allows for iteration with an explicit counter
-variable. In algorithm~\ref{alg:forto} the for to loop is used to
-count from $1$ to $9$. Note that it in reality counts up to $10$, then
-stops. Prematurely terminating a loop is done with the \textbf{break}
-statement.
-
-\begin{algorithm}
-  \caption{For to loop}\algohack{}
-  \label{alg:forto}
-  \begin{algorithmic}[1]
-    \linecomment{Prints the numbers 1--9}
-    \ForTo{$i$}{$1$}{$10$}
-    \linecomment{Print the number 1.}
-    \EndFor
-  \end{algorithmic}
-\end{algorithm}
 
 \subsection{Functions}
 \label{sec:pseudocode}
