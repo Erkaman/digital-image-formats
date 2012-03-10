@@ -1,0 +1,73 @@
+\begin{comment}
+  \bibliography{project.bib}
+\end{comment}
+
+\chapter{Perfect Compression?}
+\label{cha:perfect}
+
+In this chapter, we will show that a perfect lossless compression algorithm does
+not exist, where a perfect lossless algorithm is able to compress
+\textit{any} input without fail.
+
+\section{The Counting Argument}
+
+We base the following discussion on(faq salomon).
+
+Let us first discuss something known as the counting argument. It goes
+as follows:
+
+\begin{quote}
+  No \textit{lossless} compressor can compressed all files of size
+  $\ge N$ bits, for all integers $N \ge 0$.
+\end{quote}
+
+This statement can be proved using surprisingly simple
+mathematics. Let us first of all assume that such a compressor do
+indeed exists and so if find any contradictions. What would such a
+compressor have to do? It would have to be able to compress down all
+$2^n$ files of length n bits down to files that are \textit{at most}
+$n-1$ bits long. How many possible files are at most $n-1$ bits long?
+This is the sum
+
+\begin{equation}
+  \label{eq:n-minus-one}
+  2^0 + 2^1 + \ldots + 2^{n-1}
+\end{equation}
+
+If we inspect this sum, then we will see that the quotitent between
+each term is in fact $2$. So the sum could also be expressed as
+
+\begin{equation*}
+  \sum^{n-1}_{i = 0} 2^{i}
+\end{equation*}
+
+From this we realize that the sum is a simple geometric series! As
+familiar, such sums are calculated as
+
+\begin{equation}
+  \label{eq:geometric-series}
+  a + ak + ak^2 + \ldots + ak^{n-1} = \sum^{n-1}_{i = 0} ak^{i} =
+  \frac{a(k^n - 1)}{k -1}
+\end{equation}
+
+So the sum \eqref{eq:n-minus-one} can from \eqref{eq:geometric-series}
+simply be computed to
+
+\begin{equation*}
+  \frac{1 \cdot (2^{n} - 1)}{2 -1} = 2^{n} - 1
+\end{equation*}
+
+So, $2^n$ different $n$ bits files are by the perfect compression
+algorithm supposed to be compressed down $2^n - 1$ different files. By
+the pigeon hole principle, it is impossible for this compression to be
+lossless, because since $2^n - 1 < 2^n$ at least two different files
+will be compressed down to the same file. This simple contraction
+concludes the counting argument, reaching the conclusion that perfect
+lossless compression is impossible!
+
+But on the other hand, since $2^n - (2^{} - 1) = 1$, then that means
+that only one file failed to be mapped losslessly to some compressed
+bit string. The algorithm can actually be made lossless by mapping
+this remaining bit strings to some bit string whose length is $\ge
+n$. But since this compression algorithm no longer compresses all input strings it
+is no longer perfect, but it is now at least lossless!
