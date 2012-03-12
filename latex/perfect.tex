@@ -71,3 +71,91 @@ bit string. The algorithm can actually be made lossless by mapping
 this remaining bit strings to some bit string whose length is $\ge
 n$. But since this compression algorithm no longer compresses all input strings it
 is no longer perfect, but it is now at least lossless!
+
+\section{Shannon's entropy}
+
+How do you best compress some data? The real question is better stated
+as: how much \textit{information} is needed to restore the compressed
+data to the original data? And does there exists some minimum length
+of the compressed data that cannot be any smaller for it to be
+lossless?
+
+It intuivetely easy to see that such a limit must exist. Does, for
+example, a compressor that compresses all of input data to one single
+bit even make any sense? No it mos defenitely does not, because using
+bit it is only possible to represent $2$, and only 2, of the input
+files. All the other files cannot in this case be possibly be
+restored, and therefore the algorithm is not lossless in the first
+place!
+
+But can we calculate this minimum size? And what information is
+necessary to calculate it? In his groundbreaking paper ``A
+mathematical theory of communication''
+\cite{Shannon:2001:MTC:584091.584093}, \textit{the} paper that pretty
+started the field of Information Theory, Claude Shannon said, yes we
+can! And he derived a gasthingly simple formula this that calculates
+something known as Shannon's entropy, and this formula is the main
+subject of this section.
+
+First, we will derive Shannon's formula for entropy in a intuitive way
+as possible. Then, we will derive it in the much more rigorous way
+Shannon did in his original paper.
+
+\subsection{Intuitive Derivation}
+
+First of all, for alphabet of size $n$, how many bits are required to
+represent a letter from that alphabet? Well, if $n=4$, then obviously
+2 bits are required for representing such a letter. This is because a
+2-bit number only has 4 different states; \bin{00}, \bin{01},
+\bin{10}, \bin{11}; and because $2^2 = 4$. It is easy to see that this
+number can be computed with the help of the binary logarithm as
+$\log_2 2^2 = 2\log_2 2 = 2$.
+
+But what if $n=1$, because then $\log_2 1 = 0$, and how does that make
+any sense? That actually makes perfect if you consider the following:
+What is it that we are after in the first place? The number of bits
+required to represent a letter for an alphabet of size $n$ \dots, how
+can we put a word to that? As is nicely put by \cite{schneider2008},
+this number measures the \textit{uncertainty} of said alphabet; the
+uncertinaty involved in picking a random from text composed of that
+alphabet. See, if we to pick a random letter from a text composed of
+the letters from an alphabet of size, say, $n=6$, then the uncertinaty
+in what letter we will pick is $\log_2 6 \approx 2.58$. For larger
+alphabets we will be even more uncertain in what letter we will pick,
+and so the uncertinary will increase. And logarithms are a also
+perfect choice for measuring uncertainty because they are always
+monotonically increasing; that is, the value of the function will
+always increase for larger input values, and its slope is always
+positive.
+
+\begin{Exercise}[label={deriv-log}]
+  Show that $\frac{d}{dx} \log_b x > 0$, for $x > 0$(logarithms
+  are undefined for $x \le 0$)
+
+  Hint: Make us the fact that $\frac{d}{dx} \ln x = \frac{1}{x}$ and
+  $log_b x = \frac{\ln x}{\ln b}$(redo exercise \ref{ex-bin-log} on
+  page \pageref{ex-bin-log} if you cannot see why this must be true).
+
+\end{Exercise}
+
+\subsection{Shannon's Original, Rigorous Derivation}
+
+\section{Kraft's inequality}
+
+\answers{}
+
+\begin{Answer}[ref={deriv-log}]
+
+  \begin{equation*}
+    log_b x = \frac{\ln x}{\ln b} = \ln x \frac{1}{\ln b},
+  \end{equation*}
+
+  thus
+
+  \begin{equation*}
+    \frac{d}{dx} \log_b x = \frac{1}{x\ln b},
+  \end{equation*}
+
+  since $\ln b$ is a constant. And it is easy to see that this
+  derivative is always positive.
+\end{Answer}

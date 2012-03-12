@@ -194,11 +194,16 @@ size:
 
 Where the $\log_2$ is defined as\cite{schneider2008}
 
-\begin{equation*}
+\begin{equation}
+  \label{bin-log-def}
   \log_2x = \frac{\log_b x}{\log_b 2}
-\end{equation*}
+\end{equation}
 
 for \textit{any} base $b$.
+
+\begin{Exercise}[label={ex-bin-log}]
+  Prove equation \eqref{bin-log-def}
+\end{Exercise}
 
 For window sizes that can not be written on the form $2^n$ then the
 above reasoning does not hold, but it needs an extension. For a window
@@ -238,3 +243,25 @@ has an \ascii code of $65$, would be represented by the bit pattern
 \bin{1\ 0100\ 0001}. Matched tokens are represented by a cleared bit,
 0, followed by their offset and length values.
 
+\answers{}
+
+\begin{Answer}[ref={ex-bin-log}]
+
+  \begin{align*}
+    c & = \log_2 x \\
+    2^c & = 2^{\log_2 x} \\
+    2^c & = x \\
+    \log_b 2^c &= \log_b x \\
+    c \cdot \log_b 2 &= \log_b x \\
+    c & = \frac{log_b x}{\log_b 2}
+  \end{align*}
+
+  And generally stated, the base-b logarithm is calculated as
+
+  \begin{equation*}
+    \log_b x = \frac{log_d x}{\log_d b}
+  \end{equation*}
+
+  for any base $d$.
+
+\end{Answer}
