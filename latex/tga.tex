@@ -238,7 +238,10 @@ field does not exist at all and should be ignored.
 The color map can trivially be loaded into an array by loading the
 same number of colors that was specified in the color map length
 field, where every color has the bit size specified by the Color map
-entry size field.
+entry size field. The size of every color also indicates the type of
+the color; if 32-bit color is used, that also means that \argb is
+used(the \argb order is used in \tga rather than \rgba), and 24-bit
+color simply indicates \rgb.
 
 \imgfield{Color Data}{0}
 
