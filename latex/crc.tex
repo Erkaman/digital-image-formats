@@ -129,7 +129,7 @@ polynomial $x^2 + x^1$, has width $w=2$. The width could also be said to
 be the position of the highest toggled bit. Stated more generally,
 this means that the polynomial
 \begin{equation*}
-  P(x) = a_wx^w + a_{w-1}x^{w-1} + \ldots + a_{1}x + a_{0}
+  P(x) = a_wx^w + a_{w-1}x^{w-1} + \dots + a_{1}x + a_{0}
 \end{equation*}
 
 has a width of $w$, despite the fact that the number it represents is
@@ -727,9 +727,9 @@ of $n$ bytes the checksum is calculated as follows:
 
 \begin{align*}
     & P = 65521 \\
-    & a = 1 + D_1 + D_2 + \ldots + D_n (\bmod{P}) = 1 +
+    & a = 1 + D_1 + D_2 + \dots + D_n (\bmod{P}) = 1 +
     \displaystyle\sum_{i = 1}^{n}D_i (\bmod{P}) \\
-    & b = (1 + D_1) + (1 + D_1 + D_2) + \ldots + (1 + D_1 + D_2 + \ldots +
+    & b = (1 + D_1) + (1 + D_1 + D_2) + \dots + (1 + D_1 + D_2 + \dots +
     D_n) (\bmod{P}) = \\
     & = n + \displaystyle\sum_{i = 1}^{n}(D_i \cdot (n + 1 - i))
     (\bmod{P}) \\

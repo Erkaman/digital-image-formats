@@ -31,7 +31,7 @@ This is the sum
 
 \begin{equation}
   \label{eq:n-minus-one}
-  2^0 + 2^1 + \ldots + 2^{n-1}
+  2^0 + 2^1 + \dots + 2^{n-1}
 \end{equation}
 
 If we inspect this sum, then we will see that the quotitent between
@@ -46,7 +46,7 @@ familiar, such sums are calculated as
 
 \begin{equation}
   \label{eq:geometric-series}
-  a + ak + ak^2 + \ldots + ak^{n-1} = \sum^{n-1}_{i = 0} ak^{i} =
+  a + ak + ak^2 + \dots + ak^{n-1} = \sum^{n-1}_{i = 0} ak^{i} =
   \frac{a(k^n - 1)}{k -1}
 \end{equation}
 
@@ -114,29 +114,177 @@ $\log_2 2^2 = 2\log_2 2 = 2$.
 But what if $n=1$, because then $\log_2 1 = 0$, and how does that make
 any sense? That actually makes perfect if you consider the following:
 What is it that we are after in the first place? The number of bits
-required to represent a letter for an alphabet of size $n$ \dots, how
+required to represent a letter for an alphabet of size $n$ \dots how
 can we put a word to that? As is nicely put by \cite{schneider2008},
 this number measures the \textit{uncertainty} of said alphabet; the
-uncertinaty involved in picking a random from text composed of that
-alphabet. See, if we to pick a random letter from a text composed of
-the letters from an alphabet of size, say, $n=6$, then the uncertinaty
-in what letter we will pick is $\log_2 6 \approx 2.58$. For larger
-alphabets we will be even more uncertain in what letter we will pick,
-and so the uncertinary will increase. And logarithms are a also
-perfect choice for measuring uncertainty because they are always
-monotonically increasing; that is, the value of the function will
-always increase for larger input values, and its slope is always
-positive.
+uncertinaty involved in picking a random letter from a text composed
+of that alphabet. See, if we to pick a random letter from a text
+composed of the letters from an alphabet of size, say, $n=6$, then the
+uncertinaty in what letter we will pick is $\log_2 6 \approx
+2.58$. For larger alphabets we will be even more uncertain in what
+letter we will pick, and so the uncertinary will increase. And
+logarithms are a also perfect choice for measuring uncertainty because
+they are always their values are always increasing; that is, the value
+of the function will always increase for larger input values, and its
+slope is always positive.
 
 \begin{Exercise}[label={deriv-log}]
-  Show that $\frac{d}{dx} \log_b x > 0$, for $x > 0$(logarithms
-  are undefined for $x \le 0$)
+  To prove the last statement, show that $\frac{d}{dx} \log_2 x > 0$,
+  for all $x > 0$(logarithms are undefined for $x \le 0$)
 
   Hint: Make us the fact that $\frac{d}{dx} \ln x = \frac{1}{x}$ and
-  $log_b x = \frac{\ln x}{\ln b}$(redo exercise \ref{ex-bin-log} on
-  page \pageref{ex-bin-log} if you cannot see why this must be true).
-
+  $log_2 x = \frac{\ln x}{\ln 2}$(which was proven in exercise
+  \ref{ex-bin-log} on page \pageref{ex-bin-log}).
 \end{Exercise}
+
+So how do we interpret $\log_2 1 = 0$? If a letter is picked from an
+alphabet in which there is only letter then we are absolutely certain
+which letter we have picked: the only letter! So $0$ should be
+interpreted as the opposite of uncertainty: certainty! Because for
+smaller alphabets we will have greater amount of certinaty of what
+random letters we pick because there are obviously fewer to chose
+from!
+
+So far the formula we have is $\log_2 n$, for an alphabet of size
+$n$. Let $P_i$ denote the probability of the i:th
+letter(one-based). Our formula makes the assumption that $P = P_i$;
+that is, all letters are equally likely! But what if some letters are
+more frequent than others? Our uncertinity for these will be smaller,
+since obviously our certinty of finding common letters are greater
+than certainty for finding uncommon ones! If we pick a random letter
+from an English language text than we will be more certain that this
+letter is an ``e'' rather than a ``z''. So to summarize, smaller
+uncertinties should be calculated for more frequent letters and
+greater uncertinanties should be computed for less common letters.
+
+How can we fit this with our original formula $\log_2 n$? We need to
+rework it to fit our now intutions for certainty and uncertainty!
+
+The probabilites can also be written as
+
+\begin{equation}
+  \label{prob-frac}
+  P_i = \frac{1}{M_i},
+\end{equation}
+
+where $M$ is some positive number. This is not really saying anything;
+if the probability of something is $\frac{6}{15}$, then an equally
+valid way of writing that probability is
+
+\begin{equation*}
+  \frac{6}{15} = \frac{6 / 6}{15 / 6} = \frac{1}{2.5}
+\end{equation*}
+
+Using \eqref{prob-frac} we can find the better definition for
+uncertainty that we so desire. Since $M_i$ will be smaller for more
+frequent numbers, then also the binary logarithm, and therefore the
+uncertainty will be smaller for these numbers:
+
+\begin{equation*}
+  \log_2 P_i = \log_2 \frac{1}{M_i} = \log_2 M_i^{-1} = -\log_2 M_i
+\end{equation*}
+
+NEgative uncertinty makes little to no sense, so define our final
+formula for uncertainty as
+
+\begin{equation*}
+  -\log_2 P_i
+\end{equation*}
+
+Now everything makes sense: now more likely letters will be given more
+certinaty, as they should be, and less likely ones will have a greater
+amount of uncertinty involved in them.
+
+This formula will also work with our previous definition. For an
+alphabet of size $n$ with equally probable letters, the probabilities
+of all the letters will be
+
+\begin{equation*}
+  P_i = P = \frac{1}{n}
+\end{equation*}
+
+The uncertainty of every letter will hence be
+
+\begin{equation*}
+  -\log_2 P = -\log_2 \frac{1}{n} = -\log_2 n^{-1} = \log_2 n
+\end{equation*}
+
+So beautifulyl enough, our old formula will also fall out from our new
+defintion. What does $log_2 4 = 2$ calculate? It calculates the
+required number of bits to store all the possible letters. However,
+what if all the letters are not equally likely? Can then not mostn
+occurring letters be assigned be shorter binary numbers? As Huffman
+coding has shown we can do this. However, does not also compression
+algorihtm like \lzw and \lzone also do this, but in a different way?
+Actually yes, but they instead assign more frequently used words
+shorter binary numbers, so can indeed be considered the same as
+Huffman coding.
+
+Now, what does uncertinaty tell us again? It tells us how many bits
+that are absolutely required to store some letter of some alphabet. It
+is impossible to represent a 3-length alphbet with a single bit,
+because a single only has two possible states. Two states cannot ever
+represent three states(the letters).
+
+And similiary, how many bits are absolutely necessary to store a
+letter that has a frequency of $\frac{1}{4}$? Again, the number we are
+after is the uncertainty: $-\log_2 \frac{1}{4} = -\log_2 2^{-2} =
+2$. So to represent a letter of frequency $\frac{1}{4}$, we cannot
+assign it a binary number that is shorter than $2$ bits! So a
+compressor that assigns shorter binary numbers to more frequent
+letters, like Huffman coding and \lzone, cannot possibly assign codes
+shorter than 2 bits! It turns that all compression algorithms in
+existence more or less do this, so for a letter of a probability $P_i$
+cannot be compressed down a binary numbers that is of less than
+$-\log P_i$ of length!
+
+Now, what is the average value of the minimum code length? We want to
+calculate the average uncertainty for some alphabet of $n$, given the
+probabilities of every letter $P_i$, for $1 \le i \le n$. Let $M_i$ be
+the number of occurences for the i:th letter. How much uncertinaty is
+there then for \textit{all} those same letters. This is
+
+\begin{equation*}
+  -M_i \log_2 P_i
+\end{equation*}
+
+The sum of all the total uncertainty for all the letters of the entire
+alphabet is then
+
+\begin{equation*}
+  \sum_{i=1}^n -M_i \log_2 P_i
+\end{equation*}
+
+And by dividing this number by the total number of letters we get the
+average uncertintaty for the alphabet, for some \textit{specific}
+input data:
+
+\begin{equation*}
+  \frac{\sum_{i=1}^n -M_i \log_2 P_i}{\sum_{i=1}^n M_i}
+\end{equation*}
+
+However, $\sum_{i=1}^n M_i$ is the length of the input data, so we let
+$M$ signify this number:
+
+\begin{equation*}
+  \sum_{i=1}^n \frac{M_i}{M} \cdot (-\log_2 P_i)
+\end{equation*}
+
+But $M_i$ is the number of occurrences for the i:th letter, so $P_i =
+\frac{M_i}{M}$. So we end up with:
+
+\begin{equation}
+  \label{eq:entropy}
+  -\sum_{i=1}^n P_i \log_2 P_i
+\end{equation}
+
+Which is Shannon's famous formula for entropy! It says that given an
+alphabet of size $n$, where the probability of each letter is $P_i$,
+we cannot ever losslessly compress \textit{any} of the letters to code
+smaller than this number!
+
+Understandably, this may be a bit hard for the reader to digest, so
+let us give several examples of how much sense this formula makes.
 
 \subsection{Shannon's Original, Rigorous Derivation}
 
@@ -147,15 +295,15 @@ positive.
 \begin{Answer}[ref={deriv-log}]
 
   \begin{equation*}
-    log_b x = \frac{\ln x}{\ln b} = \ln x \frac{1}{\ln b},
+    log_2 x = \frac{\ln x}{\ln 2} = \ln x \frac{1}{\ln 2},
   \end{equation*}
 
   thus
 
   \begin{equation*}
-    \frac{d}{dx} \log_b x = \frac{1}{x\ln b},
+    \frac{d}{dx} \log_2 x = \frac{1}{x\ln 2},
   \end{equation*}
 
-  since $\ln b$ is a constant. And it is easy to see that this
-  derivative is always positive.
+  since $\ln 2$ is a constant. This derivative is always positive,
+  because $\frac{1}{\ln 2} \approx 1.44 > 0$, and $x > 0$.
 \end{Answer}
