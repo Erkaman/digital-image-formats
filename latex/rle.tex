@@ -78,30 +78,30 @@ file size was saved by the compression.
 
 \end{Exercise}
 
-\chapter{Perfect Compression?}
+\section{The Counting Argument}
 
 In this section, we will show that a perfect lossless compression
-algorithm does not exist, where a perfect lossless algorithm is able
-to compress \textit{any} input without fail.
-
-\section{The Counting Argument}
+algorithm able to compress \textit{any} input file without fail does
+not exist.
 
 We base the following discussion on\cite{Salomon:2004:DCC,jean-loup-comp-faq}.
 
-Let us first discuss something known as the counting argument. It goes
-as follows:
+Let us discuss something known as the counting argument. It goes as
+follows:
 
 \begin{quote}
-  No \textit{lossless} compressor can compressed all files of size
-  $\ge N$ bits, for all integers $N \ge 0$.
+  No \textit{lossless} compressor can compress all files of size $\ge
+  N$ bits, for all integers $N \ge 0$.
 \end{quote}
 
 This statement can be proved using surprisingly simple
-mathematics. Let us first of all assume that such a compressor do
-indeed exists and so if find any contradictions. What would such a
-compressor have to do? It would have to be able to compress down all
-$2^n$ files of length n bits down to files that are \textit{at most}
-$n-1$ bits long. How many possible files are at most $n-1$ bits long?
+mathematics. Let us first of all assume that such a compressor does
+indeed exists and check if we find any contradictions. What would such
+a compressor have to do? It would have to be able to compress down all
+$2^n$ files of length $n$ bits down to files that are \textit{at most}
+$n-1$ bits long. Because if some files were not compressed down to
+smaller files then the algorithm would no longer perfectly compress all
+input files. How many possible files are at most $n-1$ bits long?
 This is the sum
 
 \begin{equation}
@@ -110,7 +110,13 @@ This is the sum
 \end{equation}
 
 If we inspect this sum, then we will see that the quotitent between
-each term is in fact $2$. So the sum could also be expressed as
+each term is $2$, since
+
+\begin{equation*}
+  \frac{2^1}{2^0} = \frac{2^2}{2^1} = \dots = \frac{2^{n-1}}{2^{n-2}} = 2
+\end{equation*}
+
+So the sum could also be expressed as
 
 \begin{equation*}
   \sum^{n-1}_{i = 0} 2^{i}
@@ -137,16 +143,15 @@ algorithm supposed to be compressed down $2^n - 1$ different files. By
 the pigeon hole principle, it is impossible for this compression to be
 lossless, because since $2^n - 1 < 2^n$ at least two different files
 will be compressed down to the same file. This simple contraction
-concludes the counting argument, reaching the conclusion that perfect
-lossless compression is impossible!
+concludes the counting argument, thus reaching the conclusion that
+perfect lossless compression is impossible!
 
 But on the other hand, since $2^n - (2^{} - 1) = 1$, then that means
 that only one file failed to be mapped losslessly to some compressed
-bit string. The algorithm can actually be made lossless by mapping
-this remaining bit strings to some bit string whose length is $\ge
-n$. But since this compression algorithm no longer compresses all
-input strings it is no longer perfect, but it is now at least
-lossless!
+file. The algorithm can actually be made lossless by mapping this
+remaining file to some file whose length is at least $\ge n$. But
+since this compression algorithm no longer compresses all input
+strings it is no longer perfect, but it is now at least lossless!
 
 \section{RLE}
 \label{sec:rle}

@@ -128,6 +128,7 @@ void LZW_Compress(unsigned int codeSize, FILE * in,FILE * out)
 
     while (true){
 
+
         ch = (code)getc(in);
 
         if(ch == (code)EOF)
