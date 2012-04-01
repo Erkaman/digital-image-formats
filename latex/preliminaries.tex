@@ -402,13 +402,6 @@ The pseudocode will be kept as traditional as possible, but we will
 still need to establish several conventions for it, which is what
 we are going to do for the rest of the chapter.
 
-\subsection{Typographical Conventions}
-
-\begin{description}
-\item[keywords] will use a \textbf{bold} font.
-\item[functions] will be signified by \textsc{small caps}.
-\item[variables] can noticed by their $\var{cursive\ slant}$.
-\end{description}
 
 \subsection{Boolean Operators}
 \label{sec:boolean-operators}
@@ -427,59 +420,65 @@ Logical truth is represented by \True, and falseness is represented by
 \False.
 
 \begin{table}
-  \subfloat[l][Logical and]{
-      \begin{tabular}{|c|c|c|}
-    \hline
-    $\mathbf{\AND}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-    $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\False}$ \\ \hline
-    $\mathbf{\True}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
+  \subfloat[][Logical and]{
+      \begin{tabular}{ccc}
+    \toprule
+    $p$ & $q$ & $p \AND q$ \\
+    \midrule
+    $\True$ & $\True$ & $\True$ \\
+    $\True$ & $\False$ & $\False$ \\
+    $\False$ & $\True$ & $\False$ \\
+    $\False$ & $\False$ & $\False$ \\
+    \bottomrule
+
   \end{tabular}
   \label{tab:log-and-table}
     }
-  \subfloat[l][Logical or]{
-      \begin{tabular}{|c|c|c|}
-    \hline
-    $\mathbf{\OR}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-    $\mathbf{\False}$ & $\False$ & $\True$ \\ \hline
-    $\mathbf{\True}$ & $\True$ & $\True$ \\ \hline
+    \qquad
+  \subfloat[][Logical or]{
+      \begin{tabular}{ccc}
+    \toprule
+    $p$ & $q$ & $p \OR q$ \\
+    \midrule
+    $\True$ & $\True$ & $\True$ \\
+    $\True$ & $\False$ & $\True$ \\
+    $\False$ & $\True$ & $\True$ \\
+    $\False$ & $\False$ & $\False$ \\
+    \bottomrule
+
   \end{tabular}
   \label{tab:log-or-table}
 
 }
-\subfloat[l][Logical exclusive or]{
-        \begin{tabular}{|c|c|c|}
-    \hline
-    $\mathbf{\BitXor}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-    $\mathbf{\False}$ & $\mathbf{\False}$ & $\mathbf{\True}$ \\ \hline
-    $\mathbf{\True}$ & $\mathbf{\True}$ & $\mathbf{\False}$ \\ \hline
+    \qquad
+\subfloat[][Logical exclusive or]{
+
+  \begin{tabular}{ccc}
+    \toprule
+    $p$ & $q$ & $p \BitXor q$ \\
+    \midrule
+    $\True$ & $\True$ & $\False$ \\
+    $\True$ & $\False$ & $\True$ \\
+    $\False$ & $\True$ & $\True$ \\
+    $\False$ & $\False$ & $\False$ \\
+    \bottomrule
   \end{tabular}
   \label{tab:log-exlusive-or-table}
 }
-
-  \subfloat[c][Logical not]{
-  \begin{tabular}{|c|c|}
-    \hline
-    $\mathbf{p}$ & $\mathbf{\NOT p}$ \\ \hline
-    $\True$ & $\False$ \\ \hline
-    $\False$ & $\True$ \\ \hline
+\qquad
+  \subfloat[][Logical not]{
+  \begin{tabular}{cc}
+    \toprule
+    $p$ & $\NOT p$ \\
+    \midrule
+    $\True$ & $\False$ \\
+    $\False$ & $\True$ \\
+    \bottomrule
   \end{tabular}
     \label{tab:log-not-table}
     }
     \caption{Logical truth tables}
 \end{table}
-
-\begin{Exercise}[label={boolean}]
-  Are the following expressions \True or \False?
-
-  \begin{enumerate}[(a)]
-  \item $\NOT \True \AND \True$
-  \item $\NOT \True \OR (\True \AND \NOT \False)$
-
-  \item $(\True \AND \True) \AND (\True \AND \NOT(\False \OR \NOT \True))$
-
-  \end{enumerate}
-\end{Exercise}
-
 \subsection{Bitwise Operators}
 \label{sec:bitwise-operators}
 
@@ -642,6 +641,13 @@ left, so $\bin{0110} \ShiftRight 2 = \bin{0001}$.
 
 \end{Exercise}
 
+\subsection{Typographical Conventions}
+
+\begin{description}
+\item[keywords] will use a \textbf{bold} font.
+\item[functions] will be signified by \textsc{small caps}.
+\item[variables] can noticed by their $\var{cursive\ slant}$.
+\end{description}
 
 \subsection{Syntax}
 
@@ -836,16 +842,6 @@ to introduce several functions for handling file operations.
   \item \hex{03}
   \item \hex{2E}
   \item \hex{BD}
-  \end{enumerate}
-
-\end{Answer}
-
-\begin{Answer}[ref={boolean}]
-
-  \begin{enumerate}[(a)]
-  \item \False
-  \item \True
-  \item \False
   \end{enumerate}
 
 \end{Answer}
