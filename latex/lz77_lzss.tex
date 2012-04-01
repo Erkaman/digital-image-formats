@@ -5,8 +5,6 @@
 \chapter{LZ77 and LZSS}
 \label{cha:lz77-lzss}
 
-\section{History}
-
 As familiar from section~\ref{sec:hist-lzw}, \lzone was the first of
 the two algorithms described by Lempel and Ziv that sparked the family
 of dictionary methods. We have partially discussed already \lztwo,
@@ -16,16 +14,16 @@ since \lzw was based on it, and we will in this chapter discuss
 
 \section{LZ77}
 
-The following description of the \lzone algorihtm is based on
+The following description of the \lzone algorithm is based on
 \cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr_ziv_lempel}.
 
 \subsection{Compression}
 
-The core parts of the \lzone algorihtm are the so-called window and
+The core parts of the \lzone algorithm are the so-called window and
 lookahead buffers. In the window buffer already compressed data is
 stored. The lookahead buffer contains the data that has not yet been
 compressed and matched. Strings in the lookahead buffer are in the
-algorihtm matched for already processed strings in the window
+algorithm matched for already processed strings in the window
 buffer. If it finds a matching string for the string in the lookahead
 buffer, it outputs a \textit{token}. The token contains the
 information that is necessary for the decoder to locate the matched
@@ -45,7 +43,7 @@ buffer. For this example, we give the window buffer a size of 20
 characters, while the lookahead buffer is given a length of 10
 characters.
 
-In the initial part of the algorihtm, the lookahead buffer is filled
+In the initial part of the algorithm, the lookahead buffer is filled
 to its maximum capacity with characters. The window buffer is at this
 point completely empty, since no characters has yet been processed:
 
@@ -225,9 +223,45 @@ So for a window size of $w$, binary numbers of the bit length
 are used for specifying offsets. And the bit size of the length field
 is defined in very much the same way.
 
+\subsection{Performance Issues}
+
+It is quite common for \lzone-based compressor to use huge window
+buffers, up to, maybe even larger than, 30000 characters of size are
+not at all uncommon. It is important to realize that searching through
+such a huge window for matches is not by any means a computationally
+cheap operation, because the window has to be searched through many,
+many times during the compression.
+
+Let us say, for the sake of example, that for some file there are no
+repeated strings to be found. This means that \lzone cannot do sort of
+compression on the file. Then how many times would the compressor have
+to search through the, say, 30000 character window buffer when
+``compressing'' this file?  Correct, it would have to perform the
+search of this huge buffer for \textit{every byte} in the file!
+Clearly, this operation would become prohibitively expensive for large
+files.
+
+But obviously brute-force matching for strings(searching for them one
+by one) in the window is a slow and unfeasible way of doing
+things. Therefore, \lzone-based compressor tend to use some
+specialized string matching algorithm for searching the window. One
+example of such an algorithm is the \mbox{Knuth-Morris-Pratt}
+algorithm
+\cite{cormen2009introduction_to_algo,knuth-morris-pratt}. Another
+example is the Boyer-Moore algorithm
+\cite{Boyer:1977:FSS:359842.359859}. There is an entire zoo of
+different string searching/matching algorithms to pick and choose
+from! But still, even when specialized string matching algorithms are
+used, the window-searching operation remains a significant limiting
+factor in the speed of \lzone. To solve this problem, such compressors
+may chose to omit searching the entire window for matches, instead
+stopping the search after a couple of failed attempts. Such choices
+often make sense when the speed of the compression is more important
+than the compression performance.
+
 \section{LZSS}
 
-The following brief description of the \lzss algorihtm is based on
+We will now discuss \lzss, an improvement of \lzone, based on
 \cite{Salomon:2004:DCC,mark1996data_compression_book,mcfadden92:_hackin_data_compr_lzss,okumura:_data_compr_algor_larc_lharc}.
 
 \lzone can perform excellent compression but it is also very wasteful
